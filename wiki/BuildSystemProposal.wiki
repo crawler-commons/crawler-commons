@@ -1,0 +1,25 @@
+#summary build system proposal
+
+= Introduction =
+
+One of the painful first steps of any shared project is agreeing on the build system.
+
+I'm going to propose using ant for the build, and maven ant tasks for dependency management. I've used pure Maven, pure Ant, and Ant+Ivy in the past, but Ant+Maven has worked the best for me.
+
+= Details =
+
+  * Use Maven layout for files
+    * top-level build.xml
+    * top-level pom.xml (dependencies only)
+    * src/main/java
+    * src/main/resources
+    * src/test/java
+    * src/test/resources
+    * src/build/ant/build.properties (could go at top level too)
+  * Either bootstrap, or have single lib/maven-ant-tasks-{{{<version>}}}.jar
+  * For now, manually publish a single jar as the resulting artifact
+    * could eventually push to a real Maven repo, but that gets painful
+
+= Next Steps =
+
+I think the Nutch, Droids and Heritrix project reps should weigh in here with their thoughts.
