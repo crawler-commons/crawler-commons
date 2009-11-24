@@ -3,9 +3,9 @@
 
 = Introduction =
 
-We had a "Web Crawler Developer" MeetUp at this year's [http://www.us.apachecon.com/c/acus2009/ ApacheCon US] in Oakland.
+We had a "Web Crawler Developer" !MeetUp at this year's [http://www.us.apachecon.com/c/acus2009/ ApacheCon US] in Oakland.
 
-It wound up being an UnMeetUp (MeetDown?) on Wednesday, November 4th from 11am - 1pm. 
+It wound up being an !UnMeetUp (!MeetDown?) on Wednesday, November 4th from 11am - 1pm. 
 
 = Details =
 
@@ -34,7 +34,7 @@ It wound up being an UnMeetUp (MeetDown?) on Wednesday, November 4th from 11am -
   * Sub-page parsing (portlets)
   * AJAX-ish page interactions
   * Document parsing (via Tika)
-  * HttpClient (configuration)
+  * !HttpClient (configuration)
   * Text similarity
   * Mime/charset/language detection
 
