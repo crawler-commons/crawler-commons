@@ -95,6 +95,7 @@ Below are some potential topics for discussion - feel free to add/comment.
   * Parsing content - home grown, Neko/!TagSoup, Tika, screen scraping
   * Search infrastructure - options for serving up crawl results (Nutch, Solr, Katta, others?)
   * Testing challenges - is it possible to unit test a crawler?
+    * _(ab) in one project I used a primitive proxy server that would serve a corpus downloaded in advance, and stored in a DB (well, a Nutch "segment" ;) ) together with protocol-level headers. Such corpus + proxy would mimick a small-world Web. The proxy was able to introduce also bandwidth / latency limits. I'll investigate the licensing of that code, and hopefully we could add it here._
   * Fuzzy classification - mime-type, charset, language.
   * The future of Nutch, Droids, Heritrix, Bixo, etc.
   * Optimizing for types of crawling - intranet, focused, whole web.
