@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+      
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>crawlercommons</groupId>
+	<artifactId>crawler-commons</artifactId>
+	<name>Crawler-commons</name>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.opensource.org/licenses/apache2.0.php</url>
+		</license>
+	</licenses>
+	<url>http://code.google.com/p/crawler-commons/</url>
+	<description>crawler-commons is a set of reusable Java components that implement functionality common to any web crawler.</description>
+	<scm>
+		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
+		<url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
+	</scm>
+	<packaging>jar</packaging>
+	<!-- Must be kept in sync with "version" value in build.properties -->
+	<version>0.1-SNAPSHOT</version>
+	
+	<repositories>
+		<repository>
+			<id>Apache Snapshots</id>
+			<name>Apache snapshot repository</name>
+			<url>https://repository.apache.org/content/groups/snapshots-group/</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+
+		<!-- Compile time dependencies -->
+		
+		<dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.0</version>
+        </dependency>
+        
+		<dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
+
+		<!-- Test dependencies -->
+
+		<dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+
+		<dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.0</version>
+            <scope>test</scope>
+        </dependency>
+
+		<dependency>
+            <groupId>jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <!-- we'd like to use 6.0.2, but the version in central is missing the pom -->
+            <version>5.1.10</version>
+            <scope>test</scope>
+        </dependency>
+
+		<!-- Provided dependencies -->
+	
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+        
+		<!-- Eclipse project generation dependencies -->
+	
+		<dependency>
+            <groupId>ant-eclipse</groupId>
+            <artifactId>ant-eclipse-jvm1.2</artifactId>
+            <version>1.0</version>
+            <scope>eclipse</scope>
+        </dependency>
+        
+	</dependencies>
+	
+		
+</project>
