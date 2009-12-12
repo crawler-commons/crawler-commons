@@ -11,7 +11,10 @@
 	<target name="clean" description="--> clean the project">
 		<echo>cleaning ${ant.project.name}</echo>
 		<delete includeemptydirs="true" failonerror="false">
-			<fileset dir="${build.dir}" excludes="classes-*-eclipse/" />
+            <fileset dir="${build.dir}">
+                <exclude name="classes-*-eclipse/" />
+                <exclude name="crawlercommons.log" />
+            </fileset>
 		</delete>
 	</target>
 
@@ -88,7 +91,6 @@
 		<path id="test.path">
 			<pathelement location="${build.dir.main-classes}" />
 		</path>
-
 		<javac encoding="${build.encoding}"
 		       srcdir="${test.src.dir}"
 		       includes="**/*.java"
@@ -124,10 +126,12 @@
 				<pathelement location="${instrumented.dir}" />
 				<pathelement location="${build.dir.main-classes}" />
 				<pathelement location="${build.dir.test-classes}" />
-				<pathelement location="${test.res.dir}" />
+				<pathelement location="${main.res.dir}" />
+			    <pathelement location="${test.res.dir}" />
 				<path refid="test.classpath" />
 			</classpath>
-			<formatter type="plain" />
+			<formatter usefile="no" type="plain"/>
+			<formatter type="xml" />
 			<batchtest fork="yes"
 			           todir="${build.dir.test-reports}">
 				<fileset dir="${test.src.dir}">
@@ -140,7 +144,7 @@
 	</target>
 
 	<!-- ================================================================== -->
-	<!-- Build jar of sources                                               -->
+	<!-- Build jar                                               -->
 	<!-- ================================================================== -->
 
 	<target name="jar" depends="compile">
@@ -149,8 +153,10 @@
 			<format property="timestamp" pattern="MMM dd yyyy, HH:mm:ss" />
 		</tstamp>
 
-		<jar jarfile="${build.dir}/${jar.name}"
-		     basedir="${build.dir.main-classes}">
+		<jar destfile="${build.dir}/${jar.name}" compress="true">
+			<fileset dir="${build.dir.main-classes}" />
+			<fileset dir="${main.res.dir}" />
+			
 			<manifest>
 				<section name="crawler-commons">
 					<attribute name="Implementation-Title"
@@ -193,7 +199,7 @@
 	<!-- ================================================================== -->
 
 	<target name="install"
-			depends="test, mvn-install"
+			depends="jar, test, mvn-install"
 			description="--> install SNAPSHOT jar to local repository">
 	</target>
 	

@@ -25,6 +25,12 @@
 	
 	<repositories>
 		<repository>
+			<id>101tec 3rd Party</id>
+			<name>101tec Nexus 3rd party repository</name>
+			<url>http://oss.101tec.com/nexus/content/repositories/thirdparty/</url>
+		</repository>
+		
+		<repository>
 			<id>Apache Snapshots</id>
 			<name>Apache snapshot repository</name>
 			<url>https://repository.apache.org/content/groups/snapshots-group/</url>
