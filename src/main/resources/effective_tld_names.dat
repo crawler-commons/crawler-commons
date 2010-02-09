@@ -162,7 +162,7 @@ ao
 aq
 
 // ar : http://en.wikipedia.org/wiki/.ar
-*.ar
+ar
 !congresodelalengua3.ar
 !educ.ar
 !gobiernoelectronico.ar
@@ -172,6 +172,15 @@ aq
 !promocion.ar
 !retina.ar
 !uba.ar
+com.ar
+edu.ar
+gob.ar
+gov.ar
+int.ar
+mil.ar
+net.ar
+org.ar
+tur.ar
 
 // arpa : http://en.wikipedia.org/wiki/.arpa
 e164.arpa
@@ -484,7 +493,14 @@ yn.cn
 zj.cn
 
 // co : http://en.wikipedia.org/wiki/.co
-*.co
+co
+com.co
+org.co
+edu.co
+gov.co
+net.co
+mil.co
+nom.co
 
 // com : http://en.wikipedia.org/wiki/.com
 com
@@ -799,13 +815,29 @@ utazas.hu
 video.hu
 
 // id : http://en.wikipedia.org/wiki/.id
-*.id
+id
+ac.id
+co.id
+net.id
+or.id
+web.id
+sch.id
+mil.id
+go.id
 
 // ie : http://en.wikipedia.org/wiki/.ie
 ie
 
 // il : http://en.wikipedia.org/wiki/.il
-*.il
+il
+ac.il
+co.il
+org.il
+net.il
+k12.il
+gov.il
+muni.il
+idf.il
 
 // im : https://www.nic.im/pdfs/imfaqs.pdf
 im
@@ -1523,7 +1555,12 @@ net.mw
 org.mw
 
 // mx : http://www.nic.mx/
-*.mx
+mx
+com.mx
+edu.mx
+gob.mx
+net.mx
+org.mx
 
 // my : http://www.mynic.net.my/
 *.my
@@ -2346,7 +2383,20 @@ com.nr
 nu
 
 // nz : http://en.wikipedia.org/wiki/.nz
-*.nz
+nz
+ac.nz
+co.nz
+cri.nz
+geek.nz
+gen.nz
+govt.nz
+iwi.nz
+maori.nz
+mil.nz
+net.nz
+org.nz
+parliament.nz
+school.nz
 
 // om : http://en.wikipedia.org/wiki/.om
 *.om
@@ -3107,7 +3157,26 @@ ws
 *.yu
 
 // za : http://www.zadna.org.za/slds.html
-*.za
+za
+ac.za
+city.za
+co.za
+edu.za
+gov.za
+law.za
+mil.za
+nom.za
+org.za
+school.za
+ecape.school.za
+fs.school.za
+gp.school.za
+kzn.school.za
+mpm.school.za
+ncape.school.za
+lp.school.za
+nw.school.za
+wcape.school.za
 
 // zm : http://en.wikipedia.org/wiki/.zm
 *.zm
