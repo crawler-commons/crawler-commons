@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Routines to extract the PLD (paid-level domain, as per the IRLbot paper) from a hostname or URL.
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 
 public class PaidLevelDomain {
-    private static final Logger LOGGER = Logger.getLogger(PaidLevelDomain.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaidLevelDomain.class);
     
     private static final String CC_TLDS =
         "ac ad ae af ag ai al am an ao aq ar as at au aw ax az ba bb bd be bf bg bh bi " +
