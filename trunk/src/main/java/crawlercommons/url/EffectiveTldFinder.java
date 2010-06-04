@@ -9,7 +9,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Given a URL's hostname, there are determining the actual domain requires
@@ -26,7 +28,7 @@ import org.apache.log4j.Logger;
  * and have at it.
  */
 public class EffectiveTldFinder {
-    private static final Logger LOGGER = Logger.getLogger(EffectiveTldFinder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
     public static final String ETLD_DATA = "/effective_tld_names.dat";
     public static final String COMMENT = "//";
     public static final String DOT_REGEX = "\\.";

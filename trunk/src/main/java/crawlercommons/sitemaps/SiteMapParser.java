@@ -29,8 +29,8 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,7 +40,7 @@ import org.xml.sax.InputSource;
 import crawlercommons.sitemaps.SiteMap.SitemapType;
 
 public class SiteMapParser {
-    public static final Log LOG = LogFactory.getLog(SiteMapParser.class);
+    public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
 
     /** According to the specs, 50K URLs per Sitemap is the max */
     private static final int MAX_URLS = 50000;
