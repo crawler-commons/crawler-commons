@@ -155,8 +155,12 @@ public abstract class BaseFetcher implements Serializable {
         _validMimeTypes.add(validMimeType);
     }
     
+    public FetchedResult get(String url) throws BaseFetchException {
+        return get(url, null);
+    }
+    
     // Return results of HTTP GET request
-    public abstract FetchedResult get(String url) throws BaseFetchException;
+    public abstract FetchedResult get(String url, Payload payload) throws BaseFetchException;
     
     public abstract void abort();
     

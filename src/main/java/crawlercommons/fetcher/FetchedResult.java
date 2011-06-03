@@ -92,6 +92,10 @@ public class FetchedResult {
 		return _content;
 	}
 
+	public int getContentLength() {
+	    return _content.length;
+	}
+	
 	public String getContentType() {
 		return _contentType;
 	}
