@@ -1,0 +1,4 @@
+User-agent: *
+Request-rate: 1/5 # Maximum request rate of 1 page every 5 seconds (12/minute)
+Crawl-delay: 5 # Used by several bots (12/minute)
+

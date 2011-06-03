@@ -1,0 +1,8 @@
+# Sitemap can occur anywhere
+sitemap: http://domain.com/sitemap.xml
+
+User-agent: *
+Disallow: 
+
+# And sitemap directive that forgot "sitemap:"
+http://domain.com/dir/my-sitemap.xml
