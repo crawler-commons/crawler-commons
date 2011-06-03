@@ -416,8 +416,8 @@ public class SimpleHttpFetcher extends BaseFetcher {
     }
     
     @Override
-    public FetchedResult get(String url) throws BaseFetchException {
-        return request(new HttpGet(), url, null);
+    public FetchedResult get(String url, Payload payload) throws BaseFetchException {
+        return request(new HttpGet(), url, payload);
     }
 
     private FetchedResult request(HttpRequestBase request, String url, Payload payload) throws BaseFetchException {
