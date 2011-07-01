@@ -1,0 +1,16 @@
+#summary How to work around ant-eclipse jar not being in Maven central repo.
+
+= Introduction =
+
+In order to use "ant eclipse" to create an Eclipse project file, the ant-eclipse-jvm1.2-1.0.jar has to be available.
+
+But this isn't in Maven central, so it has to manually be added to your local Maven repo.
+
+= Details =
+
+To install, do the following.
+
+{{{
+ % cd crawler-commons/lib
+ % mvn install:install-file -DgroupId=ant-eclipse -DartifactId=ant-eclipse-jvm1.2 -Dversion=1.0 -Dpackaging=jar -Dfile=ant-eclipse-jvm1.2-1.0.jar
+}}}
