@@ -196,9 +196,8 @@
 
 	<target name="dist" depends="jar,doc" description="generate the distribution">
 
-		<!-- build the main artifact -->
-		<!-- copy existing one from ${build.dir}/${jar.name} -->
-		<jar jarfile="${maven-jar}" basedir="${build.dir.main-classes}" />
+		<!-- copy the main artifact -->
+		<copy tofile="${maven-jar}" file="${build.dir}/${jar.name}" />
 
 		<!-- build the javadoc artifact -->
 		<jar jarfile="${maven-javadoc-jar}">
@@ -226,7 +225,8 @@
 	<!-- before this, update project version (both build.xml and pom.xml) from 
 		SNAPSHOT to RELEASE -->
 	<target name="stage" depends="dist"
-		description="deploy release version to Maven staging repository">
+		description="deploy release version to Maven staging repository"
+		xmlns:artifact="urn:maven-artifact-ant">
 		<!-- sign and deploy the main artifact -->
 		<artifact:mvn>
 			<arg
@@ -275,7 +275,6 @@
 
 		<!-- create target directory -->
 		<mkdir dir="${build.dir.dist}" />
-		<mkdir dir="${build.dir.dist}/bin" />
 		<mkdir dir="${build.dir.dist}/docs" />
 		<mkdir dir="${build.dir.dist}/docs/licenses" />
 		<mkdir dir="${build.dir.dist}/docs/javadoc" />
@@ -315,6 +314,8 @@
 		<copy todir="${build.dir.dist}/docs/licenses">
 			<fileset dir="${basedir}/doc/licenses" />
 		</copy>
+		<!-- copy license to the root -->
+		<copy todir="${build.dir.dist}" file="${basedir}/doc/LICENSE.txt" />
 
 		<tar longfile="gnu" compression="gzip" destfile="${build.release.file}">
 			<tarfileset dir="${build.dir.dist}" />
