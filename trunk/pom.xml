@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-      
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.google.code.crawler-commons</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.google.code.crawler-commons</groupId>
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
@@ -22,93 +21,94 @@
 		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
 		<url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
 	</scm>
-	
-  <developers>
-    <developer>
-      <id>KKrugler</id>
-      <name>Ken Krugler</name>
-      <email>kkrugler_lists@transpac.com</email>
-    </developer>
-    
-	<developer>
+
+	<developers>
+		<developer>
+			<id>KKrugler</id>
+			<name>Ken Krugler</name>
+			<email>kkrugler_lists@transpac.com</email>
+		</developer>
+
+		<developer>
 			<id>ab</id>
 			<name>Andrzej Bialecki</name>
 			<email>ab@apache.org</email>
 		</developer>
-		
+
 		<developer>
 			<id>jnioche</id>
 			<name>Julien Nioche</name>
 			<email>jnioche@apache.org</email>
 		</developer>
-  </developers>
+	</developers>
 
-	
+
 	<dependencies>
 
 		<!-- Compile time dependencies -->
-		
-		<dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>0.9</version>
-        </dependency>
 
 		<dependency>
-  			<groupId>org.slf4j</groupId>
-  			<artifactId>slf4j-api</artifactId>
-  			<version>1.6.0</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>0.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.0</version>
 		</dependency>
 
 		<!-- Test dependencies -->
 
 		<dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.7</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.7</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>1.8.0</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.8.0</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
-            <groupId>jetty</groupId>
-            <artifactId>jetty</artifactId>
-            <!-- we'd like to use 6.0.2, but the version in central is missing the pom -->
-            <version>5.1.10</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<!-- we'd like to use 6.0.2, but the version in central is missing the 
+				pom -->
+			<version>5.1.10</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Provided dependencies -->
-	
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
-        
+
 		<!-- Eclipse project generation dependencies -->
-	
+
 		<dependency>
-            <groupId>ant-eclipse</groupId>
-            <artifactId>ant-eclipse-jvm1.2</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        
+			<groupId>ant-eclipse</groupId>
+			<artifactId>ant-eclipse-jvm1.2</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
-	
-		
+
+
 </project>
