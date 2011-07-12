@@ -304,6 +304,13 @@
 			<fileset file="${build.dir}/${jar.name}" />
 		</copy>
 
+		<!-- copy build files to dist dir -->
+		<copy todir="${build.dir.dist}">
+			<fileset file="${basedir}/build.xml" />
+			<fileset file="${basedir}/build.properties" />
+			<fileset file="${basedir}/pom.xml" />
+		</copy>
+
 		<!-- copy documents -->
 		<copy todir="${build.dir.dist}">
 			<fileset file="${basedir}/README" />
