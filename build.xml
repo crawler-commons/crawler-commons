@@ -191,7 +191,16 @@
 
 
 	<!-- ================================================================== -->
-	<!-- Build JAR artefacts -->
+	<!-- Install in local Maven repository									-->
+	<!-- ================================================================== -->
+
+	<target name="install"
+			depends="jar, mvn-install"
+			description="--> install SNAPSHOT jar to local repository">
+	</target>
+	
+	<!-- ================================================================== -->
+	<!-- Build JAR artifacts -->
 	<!-- ================================================================== -->
 
 	<target name="dist" depends="jar,doc" description="generate the distribution">

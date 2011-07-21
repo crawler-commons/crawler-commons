@@ -28,8 +28,9 @@ import crawlercommons.fetcher.FetchedResult;
 import crawlercommons.fetcher.HttpFetchException;
 import crawlercommons.fetcher.IOFetchException;
 import crawlercommons.fetcher.RedirectFetchException;
-import crawlercommons.fetcher.SimpleHttpFetcher;
-import crawlercommons.fetcher.UserAgent;
+import crawlercommons.fetcher.http.BaseHttpFetcher;
+import crawlercommons.fetcher.http.SimpleHttpFetcher;
+import crawlercommons.fetcher.http.UserAgent;
 
 
 public class RobotUtils {
@@ -57,11 +58,11 @@ public class RobotUtils {
     // FUTURE KKr - add in time to do the download.
     private static final long MAX_FETCH_TIME = (ROBOTS_CONNECTION_TIMEOUT + ROBOTS_SOCKET_TIMEOUT) * ROBOTS_RETRY_COUNT;
 
-    public static BaseFetcher createFetcher(BaseFetcher fetcher) {
+    public static BaseHttpFetcher createFetcher(BaseHttpFetcher fetcher) {
         return createFetcher(fetcher.getUserAgent(), fetcher.getMaxThreads());
     }
 
-    public static BaseFetcher createFetcher(UserAgent userAgent, int maxThreads) {
+    public static BaseHttpFetcher createFetcher(UserAgent userAgent, int maxThreads) {
         SimpleHttpFetcher fetcher = new SimpleHttpFetcher(maxThreads, userAgent);
         fetcher.setDefaultMaxContentSize(MAX_ROBOTS_SIZE);
         fetcher.setMaxConnectionsPerHost(MAX_CONNECTIONS_PER_HOST);
@@ -84,7 +85,7 @@ public class RobotUtils {
      * @param robotsUrl URL to robots.txt file
      * @return Robot rules
      */
-    public static BaseRobotRules getRobotRules(BaseFetcher fetcher, BaseRobotsParser parser, URL robotsUrl) {
+    public static BaseRobotRules getRobotRules(BaseHttpFetcher fetcher, BaseRobotsParser parser, URL robotsUrl) {
         
         try {
             String urlToFetch = robotsUrl.toExternalForm();

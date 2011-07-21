@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.fetcher;
+package crawlercommons.fetcher.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -94,12 +94,23 @@ import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.fetcher.AbortedFetchException;
+import crawlercommons.fetcher.AbortedFetchReason;
+import crawlercommons.fetcher.BadProtocolFetchException;
+import crawlercommons.fetcher.BaseFetchException;
+import crawlercommons.fetcher.EncodingUtils;
+import crawlercommons.fetcher.FetchedResult;
+import crawlercommons.fetcher.HttpFetchException;
+import crawlercommons.fetcher.IOFetchException;
+import crawlercommons.fetcher.Payload;
+import crawlercommons.fetcher.RedirectFetchException;
+import crawlercommons.fetcher.UrlFetchException;
 import crawlercommons.fetcher.EncodingUtils.ExpandedResult;
 import crawlercommons.fetcher.RedirectFetchException.RedirectExceptionReason;
 
 
 @SuppressWarnings("serial")
-public class SimpleHttpFetcher extends BaseFetcher {
+public class SimpleHttpFetcher extends BaseHttpFetcher {
     private static Logger LOGGER = LoggerFactory.getLogger(SimpleHttpFetcher.class);
 
     // We tried 10 seconds for all of these, but got a number of connection/read timeouts for
@@ -412,6 +423,16 @@ public class SimpleHttpFetcher extends BaseFetcher {
     
     @Override
     public FetchedResult get(String url, Payload payload) throws BaseFetchException {
+        try {
+            URL realUrl = new URL(url);
+            String protocol = realUrl.getProtocol();
+            if (!protocol.equals("http") && !protocol.equals("https")) {
+                throw new BadProtocolFetchException(url);
+            }
+        } catch (MalformedURLException e) {
+            throw new UrlFetchException(url, e.getMessage());
+        }
+        
         return request(new HttpGet(), url, payload);
     }
 
