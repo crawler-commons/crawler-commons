@@ -31,9 +31,9 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.handler.AbstractHttpHandler;
 
-import crawlercommons.fetcher.BaseFetcher;
 import crawlercommons.fetcher.FetchedResult;
-import crawlercommons.fetcher.UserAgent;
+import crawlercommons.fetcher.http.BaseHttpFetcher;
+import crawlercommons.fetcher.http.UserAgent;
 import crawlercommons.test.SimulationWebServer;
 import crawlercommons.test.TestUtils;
 
@@ -76,7 +76,7 @@ public class RobotUtilsTest {
      */
     @Test
     public void testCircularRedirect() throws Exception {
-        BaseFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
+        BaseHttpFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
         BaseRobotsParser parser = new SimpleRobotRulesParser();
         
         SimulationWebServer webServer = new SimulationWebServer();
@@ -92,7 +92,7 @@ public class RobotUtilsTest {
 
     @Test
     public void testRedirectToHtml() throws Exception {
-        BaseFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
+        BaseHttpFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
         BaseRobotsParser parser = new SimpleRobotRulesParser();
         
         SimulationWebServer webServer = new SimulationWebServer();
@@ -113,7 +113,7 @@ public class RobotUtilsTest {
         final String simpleRobotsTxt = "User-agent: crawler" + "\r\n"
         + "Disallow: /";
 
-        BaseFetcher fetcher = Mockito.mock(BaseFetcher.class);
+        BaseHttpFetcher fetcher = Mockito.mock(BaseHttpFetcher.class);
         FetchedResult result = Mockito.mock(FetchedResult.class);
         Mockito.when(result.getContent()).thenReturn(simpleRobotsTxt.getBytes());
         Mockito.when(fetcher.get(Mockito.any(String.class))).thenReturn(result);

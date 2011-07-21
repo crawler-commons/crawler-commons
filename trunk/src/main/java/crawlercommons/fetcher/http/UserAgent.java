@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.fetcher;
+package crawlercommons.fetcher.http;
 
 import java.io.Serializable;
 

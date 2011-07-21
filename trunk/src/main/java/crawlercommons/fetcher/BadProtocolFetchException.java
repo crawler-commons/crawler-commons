@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
-package crawlercommons.test;
+package crawlercommons.fetcher;
 
-import crawlercommons.fetcher.http.UserAgent;
+@SuppressWarnings("serial")
+public class BadProtocolFetchException extends BaseFetchException {
 
-public class TestUtils {
+    public BadProtocolFetchException() {
+        super();
+    }
     
-    // User agent for when we're not doing external fetching, so we just need a fake name.
-    public static final UserAgent CC_TEST_AGENT = new UserAgent("test", "test@domain.com", "http://test.domain.com");
-
+    public BadProtocolFetchException(String url) {
+        super(url);
+    }
 }

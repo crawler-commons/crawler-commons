@@ -76,9 +76,26 @@ public abstract class BaseFetchException extends Exception {
     }
 
     @Override
-	public boolean equals(Object obj) {
-		return _exception.equals(obj);
-	}
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BaseFetchException other = (BaseFetchException) obj;
+        if (_exception == null) {
+            if (other._exception != null)
+                return false;
+        } else if (!_exception.equals(other._exception))
+            return false;
+        if (_url == null) {
+            if (other._url != null)
+                return false;
+        } else if (!_url.equals(other._url))
+            return false;
+        return true;
+    }
 
 	@Override
 	public Throwable getCause() {
@@ -101,9 +118,13 @@ public abstract class BaseFetchException extends Exception {
 	}
 
 	@Override
-	public int hashCode() {
-		return _exception.hashCode();
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((_exception == null) ? 0 : _exception.hashCode());
+        result = prime * result + ((_url == null) ? 0 : _url.hashCode());
+        return result;
+    }
 
 	@Override
 	public Throwable initCause(Throwable cause) {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.fetcher;
+package crawlercommons.fetcher.http;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,8 +43,15 @@ import org.mortbay.http.HttpServer;
 import org.mortbay.http.SocketListener;
 import org.mortbay.http.handler.AbstractHttpHandler;
 
-import crawlercommons.fetcher.BaseFetcher.RedirectMode;
+import crawlercommons.fetcher.AbortedFetchException;
+import crawlercommons.fetcher.AbortedFetchReason;
+import crawlercommons.fetcher.BaseFetcher;
+import crawlercommons.fetcher.FetchedResult;
+import crawlercommons.fetcher.IOFetchException;
+import crawlercommons.fetcher.Payload;
+import crawlercommons.fetcher.RedirectFetchException;
 import crawlercommons.fetcher.RedirectFetchException.RedirectExceptionReason;
+import crawlercommons.fetcher.http.BaseHttpFetcher.RedirectMode;
 import crawlercommons.test.RandomResponseHandler;
 import crawlercommons.test.ResourcesResponseHandler;
 import crawlercommons.test.SimulationWebServer;
@@ -204,7 +211,7 @@ public class SimpleHttpFetcherTest {
         startServer(new RandomResponseHandler(20000, 2 * 1000L), 8089);
 
         // Set up for a minimum response rate of 20000 bytes/second.
-        BaseFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
+        BaseHttpFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
         fetcher.setMinResponseRate(20000);
         
         String url = "http://localhost:8089/test.html";
@@ -223,8 +230,8 @@ public class SimpleHttpFetcherTest {
         startServer(new RandomResponseHandler(1000, 500), 8089);
 
         // Set up for no minimum response rate.
-        BaseFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
-        fetcher.setMinResponseRate(BaseFetcher.NO_MIN_RESPONSE_RATE);
+        BaseHttpFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
+        fetcher.setMinResponseRate(BaseHttpFetcher.NO_MIN_RESPONSE_RATE);
 
 
         String url = "http://localhost:8089/test.html";
@@ -330,7 +337,7 @@ public class SimpleHttpFetcherTest {
     @Test
     public final void testRedirectPolicy() throws Exception {
         startServer(new RedirectResponseHandler(true), 8089);
-        BaseFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
+        BaseHttpFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
         fetcher.setRedirectMode(RedirectMode.FOLLOW_TEMP);
         String url = "http://localhost:8089/base";
         
