@@ -19,28 +19,12 @@ package crawlercommons.sitemaps;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
 
 public class SiteMap extends AbstractSiteMap {
 
-    /** Various Sitemap types */
-    public enum SitemapType {
-        XML, ATOM, RSS, TEXT
-    };
-
-    /** W3C date the Sitemap was last modified */
-    private Date lastModified;
-
-    /** Indicates if we have tried to process this Sitemap or not */
-    private boolean processed;
-
-    /** This Sitemap's type */
-    private SitemapType type;
 
     /**
      * The base URL for the Sitemap is where the Sitemap was found If found at
@@ -52,24 +36,9 @@ public class SiteMap extends AbstractSiteMap {
     /** URLs found in this Sitemap */
     private Hashtable<String, SiteMapURL> urlList;
 
-    public static DateFormat getFullDateFormat() {
-        return dateFormats.get()[1];
-    }
-
-    /**
-     * lastModified uses the W3C date format
-     * (http://www.w3.org/TR/NOTE-datetime)
-     */
-    private static final ThreadLocal<DateFormat[]> dateFormats = new ThreadLocal<DateFormat[]>() {
-        protected DateFormat[] initialValue() {
-            return new DateFormat[] { new SimpleDateFormat("yyyy-MM-dd"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm-hh:00"),
-                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+hh:00"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-hh:00"), new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz") };
-        }
-    };
-
     public SiteMap() {
+    	super();
         urlList = new Hashtable<String, SiteMapURL>();
-        lastModified = null;
         setProcessed(false);
     }
 
@@ -123,75 +92,14 @@ public class SiteMap extends AbstractSiteMap {
         }
     }
 
-    /**
-     * @param lastModified
-     *            - the lastModified to set
-     */
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    /**
-     * @param lastModified
-     *            - the lastModified to set
-     */
-    public void setLastModified(String lastModified) {
-        this.lastModified = SiteMap.convertToDate(lastModified);
-    }
-
-    /**
-     * @return the lastModified date of the Sitemap
-     */
-    public Date getLastModified() {
-        return lastModified;
-    }
 
     public String toString() {
         String s = "url=\"" + url + "\",lastMod=";
-        s += (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-        s += ",type=" + type + ",processed=" + processed + ",urlListSize=" + urlList.size();
+        s += (getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified());
+        s += ",type=" + getType() + ",processed=" + isProcessed() + ",urlListSize=" + urlList.size();
         return s;
     }
 
-    /**
-     * Convert the given date (given in an acceptable DateFormat), null if the
-     * date is not in the correct format.
-     * 
-     * @param date
-     *            - the date to be parsed
-     * @return the Date equivalent
-     */
-    public static Date convertToDate(String date) {
-
-        if (date != null) {
-            for (DateFormat df : dateFormats.get()) {
-                try {
-                    return df.parse(date);
-                } catch (ParseException e) {
-                    // do nothing
-                }
-            }
-        }
-
-        // Not successful parsing any dates
-        return null;
-    }
-
-    /**
-     * @param processed
-     *            - indicate if the Sitemap has been processed.
-     */
-    void setProcessed(boolean processed) {
-        this.processed = processed;
-    }
-
-    /**
-     * @return true if the Sitemap has been processed i.e it contains at least
-     *         one SiteMapURL
-     */
-    public boolean isProcessed() {
-        return processed;
-    }
 
     /**
      * This is private because only once we know the Sitemap's URL can we
@@ -222,21 +130,6 @@ public class SiteMap extends AbstractSiteMap {
      */
     public void addSiteMapUrl(SiteMapURL url) {
         urlList.put(url.getUrl().toString(), url);
-    }
-
-    /**
-     * @param type
-     *            the Sitemap type to set
-     */
-    void setType(SitemapType type) {
-        this.type = type;
-    }
-
-    /**
-     * @return the Sitemap type
-     */
-    public SitemapType getType() {
-        return type;
     }
 
     public boolean isIndex() {

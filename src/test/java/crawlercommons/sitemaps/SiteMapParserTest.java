@@ -19,8 +19,6 @@ package crawlercommons.sitemaps;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -52,7 +50,7 @@ public class SiteMapParserTest extends TestCase {
         assertEquals(true, asm instanceof SiteMapIndex);
         SiteMapIndex smi = (SiteMapIndex) asm;
         assertEquals(2, smi.getSitemaps().size());
-        SiteMap currentSiteMap = smi.getSitemap(new URL("http://www.example.com/sitemap1.xml.gz"));
+        AbstractSiteMap currentSiteMap = smi.getSitemap(new URL("http://www.example.com/sitemap1.xml.gz"));
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap1.xml.gz", currentSiteMap.getUrl().toString());
         assertEquals(SiteMap.convertToDate("2004-10-01T18:23:17+00:00"), currentSiteMap.getLastModified());
@@ -97,4 +95,25 @@ public class SiteMapParserTest extends TestCase {
         SiteMap sm = (SiteMap) asm;
         assertEquals(2, sm.getSiteMapUrls().size());
     }
+
+    public void testSitemapParserBrokenXml() throws IOException {
+        // This Sitemap contains badly formatted XML and can't be read
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+
+        String scontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset " + "xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url>"
+                        + "<!-- This file is not a valid XML file --></url><url><loc>" + "http://cs.harding.edu/fmccown/sitemaps/something.html</loc>"
+                        + "</url><!-- missing opening url tag --></url></urlset>";
+        byte[] content = scontent.getBytes();
+        URL url = new URL("http://www.example.com/sitemapindex.xml");
+        AbstractSiteMap asm = null;
+        try {
+            asm = parser.parseSiteMap(contentType, content, url);
+        } catch (UnknownFormatException e) {
+            // If Exception is thrown Test was successful
+            return;
+        }
+        fail("Test failed: UnknownFormatException not thrown");
+    }
+
 }

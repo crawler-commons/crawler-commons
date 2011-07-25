@@ -25,10 +25,10 @@ import java.util.Map.Entry;
 public class SiteMapIndex extends AbstractSiteMap {
 
     /** URLs found in this Sitemap Index */
-    private Hashtable<String, SiteMap> sitemaps;
+    private Hashtable<String, AbstractSiteMap> sitemaps;
 
     public SiteMapIndex() {
-        sitemaps = new Hashtable<String, SiteMap>();
+        sitemaps = new Hashtable<String, AbstractSiteMap>();
     }
 
     public SiteMapIndex(URL url) {
@@ -39,7 +39,7 @@ public class SiteMapIndex extends AbstractSiteMap {
     /**
      * @return a Collection of Sitemaps in this Sitemap Index.
      */
-    public Collection<SiteMap> getSitemaps() {
+    public Collection<AbstractSiteMap> getSitemaps() {
         return sitemaps.values();
     }
 
@@ -49,7 +49,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @param sitemap
      *            - Sitemap to be added to the list of Sitemaps
      */
-    void addSitemap(SiteMap sitemap) {
+    void addSitemap(AbstractSiteMap sitemap) {
         sitemaps.put(sitemap.getUrl().toString(), sitemap);
     }
 
@@ -61,7 +61,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      *            - The Sitemap's URL
      * @return SiteMap corresponding to the URL or null
      */
-    public SiteMap getSitemap(URL url) {
+    public AbstractSiteMap getSitemap(URL url) {
         return sitemaps.get(url.toString());
     }
 
@@ -72,13 +72,12 @@ public class SiteMapIndex extends AbstractSiteMap {
     public boolean hasUnprocessedSitemap() {
 
         // Find an unprocessed Sitemap
-        for (Entry<String, SiteMap> sitemap : sitemaps.entrySet()) {
-            SiteMap s = sitemap.getValue();
+        for (Entry<String, AbstractSiteMap> sitemap : sitemaps.entrySet()) {
+        	AbstractSiteMap s = sitemap.getValue();
             if (!s.isProcessed()) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -86,9 +85,9 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could
      *         be found.
      */
-    public SiteMap nextUnprocessedSitemap() {
-        for (Entry<String, SiteMap> sitemap : sitemaps.entrySet()) {
-            SiteMap s = sitemap.getValue();
+    public AbstractSiteMap nextUnprocessedSitemap() {
+        for (Entry<String, AbstractSiteMap> sitemap : sitemaps.entrySet()) {
+        	AbstractSiteMap s = sitemap.getValue();
             if (!s.isProcessed()) {
                 return s;
             }
