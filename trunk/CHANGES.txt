@@ -1,0 +1,12 @@
+Crawler-Commons Change Log
+
+Release 0.2
+- refactoring of SiteMap objects (Hannes Schwarz via jnioche)
+- added simple support for the file: protocol (kkrugler)
+- cleaned up packaging and added "install" target (kkrugler)
+
+Release 0.1
+- parsing robots.txt
+- parsing sitemaps
+- URL analyzer which returns Top Level Domains
+- a simple HttpFetcher

@@ -37,29 +37,31 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import crawlercommons.sitemaps.SiteMap.SitemapType;
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+
+
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
+    
 
     /** According to the specs, 50K URLs per Sitemap is the max */
     private static final int MAX_URLS = 50000;
 
     /** Sitemap docs must be limited to 10MB (10,485,760 bytes) */
-    private static int MAX_BYTES_ALLOWED = 10485760;
+    public static int MAX_BYTES_ALLOWED = 10485760;
 
-    public SiteMapParser() {
-    }
+    public SiteMapParser() {}
 
     /**
      * Returned a processed copy of an unprocessed sitemap object, i.e. transfer the value of 
-     * getLastModified.
+     * getLastModified and sets the original sitemap to processed.
      **/  
-    public SiteMap parseSiteMap(String contentType, byte[] content, SiteMap sitemap) throws UnknownFormatException, IOException {
-        AbstractSiteMap asmp = parseSiteMap(contentType, content, sitemap.getUrl());
-        SiteMap smap2 = (SiteMap)asmp;
-        smap2.setLastModified(sitemap.getLastModified());
-        return smap2;
+    public AbstractSiteMap parseSiteMap(String contentType, byte[] content, AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
+        AbstractSiteMap asmCopy =  parseSiteMap(contentType, content, sitemap.getUrl());
+        asmCopy.setLastModified(sitemap.getLastModified());
+        sitemap.setProcessed(true);        
+        return asmCopy;
     }
     
     /**
@@ -276,7 +278,8 @@ public class SiteMapParser {
         LOG.debug("Parsing Sitemap Index");
 
         SiteMapIndex sitemapIndex = new SiteMapIndex(url);
-
+        sitemapIndex.setType(SitemapType.INDEX);
+        
         // Loop through the <sitemap>s
         for (int i = 0; i < nodeList.getLength() && i < MAX_URLS; i++) {
 
@@ -308,6 +311,7 @@ public class SiteMapParser {
                 }
             }
         }
+        sitemapIndex.setProcessed(true);
         return sitemapIndex;
     }
 
