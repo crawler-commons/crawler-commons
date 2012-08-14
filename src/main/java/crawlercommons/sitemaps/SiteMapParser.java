@@ -21,7 +21,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -29,6 +29,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -76,10 +77,10 @@ public class SiteMapParser {
                         || contentType.contains("application/atom+xml") || contentType.contains("application/rss+xml")) {
 
             // Try parsing the XML which could be in a number of formats
-            return processXml(url, new String(content));
+            return processXml(url, content);
         } else if (contentType.contains("text/plain")) {
             // plain text
-            return (AbstractSiteMap) processText(new String(content), url.toString());
+            return (AbstractSiteMap) processText(content, url.toString());
         } else if (url.getPath().endsWith(".gz") || contentType.contains("application/gzip") || contentType.contains("application/x-gzip") || contentType.contains("application/x-gunzip")
                         || contentType.contains("application/gzipped") || contentType.contains("application/gzip-compressed") || contentType.contains("application/x-compress")
                         || contentType.contains("gzip/document") || contentType.contains("application/octet-stream")) {
@@ -96,10 +97,11 @@ public class SiteMapParser {
      * @return
      * @throws UnknownFormatException
      */
-    private AbstractSiteMap processXml(URL sitemapUrl, String xmlContent) throws UnknownFormatException {
+    private AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
 
+        BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(xmlContent));
         InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(xmlContent));
+        is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs)));
         return processXml(sitemapUrl, is);
     }
 
@@ -110,14 +112,15 @@ public class SiteMapParser {
      * @param content
      * @throws IOException
      */
-    private SiteMap processText(String content, String sitemapUrl) throws IOException {
+    private SiteMap processText(byte[] content, String sitemapUrl) throws IOException {
 
         LOG.debug("Processing textual Sitemap");
 
         SiteMap textSiteMap = new SiteMap(sitemapUrl);
         textSiteMap.setType(SitemapType.TEXT);
 
-        BufferedReader reader = new BufferedReader(new StringReader(content));
+        BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(content));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs));
 
         String line;
 
@@ -165,7 +168,7 @@ public class SiteMapParser {
 
         LOG.debug("XML url = " + xmlUrl);
 
-        InputStream decompressed = new GZIPInputStream(is);
+        BOMInputStream decompressed = new BOMInputStream(new GZIPInputStream(is));
         InputSource in = new InputSource(decompressed);
         in.setSystemId(xmlUrl);
         smi = processXml(url, in);
