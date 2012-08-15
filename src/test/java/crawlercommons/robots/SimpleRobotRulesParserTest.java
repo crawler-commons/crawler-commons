@@ -533,6 +533,19 @@ public class SimpleRobotRulesParserTest {
     }
     
     @Test
+    public void testMultiWordAgentName() throws MalformedURLException {
+        // When the user agent name has a space in it.
+        final String simpleRobotsTxt = "User-agent: Download Ninja" + CRLF
+                + "Disallow: /index.html" + CRLF
+                + "Allow: /";
+
+        BaseRobotRules rules = createRobotRules("Download Ninja", simpleRobotsTxt.getBytes());
+        assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+    }
+    
+
+    @Test
     public void testUnsupportedFields() throws MalformedURLException {
         // When we have a new field type that we don't know about.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF
