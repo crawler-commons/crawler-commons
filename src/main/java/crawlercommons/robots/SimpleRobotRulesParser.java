@@ -311,6 +311,18 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             offset = 3;
             bytesLen -= 3;
             encoding = "UTF-8";
+        } 
+        // Check for UTF-16LE BOM at the beginning (FF FE)
+        else if ((bytesLen >= 2) && (content[0] == (byte)0xFF) && (content[1] == (byte)0xFE)) {
+            offset = 2;
+            bytesLen -= 2;
+            encoding = "UTF-16LE";
+        }
+        // Check for UTF-16BE BOM at the beginning (FE FF)
+            else if ((bytesLen >= 2) && (content[0] == (byte)0xFE) && (content[1] == (byte)0xFF)) {
+            offset = 2;
+            bytesLen -= 2;
+            encoding = "UTF-16BE";
         }
         
         String contentAsStr;
