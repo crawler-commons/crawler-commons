@@ -654,8 +654,20 @@ public class SimpleRobotRulesParserTest {
     }
     
     @Test
-    public void testRobotsWithBOM() throws Exception {
-        BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-bom.txt"));
+    public void testRobotsWithUTF8BOM() throws Exception {
+        BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf8-bom.txt"));
+        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+    }
+    
+    @Test
+    public void testRobotsWithUTF16LEBOM() throws Exception {
+        BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16le-bom.txt"));
+        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+    }
+    
+    @Test
+    public void testRobotsWithUTF16BEBOM() throws Exception {
+        BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16be-bom.txt"));
         assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
     }
     
