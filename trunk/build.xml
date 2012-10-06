@@ -370,7 +370,7 @@
 		</eclipse>
 		<concat destfile="${root.dir}/.settings/org.eclipse.jdt.core.prefs"
 			append="true">
-			<filelist dir="${root.dir}/doc/" files="eclipse-formatter.xml" />
+			<filelist dir="${root.dir}/doc/" files="eclipse-formatter.properties" />
 		</concat>
 		<replace file="${root.dir}/.settings/org.eclipse.jdt.core.prefs"
 			token="org.eclipse.jdt.core.compiler.compliance=6.0" value="org.eclipse.jdt.core.compiler.compliance=1.6" />
