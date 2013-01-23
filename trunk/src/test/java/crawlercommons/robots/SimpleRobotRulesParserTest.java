@@ -370,6 +370,28 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
         assertFalse(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
+
+        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt.getBytes());
+        assertFalse(rules.isAllowed("http://www.domain.com/a"));
+        assertFalse(rules.isAllowed("http://www.domain.com/a/"));
+        assertFalse(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/b"));
+        assertFalse(rules.isAllowed("http://www.domain.com/b/a"));
+        assertFalse(rules.isAllowed("http://www.domain.com/b/a/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/c"));
+        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
+        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/d"));
+        assertTrue(rules.isAllowed("http://www.domain.com/d/a"));
+        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
+        assertTrue(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
     }
     
     
