@@ -1,0 +1,52 @@
+#summary Step-by-step guide to generating a release.
+
+= Introduction =
+
+This page describes how to do a release of crawler-commons.
+
+= Details =
+
+*Generate javadoc*
+
+  * % cd ~/svn/crawler-commons/crawler-commons-trunk
+  * % ant doc
+  * % cd doc
+  * % svn del javadoc (todo will this work, when we do the copy? And what if the same file exists?)
+  * % cp -r ../build/java-doc/ javadoc/
+  * % svn add javadoc
+  * % find javadoc -name "`*`.html" | xargs -I filename svn propset svn:mime-type text/html filename
+  * % find javadoc -name "`*`.gif" | xargs -I filename svn propset svn:mime-type image/gif filename
+  * % find javadoc -name "`*`.css" | xargs -I filename svn propset svn:mime-type text/css filename
+
+*Update version numbers*
+
+This should be changed from X.Y-SNAPSHOT to just X.Y, in the following files:
+
+  * pom.xml
+  * build.properties
+
+*Do build/deploy to Sonatype*
+
+% ant clean xxx
+
+*Commit to SVN & Tag*
+
+Once the build and deploy has worked, you want to commit the new Javadocs and files with new version numbers to Subversion. Then you can tag this as the released version.
+
+  * % svn ci -m "Update for X.Y release"
+  * % svn <tag command>
+
+*Update Version Numbers*
+
+Edit the same files as above to change the version number from X.Y to X.Y+1-SNAPSHOT (e.g. 0.2 to 0.3-SNAPSHOT)
+
+  * pom.xml
+  * build.properties
+
+Then commit these modified files
+
+% svn ci -m "Update version numbers for X.Y+1 development"
+
+*Publicize*
+
+Post to the crawler-commons list, as well as Nutch and Bixo.
