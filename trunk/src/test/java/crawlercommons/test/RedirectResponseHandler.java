@@ -26,7 +26,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.AbstractHttpHandler;
 
 /**
- * Reponse handler that always returns a 404.
+ * Response handler that can be used to do redirects..
  *
  */
 @SuppressWarnings("serial")
@@ -34,17 +34,23 @@ public class RedirectResponseHandler extends AbstractHttpHandler {
     
     private String _originalPath;
     private String _redirectUrl;
+    private boolean _doRedirects;
+    
+    public RedirectResponseHandler() {
+        _doRedirects = false;
+    }
     
     public RedirectResponseHandler(String originalPath, String redirectUrl) {
         _originalPath = originalPath;
         _redirectUrl = redirectUrl;
+        _doRedirects = true;
     }
     
     @Override
     public void handle(String pathInContext, String pathParams, HttpRequest request, HttpResponse response) throws HttpException, IOException {
-        if (pathInContext.equalsIgnoreCase(_originalPath)) {
+        if (_doRedirects && pathInContext.equalsIgnoreCase(_originalPath)) {
             response.sendRedirect(_redirectUrl);
-        } else if (_redirectUrl.contains(pathInContext)) {
+        } else if (_doRedirects && _redirectUrl.contains(pathInContext)) {
             response.setStatus(HttpStatus.SC_OK);
             response.setContentType("text/plain");
 

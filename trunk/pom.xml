@@ -16,7 +16,10 @@
 		</license>
 	</licenses>
 	<url>http://code.google.com/p/crawler-commons/</url>
-	<description>crawler-commons is a set of reusable Java components that implement functionality common to any web crawler.</description>
+	<description>crawler-commons is a set of reusable Java components that implement functionality common to any web crawler.
+                 WARNING! This project is built using ant (and build.xml). You can use Maven with this pom.xml file to
+                 generate dependency information, but it will not build artifacts.
+    </description>
 	<scm>
 		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
 		<url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
@@ -124,4 +127,7 @@
 	</dependencies>
 
 
+	<issueManagement>
+	    <url>https://code.google.com/p/crawler-commons/issues</url>
+	</issueManagement>
 </project>
