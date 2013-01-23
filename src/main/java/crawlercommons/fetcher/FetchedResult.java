@@ -33,7 +33,7 @@ public class FetchedResult {
     private final String _newBaseUrl;
     private final int _numRedirects;
     private final String _hostAddress;
-
+    
     private Payload _payload;
     
     public FetchedResult(   String baseUrl,
