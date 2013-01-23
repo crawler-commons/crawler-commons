@@ -47,6 +47,7 @@ import crawlercommons.fetcher.AbortedFetchException;
 import crawlercommons.fetcher.AbortedFetchReason;
 import crawlercommons.fetcher.BaseFetcher;
 import crawlercommons.fetcher.FetchedResult;
+import crawlercommons.fetcher.HttpFetchException;
 import crawlercommons.fetcher.IOFetchException;
 import crawlercommons.fetcher.Payload;
 import crawlercommons.fetcher.RedirectFetchException;
@@ -84,6 +85,7 @@ public class SimpleHttpFetcherTest {
         return _webServer.getServer();
     }
     
+    // TODO - merge this code with RedirectResponseHandler class in crawlercommons.test package.
     @SuppressWarnings("serial")
     private class RedirectResponseHandler extends AbstractHttpHandler {
         
@@ -245,7 +247,7 @@ public class SimpleHttpFetcherTest {
 
         String url = "http://localhost:8089/test.html";
         FetchedResult result = fetcher.get(url);
-
+        assertEquals(HttpStatus.SC_OK, result.getStatusCode());
         assertTrue("Content size should be truncated", result.getContent().length <= fetcher.getDefaultMaxContentSize());
     }
     
@@ -259,7 +261,9 @@ public class SimpleHttpFetcherTest {
         String urlToFetch = "http://localhost:8089/karlie.html";
         
         FetchedResult result1 = fetcher.get(urlToFetch);
+        assertEquals(HttpStatus.SC_OK, result1.getStatusCode());
         FetchedResult result2 = fetcher.get(urlToFetch);
+        assertEquals(HttpStatus.SC_OK, result2.getStatusCode());
         
         // Verify that we got the same data from each fetch request.
         assertEquals(1000, result1.getContent().length);
@@ -443,6 +447,23 @@ public class SimpleHttpFetcherTest {
         String hostAddress = result.getHostAddress();
         assertNotNull(hostAddress);
         assertEquals("127.0.0.1", hostAddress);
+    }
+    
+    @Test
+    public final void testMissingPage() throws Exception {
+        startServer(new ResourcesResponseHandler(), 8089);
+        BaseFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
+        String url = "http://localhost:8089/this-page-will-not-exist.html";
+        
+        try {
+            fetcher.get(url);
+            fail("Should have thrown exception");
+        } catch (HttpFetchException e) {
+            assertEquals(HttpStatus.SC_NOT_FOUND, e.getHttpStatus());
+            
+            // Make sure the reason gets into the exception message.
+            assertTrue(e.getMessage().contains("Not Found"));
+        }
     }
     
 }

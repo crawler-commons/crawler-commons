@@ -40,6 +40,7 @@ public class SimpleFileFetcherTest {
         SimpleFileFetcher fetcher = new SimpleFileFetcher();
         FetchedResult result = fetcher.get(url);
         Assert.assertEquals(0, result.getNumRedirects());
+        Assert.assertEquals(HttpStatus.SC_OK, result.getStatusCode());
         
         String fetchedContent = new String(result.getContent(), "us-ascii");
         Assert.assertEquals("Now is the time for all good men to come to the aid of their country.", fetchedContent);
@@ -66,6 +67,7 @@ public class SimpleFileFetcherTest {
         
         SimpleFileFetcher fetcher = new SimpleFileFetcher();
         FetchedResult result = fetcher.get(url);
+        Assert.assertEquals(HttpStatus.SC_OK, result.getStatusCode());
         Assert.assertEquals(0, result.getContentLength());
         Assert.assertEquals(0, result.getResponseRate());
     }

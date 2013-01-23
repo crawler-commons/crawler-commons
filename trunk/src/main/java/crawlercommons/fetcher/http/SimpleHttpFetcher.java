@@ -490,6 +490,8 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
         String contentType = "";
         String mimeType = "";
         String hostAddress = null;
+        int statusCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        String reasonPhrase = null;
         
         // Create a local instance of cookie store, and bind to local context
         // Without this we get killed w/lots of threads, due to sync() on single cookie store.
@@ -513,9 +515,11 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 headerMap.add(header.getName(), header.getValue());
             }
 
-            int httpStatus = response.getStatusLine().getStatusCode();
+            statusCode = response.getStatusLine().getStatusCode();
+            reasonPhrase = response.getStatusLine().getReasonPhrase();
+            
             if (LOGGER.isTraceEnabled()) {
-                fetchTrace.append("; status code: " + httpStatus);
+                fetchTrace.append("; status code: " + statusCode);
                 if (headerMap.get(HttpHeaders.CONTENT_LENGTH) != null) {
                     fetchTrace.append("; Content-Length: " + headerMap.get(HttpHeaders.CONTENT_LENGTH));
                 }
@@ -525,9 +529,9 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 }
             }
             
-            if ((httpStatus < 200) || (httpStatus >= 300)) {
+            if ((statusCode < 200) || (statusCode >= 300)) {
                 // We can't just check against SC_OK, as some wackos return 201, 202, etc
-                throw new HttpFetchException(url, "Error fetching " + url, httpStatus, headerMap);
+                throw new HttpFetchException(url, "Error fetching " + url + " due to \"" + reasonPhrase + "\"", statusCode, headerMap);
             }
 
             redirectedUrl = extractRedirectedUrl(url, localContext);
@@ -754,7 +758,9 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                                     payload,
                                     newBaseUrl,
                                     numRedirects,
-                                    hostAddress);
+                                    hostAddress,
+                                    statusCode,
+                                    reasonPhrase);
     }
     
     private boolean isTextMimeType(String mimeType) {
