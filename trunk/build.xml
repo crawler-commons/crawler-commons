@@ -325,7 +325,7 @@
 			<fileset file="${basedir}/README" />
 		</copy>
 		<copy todir="${build.dir.dist}/docs">
-			<fileset file="${basedir}/doc/eclipse-formatter.xml" />
+			<fileset file="${basedir}/doc/eclipse-formatter.properties" />
 		</copy>
 		<copy todir="${build.dir.dist}/docs/licenses">
 			<fileset dir="${basedir}/doc/licenses" />
