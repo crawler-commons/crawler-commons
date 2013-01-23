@@ -476,24 +476,29 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             state.setFinishedAgentFields(false);
             state.setAddingRules(false);
         }
+       
+        // Handle the case when there are multiple target names are passed
+        String[] targetNames = state.getTargetName().split(","); 
+
+        for(int count = 0; count < targetNames.length; count++) {
+            // Extract possible match names from our target agent name, since it appears
+            // to be expected that "Mozilla botname 1.0" matches "botname"
+            String[] targetNameSplits = targetNames[count].trim().split(" ");
         
-        // Extract possible match names from our target agent name, since it appears
-        // to be expected that "Mozilla botname 1.0" matches "botname"
-        String[] targetNames = state.getTargetName().split(" ");
-        
-        // TODO KKr - catch case of multiple names, log as non-standard.
-        String[] agentNames = token.getData().split("[ \t,]");
-        for (String agentName : agentNames) {
-            if (agentName.equals("*") && !state.isMatchedWildcard()) {
-                state.setMatchedWildcard(true);
-                state.setAddingRules(true);
-            } else {
-                for (String targetName : targetNames) {
-                    if (targetName.startsWith(agentName)) {
-                        state.setMatchedRealName(true);
-                        state.setAddingRules(true);
-                        state.clearRules();     // In case we previously hit a wildcard rule match
-                        break;
+            // TODO KKr - catch case of multiple names, log as non-standard.
+            String[] agentNames = token.getData().split("[ \t,]");
+            for (String agentName : agentNames) {
+                if (agentName.equals("*") && !state.isMatchedWildcard()) {
+                    state.setMatchedWildcard(true);
+                    state.setAddingRules(true);
+                } else {
+                    for (String targetName : targetNameSplits) {
+                        if (targetName.startsWith(agentName)) {
+                            state.setMatchedRealName(true);
+                            state.setAddingRules(true);
+                            state.clearRules();     // In case we previously hit a wildcard rule match
+                            break;
+                        }
                     }
                 }
             }
