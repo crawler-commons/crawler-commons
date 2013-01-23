@@ -38,7 +38,9 @@ public class SiteMap extends AbstractSiteMap {
 
     public SiteMap() {
     	super();
+    	
         urlList = new Hashtable<String, SiteMapURL>();
+        
         setProcessed(false);
     }
 

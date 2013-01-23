@@ -106,14 +106,42 @@ public class SiteMapParserTest extends TestCase {
                         + "</url><!-- missing opening url tag --></url></urlset>";
         byte[] content = scontent.getBytes();
         URL url = new URL("http://www.example.com/sitemapindex.xml");
-        AbstractSiteMap asm = null;
+
         try {
-            asm = parser.parseSiteMap(contentType, content, url);
+            parser.parseSiteMap(contentType, content, url);
+            fail("Test failed: UnknownFormatException not thrown");
         } catch (UnknownFormatException e) {
             // If Exception is thrown Test was successful
-            return;
         }
-        fail("Test failed: UnknownFormatException not thrown");
     }
+
+    public void testLenientParser() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+
+        String scontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                            + "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">" 
+                            + "  <url>" + "<loc>http://www.example.com/</loc>"
+                            + " </url>" 
+                            + "</urlset>";
+
+        byte[] content = scontent.getBytes();
+        URL url = new URL("http://www.example.com/subsection/sitemap.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(0, sm.getSiteMapUrls().size());
+        
+        // Now try again with lenient parsing. We should get one invalid URL
+        parser = new SiteMapParser(false);
+        asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+
 
 }
