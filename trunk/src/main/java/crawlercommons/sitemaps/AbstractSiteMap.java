@@ -39,11 +39,11 @@ public abstract class AbstractSiteMap {
 
     /** Indicates if we have tried to process this Sitemap or not */
     private boolean processed;
-        
-    URL url;
+    
+    protected URL url;
     
     public AbstractSiteMap() {
-    	lastModified = null;
+        lastModified = null;
     }
     
     public static DateFormat getFullDateFormat() {

@@ -46,28 +46,34 @@ public class SiteMapURL {
     /** Value between [0.0 - 1.0] (optional) */
     private double priority;
 
-    public SiteMapURL(String url) {
+    /** could be false, if URL isn't found under base path **/
+    private boolean valid;
+    
+    public SiteMapURL(String url, boolean valid) {
         setUrl(url);
+        setValid(valid);
     }
 
-    public SiteMapURL(URL url) {
+    public SiteMapURL(URL url, boolean valid) {
         setUrl(url);
+        setValid(valid);
     }
 
-    public SiteMapURL(String url, String lastModified, String changeFreq, String priority) {
+    public SiteMapURL(String url, String lastModified, String changeFreq, String priority, boolean valid) {
+        setUrl(url);
+        setLastModified(lastModified);
+        setChangeFrequency(changeFreq);
+        setPriority(priority);
+        setValid(valid);
+    }
+
+    public SiteMapURL(URL url, Date lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
 
         setUrl(url);
         setLastModified(lastModified);
         setChangeFrequency(changeFreq);
         setPriority(priority);
-    }
-
-    public SiteMapURL(URL url, Date lastModified, ChangeFrequency changeFreq, double priority) {
-
-        setUrl(url);
-        setLastModified(lastModified);
-        setChangeFrequency(changeFreq);
-        setPriority(priority);
+        setValid(valid);
     }
 
     /**
@@ -222,6 +228,14 @@ public class SiteMapURL {
         }
     }
 
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+    
+    public boolean isValid() {
+        return valid;
+    }
+    
     public String toString() {
         String s = "url=\"" + url + "\",";
         s += "lastMod=";
