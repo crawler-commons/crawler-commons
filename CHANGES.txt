@@ -1,6 +1,13 @@
 Crawler-Commons Change Log
 
 Release 0.2
+- add HTTP status code & reason to FetchedResult (Fuad Efendi via kkrugler)
+- support for multiple user agent names (Tejas Patil via kkrugler)
+- added javadoc generation, publish in /doc/javadoc (kkrugler)
+- switch to using eclipse-formatter.properties (kkrugler)
+- support robots.txt files that have UTF-16LE and UTF-16BE BOMs (kkrugler)
+- support for user agent names that contain spaces (kkrugler)
+- fixed handling of BOM in sitemaps (Vivek Magotra via kkrugler)
 - refactoring of SiteMap objects (Hannes Schwarz via jnioche)
 - added simple support for the file: protocol (kkrugler)
 - cleaned up packaging and added "install" target (kkrugler)
