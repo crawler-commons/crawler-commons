@@ -86,7 +86,7 @@ public class SimpleFileFetcher extends BaseFetcher {
             long responseRate = (content.length * 1000L) / totalReadTime;
             String contentType = "application/octet-stream";
             return new FetchedResult(url, url, System.currentTimeMillis(), new Metadata(), content, contentType, 
-                    (int)responseRate, payload, url, 0, "localhost");
+                    (int)responseRate, payload, url, 0, "localhost", HttpStatus.SC_OK, null);
         } catch (FileNotFoundException e) {
             throw new HttpFetchException(url, "Error fetching " + url, HttpStatus.SC_NOT_FOUND, new Metadata());
         } catch (IOException e) {

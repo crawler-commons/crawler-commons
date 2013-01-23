@@ -33,7 +33,8 @@ public class FetchedResult {
     private final String _newBaseUrl;
     private final int _numRedirects;
     private final String _hostAddress;
-    
+    private final int _statusCode;              // HTTP status code
+    private final String _reasonPhrase;         // HTTP reason phrase, or null
     private Payload _payload;
     
     public FetchedResult(   String baseUrl,
@@ -46,7 +47,9 @@ public class FetchedResult {
 	                        Payload payload,
 	                        String newBaseUrl,
 	                        int numRedirects,
-	                        String hostAddress){
+	                        String hostAddress,
+	                        int statusCode,
+	                        String reasonPhrase) {
         _payload = payload;
 		
 		if (baseUrl == null) {
@@ -83,6 +86,8 @@ public class FetchedResult {
         _newBaseUrl = newBaseUrl;
         _numRedirects = numRedirects;
         _hostAddress = hostAddress;
+        _statusCode = statusCode;
+        _reasonPhrase = reasonPhrase;
 	}
 
 	public Payload getPayload() {
@@ -136,4 +141,12 @@ public class FetchedResult {
 	public String getHostAddress() {
         return _hostAddress;
     }
+	
+	public int getStatusCode() {
+	    return _statusCode;
+	}
+
+	public String getReasonPhrase() {
+	    return _reasonPhrase;
+	}
 }
