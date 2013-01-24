@@ -678,8 +678,8 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                         throw new AbortedFetchException(url, "Slow response rate of " + readRate + " bytes/sec", AbortedFetchReason.SLOW_RESPONSE_RATE);
                     }
 
-                    // Check to see if we got interrupted.
-                    if (Thread.interrupted()) {
+                    // Check to see if we got interrupted, but don't clear the interrupted flag.
+                    if (Thread.currentThread().isInterrupted()) {
                         throw new AbortedFetchException(url, AbortedFetchReason.INTERRUPTED);
                     }
                 }
