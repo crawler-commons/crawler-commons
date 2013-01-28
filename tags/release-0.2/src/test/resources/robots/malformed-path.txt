@@ -1,0 +1,4 @@
+# Snippet from Wikipedia robots.txt
+User-agent: *
+Disallow: /wiki/Wikipedia_talk:Mediation_Committee/
+Disallow: /wiki/Wikipedia_talk%3Mediation_Committee/
