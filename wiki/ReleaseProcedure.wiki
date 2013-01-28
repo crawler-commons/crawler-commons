@@ -40,7 +40,7 @@ Before we deploy the artifacts, we want to commit the new Javadocs and files wit
 
   * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
   * % svn ci -m "Update for X.Y release"
-  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ http://crawler-commons.googlecode.com/svn/tags/release-X.Y
+  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ https://crawler-commons.googlecode.com/svn/tags/release-X.Y
   
 *Build & Deploy the pom, jar, javadoc, signatures and sources to the Sonatype staging repository*
 
