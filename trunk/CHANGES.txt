@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Release 0.2
+- Substantiate Javadoc (lewismc)
 - Review default.properties (lewismc)
 - add HTTP status code & reason to FetchedResult (Fuad Efendi via kkrugler)
 - support for multiple user agent names (Tejas Patil via kkrugler)
