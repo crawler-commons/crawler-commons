@@ -39,7 +39,8 @@
 	<!-- ================================================================== -->
 
 	<target name="mvn-init" unless="compile.classpath"
-		xmlns:artifact="urn:maven-artifact-ant">
+		xmlns:artifact="urn:maven-artifact-ant" 
+		description="--> initialize local maven-ant-tasks jar">
 		<path id="maven.ant.tasks.classpath" path="${lib.dir}/maven-ant-tasks-2.0.10.jar" />
 		<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
 			uri="urn:maven-artifact-ant" classpathref="maven.ant.tasks.classpath" />
@@ -74,7 +75,7 @@
 	</target>
 
 	<target name="mvn-install" xmlns:artifact="urn:maven-artifact-ant"
-		depends="mvn-init">
+		depends="mvn-init" description="--> install local maven artifact">
 		<artifact:install file="${build.dir}/${jar.name}">
 			<pom refid="maven.project" />
 		</artifact:install>
@@ -100,7 +101,7 @@
 	<!-- Unit Tests -->
 	<!-- ================================================================== -->
 
-	<target name="compile-test" depends="compile">
+	<target name="compile-test" depends="compile" description="--> compile test classes">
 		<echo>*** Building Unit Tests Sources ***</echo>
 		<mkdir dir="${build.dir.test-classes}" />
 		<path id="test.path">
@@ -149,7 +150,7 @@
 	<!-- Build jar -->
 	<!-- ================================================================== -->
 
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="--> build crawer commons jar">
 
 		<tstamp>
 			<format property="timestamp" pattern="MMM dd yyyy, HH:mm:ss" />
@@ -203,7 +204,7 @@
 	<!-- Build JAR artifacts -->
 	<!-- ================================================================== -->
 
-	<target name="dist" depends="jar,doc" description="generate the distribution">
+	<target name="dist" depends="jar,doc" description="--> generate the distribution">
 
 		<!-- copy the main artifact -->
 		<copy tofile="${maven-jar}" file="${build.dir}/${jar.name}" />
@@ -220,7 +221,7 @@
 	</target>
 
 	<target name="deploy" depends="dist"
-		description="deploy snapshot version to Maven snapshot repository"
+		description="--> deploy snapshot version to Maven snapshot repository"
 		xmlns:artifact="urn:maven-artifact-ant">
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
@@ -234,7 +235,7 @@
 	<!-- before this, update project version (both build.xml and pom.xml) from 
 		SNAPSHOT to RELEASE -->
 	<target name="stage" depends="dist"
-		description="deploy release version to Maven staging repository"
+		description="--> deploy release version to Maven staging repository"
 		xmlns:artifact="urn:maven-artifact-ant">
 		<!-- sign and deploy the main artifact -->
 		<artifact:mvn>
