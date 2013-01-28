@@ -2,43 +2,54 @@
 
 = Introduction =
 
-This page describes how to do a release of crawler-commons.
+This page describes how to do a release of crawler-commons. As we are using 
+Ant Tasks + Maven, it is drop dead easy :0). So hold on to your hats, here we go!
 
 = Details =
 
-*Generate javadoc*
+*Checkout a fresh version of the ENTIRE Crawler Commons SVN repository* 
+It is pretty small < 1/2 GB and this saves time later on. The following command 
+can be used-
 
-  * % cd ~/svn/crawler-commons/crawler-commons-trunk
-  * % ant doc
-  * % cd doc
-  * % svn del javadoc (todo will this work, when we do the copy? And what if the same file exists?)
-  * % cp -r ../build/java-doc/ javadoc/
-  * % svn add javadoc
-  * % find javadoc -name "`*`.html" | xargs -I filename svn propset svn:mime-type text/html filename
-  * % find javadoc -name "`*`.gif" | xargs -I filename svn propset svn:mime-type image/gif filename
-  * % find javadoc -name "`*`.css" | xargs -I filename svn propset svn:mime-type text/css filename
+svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --username ${user.name}
+
+You may also be promped for your password here.
 
 *Update version numbers*
 
-This should be changed from X.Y-SNAPSHOT to just X.Y, in the following files:
+  * % cd trunk
+
+Versioning should be changed from X.Y-SNAPSHOT to just X.Y, in the following files:
 
   * pom.xml
-  * build.properties
+  * build.properties 
+  
+Additionally, please ensure that the details in CHANGES.txt are accurate and that 
+the year, javadoc.link etc. are all accurate within build.properties. 
 
-*Do build/deploy to Sonatype*
+*Generate release javadoc*
 
-% ant clean xxx
-
+  * % ant doc
+  * % cp -r build/java-doc/ ../wiki/javadoc/X.Y/ (X.Y should denote the release version)
+  * % svn add ../wiki/docs/X.Y/
+  * % ant clean
+  
 *Commit to SVN & Tag*
 
-Once the build and deploy has worked, you want to commit the new Javadocs and files with new version numbers to Subversion. Then you can tag this as the released version.
+Before we deploy the artifacts, we want to commit the new Javadocs and files with new version numbers to Subversion. Then you can tag this as the released version.
 
+  * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
   * % svn ci -m "Update for X.Y release"
-  * % svn <tag command>
+  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ http://crawler-commons.googlecode.com/svn/tags/release-X.Y
+  
+*Build & Deploy the pom, jar, javadoc, signatures and sources to the Sonatype staging repository*
 
-*Update Version Numbers*
+  + % cd trunk 
+  + % ant stage
 
-Edit the same files as above to change the version number from X.Y to X.Y+1-SNAPSHOT (e.g. 0.2 to 0.3-SNAPSHOT)
+*Update Version Numbers to accomodate new development*
+
+Edit the first two files to change the version number from X.Y to X.Y+1-SNAPSHOT (e.g. 0.2 to 0.3-SNAPSHOT)
 
   * pom.xml
   * build.properties
