@@ -40,12 +40,14 @@ Before we deploy the artifacts, we want to commit the new Javadocs and files wit
 
   * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
   * % svn ci -m "Update for X.Y release"
-  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ https://crawler-commons.googlecode.com/svn/tags/release-X.Y
+  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ https://crawler-commons.googlecode.com/svn/tags/release-X.Y -m "Tag for X.Y release"
   
 *Build & Deploy the pom, jar, javadoc, signatures and sources to the Sonatype staging repository*
 
-  + % cd trunk 
-  + % ant stage
+It is important to note that at this time, if you are not already in the possession of one, you will definately need to obtain a user account and password for the Sonatype OSS Nexus repository. You can get one by going to the Sonatype dashboard and signing up at http://issues.sonatype.org/ 
+
+  * % cd trunk 
+  * % ant stage
 
 *Update Version Numbers to accomodate new development*
 
