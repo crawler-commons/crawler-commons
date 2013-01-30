@@ -10,20 +10,43 @@
 	<!-- Must be kept in sync with "version" value in build.properties -->
 	<version>0.2</version>
 	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.opensource.org/licenses/apache2.0.php</url>
-		</license>
+	  <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          </license>
 	</licenses>
 	<url>http://code.google.com/p/crawler-commons/</url>
-	<description>crawler-commons is a set of reusable Java components that implement functionality common to any web crawler.
-                 WARNING! This project is built using ant (and build.xml). You can use Maven with this pom.xml file to
-                 generate dependency information, but it will not build artifacts.
-    </description>
+	<description>crawler-commons is a set of reusable Java components that implement 
+	functionality common to any web crawler.
+	</description>
+	
 	<scm>
-		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
-		<url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
+          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
+          <url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
 	</scm>
+	<issueManagement>
+          <system>Google Issues</system>
+          <url>http://code.google.com/p/crawler-commons/issues/list</url>
+        </issueManagement>
+        <mailingLists>
+	  <mailingList>
+            <name>Project Mailing List</name>
+            <post>crawler-commons [at] googlecode [dot] com</post>
+          </mailingList>
+        </mailingLists>
+        
+        <distributionManagement>
+          <repository>
+            <id>sonatype.nexus.staging</id>
+            <name>Sonatype Distribution Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+          </repository>
+          <snapshotRepository>
+            <id>sonatype.nexus.snapshots</id>
+            <name>Sonatype Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+          </snapshotRepository>
+        </distributionManagement>
 
 	<developers>
 		<developer>
@@ -43,91 +66,364 @@
 			<name>Julien Nioche</name>
 			<email>jnioche@apache.org</email>
 		</developer>
+		
+		<developer>
+			<id>lewismc</id>
+			<name>Lewis John McGibbney</name>
+			<email>lewismc [at] apache [dot] org</email>
+		</developer>
 	</developers>
+	
+      <build>
+    	<defaultGoal>install</defaultGoal>
+    	<directory>target</directory>
+        <outputDirectory>${basedir}/target/classes</outputDirectory>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources/</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </testResource>
+        </testResources>
+	<pluginManagement>
+	<plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <version>${maven-deploy-plugin.version}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>${maven-release-plugin.version}</version>
+            <configuration>
+              <mavenExecutorId>forked-path</mavenExecutorId>
+              <tagBase>https://crawler-commons.googlecode.com/svn/tags/</tagBase>
+              <useReleaseProfile>false</useReleaseProfile>
+              <arguments>-Papache-release,release</arguments>
+              <!--autoVersionSubmodules>true</autoVersionSubmodules-->
+            </configuration>
+          </plugin>
+	</plugins>
+	</pluginManagement>
+	
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>${javac.src.version}</source>
+                    <target>${javac.target.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surfire-plugin.version}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <systemPropertyVariables>
+                        <hadoop.log.dir>${project.basedir}/target/test-logs/</hadoop.log.dir>
+                        <test.build.data>${project.basedir}/target/test-data/</test.build.data>
+                    </systemPropertyVariables>
+                    <argLine>-Xmx512m</argLine>
+                    <forkMode>always</forkMode>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+         </plugins>
+    </build>
+    
+    <profiles>
+      <profile>
+        <id>release</id>
+          <build>
+            <plugins>
+              <!-- 
+              <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>${apache-rat-plugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>rat-verify</id>
+                    <phase>test</phase>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+          	    <licenses>
+            	  <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+              	  <licenseFamilyCategory>ASL20</licenseFamilyCategory>
+              	  <licenseFamilyName>Apache Software License, 2.0</licenseFamilyName>
+              	  <notes>Single licensed ASL v2.0</notes>
+              	  <patterns>
+                	<pattern>Licensed to the Apache Software Foundation (ASF) under one
+                	or more contributor license agreements.</pattern>
+              	  </patterns>
+            	  </license>
+                 </licenses>
+                 <excludeSubProjects>false</excludeSubProjects>
+                 <excludes>
+                   <exclude>CHANGES.txt</exclude>
+                 </excludes>
+                </configuration>
+              </plugin-->
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-source-plugin</artifactId>
+            	<version>${maven-source-plugin.version}</version>
+            	<executions>
+              	  <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                  <configuration>
+                    <archive>
+                      <manifest>
+                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      	<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                      </manifest>
+                      <manifestEntries>
+                        <Implementation-Build>${implementation.build}</Implementation-Build>
+                      	<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                      	<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                      	<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                      </manifestEntries>
+                    </archive>
+                  </configuration>
+              	  </execution>
+            	</executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-javadoc-plugin</artifactId>
+            	<version>${maven-javadoc-plugin.version}</version>
+            	<executions>
+                  <execution>
+                    <id>attach-javadocs</id>
+                    <goals>
+                      <goal>jar</goal>
+                    </goals>
+                    <configuration>
+                      <quiet>true</quiet>
+                      <archive>
+                        <manifest>
+                          <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                          <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                          <Implementation-Build>${implementation.build}</Implementation-Build>
+                          <Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                          <X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                          <X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                        </manifestEntries>
+                      </archive>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven-gpg-plugin.version}</version>
+            	<executions>
+              	  <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                      <goal>sign</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+        	<groupId>net.ju-n.maven.plugins</groupId>
+        	<artifactId>checksum-maven-plugin</artifactId>
+        	<version>${checksum-maven-plugin.version}</version>
+      	      </plugin>
+            </plugins>
+          </build>
+       </profile>
+    </profiles>
+    
+    <properties>
+        <!-- Dependencies -->
+        
+        <httpclient.version>4.1.1</httpclient.version>
+        <commons-io.version>2.4</commons-io.version>
+        <tika-core.version>0.9</tika-core.version>
+        <slf4j-api.version>1.6.6</slf4j-api.version>
+        <junit.version>4.7</junit.version>
+        <slf4j-log4j12.version>1.6.6</slf4j-log4j12.version>
+        <mockito-core.version>1.8.0</mockito-core.version>
+        <jetty.version>5.1.10</jetty.version>
+        <servlet-api.version>2.5</servlet-api.version>
+        <ant-eclipse-jvm1.2.version>1.0</ant-eclipse-jvm1.2.version>
 
+        <!-- Maven Plugin Dependencies -->
+        <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
+        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+        <maven-dependency-plugin.version>2.4</maven-dependency-plugin.version>
+        <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
+        <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+        <maven-release-plugin.version>2.2.2</maven-release-plugin.version>
+        <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
+        <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
+        <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
+        <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
+        <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+        <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
+        
+        <!-- General Properties -->
+        <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
+        <javac.src.version>1.6</javac.src.version>
+        <javac.target.version>1.6</javac.target.version>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
+        <skipTests>false</skipTests>
+        <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
+        <downloads.url>http://www.apache.org/dist/gora</downloads.url>
+    </properties>
 
 	<dependencies>
 
 		<!-- Compile time dependencies -->
 
         <dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1.1</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>${commons-io.version}</version>
         </dependency>
 
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>0.9</version>
-		</dependency>
+	<dependency>
+	    <groupId>org.apache.tika</groupId>
+	    <artifactId>tika-core</artifactId>
+	    <version>${tika-core.version}</version>
+	</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
-		</dependency>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>${slf4j-api.version}</version>
+	</dependency>
 
-		<!-- Test dependencies -->
+	<!-- Test dependencies -->
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.7</version>
-			<scope>test</scope>
-		</dependency>
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>${junit.version}</version>
+	    <scope>test</scope>
+	</dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.6</version>
+            <version>${slf4j-log4j12.version}</version>
             <scope>test</scope>
         </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>1.8.0</version>
-			<scope>test</scope>
-		</dependency>
+	<dependency>
+	    <groupId>org.mockito</groupId>
+	    <artifactId>mockito-core</artifactId>
+	    <version>${mockito-core.version}</version>
+	    <scope>test</scope>
+	</dependency>
 
-		<dependency>
-			<groupId>jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<!-- we'd like to use 6.0.2, but the version in central is missing the 
-				pom -->
-			<version>5.1.10</version>
-			<scope>test</scope>
-		</dependency>
+	<dependency>
+	    <groupId>jetty</groupId>
+	    <artifactId>jetty</artifactId>
+	    <!-- we'd like to use 6.0.2, but the version in central is missing the 
+	    pom -->
+	    <version>${jetty.version}</version>
+	    <scope>test</scope>
+	</dependency>
 
-		<!-- Provided dependencies -->
+	<!-- Provided dependencies -->
+	<dependency>
+	    <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+	    <version>${servlet-api.version}</version>
+	    <scope>provided</scope>
+	</dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
+	<!-- Eclipse project generation dependencies -->
 
-		<!-- Eclipse project generation dependencies -->
-
-		<dependency>
-			<groupId>ant-eclipse</groupId>
-			<artifactId>ant-eclipse-jvm1.2</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
-		</dependency>
+	<dependency>
+	    <groupId>ant-eclipse</groupId>
+	    <artifactId>ant-eclipse-jvm1.2</artifactId>
+	    <version>${ant-eclipse-jvm1.2.version}</version>
+	    <scope>provided</scope>
+	</dependency>
 
 	</dependencies>
-
-
-	<issueManagement>
-	    <url>https://code.google.com/p/crawler-commons/issues</url>
-	</issueManagement>
 </project>
