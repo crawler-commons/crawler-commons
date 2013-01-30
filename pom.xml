@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.google.code.crawler-commons</groupId>
 	<artifactId>crawler-commons</artifactId>
@@ -34,19 +40,6 @@
             <post>crawler-commons [at] googlecode [dot] com</post>
           </mailingList>
         </mailingLists>
-        
-        <distributionManagement>
-          <repository>
-            <id>sonatype.nexus.staging</id>
-            <name>Sonatype Distribution Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-          </repository>
-          <snapshotRepository>
-            <id>sonatype.nexus.snapshots</id>
-            <name>Sonatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-          </snapshotRepository>
-        </distributionManagement>
 
 	<developers>
 		<developer>
