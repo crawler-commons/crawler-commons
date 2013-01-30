@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.google.code.crawler-commons</groupId>
@@ -8,7 +7,7 @@
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
 	<!-- Must be kept in sync with "version" value in build.properties -->
-	<version>0.2-SNAPSHOT</version>
+	<version>0.2</version>
 	<licenses>
 	  <license>
             <name>Apache License, Version 2.0</name>
@@ -21,8 +20,8 @@
 	</description>
 	
 	<scm>
-          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</connection>
-          <url>scm:svn:http://crawler-commons.googlecode.com/svn/trunk/</url>
+          <connection>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.2</connection>
+          <url>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.2</url>
 	</scm>
 	<issueManagement>
           <system>Google Issues</system>
