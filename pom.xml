@@ -20,8 +20,9 @@
 	</description>
 	
 	<scm>
-          <connection>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.2</connection>
-          <url>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.2</url>
+          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
+          <developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
+          <url>http://crawler-commons.googlecode.com/svn/trunk</url>
 	</scm>
 	<issueManagement>
           <system>Google Issues</system>
