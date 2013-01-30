@@ -122,7 +122,7 @@
               <mavenExecutorId>forked-path</mavenExecutorId>
               <tagBase>https://crawler-commons.googlecode.com/svn/tags/</tagBase>
               <useReleaseProfile>false</useReleaseProfile>
-              <arguments>-Papache-release,release</arguments>
+              <arguments>-Prelease</arguments>
               <!--autoVersionSubmodules>true</autoVersionSubmodules-->
             </configuration>
           </plugin>
