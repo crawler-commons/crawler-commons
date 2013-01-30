@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Release 0.2
+- Move to pure Maven for CC build lifecycle (lewismc)
+- Move Javadoc out of core code (lewismc)
 - Substantiate Javadoc (lewismc)
 - Review default.properties (lewismc)
 - add HTTP status code & reason to FetchedResult (Fuad Efendi via kkrugler)
