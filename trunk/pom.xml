@@ -99,6 +99,23 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>${maven-clean-plugin.version}</version>
+            <configuration>
+             	<filesets>
+		    <fileset>
+			<directory>${basedir}/lib</directory>
+			<followSymlinks>false</followSymlinks>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<includes>
+			    <include>*.jar</include>
+			</includes>
+		    </fileset>
+		</filesets>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
             <version>${maven-release-plugin.version}</version>
             <configuration>
