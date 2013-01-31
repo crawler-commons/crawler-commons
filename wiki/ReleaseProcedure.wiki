@@ -3,7 +3,7 @@
 = Introduction =
 
 This page describes how to do a release of crawler-commons. As we are using 
-Ant Tasks + Maven, it is drop dead easy :0). So hold on to your hats, here we go!
+pure Maven, it is drop dead easy :0). So hold on to your hats, here we go!
 
 = Details =
 
@@ -15,51 +15,66 @@ svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --usern
 
 You may also be promped for your password here.
 
-*Update version numbers*
+*Non-core Documentation is Accurate*
 
   * % cd trunk
 
-Versioning should be changed from X.Y-SNAPSHOT to just X.Y, in the following files:
+Please ensure that the details in CHANGES.txt are accurate and that 
+licensing etc. is all accurate. 
 
-  * pom.xml
-  * build.properties 
-  
-Additionally, please ensure that the details in CHANGES.txt are accurate and that 
-the year, javadoc.link etc. are all accurate within build.properties. 
+*Generate Release Javadoc*
 
-*Generate release javadoc*
-
-  * % ant doc
-  * % cp -r build/java-doc/ ../wiki/javadoc/X.Y/ (X.Y should denote the release version)
+  * % gedit pom.xml
+  * % change project version from X.Y-SNAPSHOT to X.Y
+  * % mvn javadoc:javadoc
+  * % cp -r target/site/apidocs/ ../wiki/javadoc/X.Y/ (X.Y should denote the release version. You may need to create the new destination directory)
   * % svn add ../wiki/docs/X.Y/
-  * % ant clean
+  * % svn revert pom.xml
+  * % mvn clean
   
+*Prepare the Release Artifacts (Dry-Run)*
+
+  * % mvn release:clean release:prepare -DdryRun=true
+  
+Executing the above makes life a breeze for us. It 
+
+  * % cleans out all previouus release-related module directories
+  * % prepares us for a release, stating that this is a dryRun of the actual release. This gives us the oppertunity to review the artifacts.
+
+At this stage is it imperative to check the resulting artifacts as we wish to iron out any discrepancies at this stage.
+
 *Commit to SVN & Tag*
 
-Before we deploy the artifacts, we want to commit the new Javadocs and files with new version numbers to Subversion. Then you can tag this as the released version.
+Before we commit the tag and set ourselves up for the next development drive, we want to commit the new Javadocs to Subversion. 
 
   * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
-  * % svn ci -m "Update for X.Y release"
-  * % svn copy https://crawler-commons.googlecode.com/svn/trunk/ https://crawler-commons.googlecode.com/svn/tags/release-X.Y -m "Tag for X.Y release"
+  * % svn ci -m "X.Y Release Javadoc"
+  * % cd trunk
+  * % mvn release:clean release:prepare 
+
+This will create and commit the release tag and bump the development version on. 
   
 *Build & Deploy the pom, jar, javadoc, signatures and sources to the Sonatype staging repository*
 
-It is important to note that at this time, if you are not already in the possession of one, you will definately need to obtain a user account and password for the Sonatype OSS Nexus repository. You can get one by going to the Sonatype dashboard and signing up at http://issues.sonatype.org/ 
+  * % mvn:release:perform
 
-  * % cd trunk 
-  * % ant stage
+*Close the Sonatype Staging Repository* 
 
-*Update Version Numbers to accomodate new development*
+  * % Browse to https://oss.sonatype.org/index.html and log in.
+  * % Navigate to the Staging Repositories side tab and locate the stating release.
+  * % Close the repository so that others can view and review it.
+   
+*Hold a Community VOTE*
 
-Edit the first two files to change the version number from X.Y to X.Y+1-SNAPSHOT (e.g. 0.2 to 0.3-SNAPSHOT)
-
-  * pom.xml
-  * build.properties
-
-Then commit these modified files
-
-% svn ci -m "Update version numbers for X.Y+1 development"
+  * % Head over to the Crawer Commons mailing list and create thread which details the tag and staging release.
+  * % If all is good head back to the staging repository and Release the artifacts.
 
 *Publicize*
 
-Post to the crawler-commons list, as well as Nutch and Bixo.
+Post to the crawler-commons list, as well as Nutch, Bixo, LinkedIn, Twitter etc.
+
+*Additional Information*
+
+It is common for developers unfamiliar with staging, snapshot and release repositories to encounter difficulties when attemtping to release artifacts. Much more information on the OSS Sonatype platform can be found below.
+
+  * % https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
