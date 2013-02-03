@@ -7,13 +7,13 @@ pure Maven, it is drop dead easy :0). So hold on to your hats, here we go!
 
 = Details =
 
-*Checkout a fresh version of the ENTIRE Crawler Commons SVN repository* 
-It is pretty small < 1/2 GB and this saves time later on. The following command 
-can be used-
+First, checkout a fresh version of the *ENTIRE* Crawler-Commons SVN repository*
 
-svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --username ${user.name}
+It is pretty small (< 1/2 GB) and this saves time later on. The following command can be used:
 
-You may also be promped for your password here.
+ % svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --username ${user.name}
+
+You may also be prompted for your password here.
 
 *Non-core Documentation is Accurate*
 
@@ -28,7 +28,7 @@ licensing etc. is all accurate.
   * % change project version from X.Y-SNAPSHOT to X.Y
   * % mvn javadoc:javadoc
   * % cp -r target/site/apidocs/ ../wiki/javadoc/X.Y/ (X.Y should denote the release version. You may need to create the new destination directory)
-  * % svn add ../wiki/docs/X.Y/
+  * % svn add ../wiki/javadoc/X.Y/
   * % svn revert pom.xml
   * % mvn clean
   
@@ -36,10 +36,10 @@ licensing etc. is all accurate.
 
   * % mvn release:clean release:prepare -DdryRun=true
   
-Executing the above makes life a breeze for us. It 
+Executing the above makes life a breeze for us. It does the following:
 
-  * % cleans out all previouus release-related module directories
-  * % prepares us for a release, stating that this is a dryRun of the actual release. This gives us the oppertunity to review the artifacts.
+  * cleans out all previous release-related module directories
+  * prepares us for a release, stating that this is a dryRun of the actual release. This gives us the opportunity to review the artifacts.
 
 At this stage is it imperative to check the resulting artifacts as we wish to iron out any discrepancies at this stage.
 
@@ -48,13 +48,18 @@ At this stage is it imperative to check the resulting artifacts as we wish to ir
 Before we commit the tag and set ourselves up for the next development drive, we want to commit the new Javadocs to Subversion. 
 
   * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
+  * % find wiki/javadoc -name "`*`.html" | xargs -I filename svn propset svn:mime-type text/html filename
+  * % find wiki/javadoc -name "`*`.gif" | xargs -I filename svn propset svn:mime-type image/gif filename
+  * % find wiki/javadoc -name "`*`.css" | xargs -I filename svn propset svn:mime-type text/css filename
   * % svn ci -m "X.Y Release Javadoc"
   * % cd trunk
   * % mvn release:clean release:prepare 
 
-This will create and commit the release tag and bump the development version on. 
+This will create and commit the release tag and bump the development version in the pom.xml file.
   
-*Build & Deploy the pom, jar, javadoc, signatures and sources to the Sonatype staging repository*
+*Build & Deploy to Sonatype*
+
+This will build the pom, jar, javadoc, signatures and sources, and push them to the Sonatype staging repository
 
   * % mvn:release:perform
 
@@ -66,8 +71,14 @@ This will create and commit the release tag and bump the development version on.
    
 *Hold a Community VOTE*
 
-  * % Head over to the Crawer Commons mailing list and create thread which details the tag and staging release.
+  * % Head over to the Crawer Commons mailing list and create a thread which details the tag and staging release.
+  * % Collect votes, give it time to bake.
   * % If all is good head back to the staging repository and Release the artifacts.
+
+*Update the Javadoc link on the project main page*
+
+ * Click on the Administer link
+ * Update the `*`User Documentation`*` section to link to the new Javadoc index.html file, e.g. `* [http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.2/index.html Javadoc]`
 
 *Publicize*
 
