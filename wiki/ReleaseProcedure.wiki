@@ -11,30 +11,33 @@ First, checkout a fresh version of the *ENTIRE* Crawler-Commons SVN repository*
 
 It is pretty small (< 1/2 GB) and this saves time later on. The following command can be used:
 
- % svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --username ${user.name}
+ % `svn checkout https://crawler-commons.googlecode.com/svn/ crawler-commons --username ${user.name}`
 
 You may also be prompted for your password here.
 
 *Non-core Documentation is Accurate*
 
-  * % cd trunk
+  * `% cd trunk`
 
-Please ensure that the details in CHANGES.txt are accurate and that 
+Please ensure that the details in `CHANGES.txt` are accurate and that 
 licensing etc. is all accurate. 
 
 *Generate Release Javadoc*
 
-  * % gedit pom.xml
-  * % change project version from X.Y-SNAPSHOT to X.Y
-  * % mvn javadoc:javadoc
-  * % cp -r target/site/apidocs/ ../wiki/javadoc/X.Y/ (X.Y should denote the release version. You may need to create the new destination directory)
-  * % svn add ../wiki/javadoc/X.Y/
-  * % svn revert pom.xml
-  * % mvn clean
+In all of the steps below, replace `X.Y` with the actual release number.
+
+  * `% gedit pom.xml`
+  * change project version from `X.Y-SNAPSHOT` to `X.Y`
+  * `% mvn javadoc:javadoc`
+  * You may need to create the new `javadoc/X.Y` directory
+  * % `cp -r target/site/apidocs/ ../wiki/javadoc/X.Y/`
+  * % `svn add ../wiki/javadoc/X.Y/`
+  * % `svn revert pom.xml`
+  * % `mvn clean`
   
 *Prepare the Release Artifacts (Dry-Run)*
 
-  * % mvn release:clean release:prepare -DdryRun=true
+  * % `mvn release:clean release:prepare -DdryRun=true`
   
 Executing the above makes life a breeze for us. It does the following:
 
@@ -47,13 +50,14 @@ At this stage is it imperative to check the resulting artifacts as we wish to ir
 
 Before we commit the tag and set ourselves up for the next development drive, we want to commit the new Javadocs to Subversion. 
 
-  * % cd ../ (you may wish to execute 'svn status' to ensure that all the files you wish are being committed)
-  * % find wiki/javadoc -name "`*`.html" | xargs -I filename svn propset svn:mime-type text/html filename
-  * % find wiki/javadoc -name "`*`.gif" | xargs -I filename svn propset svn:mime-type image/gif filename
-  * % find wiki/javadoc -name "`*`.css" | xargs -I filename svn propset svn:mime-type text/css filename
-  * % svn ci -m "X.Y Release Javadoc"
-  * % cd trunk
-  * % mvn release:clean release:prepare 
+  * `% cd ../`
+  * You may wish to execute `svn status` to ensure that all the files you wish are being committed
+  * `% find wiki/javadoc -name "*.html" | xargs -I filename svn propset svn:mime-type text/html filename`
+  * `% find wiki/javadoc -name "*.gif" | xargs -I filename svn propset svn:mime-type image/gif filename`
+  * `% find wiki/javadoc -name "*.css" | xargs -I filename svn propset svn:mime-type text/css filename`
+  * `% svn ci -m "X.Y Release Javadoc"`
+  * `% cd trunk`
+  * `% mvn release:clean release:prepare`
 
 This will create and commit the release tag and bump the development version in the pom.xml file.
   
@@ -61,7 +65,7 @@ This will create and commit the release tag and bump the development version in 
 
 This will build the pom, jar, javadoc, signatures and sources, and push them to the Sonatype staging repository
 
-  * % mvn:release:perform
+  * `% mvn:release:perform`
 
 *Close the Sonatype Staging Repository* 
 
@@ -86,6 +90,4 @@ Post to the crawler-commons list, as well as Nutch, Bixo, LinkedIn, Twitter etc.
 
 *Additional Information*
 
-It is common for developers unfamiliar with staging, snapshot and release repositories to encounter difficulties when attemtping to release artifacts. Much more information on the OSS Sonatype platform can be found below.
-
-  * % https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+It is common for developers unfamiliar with staging, snapshot and release repositories to encounter difficulties when attempting to release artifacts. Much more information on the OSS Sonatype platform can be found [https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide here]
