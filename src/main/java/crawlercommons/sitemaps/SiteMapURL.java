@@ -28,6 +28,8 @@ import java.util.Date;
  * @author fmccown
  */
 public class SiteMapURL {
+    
+    public static double defaultPriority= 0.5;
 
     /** Allowed change frequencies */
     public enum ChangeFrequency {
@@ -44,7 +46,7 @@ public class SiteMapURL {
     private ChangeFrequency changeFreq;
 
     /** Value between [0.0 - 1.0] (optional) */
-    private double priority;
+    private double priority = defaultPriority;
 
     /** could be false, if URL isn't found under base path **/
     private boolean valid;
@@ -155,7 +157,7 @@ public class SiteMapURL {
 
         // Ensure proper value
         if (priority < 0.0 || priority > 1.0) {
-            this.priority = 0.0;
+            this.priority = defaultPriority;
         } else {
             this.priority = priority;
         }
@@ -173,10 +175,10 @@ public class SiteMapURL {
             try {
                 setPriority(Double.parseDouble(priority));
             } catch (NumberFormatException e) {
-                setPriority(0.0);
+                setPriority(defaultPriority);
             }
         } else {
-            setPriority(0.0);
+            setPriority(defaultPriority);
         }
     }
 

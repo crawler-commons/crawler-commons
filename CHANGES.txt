@@ -2,6 +2,7 @@ Crawler-Commons Change Log
 
 TRUNK
 - Issue 27: [SiteMap] Unnecessary String concatenations when logging + in SiteMapURL.toString() (jnioche)
+- Issue 26: [SiteMap] Set correct default priority for URL in a sitemap file (jnioche)
 
 Release 0.2
 - Move to pure Maven for CC build lifecycle (lewismc)
