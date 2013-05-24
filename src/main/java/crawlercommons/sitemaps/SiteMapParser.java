@@ -148,7 +148,11 @@ public class SiteMapParser {
                     boolean valid = urlIsLegal(textSiteMap.getBaseUrl(), url.toString());
                     
                     if (valid || !strict) {
-                        LOG.debug("  " + i + ". " + url);
+                        if (LOG.isDebugEnabled()){
+                            StringBuffer sb = new StringBuffer("  ");
+                            sb.append(i).append(". ").append(url);
+                            LOG.debug(sb.toString());
+                        }
                         i++;
                         SiteMapURL surl = new SiteMapURL(url, valid);
                         textSiteMap.addSiteMapUrl(surl);
@@ -267,7 +271,11 @@ public class SiteMapParser {
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        LOG.trace("  " + (i + 1) + ". " + sUrl);
+                        if (LOG.isDebugEnabled()){
+                            StringBuffer sb = new StringBuffer("  ");
+                            sb.append(i + 1).append(". ").append(sUrl);
+                            LOG.debug(sb.toString());
+                        }
                     }
                 } catch (MalformedURLException e) {
                     // e.printStackTrace();
@@ -324,7 +332,11 @@ public class SiteMapParser {
 
                     SiteMap s = new SiteMap(sitemapUrl, lastModified);
                     sitemapIndex.addSitemap(s);
-                    LOG.debug("  " + (i + 1) + ". " + s);
+                    if (LOG.isDebugEnabled()){
+                        StringBuffer sb = new StringBuffer("  ");
+                        sb.append(i + 1).append(". ").append(s);
+                        LOG.debug(sb.toString());
+                    }
                 } catch (MalformedURLException e) {
                     // e.printStackTrace();
 
@@ -427,7 +439,11 @@ public class SiteMapParser {
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        LOG.debug("  " + (i + 1) + ". " + sUrl);
+                        if (LOG.isDebugEnabled()){
+                            StringBuffer sb = new StringBuffer("  ");
+                            sb.append(i + 1).append(". ").append(sUrl);
+                            LOG.debug(sb.toString());
+                        }
                     }
                 } catch (MalformedURLException e) {
                     // Can't create an entry with a bad URL
@@ -506,7 +522,11 @@ public class SiteMapParser {
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        LOG.debug("  " + (i + 1) + ". " + sUrl);
+                        if (LOG.isDebugEnabled()){
+                            StringBuffer sb = new StringBuffer("  ");
+                            sb.append(i + 1).append(". ").append(sUrl);
+                            LOG.debug(sb.toString());
+                        }
                     }
                 } catch (MalformedURLException e) {
                     // Can't create an entry with a bad URL
@@ -574,8 +594,12 @@ public class SiteMapParser {
             String u = testUrl.substring(0, sitemapBaseUrl.length()).toLowerCase();
             ret = sitemapBaseUrl.equals(u);
         }
-
-        LOG.trace("urlIsLegal: " + sitemapBaseUrl + " <= " + testUrl + " ? " + ret);
+        if (LOG.isTraceEnabled()){
+            StringBuffer sb = new StringBuffer("urlIsLegal: ");
+            sb.append(sitemapBaseUrl).append(" <= ").append(testUrl);
+            sb.append(" ? ").append(ret);
+            LOG.trace(sb.toString());
+        }
 
         return ret;
     }

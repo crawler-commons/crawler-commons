@@ -237,12 +237,12 @@ public class SiteMapURL {
     }
     
     public String toString() {
-        String s = "url=\"" + url + "\",";
-        s += "lastMod=";
-        s += (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-        s += ",changeFreq=" + changeFreq;
-        s += ",priority=" + priority;
-        return s;
+        StringBuilder sb = new StringBuilder();
+        sb.append("url=\"").append(url).append("\",");
+        sb.append("lastMod=").append((lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified));
+        sb.append(",changeFreq=").append(changeFreq);
+        sb.append(",priority=").append(priority);
+        return sb.toString();
     }
 
 }

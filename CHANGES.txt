@@ -1,5 +1,8 @@
 Crawler-Commons Change Log
 
+TRUNK
+- Issue 27: [SiteMap] Unnecessary String concatenations when logging + in SiteMapURL.toString() (jnioche)
+
 Release 0.2
 - Move to pure Maven for CC build lifecycle (lewismc)
 - Move Javadoc out of core code (lewismc)
