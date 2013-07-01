@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 TRUNK
+- Issue 16: remove ant scripts and configuration (lewismc)
 - Issue 27: [SiteMap] Unnecessary String concatenations when logging + in SiteMapURL.toString() (jnioche)
 - Issue 26: [SiteMap] Set correct default priority for URL in a sitemap file (jnioche)
 
