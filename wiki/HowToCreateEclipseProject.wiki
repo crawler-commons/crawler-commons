@@ -2,15 +2,16 @@
 
 = Introduction =
 
-In order to use "ant eclipse" to create an Eclipse project file, the ant-eclipse-jvm1.2-1.0.jar has to be available.
-
-But this isn't in Maven central, so it has to manually be added to your local Maven repo.
+As Crawer-Commons relies upon Apache Maven for build lifecycle, it is really easy to create an Eclipse project which you can import in to Eclipse.
 
 = Details =
 
-To install, do the following.
+Just do the following.
 
 {{{
- % cd crawler-commons/lib
- % mvn install:install-file -DgroupId=ant-eclipse -DartifactId=ant-eclipse-jvm1.2 -Dversion=1.0 -Dpackaging=jar -Dfile=ant-eclipse-jvm1.2-1.0.jar
+ % mvn eclipse:eclipse 
 }}}
+
+This will generate the .project file and other required files.
+
+You can then open Eclipse and go to File > Import > Existing Projects into Workspace > path/to/Crawler-Commons 
