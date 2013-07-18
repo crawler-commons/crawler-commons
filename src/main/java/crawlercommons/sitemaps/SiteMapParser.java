@@ -94,7 +94,7 @@ public class SiteMapParser {
 
             // Try parsing the XML which could be in a number of formats
             return processXml(url, content);
-        } else if (contentType.contains("text/plain")) {
+        } else if (url.getPath().endsWith(".txt") || contentType.contains("text/plain")) {
             // plain text
             return (AbstractSiteMap) processText(content, url.toString());
         } else if (url.getPath().endsWith(".gz") || contentType.contains("application/gzip") || contentType.contains("application/x-gzip") || contentType.contains("application/x-gunzip")
