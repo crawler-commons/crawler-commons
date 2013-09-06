@@ -223,12 +223,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * @return robot command found on line
      */
     private static RobotToken tokenize(String line) {
+        String lowerLine = line.toLowerCase();
         for (String prefix : DIRECTIVE_PREFIX.keySet()) {
             int prefixLength = prefix.length();
-            if (line.startsWith(prefix)) {
+            if (lowerLine.startsWith(prefix)) {
                 RobotDirective directive = DIRECTIVE_PREFIX.get(prefix);
-                String dataPortion = line.substring(prefixLength);
+                String dataPortion = lowerLine.substring(prefixLength);
 
+                // preserve the original case for sitemaps
+                if (directive.equals(RobotDirective.SITEMAP))
+                    dataPortion = line.substring(prefixLength);
+                
                 if (directive.isPrefix()) {
                     Matcher m = DIRECTIVE_SUFFIX_PATTERN.matcher(dataPortion);
                     if (m.matches()) {
@@ -248,7 +253,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
         }
         
-        Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(line);
+        Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(lowerLine);
         if (m.matches()) {
             return new RobotToken(RobotDirective.UNKNOWN, line);
         } else {
@@ -378,7 +383,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 line = line.substring(0, hashPos);
             }
             
-            line = line.trim().toLowerCase();
+            line = line.trim();
             if (line.length() == 0) {
                 continue;
             }
