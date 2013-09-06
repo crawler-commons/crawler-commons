@@ -750,7 +750,11 @@ public class SimpleRobotRulesParserTest {
     @Test
     public void testSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots.txt"));
-        assertEquals("Found sitemap", 2, rules.getSitemaps().size());
+        assertEquals("Found sitemap", 3, rules.getSitemaps().size());
+        // check that the last one is not lowercase only
+        String url = rules.getSitemaps().get(2);
+        boolean lowercased = url.equals(url.toLowerCase());
+        assertFalse ("Sitemap case check",lowercased);
     }
 
     @Test

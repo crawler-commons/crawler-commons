@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 /** Utility class for testing the Sitemap Parsing **/
 public class SiteMapTester {
 
-    SiteMapParser parser = new SiteMapParser();
+    SiteMapParser parser = new SiteMapParser(false);
 
     private void parse(URL url, boolean recursive) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
@@ -17,7 +17,7 @@ public class SiteMapTester {
         String mt = "";
         AbstractSiteMap sm = parser.parseSiteMap(mt, content, url);
 
-        System.out.println(sm.toString());
+        // System.out.println(sm.toString());
 
         if (recursive && sm.isIndex()) {
             Collection<AbstractSiteMap> links = ((SiteMapIndex) sm).getSitemaps();
@@ -27,7 +27,7 @@ public class SiteMapTester {
         } else if (!sm.isIndex()) {
             Collection<SiteMapURL> links = ((SiteMap) sm).getSiteMapUrls();
             for (SiteMapURL smu : links) {
-                System.out.println("\t" + smu.toString());
+                System.out.println(smu.getUrl());
             }
         }
     }
