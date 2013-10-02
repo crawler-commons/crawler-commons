@@ -322,6 +322,12 @@ public class SiteMapParser {
                 Element elem = (Element) firstNode;
                 String loc = getElementValue(elem, "loc");
 
+                // try the text content when no loc element 
+                // has been specified
+                if (loc == null) {
+                    loc = elem.getTextContent().trim();
+                }
+
                 try {
                     sitemapUrl = new URL(loc);
                     String lastmod = getElementValue(elem, "lastmod");
