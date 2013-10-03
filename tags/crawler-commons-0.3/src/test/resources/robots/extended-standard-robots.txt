@@ -1,0 +1,19 @@
+User-agent: bot1
+Disallow: 
+Request-rate: 30/1m
+visit-time: 0100-0600
+robot-version: 2.0
+comment: This is a comment about bot1
+
+User-agent: bot2
+Disallow:
+request-rate: 1/15
+
+User-agent: bot3
+Disallow: 
+request-rate: 5/1m 0200-2259
+request-rate: 20/1m 2300-0159
+
+User-agent: bot4
+Disallow:
+request-rate: 8/1s

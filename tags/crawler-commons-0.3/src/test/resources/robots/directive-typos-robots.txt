@@ -1,0 +1,12 @@
+User-agent: bot1
+Desallow: /desallow/
+dissalow: /dissalow/
+
+useragent: bot2
+Disallow: /useragent/
+
+useg-agent: bot3
+Disallow: /useg-agent/
+
+useragent bot4
+Disallow: /useragent-no-colon/
