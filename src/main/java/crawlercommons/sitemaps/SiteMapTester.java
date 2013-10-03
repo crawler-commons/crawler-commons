@@ -11,10 +11,9 @@ public class SiteMapTester {
 
     SiteMapParser parser = new SiteMapParser(false);
 
-    private void parse(URL url, boolean recursive) throws IOException, UnknownFormatException {
+    private void parse(URL url, String mt, boolean recursive) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
 
-        String mt = "";
         AbstractSiteMap sm = parser.parseSiteMap(mt, content, url);
 
         // System.out.println(sm.toString());
@@ -22,7 +21,7 @@ public class SiteMapTester {
         if (recursive && sm.isIndex()) {
             Collection<AbstractSiteMap> links = ((SiteMapIndex) sm).getSitemaps();
             for (AbstractSiteMap asm : links) {
-                parse(asm.getUrl(), recursive);
+                parse(asm.getUrl(), mt, recursive);
             }
         } else if (!sm.isIndex()) {
             Collection<SiteMapURL> links = ((SiteMap) sm).getSiteMapUrls();
@@ -33,14 +32,19 @@ public class SiteMapTester {
     }
 
     public static void main(String[] args) throws IOException, UnknownFormatException {
-        if (args.length<1) {
-            System.err.println("SiteMapTester URL_to_test");
+        if (args.length < 1) {
+            System.err.println("SiteMapTester URL_to_test [MimeType]");
         }
-        
+
         URL url = new URL(args[0]);
 
+        String mt = "";
+
+        if (args.length > 1)
+            mt = args[1];
+
         SiteMapTester tester = new SiteMapTester();
-        tester.parse(url, true);
+        tester.parse(url, mt, true);
     }
 
 }
