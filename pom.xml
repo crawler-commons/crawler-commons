@@ -13,7 +13,7 @@
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
 	<!-- Must be kept in sync with "version" value in build.properties -->
-	<version>0.3-SNAPSHOT</version>
+	<version>0.3</version>
 	<licenses>
 	  <license>
             <name>Apache License, Version 2.0</name>
@@ -26,9 +26,9 @@
 	</description>
 	
 	<scm>
-          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
-          <developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
-          <url>http://crawler-commons.googlecode.com/svn/trunk</url>
+          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</connection>
+          <developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</developerConnection>
+          <url>http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</url>
 	</scm>
 	<issueManagement>
           <system>Google Issues</system>
