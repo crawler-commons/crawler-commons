@@ -65,7 +65,7 @@ This will create and commit the release tag and bump the development version in 
 
 This will build the pom, jar, javadoc, signatures and sources, and push them to the Sonatype staging repository
 
-  * `% mvn:release:perform`
+  * `% mvn release:perform`
 
 *Close the Sonatype Staging Repository* 
 
