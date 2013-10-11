@@ -24,11 +24,13 @@
 	functionality common to any web crawler.
 	</description>
 
-	<scm>
-		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</connection>
-		<developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</developerConnection>
-		<url>http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3</url>
-	</scm>
+        <scm>
+          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
+          <developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
+          <url>http://crawler-commons.googlecode.com/svn/trunk</url>
+        </scm>
+	
+	
 	<issueManagement>
 		<system>Google Issues</system>
 		<url>http://code.google.com/p/crawler-commons/issues/list</url>
