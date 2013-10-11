@@ -1,0 +1,22 @@
+#Google Search Engine Robot
+User-agent: Googlebot
+# Crawl-delay: 10 -- Googlebot ignores crawl-delay ftl
+Disallow: /*?
+Disallow: /*/with_friends
+
+#Yahoo! Search Engine Robot
+User-Agent: Slurp
+Crawl-delay: 1
+Disallow: /*?
+Disallow: /*/with_friends
+
+#Microsoft Search Engine Robot
+User-Agent: msnbot
+Crawl-delay: 10
+Disallow: /*?
+Disallow: /*/with_friends
+
+# Every bot that might possibly read and respect this file.
+User-agent: *
+Disallow: /*?
+Disallow: /*/with_friends

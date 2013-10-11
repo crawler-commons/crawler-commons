@@ -1,0 +1,15 @@
+﻿User-agent: *
+Disallow: /login.aspx
+Disallow: /register.aspx
+Disallow: /profile
+Disallow: /*/output/print
+Disallow: /search.aspx
+
+User-agent: Googlebot
+Disallow: /*/output/print
+Disallow: /login.aspx
+Disallow: /register.aspx
+Disallow: /profile
+Disallow: /search.aspx
+
+Sitemap: http://www.newsweek.com/sitemap_index.xml
