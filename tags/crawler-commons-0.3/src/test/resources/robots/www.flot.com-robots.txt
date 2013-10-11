@@ -1,7 +1,0 @@
-User-agent: *
-Disallow: /bitrix/
-Disallow: /admin/
-Disallow: /upload/
-Disallow: /img/
-Host: flot.com
-Sitemap: http://flot.com/sitemap_index.xml
