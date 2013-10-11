@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Release 0.3
+- Upgraded to Tika 1.4 (jnioche)
 - [SiteMap] added utility class for testing sitemaps (jnioche)
 - Issue 16: remove ant scripts and configuration (lewismc)
 - Issue 27: [SiteMap] Unnecessary String concatenations when logging + in SiteMapURL.toString() (jnioche)
