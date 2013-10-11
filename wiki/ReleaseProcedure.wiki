@@ -37,6 +37,7 @@ In all of the steps below, replace `X.Y` with the actual release number.
   
 *Prepare the Release Artifacts (Dry-Run)*
 
+  * % `rm -rf ~/.m2/repository/com/google/code/crawler-commons/`
   * % `mvn release:clean release:prepare -DdryRun=true`
   
 Executing the above makes life a breeze for us. It does the following:
