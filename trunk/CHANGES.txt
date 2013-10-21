@@ -1,5 +1,8 @@
 Crawler-Commons Change Log
 
+[trunk]
+- cleanup of ANT build remnants [lib and lib-ext] (jnioche)
+
 Release 0.3
 - Upgraded to Tika 1.4 (jnioche)
 - [SiteMap] added utility class for testing sitemaps (jnioche)
