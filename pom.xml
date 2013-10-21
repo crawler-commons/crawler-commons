@@ -93,23 +93,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>${maven-clean-plugin.version}</version>
-					<configuration>
-						<filesets>
-							<fileset>
-								<directory>${basedir}/lib</directory>
-								<followSymlinks>false</followSymlinks>
-								<useDefaultExcludes>true</useDefaultExcludes>
-								<includes>
-									<include>*.jar</include>
-								</includes>
-							</fileset>
-						</filesets>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>${maven-release-plugin.version}</version>
 					<configuration>
@@ -160,23 +143,6 @@
 					<forkMode>always</forkMode>
 					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>${maven-dependency-plugin.version}</version>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>lib</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -314,7 +280,6 @@
 		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
 		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-		<maven-dependency-plugin.version>2.4</maven-dependency-plugin.version>
 		<build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
 		<maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
 		<maven-release-plugin.version>2.2.2</maven-release-plugin.version>
@@ -325,7 +290,6 @@
 		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
 		<maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
 		<checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
-		<maven-clean-plugin.version>2.5</maven-clean-plugin.version>
 
 		<!-- General Properties -->
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
