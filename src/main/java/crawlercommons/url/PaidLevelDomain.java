@@ -47,8 +47,8 @@ public class PaidLevelDomain {
         "us uy uz va vc ve vg vi vn vu wf ws ye yt yu za zm zw";
 
     private static final String G_TLDS = 
-        "aero arpa asia biz cat com coop edu gov info int jobs mil mobi museum name net " +
-        "org pro tel";
+        "aero arpa asia biz cat com coop edu gov info int jobs me mil mobi museum name net " +
+        "org pro rs tel";
 
     private static final Set<String> ccTLDs = new HashSet<String>(Arrays.asList(CC_TLDS.split(" ")));
     private static final Set<String> gTLDs = new HashSet<String>(Arrays.asList(G_TLDS.split(" ")));
