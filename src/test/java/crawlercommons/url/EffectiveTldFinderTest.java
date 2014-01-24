@@ -88,17 +88,15 @@ public class EffectiveTldFinderTest {
         assertTrue(etld.isException());
         assertFalse(etld.isWild());
         assertEquals("parliament.uk", etld.getDomain());
-        // domains can be assigned under hokkaido.jp except for a
-        // a prescribed set of prefects (I think)
         etld = EffectiveTldFinder.getEffectiveTLD("hokkaido.jp");
         assertFalse(etld.isException());
-        assertTrue(etld.isWild());
+        assertFalse(etld.isWild());
         assertEquals("hokkaido.jp", etld.getDomain());
-        // test a Japanese prefect
-        etld = EffectiveTldFinder.getEffectiveTLD("www.pref.hokkaido.jp");
+        // test a Japanese city
+        etld = EffectiveTldFinder.getEffectiveTLD("www.city.kawasaki.jp");
         assertTrue(etld.isException());
         assertFalse(etld.isWild());
-        assertEquals("pref.hokkaido.jp", etld.getDomain());
+        assertEquals("city.kawasaki.jp", etld.getDomain());
     }
 
     @Test
