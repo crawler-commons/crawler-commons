@@ -95,7 +95,7 @@ public abstract class AbstractSiteMap {
      * @param processed
      *            - indicate if the Sitemap has been processed.
      */
-    void setProcessed(boolean processed) {
+    public void setProcessed(boolean processed) {
         this.processed = processed;
     }
 
