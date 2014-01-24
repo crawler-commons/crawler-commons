@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  * <li><a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD Service</a></li>
  * <li><a href="http://www.publicsuffix.org">Public Suffix</a></li>
+ * <li><a href="http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1">effective_tld_names</a></li>
  * </ul>
  *
  * This class just needs "effective_tld_names.dat" in the classpath. If you want
