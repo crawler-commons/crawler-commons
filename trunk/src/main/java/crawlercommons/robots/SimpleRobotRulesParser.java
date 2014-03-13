@@ -440,6 +440,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: " + url);
             return new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
         } else {
+            result.sortRules();
             return result;
         }
     }

@@ -20,7 +20,7 @@ package crawlercommons.robots;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.util.Collections;
 
 /**
  * Result from parsing a single robots.txt file - which means we
@@ -38,21 +38,25 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Single rule that maps from a path prefix to an allow flag.
      */
-    protected class RobotRule {
+    protected class RobotRule implements Comparable<RobotRule> {
         String _prefix;
-        Pattern _pattern;
         boolean _allow;
 
         public RobotRule(String prefix, boolean allow) {
             _prefix = prefix;
-            _pattern = null;
             _allow = allow;
         }
 
-        public RobotRule(Pattern pattern, boolean allow) {
-            _prefix = null;
-            _pattern = pattern;
-            _allow = allow;
+        // Sort from longest to shortest rules.
+        @Override
+        public int compareTo(RobotRule o) {
+            if (_prefix.length() < o._prefix.length()) {
+                return 1;
+            } else if (_prefix.length() > o._prefix.length()) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -85,23 +89,21 @@ public class SimpleRobotRules extends BaseRobotRules {
         _rules.add(new RobotRule(prefix, allow));
     }
 
-    // TODO KKr - make sure paths are sorted from longest to shortest,
-    // to implement longest match
     public boolean isAllowed(String url) {
         if (_mode == RobotRulesMode.ALLOW_NONE) {
             return false;
         } else if (_mode == RobotRulesMode.ALLOW_ALL) {
             return true;
         } else {
-            String path = getPath(url);
-            
+            String pathWithQuery = getPath(url, true);
+
             // Always allow robots.txt
-            if (path.equals("/robots.txt")) {
+            if (pathWithQuery.equals("/robots.txt")) {
                 return true;
             }
 
             for (RobotRule rule : _rules) {
-                if (path.startsWith(rule._prefix)) {
+                if (ruleMatches(pathWithQuery, rule._prefix)){
                     return rule._allow;
                 }
             }
@@ -110,10 +112,15 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
     }
 
-    private String getPath(String url) {
+    private String getPath(String url, boolean getWithQuery) {
 
         try {
-            String path = new URL(url).getPath();
+            URL urlObj = new URL(url);
+            String path = urlObj.getPath();
+            String query = urlObj.getQuery();
+            if (getWithQuery && query != null){
+                path += "?" + query;
+            }
             
             if ((path == null) || (path.equals(""))) {
                 return "/";
@@ -128,6 +135,95 @@ public class SimpleRobotRules extends BaseRobotRules {
             // will fail, so return the root.
             return "/";
         }
+    }
+
+    private boolean ruleMatches(String text, String pattern) {
+        int patternPos = 0;
+        int textPos = 0;
+        
+        int patternEnd = pattern.length();
+        int textEnd = text.length();
+        
+        boolean containsEndChar = pattern.endsWith("$");
+        if (containsEndChar) {
+            patternEnd -= 1;
+        }
+        
+        while ((patternPos < patternEnd) && (textPos < textEnd)) {
+            // Find next wildcard in the pattern.
+            int wildcardPos = pattern.indexOf('*', patternPos);
+            if (wildcardPos == -1) {
+                wildcardPos = patternEnd;
+            }
+            
+            // If we're at a wildcard in the pattern, find the place in the text
+            // where the character(s) after the wildcard match up with what's in
+            // the text.
+            if (wildcardPos == patternPos) {
+                patternPos += 1;
+                if (patternPos >= patternEnd) {
+                    // Pattern ends with '*', we're all good.
+                    return true;
+                }
+
+                // TODO - don't worry about having two '*' in a row?
+                
+                // Find the end of the pattern piece we need to match.
+                int patternPieceEnd = pattern.indexOf('*', patternPos);
+                if (patternPieceEnd == -1) {
+                    patternPieceEnd = patternEnd;
+                }
+                
+                boolean matched = false;
+                int patternPieceLen = patternPieceEnd - patternPos;
+                while ((textPos + patternPieceLen <= textEnd) && !matched) {
+                    // See if patternPieceLen chars from text at textPos match chars from pattern at patternPos
+                    matched = true;
+                    for (int i = 0; i < patternPieceLen && matched; i++) {
+                        if (text.charAt(textPos + i) != pattern.charAt(patternPos + i)) {
+                            matched = false;
+                        }
+                    }
+                    
+                    // If we matched, we're all set, otherwise we have to advance textPos
+                    if (!matched) {
+                        textPos += 1;
+                    }
+                }
+                
+                // If we matched, we're all set, otherwise we failed
+                if (!matched) {
+                    return false;
+                }
+            } else {
+                // See if the pattern from patternPos to wildcardPos matches the text
+                // starting at textPos
+                while ((patternPos < wildcardPos) && (textPos < textEnd)) {
+                    if (text.charAt(textPos++) != pattern.charAt(patternPos++)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        // If we didn't reach the end of the pattern, make sure we're not at a wildcard, sa
+        // that's a 0 or more match, so then we're still OK.
+        while ((patternPos < patternEnd) && (pattern.charAt(patternPos) == '*')) {
+            patternPos += 1;
+        }
+        
+        // We're at the end, so we have a match if the pattern was completely consumed,
+        // and either we consumed all the text or we didn't have to match it all (no '$' at end
+        // of the pattern)
+        return (patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar);
+    }
+
+    /**
+     * In order to match up with Google's convention, we want to match rules from longest to shortest.
+     * So sort the rules.
+     */
+    public void sortRules() {
+        Collections.sort(_rules);
     }
     
     /**
