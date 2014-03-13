@@ -50,15 +50,69 @@ public class SimpleRobotRulesParserTest {
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", "".getBytes());
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
-    
-    // TODO - reenable this test when wildcards (the '*' in the disallow) are supported.
-    // @Test
+
+    @Test
     public void testQueryParamInDisallow() throws Exception {
         final String simpleRobotsTxt = "User-agent: *" + CRLF
         + "Disallow: /index.cfm?fuseaction=sitesearch.results*";
-        
+
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
         assertFalse(rules.isAllowed("http://searchservice.domain.com/index.cfm?fuseaction=sitesearch.results&type=People&qry=california&pg=2"));
+    }
+
+    @Test
+    public void testPatternMatching() throws Exception{
+        final String simpleRobotsTxt1 = "User-agent: *" + CRLF
+                + "Disallow: /fish*" + CRLF;
+
+        BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1.getBytes());
+        assertTrue(rule1.isAllowed("http://www.fict.com/fis"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fish"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fish.html"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fish/salmon.html"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fishheads"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fishheads/yummy.html"));
+        assertFalse(rule1.isAllowed("http://www.fict.com/fish.php?id=anything"));
+        assertTrue(rule1.isAllowed("http://www.fict.com/catfish"));
+        assertTrue(rule1.isAllowed("http://www.fict.com/?id=fish"));
+
+        final String simpleRobotsTxt2 = "User-agent: *" + CRLF
+                + "Disallow: /*.php" + CRLF;
+
+        BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2.getBytes());
+        assertFalse(rule2.isAllowed("http://www.fict.com/filename.php"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/folder/filename.php"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/folder/filename.php?parameters"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/folder/any.php.file.html"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/filename.php/"));
+        assertTrue(rule2.isAllowed("http://www.fict.com/"));
+
+        final String simpleRobotsTxt3 = "User-agent: *" + CRLF
+                + "Disallow: /*.php$" + CRLF;
+
+        BaseRobotRules rule3 = createRobotRules("Any-darn-crawler", simpleRobotsTxt3.getBytes());
+        assertFalse(rule3.isAllowed("http://www.fict.com/filename.php"));
+        assertFalse(rule3.isAllowed("http://www.fict.com/folder/filename.php"));
+        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php?parameters"));
+        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php/"));
+        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php5"));
+
+        final String simpleRobotsTxt4 = "User-agent: *" + CRLF
+                        + "Disallow: /fish*.php" + CRLF;
+
+        BaseRobotRules rule4 = createRobotRules("Any-darn-crawler", simpleRobotsTxt4.getBytes());
+        assertFalse(rule4.isAllowed("http://www.fict.com/fish.php"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/fishheads/catfish.php?parameters"));
+        assertTrue(rule4.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
+        
+        // Test rule with multiple '*' characters
+        final String simpleRobotsTxt5 = "User-agent: *" + CRLF
+                        + "Disallow: /*fish*.php" + CRLF;
+
+        BaseRobotRules rule5 = createRobotRules("Any-darn-crawler", simpleRobotsTxt5.getBytes());
+        assertFalse(rule5.isAllowed("http://www.fict.com/fish.php"));
+        assertFalse(rule5.isAllowed("http://www.fict.com/superfishheads/catfish.php?parameters"));
+        assertTrue(rule5.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
     }
     
     @Test
@@ -780,6 +834,14 @@ public class SimpleRobotRulesParserTest {
         assertTrue("Allowed URL", rules.isAllowed("http://ford.com/"));
         assertEquals(1000L, rules.getCrawlDelay());
     }
+    
+    @Test
+    public void testAmazonRobotsWithWildcards() throws Exception {
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", readFile("/robots/wildcards.txt"));
+        assertFalse(rules.isAllowed("http://www.fict.com/wishlist/bogus"));
+        assertTrue(rules.isAllowed("http://www.fict.com/wishlist/universal/page"));
+        assertFalse(rules.isAllowed("http://www.fict.com/anydirectoryhere/gcrnsts"));
+   }
     
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
