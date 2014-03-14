@@ -843,6 +843,17 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("http://www.fict.com/anydirectoryhere/gcrnsts"));
    }
     
+    @Test
+    public void testAllowBeforeDisallow() throws Exception {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF
+                        + "Disallow: /fish" + CRLF
+                        + "Allow: /fish" + CRLF;
+
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+
+        assertTrue(rules.isAllowed("http://www.fict.com/fish"));
+   }
+    
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);

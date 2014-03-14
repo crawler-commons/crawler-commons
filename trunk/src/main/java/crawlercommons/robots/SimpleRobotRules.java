@@ -54,8 +54,13 @@ public class SimpleRobotRules extends BaseRobotRules {
                 return 1;
             } else if (_prefix.length() > o._prefix.length()) {
                 return -1;
-            } else {
+            } else if (_allow == o._allow) {
                 return 0;
+            } else if (_allow) {
+                // Allow comes before disallow
+                return -1;
+            } else {
+                return 1;
             }
         }
     }
