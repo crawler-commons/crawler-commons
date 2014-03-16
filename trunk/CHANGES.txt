@@ -1,6 +1,13 @@
 Crawler-Commons Change Log
 
 [trunk]
+- Issue 18: Support matching against query parameters in robots.txt rules (alparslanavci. kkrugler)
+- Issue 21: Follow Google example of giving Allow directives higher match weight than Disallow directives (y.vladimirov, via kkrugler)
+- Issue 22: Use longest-match-wins approach to matching URLs in robots.txt (kkrugler)
+- Issue 17: Support Googlebot-compatible regular expressions in URL specifications (alparslanavci. kkrugler)
+- Issue 31: Missing top level domains (jnioche, kkrugler)
+- Issue 23: Trivial improvements to UserAgent (lewismc)
+- Issue 30: SitemapIndex should allow to skip sitemaps (Sebastian Nagel, kkrugler)
 - cleanup of ANT build remnants [lib and lib-ext] (jnioche)
 
 Release 0.3
