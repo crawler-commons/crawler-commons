@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -24,13 +25,13 @@
 	functionality common to any web crawler.
 	</description>
 
-        <scm>
-          <connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
-          <developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
-          <url>http://crawler-commons.googlecode.com/svn/trunk</url>
-        </scm>
-	
-	
+	<scm>
+		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
+		<developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
+		<url>http://crawler-commons.googlecode.com/svn/trunk</url>
+	</scm>
+
+
 	<issueManagement>
 		<system>Google Issues</system>
 		<url>http://code.google.com/p/crawler-commons/issues/list</url>
@@ -84,22 +85,22 @@
 				</includes>
 			</testResource>
 		</testResources>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/version.prop</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>**/version.prop</exclude>
-                </excludes>
-            </resource>
-        </resources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.prop</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.prop</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -152,7 +153,6 @@
 				<inherited>true</inherited>
 				<configuration>
 					<systemPropertyVariables>
-						<hadoop.log.dir>${project.basedir}/target/test-logs/</hadoop.log.dir>
 						<test.build.data>${project.basedir}/target/test-data/</test.build.data>
 					</systemPropertyVariables>
 					<argLine>-Xmx512m</argLine>
@@ -281,7 +281,7 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<httpclient.version>4.1.1</httpclient.version>
+		<httpclient.version>4.2.6</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
 		<tika-core.version>1.4</tika-core.version>
 		<slf4j-api.version>1.6.6</slf4j-api.version>
@@ -290,7 +290,6 @@
 		<mockito-core.version>1.8.0</mockito-core.version>
 		<jetty.version>5.1.10</jetty.version>
 		<servlet-api.version>2.5</servlet-api.version>
-		<ant-eclipse-jvm1.2.version>1.0</ant-eclipse-jvm1.2.version>
 
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
@@ -382,15 +381,6 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>${servlet-api.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Eclipse project generation dependencies -->
-
-		<dependency>
-			<groupId>ant-eclipse</groupId>
-			<artifactId>ant-eclipse-jvm1.2</artifactId>
-			<version>${ant-eclipse-jvm1.2.version}</version>
 			<scope>provided</scope>
 		</dependency>
 

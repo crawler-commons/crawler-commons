@@ -24,9 +24,11 @@ public class RedirectFetchException extends BaseFetchException {
     // Possible redirect exception types.
     
     public enum RedirectExceptionReason {
-        TOO_MANY_REDIRECTS,         // Request for original URL tried too many hops.
-        PERM_REDIRECT_DISALLOWED,   // RedirectMode disallows a permanent redirect.
-        TEMP_REDIRECT_DISALLOWED    // RedirectMode disallows a temp redirect.
+      TOO_MANY_REDIRECTS,       // - Request for original URL tried too many hops.
+      PERM_REDIRECT_DISALLOWED, // - RedirectMode disallows a permanent redirect.
+      TEMP_REDIRECT_DISALLOWED, // - RedirectMode disallows a temp redirect.
+      SEE_OTHER_DISALLOWED      // - to handle 303 redirects, usually after POST
+                                //   method & RESTful applications
     }
 
     private String _redirectedUrl;
