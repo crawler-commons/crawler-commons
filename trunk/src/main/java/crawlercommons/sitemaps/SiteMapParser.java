@@ -136,6 +136,7 @@ public class SiteMapParser {
         textSiteMap.setType(SitemapType.TEXT);
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(content));
+        @SuppressWarnings("resource")
         BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs));
 
         String line;

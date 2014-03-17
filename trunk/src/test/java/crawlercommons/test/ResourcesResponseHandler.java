@@ -56,6 +56,7 @@ public class ResourcesResponseHandler extends AbstractHttpHandler {
         try {
             File file = new File(path.getFile());
             byte[] bytes = new byte[(int) file.length()];
+            @SuppressWarnings("resource")
             DataInputStream in = new DataInputStream(new FileInputStream(file));
             in.readFully(bytes);
             

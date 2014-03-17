@@ -25,7 +25,6 @@ import junit.framework.Assert;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
 
-import crawlercommons.fetcher.BaseFetchException;
 import crawlercommons.fetcher.FetchedResult;
 import crawlercommons.fetcher.HttpFetchException;
 

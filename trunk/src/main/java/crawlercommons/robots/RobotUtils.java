@@ -23,7 +23,6 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import crawlercommons.fetcher.BaseFetcher;
 import crawlercommons.fetcher.FetchedResult;
 import crawlercommons.fetcher.HttpFetchException;
 import crawlercommons.fetcher.IOFetchException;
