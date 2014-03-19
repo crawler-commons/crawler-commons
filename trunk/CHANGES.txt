@@ -1,7 +1,9 @@
 Crawler-Commons Change Log
 
 [trunk]
-- Issue 18: Support matching against query parameters in robots.txt rules (alparslanavci. kkrugler)
+- Issue 13: Fix deprecation in Crawler Commons Code (lewismc via kkrugler)
+- Issue 8 : Upgrade of httpclient to v4.2.6 (Fuad Efendi, lewismc via kkrugler)
+- Issue 18: Support matching against query parameters in robots.txt rules (alparslanavci, kkrugler)
 - Issue 21: Follow Google example of giving Allow directives higher match weight than Disallow directives (y.vladimirov, via kkrugler)
 - Issue 22: Use longest-match-wins approach to matching URLs in robots.txt (kkrugler)
 - Issue 17: Support Googlebot-compatible regular expressions in URL specifications (alparslanavci. kkrugler)
