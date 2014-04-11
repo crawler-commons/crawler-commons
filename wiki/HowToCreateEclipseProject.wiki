@@ -1,4 +1,4 @@
-#summary How to work around ant-eclipse jar not being in Maven central repo.
+#summary How to create Eclipse project files for Crawler Commons.
 
 = Introduction =
 
@@ -14,4 +14,4 @@ Just do the following.
 
 This will generate the .project file and other required files.
 
-You can then open Eclipse and go to File > Import > Existing Projects into Workspace > path/to/Crawler-Commons 
+You can then open Eclipse and go to File > Import > Existing (Maven) Projects into Workspace > path/to/Crawler-Commons 
