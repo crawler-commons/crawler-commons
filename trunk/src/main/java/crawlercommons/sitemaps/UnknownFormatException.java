@@ -22,27 +22,19 @@ public class UnknownFormatException extends Exception {
 
     private String error;
 
-    // ----------------------------------------------
-    // Default constructor - initializes instance variable to unknown
-
+    /** Default constructor - initializes instance variable to unknown */
     public UnknownFormatException() {
         super();
         error = "unknown";
     }
 
-    // -----------------------------------------------
-    // Constructor receives some kind of message that is saved in an instance
-    // variable.
-
+    /** Constructor receives some kind of message that is saved in an instance variable. */
     public UnknownFormatException(String err) {
         super(err);
         error = err;
     }
 
-    // ------------------------------------------------
-    // public method, callable by exception catcher. It returns the error
-    // message.
-
+    /** public method, callable by exception catcher. It returns the error message. */
     public String getError() {
         return error;
     }

@@ -21,6 +21,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 
 /** SiteMap or SiteMapIndex**/
@@ -37,7 +38,7 @@ public abstract class AbstractSiteMap {
     /** This Sitemap's type */
     private SitemapType type;
 
-    /** Indicates if we have tried to process this Sitemap or not */
+    /** indicate if the Sitemap has been processed. */
     private boolean processed;
     
     protected URL url;
@@ -56,17 +57,19 @@ public abstract class AbstractSiteMap {
      */
     private static final ThreadLocal<DateFormat[]> dateFormats = new ThreadLocal<DateFormat[]>() {
         protected DateFormat[] initialValue() {
-            return new DateFormat[] { new SimpleDateFormat("yyyy-MM-dd"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm-hh:00"),
-                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+hh:00"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-hh:00"), new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz") };
+            return new DateFormat[] { new SimpleDateFormat("yyyy-MM-dd"),
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00"),
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm-hh:00"),
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+hh:00"),
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-hh:00"),
+                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
+            };
         }
     };
     
     
     public boolean isIndex() {
-    	if(type == SitemapType.INDEX) {
-    		return true;
-    	}
-    	return false;    	
+    	return (type == SitemapType.INDEX);
     };
     
     /**
@@ -100,8 +103,7 @@ public abstract class AbstractSiteMap {
     }
 
     /**
-     * @return true if the Sitemap has been processed i.e it contains at least
-     *         one SiteMapURL
+     * @return true if the Sitemap has been processed i.e it contains at least one SiteMapURL
      */
     public boolean isProcessed() {
         return processed;
@@ -136,7 +138,7 @@ public abstract class AbstractSiteMap {
      * 
      * @param date
      *            - the date to be parsed
-     * @return the Date equivalent
+     * @return the Date equivalent or NULL when encountering an unparsable date string argument
      */
     public static Date convertToDate(String date) {
 
@@ -153,4 +155,7 @@ public abstract class AbstractSiteMap {
         // Not successful parsing any dates
         return null;
     }
+
+    // Please ignore this for now - I will upgrade it as a future patch
+//    public abstract Collection<SiteMapURL> getSiteMapUrls();
 }
