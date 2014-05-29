@@ -18,6 +18,7 @@
 package crawlercommons.sitemaps;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map.Entry;
@@ -71,37 +72,41 @@ public class SiteMapIndex extends AbstractSiteMap {
      */
     public boolean hasUnprocessedSitemap() {
 
-        // Find an unprocessed Sitemap
-        for (Entry<String, AbstractSiteMap> sitemap : sitemaps.entrySet()) {
-        	AbstractSiteMap s = sitemap.getValue();
-            if (!s.isProcessed()) {
-                return true;
-            }
-        }
-        return false;
+        // Check existence of an unprocessed Sitemap
+        return (nextUnprocessedSitemap() != null);
     }
 
     /**
-     * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could
-     *         be found.
+     * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could be found.
      */
     public AbstractSiteMap nextUnprocessedSitemap() {
         for (Entry<String, AbstractSiteMap> sitemap : sitemaps.entrySet()) {
-        	AbstractSiteMap s = sitemap.getValue();
-            if (!s.isProcessed()) {
-                return s;
+        	AbstractSiteMap asm = sitemap.getValue();
+            if (!asm.isProcessed()) {
+                return asm;
             }
         }
 
         return null;
     }
 
-    public String toString() {
-        return "url=\"" + url + "\",sitemapListSize=" + sitemaps.size();
-    }
-
+    @Override
     public boolean isIndex() {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "url = \"" + url + "\", sitemapListSize = " + sitemaps.size();
+    }
+
+    // Please ignore this for now - I will use it in a near future patch
+//    public Collection<SiteMapURL> getSiteMapUrls() {
+//        Collection<SiteMapURL> siteMapUrls = new ArrayList<SiteMapURL>();
+//        for (AbstractSiteMap asm : sitemaps.values()) {
+//            siteMapUrls.addAll(asm.getSiteMapUrls()); // recursive
+//        }
+//
+//        return siteMapUrls;
+//    }
 }

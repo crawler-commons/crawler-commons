@@ -40,7 +40,6 @@ public class SiteMap extends AbstractSiteMap {
     	super();
     	
         urlList = new Hashtable<String, SiteMapURL>();
-        
         setProcessed(false);
     }
 
@@ -83,6 +82,7 @@ public class SiteMap extends AbstractSiteMap {
     /**
      * @param url
      *            - the URL of the Sitemap
+     * In the case of a Malformed URL the URL member is set to null
      */
     private void setUrl(String url) {
         try {
@@ -96,10 +96,20 @@ public class SiteMap extends AbstractSiteMap {
 
 
     public String toString() {
-        String s = "url=\"" + url + "\",lastMod=";
-        s += (getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified());
-        s += ",type=" + getType() + ",processed=" + isProcessed() + ",urlListSize=" + urlList.size();
-        return s;
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("url = \"")
+                .append(url)
+                .append("\", lastMod = ")
+                .append((getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified()))
+                .append(", type = ")
+                .append(getType())
+                .append(", processed = ")
+                .append(isProcessed())
+                .append(", urlListSize = ")
+                .append(urlList.size());
+
+        return sb.toString();
     }
 
 
@@ -137,5 +147,4 @@ public class SiteMap extends AbstractSiteMap {
     public boolean isIndex() {
         return false;
     }
-
 }

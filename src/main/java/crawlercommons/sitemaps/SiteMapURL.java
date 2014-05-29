@@ -18,6 +18,9 @@
 package crawlercommons.sitemaps;
 
 // JDK imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -28,8 +31,8 @@ import java.util.Date;
  * @author fmccown
  */
 public class SiteMapURL {
-    
-    public static double defaultPriority= 0.5;
+    private static Logger LOG = LoggerFactory.getLogger(SiteMapURL.class);
+    public static double defaultPriority = 0.5;
 
     /** Allowed change frequencies */
     public enum ChangeFrequency {
@@ -62,20 +65,17 @@ public class SiteMapURL {
     }
 
     public SiteMapURL(String url, String lastModified, String changeFreq, String priority, boolean valid) {
-        setUrl(url);
+        this(url, valid);
         setLastModified(lastModified);
         setChangeFrequency(changeFreq);
         setPriority(priority);
-        setValid(valid);
     }
 
     public SiteMapURL(URL url, Date lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
-
-        setUrl(url);
+        this(url, valid);
         setLastModified(lastModified);
         setChangeFrequency(changeFreq);
         setPriority(priority);
-        setValid(valid);
     }
 
     /**
@@ -100,13 +100,13 @@ public class SiteMapURL {
      * Set the URL.
      * 
      * @param url
+     * In case of Malformed URL, the current url in this instance will be set to NULL
      */
     public void setUrl(String url) {
         try {
             this.url = new URL(url);
         } catch (MalformedURLException e) {
-            // e.printStackTrace();
-            System.out.println("Bad url: [" + url + "]");
+            LOG.error("Bad url: [{}], Exception: {}", url, e.toString());
             this.url = null;
         }
     }
@@ -148,7 +148,7 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (0.0 is used if the
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
      * given priority is out of range).
      * 
      * @param priority
@@ -158,27 +158,24 @@ public class SiteMapURL {
         // Ensure proper value
         if (priority < 0.0 || priority > 1.0) {
             this.priority = defaultPriority;
+            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, defaultPriority);
         } else {
             this.priority = priority;
         }
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (0.0 is used if the
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
      * given priority is out of range).
      * 
      * @param priority
      */
     public void setPriority(String priority) {
-
-        if (priority != null && priority.length() > 0) {
-            try {
-                setPriority(Double.parseDouble(priority));
-            } catch (NumberFormatException e) {
-                setPriority(defaultPriority);
-            }
-        } else {
+        try {
+            setPriority(Double.parseDouble(priority));
+        } catch (Exception e) { // Will catch NumberFormatException or NullPointerException
             setPriority(defaultPriority);
+            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, defaultPriority);
         }
     }
 
@@ -202,6 +199,7 @@ public class SiteMapURL {
 
     /**
      * Set the URL's change frequency
+     * In case of a bad ChangeFrequency, the current frequency in this instance will be set to NULL
      * 
      * @param changeFreq
      */
@@ -240,11 +238,11 @@ public class SiteMapURL {
     
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("url=\"").append(url).append("\",");
-        sb.append("lastMod=").append((lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified));
-        sb.append(",changeFreq=").append(changeFreq);
-        sb.append(",priority=").append(priority);
+        sb.append("url = \"").append(url).append("\"");
+        sb.append(", lastMod = ").append((lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified));
+        sb.append(", changeFreq = ").append(changeFreq);
+        sb.append(", priority = ").append(priority);
+
         return sb.toString();
     }
-
 }

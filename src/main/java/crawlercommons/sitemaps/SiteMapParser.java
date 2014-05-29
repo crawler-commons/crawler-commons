@@ -41,7 +41,6 @@ import org.xml.sax.InputSource;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 
-
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
     
@@ -102,7 +101,8 @@ public class SiteMapParser {
                         || contentType.contains("gzip/document") || contentType.contains("application/octet-stream")) {
             return processGzip(url, content);
         }
-        throw new UnknownFormatException("Unknown format " + contentType + " at " + url);
+
+        throw new UnknownFormatException("Unknown format: " + contentType + " at: " + url);
     }
 
     /**
@@ -140,7 +140,6 @@ public class SiteMapParser {
         BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs));
 
         String line;
-
         int i = 1;
         while ((line = reader.readLine()) != null) {
             if (line.length() > 0 && i <= MAX_URLS) {
@@ -149,17 +148,13 @@ public class SiteMapParser {
                     boolean valid = urlIsLegal(textSiteMap.getBaseUrl(), url.toString());
                     
                     if (valid || !strict) {
-                        if (LOG.isDebugEnabled()){
-                            StringBuffer sb = new StringBuffer("  ");
-                            sb.append(i).append(". ").append(url);
-                            LOG.debug(sb.toString());
-                        }
-                        i++;
+                        LOG.debug("  {}. {}",i++ , url);
+
                         SiteMapURL surl = new SiteMapURL(url, valid);
                         textSiteMap.addSiteMapUrl(surl);
                     }
                 } catch (MalformedURLException e) {
-                    LOG.debug("Bad URL [" + line + "].");
+                    LOG.debug("Bad URL [{}].", line);
                 }
             }
         }
@@ -183,13 +178,12 @@ public class SiteMapParser {
         LOG.debug("Processing gzip");
 
         AbstractSiteMap smi;
-
         InputStream is = new ByteArrayInputStream(response);
 
         // Remove .gz ending
         String xmlUrl = url.toString().replaceFirst("\\.gz$", "");
 
-        LOG.debug("XML url = " + xmlUrl);
+        LOG.debug("XML url = {}", xmlUrl);
 
         BOMInputStream decompressed = new BOMInputStream(new GZIPInputStream(is));
         InputSource in = new InputSource(decompressed);
@@ -214,7 +208,7 @@ public class SiteMapParser {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             doc = dbf.newDocumentBuilder().parse(is);
         } catch (Exception e) {
-            throw new UnknownFormatException("Error parsing XML for " + sitemapUrl);
+            throw new UnknownFormatException("Error parsing XML for: " + sitemapUrl);
         }
 
         // See if this is a sitemap index
@@ -229,7 +223,8 @@ public class SiteMapParser {
             // Could be RSS or Atom
             return parseSyndicationFormat(sitemapUrl, doc);
         }
-        throw new UnknownFormatException("Unknown XML format for " + sitemapUrl);
+
+        throw new UnknownFormatException("Unknown XML format for: " + sitemapUrl);
     }
 
     /**
@@ -255,15 +250,12 @@ public class SiteMapParser {
         for (int i = 0; i < list.getLength(); i++) {
 
             Node n = list.item(i);
-
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) n;
 
                 String loc = getElementValue(elem, "loc");
-
-                URL url = null;
                 try {
-                    url = new URL(loc);
+                    URL url = new URL(loc);
                     String lastMod = getElementValue(elem, "lastmod");
                     String changeFreq = getElementValue(elem, "changefreq");
                     String priority = getElementValue(elem, "priority");
@@ -272,17 +264,11 @@ public class SiteMapParser {
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        if (LOG.isDebugEnabled()){
-                            StringBuffer sb = new StringBuffer("  ");
-                            sb.append(i + 1).append(". ").append(sUrl);
-                            LOG.debug(sb.toString());
-                        }
+                        LOG.debug("  {}. {}", (i + 1), sUrl);
                     }
                 } catch (MalformedURLException e) {
-                    // e.printStackTrace();
-
-                    // Can't create an entry with a bad URL
-                    LOG.debug("Bad url: [" + loc + "]");
+                    LOG.debug("Bad url: [{}]", loc);
+                    LOG.trace("Can't create an entry with a bad URL", e);
                 }
             }
         }
@@ -316,9 +302,6 @@ public class SiteMapParser {
 
             Node firstNode = nodeList.item(i);
 
-            URL sitemapUrl = null;
-            Date lastModified = null;
-
             if (firstNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) firstNode;
                 String loc = getElementValue(elem, "loc");
@@ -330,25 +313,19 @@ public class SiteMapParser {
                 }
 
                 try {
-                    sitemapUrl = new URL(loc);
+                    URL sitemapUrl = new URL(loc);
                     String lastmod = getElementValue(elem, "lastmod");
-                    lastModified = SiteMap.convertToDate(lastmod);
+                    Date lastModified = SiteMap.convertToDate(lastmod);
 
                     // Right now we are not worried about sitemapUrls that point
                     // to different websites.
 
                     SiteMap s = new SiteMap(sitemapUrl, lastModified);
                     sitemapIndex.addSitemap(s);
-                    if (LOG.isDebugEnabled()){
-                        StringBuffer sb = new StringBuffer("  ");
-                        sb.append(i + 1).append(". ").append(s);
-                        LOG.debug(sb.toString());
-                    }
+                    LOG.debug("  {}. {}", (i + 1), s);
                 } catch (MalformedURLException e) {
-                    // e.printStackTrace();
-
-                    // Don't create an entry for a bad URL
-                    LOG.debug("Bad url: [" + loc + "]");
+                    LOG.trace("Don't create an entry with a bad URL", e);
+                    LOG.debug("Bad url: [{}]", loc);
                 }
             }
         }
@@ -357,14 +334,15 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse the XML document, looking for "feed" element to determine if it's
-     * an Atom doc and "rss" to determine if it's an RSS doc.
+     * Parse the XML document, looking for a
+     * <b>feed</b> element to determine if it's an <b>Atom doc</b>
+     * <b>rss</b> to determine if it's an <b>RSS doc</b>.
      * 
      * @param sitemapUrl
      * @param doc
      *            - XML document to parse
      * @throws UnknownFormatException
-     *             if XML does not appear to be Arom or RSS
+     *             if XML does not appear to be Atom or RSS
      */
     private SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
 
@@ -377,7 +355,7 @@ public class SiteMapParser {
             sitemap.setProcessed(true);
             return sitemap;
         } else {
-            // See if RSS feed by looking for "rss" element
+            // See if it is a RSS feed by looking for a "rss" element
             list = doc.getElementsByTagName("rss");
             if (list.getLength() > 0) {
                 parseRSS(sitemap, doc);
@@ -423,7 +401,7 @@ public class SiteMapParser {
         sitemap.setType(SitemapType.ATOM);
 
         String lastMod = getElementValue(elem, "modified");
-        LOG.debug("lastMod=" + lastMod);
+        LOG.debug("lastMod = {}", lastMod);
 
         NodeList list = doc.getElementsByTagName("entry");
 
@@ -431,32 +409,25 @@ public class SiteMapParser {
         for (int i = 0; i < list.getLength() && i < MAX_URLS; i++) {
 
             Node n = list.item(i);
-
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) n;
 
                 String href = getElementAttributeValue(elem, "link", "href");
-                LOG.debug("href=" + href);
+                LOG.debug("href = {}", href);
 
-                URL url = null;
                 try {
-                    url = new URL(href);
+                    URL url = new URL(href);
                     boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
                     
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        if (LOG.isDebugEnabled()){
-                            StringBuffer sb = new StringBuffer("  ");
-                            sb.append(i + 1).append(". ").append(sUrl);
-                            LOG.debug(sb.toString());
-                        }
+                        LOG.debug("  {}. {}", (i + 1), sUrl);
                     }
                 } catch (MalformedURLException e) {
-                    // Can't create an entry with a bad URL
-                    LOG.debug("Bad url: [" + href + "]");
+                    LOG.trace("Can't create an entry with a bad URL", e);
+                    LOG.debug("Bad url: [{}]", href);
                 }
-
             }
         }
     }
@@ -506,21 +477,17 @@ public class SiteMapParser {
 
         // Treat publication date as last mod (Tue, 10 Jun 2003 04:00:00 GMT)
         String lastMod = getElementValue(elem, "pubDate");
-
-        LOG.debug("lastMod=" + lastMod);
+        LOG.debug("lastMod = ", lastMod);
 
         list = doc.getElementsByTagName("item");
-
         // Loop through the <item>s
         for (int i = 0; i < list.getLength() && i < MAX_URLS; i++) {
 
             Node n = list.item(i);
-
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) n;
-
                 String link = getElementValue(elem, "link");
-                LOG.debug("link=" + link);
+                LOG.debug("link = {}", link);
 
                 try {
                     URL url = new URL(link);
@@ -529,15 +496,11 @@ public class SiteMapParser {
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
-                        if (LOG.isDebugEnabled()){
-                            StringBuffer sb = new StringBuffer("  ");
-                            sb.append(i + 1).append(". ").append(sUrl);
-                            LOG.debug(sb.toString());
-                        }
+                        LOG.debug("  {}. {}", (i + 1), sUrl);
                     }
                 } catch (MalformedURLException e) {
-                    // Can't create an entry with a bad URL
-                    LOG.debug("Bad url: [" + link + "]");
+                    LOG.trace("Can't create an entry with a bad URL", e);
+                    LOG.debug("Bad url: [{}]", link);
                 }
             }
         }
@@ -584,13 +547,13 @@ public class SiteMapParser {
     }
 
     /**
-     * See if testUrl is under sitemapUrl. Only URLs under sitemapUrl are legal.
+     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl are legal.
      * Both URLs are first converted to lowercase before the comparison is made
      * (this could be an issue on web servers that are case sensitive).
      * 
-     * @param sitemapUrl
+     * @param sitemapBaseUrl
      * @param testUrl
-     * @return true if testUrl is under sitemapUrl, false otherwise
+     * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
     private boolean urlIsLegal(String sitemapBaseUrl, String testUrl) {
 
@@ -601,7 +564,7 @@ public class SiteMapParser {
             String u = testUrl.substring(0, sitemapBaseUrl.length()).toLowerCase();
             ret = sitemapBaseUrl.equals(u);
         }
-        if (LOG.isTraceEnabled()){
+        if (LOG.isTraceEnabled()){ // todo After upgrading slf4j to a version greater than v1.6.6 this statement should be upgraded
             StringBuffer sb = new StringBuffer("urlIsLegal: ");
             sb.append(sitemapBaseUrl).append(" <= ").append(testUrl);
             sb.append(" ? ").append(ret);
@@ -610,5 +573,4 @@ public class SiteMapParser {
 
         return ret;
     }
-
 }
