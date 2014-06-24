@@ -283,9 +283,9 @@
 		<httpclient.version>4.2.6</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
 		<tika-core.version>1.4</tika-core.version>
-		<slf4j-api.version>1.6.6</slf4j-api.version>
+		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>4.7</junit.version>
-		<slf4j-log4j12.version>1.6.6</slf4j-log4j12.version>
+		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
 		<mockito-core.version>1.8.0</mockito-core.version>
 		<jetty.version>5.1.10</jetty.version>
 		<servlet-api.version>2.5</servlet-api.version>
@@ -381,7 +381,7 @@
 			<artifactId>servlet-api</artifactId>
 			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
-		</dependency>
+        </dependency>
 
 	</dependencies>
 </project>
