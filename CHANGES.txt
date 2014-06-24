@@ -1,5 +1,8 @@
 Crawler-Commons Change Log
 
+Release x.x
+- Issue 37: Upgrade the Slf4j logging Library to v1.7.7 (avraham2 via kkrugler)
+
 Release 0.4
 - Issue 13: Fix deprecation in Crawler Commons Code (lewismc via kkrugler)
 - Issue 8 : Upgrade of httpclient to v4.2.6 (Fuad Efendi, lewismc via kkrugler)
