@@ -1,7 +1,10 @@
 Crawler-Commons Change Log
 
-Release x.x
+Release 0.5
+- Issue 42: [Sitemaps] Add more JUnit tests (Avi Hayun via lewismc)
 - Issue 37: Upgrade the Slf4j logging Library to v1.7.7 (avraham2 via kkrugler)
+- Issue 41: Upgrade to JUnit v4 conventions in SiteMapParser
+- Issue 34: Upgrade the Slf4j logging in SiteMaps
 
 Release 0.4
 - Issue 13: Fix deprecation in Crawler Commons Code (lewismc via kkrugler)

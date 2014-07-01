@@ -17,11 +17,16 @@
 
 package crawlercommons.sitemaps;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -77,27 +82,6 @@ public class SiteMapParserTest {
     }
 
     @Test
-    public void testSitemapXML() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
-        String contentType = "text/xml";
-        String scontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">" + "  <url>" + "<loc>http://www.example.com/</loc>"
-                        + "<lastmod>2005-01-01</lastmod>" + "<changefreq>monthly</changefreq>" + "<priority>0.8</priority>" + "</url>" + "<url>"
-                        + "<loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>" + "<changefreq>weekly</changefreq>" + "</url>" + "<url>"
-                        + "<loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>" + "<lastmod>2004-12-23</lastmod>" + "<changefreq>weekly</changefreq>" + "</url>" + "<url>"
-                        + "<loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>" + "<lastmod>2004-12-23T18:00:15+00:00</lastmod>" + "<priority>0.3</priority>" + "</url>"
-                        + "<url>" + "<loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>" + "<lastmod>2004-11-23</lastmod>" + "</url>" + "</urlset>";
-        byte[] content = scontent.getBytes();
-        URL url = new URL("http://www.example.com/sitemap.xml");
-
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
-        assertEquals(false, asm.isIndex());
-        assertEquals(true, asm instanceof SiteMap);
-
-        SiteMap sm = (SiteMap) asm;
-        assertEquals(5, sm.getSiteMapUrls().size());
-    }
-
-    @Test
     public void testSitemapTXT() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/plain";
@@ -111,6 +95,55 @@ public class SiteMapParserTest {
 
         SiteMap sm = (SiteMap) asm;
         assertEquals(2, sm.getSiteMapUrls().size());
+    }
+
+    @Test
+    @Ignore
+    public void testSitemapTXTWithXMLExt() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
+        byte[] content = scontent.getBytes();
+        URL url = new URL("http://www.example.com/sitemap.xml");
+        String contentType = "text/plain";
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(2, sm.getSiteMapUrls().size());
+    }
+
+    @Test
+    public void testSitemapXML() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getXMLSitemapAsBytes();
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(5, sm.getSiteMapUrls().size());
+    }
+
+    @Test
+    public void testSitemapXMLMediaTypes() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        byte[] content = getXMLSitemapAsBytes();
+        URL url = new URL("http://www.example.com/sitemap.nonXmlExt");
+
+        // TODO (Avi) Remove "application/x-xml" when changing to Tika MediaType recognition, add it back after release of Tike v1.6
+        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/xml", "application/atom+xml", "application/rss+xml", "application/x-xml"};
+        for (String contentType: XML_CONTENT_TYPES) {
+            AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+            assertEquals(false, asm.isIndex());
+            assertEquals(true, asm instanceof SiteMap);
+            SiteMap sm = (SiteMap) asm;
+            assertEquals(5, sm.getSiteMapUrls().size());
+        }
     }
 
     /**
@@ -130,6 +163,57 @@ public class SiteMapParserTest {
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         parser.parseSiteMap(contentType, content, url); // This Sitemap contains badly formatted XML and can't be read
+    }
+
+    @Test
+    public void testSitemapGZ() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "application/gzip";
+        File gzSitemapFile = new File("src/test/resources/xmlSitemap.gz");
+        InputStream is = new FileInputStream(gzSitemapFile);
+        byte[] content = IOUtils.toByteArray(is);
+
+        URL url = new URL("http://www.example.com/sitemap.xml.gz");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(5, sm.getSiteMapUrls().size());
+    }
+
+    @Test
+    public void testSitemapGZMediaTypes() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        File gzSitemapFile = new File("src/test/resources/xmlSitemap.gz");
+        InputStream is = new FileInputStream(gzSitemapFile);
+        byte[] content = IOUtils.toByteArray(is);
+
+        // TODO (Avi) Remove "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" when changing to Tika MediaType recognition, add them back after release of Tike v1.6
+        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip", "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document"};
+        for (String contentType: GZ_CONTENT_TYPES) {
+            URL url = new URL("http://www.example.com/sitemap");
+            AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+            assertEquals(false, asm.isIndex());
+            assertEquals(true, asm instanceof SiteMap);
+            SiteMap sm = (SiteMap) asm;
+            assertEquals(5, sm.getSiteMapUrls().size());
+        }
+    }
+
+    @Test (expected = UnknownFormatException.class)
+    @Ignore
+    public void testSitemapWithOctetMediaType() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "application/octet-stream";
+        byte[] content = getXMLSitemapAsBytes();
+        URL url = new URL("http://www.example.com/sitemap");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(5, sm.getSiteMapUrls().size());
     }
 
     @Test
@@ -162,5 +246,39 @@ public class SiteMapParserTest {
         sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+
+    /** Returns a good simple default XML sitemap as a byte array */
+    private byte[] getXMLSitemapAsBytes() {
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+                .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+                .append("<url>")
+                .append("  <loc>http://www.example.com/</loc>")
+                .append("  <lastmod>2005-01-01</lastmod>")
+                .append("  <changefreq>monthly</changefreq>")
+                .append("  <priority>0.8</priority>")
+                .append("</url>")
+                .append("<url>")
+                .append("  <loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>")
+                .append("  <changefreq>weekly</changefreq>")
+                .append("</url>")
+                .append("<url>")
+                .append("  <loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>")
+                .append("  <lastmod>2004-12-23</lastmod>")
+                .append("  <changefreq>weekly</changefreq>")
+                .append("</url>")
+                .append("<url>")
+                .append("  <loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>")
+                .append("  <lastmod>2004-12-23T18:00:15+00:00</lastmod>")
+                .append("  <priority>0.3</priority>")
+                .append("</url>")
+                .append("<url>")
+                .append("  <loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>")
+                .append("  <lastmod>2004-11-23</lastmod>")
+                .append("</url>")
+                .append("</urlset>");
+
+        return scontent.toString().getBytes();
     }
 }
