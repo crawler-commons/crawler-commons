@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Release 0.5
+- Issue 39: [Sitemaps] Add the Parser a conviniece method with only a URL argument (Avi Hayun via lewismc)
 - Issue 42: [Sitemaps] Add more JUnit tests (Avi Hayun via lewismc)
 - Issue 37: Upgrade the Slf4j logging Library to v1.7.7 (avraham2 via kkrugler)
 - Issue 41: Upgrade to JUnit v4 conventions in SiteMapParser

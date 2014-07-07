@@ -29,7 +29,10 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.tika.Tika;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -68,7 +71,19 @@ public class SiteMapParser {
     public boolean isStrict() {
         return strict;
     }
-    
+
+    /**
+     * Returns a SiteMap or SiteMapIndex given an online sitemap URL<br/>
+     * Please note that this method is a static method which goes online and fetches the sitemap then parses it<br/><br/>
+     * This method is a convenience method for a user who has a sitemap URL and wants a "Keep it simple" way to parse it.
+     **/
+    public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
+        byte[] bytes = IOUtils.toByteArray(onlineSitemapUrl);
+        String contentType = new Tika().detect(bytes);
+
+        return parseSiteMap(contentType, bytes, onlineSitemapUrl);
+    }
+
     /**
      * Returned a processed copy of an unprocessed sitemap object, i.e. transfer the value of 
      * getLastModified and sets the original sitemap to processed.
@@ -208,6 +223,7 @@ public class SiteMapParser {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             doc = dbf.newDocumentBuilder().parse(is);
         } catch (Exception e) {
+            LOG.debug(e.toString());
             throw new UnknownFormatException("Error parsing XML for: " + sitemapUrl);
         }
 
@@ -564,12 +580,7 @@ public class SiteMapParser {
             String u = testUrl.substring(0, sitemapBaseUrl.length()).toLowerCase();
             ret = sitemapBaseUrl.equals(u);
         }
-        if (LOG.isTraceEnabled()){ // todo After upgrading slf4j to a version greater than v1.6.6 this statement should be upgraded
-            StringBuffer sb = new StringBuffer("urlIsLegal: ");
-            sb.append(sitemapBaseUrl).append(" <= ").append(testUrl);
-            sb.append(" ? ").append(ret);
-            LOG.trace(sb.toString());
-        }
+        LOG.trace("urlIsLegal: {}  <= {}  ? {}", sitemapBaseUrl, testUrl, ret);
 
         return ret;
     }
