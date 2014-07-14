@@ -66,6 +66,12 @@
 			<name>Lewis John McGibbney</name>
 			<email>lewismc [at] apache [dot] org</email>
 		</developer>
+
+		<developer>
+			<id>avi_hayun</id>
+			<name>Avi Hayun</name>
+			<email>avraham2@gmail.com</email>
+		</developer>
 	</developers>
 
 	<build>
