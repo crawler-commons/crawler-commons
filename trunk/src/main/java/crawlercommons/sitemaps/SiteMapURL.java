@@ -17,7 +17,6 @@
 
 package crawlercommons.sitemaps;
 
-// JDK imports
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,17 +165,24 @@ public class SiteMapURL {
 
     /**
      * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
-     * given priority is out of range).
+     * given priority missing or is out of range).
      * 
-     * @param priority
+     * @param priorityStr
      */
-    public void setPriority(String priority) {
+    public void setPriority(String priorityStr) {
+        double priority = defaultPriority;
+
         try {
-            setPriority(Double.parseDouble(priority));
-        } catch (Exception e) { // Will catch NumberFormatException or NullPointerException
-            setPriority(defaultPriority);
-            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, defaultPriority);
+            if (priorityStr == null || priorityStr.isEmpty()) {
+                LOG.debug("This item contains no priority (which is ok as text sitemaps don't have priority for example), defaulting priority value to: {}", defaultPriority);
+            } else {
+                priority = Double.parseDouble(priorityStr);
+            }
+        } catch (NumberFormatException nfe) {
+            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priorityStr, defaultPriority);
         }
+
+        setPriority(priority);
     }
 
     /**

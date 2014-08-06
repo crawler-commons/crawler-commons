@@ -26,7 +26,6 @@ import java.net.URL;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -98,7 +97,6 @@ public class SiteMapParserTest {
     }
 
     @Test
-    @Ignore
     public void testSitemapTXTWithXMLExt() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
@@ -135,8 +133,8 @@ public class SiteMapParserTest {
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap.nonXmlExt");
 
-        // TODO (Avi) Remove "application/x-xml" when changing to Tika MediaType recognition, add it back after release of Tike v1.6
-        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/xml", "application/atom+xml", "application/rss+xml", "application/x-xml"};
+        // TODO (Avi) add "application/x-xml" back after release of Tike v1.6
+        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/xml", "application/atom+xml", "application/rss+xml"};
         for (String contentType: XML_CONTENT_TYPES) {
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
             assertEquals(false, asm.isIndex());
@@ -188,8 +186,8 @@ public class SiteMapParserTest {
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
 
-        // TODO (Avi) Remove "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" when changing to Tika MediaType recognition, add them back after release of Tike v1.6
-        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip", "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document"};
+        // TODO (Avi) Add "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" after release of Tike v1.6
+        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip"};
         for (String contentType: GZ_CONTENT_TYPES) {
             URL url = new URL("http://www.example.com/sitemap");
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -201,7 +199,6 @@ public class SiteMapParserTest {
     }
 
     @Test (expected = UnknownFormatException.class)
-    @Ignore
     public void testSitemapWithOctetMediaType() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/octet-stream";
