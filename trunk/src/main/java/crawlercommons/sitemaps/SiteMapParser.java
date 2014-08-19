@@ -31,6 +31,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.tika.Tika;
@@ -68,6 +69,7 @@ public class SiteMapParser {
     static {
         initMediaTypes();
     }
+    private static Tika tika;
 
     /** True (by default) if invalid URLs should be rejected */
     private boolean strict;
@@ -91,10 +93,22 @@ public class SiteMapParser {
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL<br/>
      * Please note that this method is a static method which goes online and fetches the sitemap then parses it<br/><br/>
      * This method is a convenience method for a user who has a sitemap URL and wants a "Keep it simple" way to parse it.
+     *
+     * @param onlineSitemapUrl URL of the online sitemap
+     * @return AbstractSiteMap object or null if the onlineSitemap is null
      **/
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
+        if (onlineSitemapUrl == null) {
+            return null;
+        }
+
+        if (tika == null) {
+            tika = new Tika();
+        }
+
         byte[] bytes = IOUtils.toByteArray(onlineSitemapUrl);
-        String contentType = new Tika().detect(onlineSitemapUrl);
+        String filename = FilenameUtils.getName(onlineSitemapUrl.getPath());
+        String contentType = tika.detect(bytes, filename);
 
         return parseSiteMap(contentType, bytes, onlineSitemapUrl);
     }
