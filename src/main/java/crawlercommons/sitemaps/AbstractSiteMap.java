@@ -155,7 +155,4 @@ public abstract class AbstractSiteMap {
         // Not successful parsing any dates
         return null;
     }
-
-    // Please ignore this for now - I will upgrade it as a future patch
-//    public abstract Collection<SiteMapURL> getSiteMapUrls();
 }

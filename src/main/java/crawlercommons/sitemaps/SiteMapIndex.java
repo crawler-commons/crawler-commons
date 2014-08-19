@@ -99,14 +99,4 @@ public class SiteMapIndex extends AbstractSiteMap {
     public String toString() {
         return "url = \"" + url + "\", sitemapListSize = " + sitemaps.size();
     }
-
-    // Please ignore this for now - I will use it in a near future patch
-//    public Collection<SiteMapURL> getSiteMapUrls() {
-//        Collection<SiteMapURL> siteMapUrls = new ArrayList<SiteMapURL>();
-//        for (AbstractSiteMap asm : sitemaps.values()) {
-//            siteMapUrls.addAll(asm.getSiteMapUrls()); // recursive
-//        }
-//
-//        return siteMapUrls;
-//    }
 }
