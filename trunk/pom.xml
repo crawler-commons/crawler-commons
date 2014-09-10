@@ -288,7 +288,7 @@
 
 		<httpclient.version>4.2.6</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
-		<tika-core.version>1.4</tika-core.version>
+		<tika-core.version>1.6</tika-core.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>4.7</junit.version>
 		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>

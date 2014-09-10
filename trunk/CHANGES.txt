@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Release 0.5
+- Issue 48:	Upgraded to Tika 1.6 (jnioche)
 - Issue 47:	[Sitemaps] SiteMapParser Tika detection doesn't work well on some cases (Avi Hayun)
 - Issue 40:	[Sitemaps] Add Tika MediaType Support (Avi Hayun)
 - Issue 39: [Sitemaps] Add the Parser a convenience method with only a URL argument (Avi Hayun via lewismc)
