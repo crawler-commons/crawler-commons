@@ -620,18 +620,13 @@ public class SiteMapParser {
         XML_MEDIA_TYPES.add(APPLICATION_XML);
         XML_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(APPLICATION_XML));
 
-            /* TEXT media types (and all aliases) */
+        /* TEXT media types (and all aliases) */
         TEXT_MEDIA_TYPES.add(TEXT_PLAIN);
         TEXT_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(TEXT_PLAIN));
 
-            /* GZIP media types (and all aliases) */
+        /* GZIP media types (and all aliases) */
         MediaType gzipMediaType = MediaType.parse("application/gzip");
         GZ_MEDIA_TYPES.add(gzipMediaType);
         GZ_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(gzipMediaType));
-
-        // TODO Remove the following two lines which are a workaround till v1.6 of Tika which will fix recognition of GZIP
-        GZ_MEDIA_TYPES.add(MediaType.parse("application/x-gzip"));
-        GZ_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(MediaType.parse("application/x-gzip")));
-        // The MediaType according to Wikipedia is application/gzip, while in the TIKA DB it is: "application/x-gzip" and the "application/gzip"  is totally left out (not even an alias) !?
     }
 }

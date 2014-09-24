@@ -133,8 +133,7 @@ public class SiteMapParserTest {
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap.nonXmlExt");
 
-        // TODO (Avi) add "application/x-xml" back after release of Tike v1.6
-        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/xml", "application/atom+xml", "application/rss+xml"};
+        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/x-xml", "application/xml", "application/atom+xml", "application/rss+xml"};
         for (String contentType: XML_CONTENT_TYPES) {
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
             assertEquals(false, asm.isIndex());
@@ -186,8 +185,8 @@ public class SiteMapParserTest {
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
 
-        // TODO (Avi) Add "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" after release of Tike v1.6
-        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip"};
+        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip", "application/x-gunzip",
+           "application/gzipped", "application/gzip-compressed", "gzip/document"};
         for (String contentType: GZ_CONTENT_TYPES) {
             URL url = new URL("http://www.example.com/sitemap");
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
