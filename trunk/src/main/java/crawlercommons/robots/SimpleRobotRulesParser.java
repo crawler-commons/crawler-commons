@@ -494,7 +494,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             // TODO KKr - catch case of multiple names, log as non-standard.
             String[] agentNames = token.getData().split("[ \t,]");
             for (String agentName : agentNames) {
-                if (agentName.equals("*") && !state.isMatchedWildcard()) {
+                agentName = agentName.trim();
+                if (agentName.isEmpty()) {
+                    // Ignore empty names
+                } else if (agentName.equals("*") && !state.isMatchedWildcard()) {
                     state.setMatchedWildcard(true);
                     state.setAddingRules(true);
                 } else {

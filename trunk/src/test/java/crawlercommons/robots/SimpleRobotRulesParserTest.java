@@ -854,6 +854,27 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
    }
     
+    @Test
+    public void testSpacesInMultipleUserAgentNames() throws Exception {
+        final String simpleRobotsTxt = "User-agent: One, Two, Three" + CRLF
+                        + "Disallow: /" + CRLF
+                        + "" + CRLF
+                        + "User-agent: *" + CRLF
+                        + "Allow: /" + CRLF;
+
+        BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt.getBytes());
+        assertFalse(rules.isAllowed("http://www.fict.com/fish"));
+
+        rules = createRobotRules("Two", simpleRobotsTxt.getBytes());
+        assertFalse(rules.isAllowed("http://www.fict.com/fish"));
+
+        rules = createRobotRules("Three", simpleRobotsTxt.getBytes());
+        assertFalse(rules.isAllowed("http://www.fict.com/fish"));
+
+        rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        assertTrue(rules.isAllowed("http://www.fict.com/fish"));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);
