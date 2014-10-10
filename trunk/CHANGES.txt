@@ -1,10 +1,10 @@
 Crawler-Commons Change Log
 
-Release 0.5
-- Issue 45:	[Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
-- Issue 48:	Upgraded to Tika 1.6 (jnioche)
-- Issue 47:	[Sitemaps] SiteMapParser Tika detection doesn't work well on some cases (Avi Hayun)
-- Issue 40:	[Sitemaps] Add Tika MediaType Support (Avi Hayun)
+Release 0.5 - 09/10/2014 (dd/mm/yyyy)
+- Issue 45: [Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
+- Issue 48: Upgraded to Tika 1.6 (jnioche)
+- Issue 47: [Sitemaps] SiteMapParser Tika detection doesn't work well on some cases (Avi Hayun)
+- Issue 40: [Sitemaps] Add Tika MediaType Support (Avi Hayun)
 - Issue 39: [Sitemaps] Add the Parser a convenience method with only a URL argument (Avi Hayun via lewismc)
 - Issue 42: [Sitemaps] Add more JUnit tests (Avi Hayun via lewismc)
 - Issue 37: Upgrade the Slf4j logging Library to v1.7.7 (Avi Hayun via kkrugler)
