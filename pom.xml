@@ -30,6 +30,13 @@
 		<url>http://crawler-commons.googlecode.com/svn/trunk</url>
 	</scm>
 
+	<distributionManagement>
+		<repository>
+		<id>sonatype-nexus-staging</id>
+		<name>Nexus Staging Repository</name>
+		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<issueManagement>
 		<system>Google Issues</system>
@@ -318,7 +325,6 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
 		<skipTests>false</skipTests>
 		<assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
-		<downloads.url>http://www.apache.org/dist/gora</downloads.url>
 	</properties>
 
 	<dependencies>
