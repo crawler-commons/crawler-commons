@@ -61,7 +61,7 @@ Before we commit the tag and set ourselves up for the next development drive, we
   * `% mvn release:clean release:prepare`
 
 N.B. If the final command fails this may be due to non-interactive mode being activated in your local SVN client.
-This can easily be overcome by explicitely passing in the -Dusername=${username} -Dpassword={password} arguments
+This can easily be overcome by explicitely passing in the -Dusername=${username} -Dpassword=${password} arguments
 to the command. Your username and password can be located within your GoogleCode profile.
 
 This will create and commit the release tag and bump the development version in the pom.xml file.
@@ -71,6 +71,22 @@ This will create and commit the release tag and bump the development version in 
 This will build the pom, jar, javadoc, signatures and sources, and push them to the Sonatype staging repository
 
   * `% mvn release:perform`
+
+If this command fails, ensure that you have the sonatype server configuration within your ~/.m2/settings.xml as follows
+
+{{{
+<settings>
+  <servers>
+    ...
+    <server>
+      <id>sonatype-nexus-staging</id>
+      <username>${nexus_username}</username>
+      <password>${nexus_password}</password>
+    </server>
+    ...
+}}}
+
+
 
 *Close the Sonatype Staging Repository* 
 
