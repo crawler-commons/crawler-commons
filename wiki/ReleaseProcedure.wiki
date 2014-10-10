@@ -60,6 +60,10 @@ Before we commit the tag and set ourselves up for the next development drive, we
   * `% cd trunk`
   * `% mvn release:clean release:prepare`
 
+N.B. If the final command fails this may be due to non-interactive mode being activated in your local SVN client.
+This can easily be overcome by explicitely passing in the -Dusername=${username} -Dpassword={password} arguments
+to the command. Your username and password can be located within your GoogleCode profile.
+
 This will create and commit the release tag and bump the development version in the pom.xml file.
   
 *Build & Deploy to Sonatype*
