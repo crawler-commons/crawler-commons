@@ -18,6 +18,7 @@
 package crawlercommons.fetcher;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 
 import org.apache.tika.metadata.Metadata;
 
@@ -39,33 +40,33 @@ public class FetchedResult {
     
     public FetchedResult(   String baseUrl,
                             String redirectedUrl,
-	                        long fetchTime,
-	                        Metadata headers, 
-	                        byte[] content,
-	                        String contentType,
-	                        int responseRate,
-	                        Payload payload,
-	                        String newBaseUrl,
-	                        int numRedirects,
-	                        String hostAddress,
-	                        int statusCode,
-	                        String reasonPhrase) {
+                          long fetchTime,
+                          Metadata headers, 
+                          byte[] content,
+                          String contentType,
+                          int responseRate,
+                          Payload payload,
+                          String newBaseUrl,
+                          int numRedirects,
+                          String hostAddress,
+                          int statusCode,
+                          String reasonPhrase) {
         _payload = payload;
-		
-		if (baseUrl == null) {
-        	throw new InvalidParameterException("baseUrl cannot be null");
+
+        if (baseUrl == null) {
+            throw new InvalidParameterException("baseUrl cannot be null");
         }
         
         if (redirectedUrl == null) {
-        	throw new InvalidParameterException("redirectedUrl cannot be null");
+            throw new InvalidParameterException("redirectedUrl cannot be null");
         }
         
         if (headers == null) {
-        	throw new InvalidParameterException("headers cannot be null");
+            throw new InvalidParameterException("headers cannot be null");
         }
         
         if (content == null) {
-        	throw new InvalidParameterException("content cannot be null");
+            throw new InvalidParameterException("content cannot be null");
         }
         
         if (contentType == null) {
@@ -75,7 +76,7 @@ public class FetchedResult {
         if (hostAddress == null) {
             throw new InvalidParameterException("hostAddress cannot be null");
         }
-        
+         
         _baseUrl = baseUrl;
         _fetchedUrl = redirectedUrl;
         _fetchTime = fetchTime;
@@ -115,7 +116,7 @@ public class FetchedResult {
 	}
 
 	public int getContentLength() {
-	    return _content.length;
+	        return _content.length;
 	}
 	
 	public String getContentType() {
@@ -139,14 +140,53 @@ public class FetchedResult {
 	}
 
 	public String getHostAddress() {
-        return _hostAddress;
-    }
+                return _hostAddress;
+       } 
 	
 	public int getStatusCode() {
-	    return _statusCode;
+	        return _statusCode;
 	}
 
 	public String getReasonPhrase() {
-	    return _reasonPhrase;
+	        return _reasonPhrase;
 	}
+	
+	/**
+	 * Produces a neat report containing everything from a {@link FetchedResult}.
+	 * The order of the report is based on the logical population of FetchedReport 
+	 * entities as per a non-public algorithm within 
+	 * {@link crawlercommons.fetcher.http.SimpleHttpFetcher}.
+	 * @return returns a String report of the FetchedResult.
+	 */
+         public String report() {
+             StringBuilder report = new StringBuilder();
+             report.append("FetchedResult Report:\n");
+             report.append("*********************\n");
+             report.append("    BaseUrl       : " + getBaseUrl() +"\n");
+             report.append("    Headers       : __\n");  //Map Tika Metadata to individual string entries
+             for (String header : getHeaders().names()) {
+                 String mdString = getHeaders().get(header) + Arrays.toString(getHeaders().getValues(header));
+                 report.append("                   " + mdString + "\n"); 
+             }
+             report.append("    StatusCode    : " + getStatusCode() +"\n");
+             report.append("    ReasonPhrase  : " + getReasonPhrase() +"\n");
+             report.append("    NumRedirects  : " + getNumRedirects() +"\n");
+             report.append("    NewBaseUrl    : " + getNewBaseUrl() +"\n");
+             report.append("    HostAddress   : " + getHostAddress() +"\n");
+             report.append("    ResponseRate  : " + getResponseRate() +"\n");
+             report.append("    PayLoad       : __\n"); //Map Keysets to individual string entries
+             for (String payLoad : getPayload().keySet()) {
+                 String payString = payLoad + getPayload().get(payLoad);
+                 report.append("                   " + payString + "\n"); 
+             }
+             report.append("    FetchTime     : " + getFetchTime() +"\n");
+             report.append("    FetchedUrl    : " + getFetchedUrl() +"\n");
+             report.append("    ContentType   : " + getContentType() +"\n");
+             report.append("    ContentLength : " + getContentLength() +"\n");
+             report.append("    Content       : " + new String(getContent()) +"\n"); //byte array to string
+             report.append("*********************\n");
+             report.append("End of Report:\n");
+             return report.toString();
+    
+         }
 }
