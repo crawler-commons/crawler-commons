@@ -2,6 +2,7 @@ Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
+- Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value
 
 Release 0.5 - 09/10/2014 (dd/mm/yyyy)
 - Issue 53:	Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
