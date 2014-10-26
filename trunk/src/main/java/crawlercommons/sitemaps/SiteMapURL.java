@@ -170,19 +170,17 @@ public class SiteMapURL {
      * @param priorityStr
      */
     public void setPriority(String priorityStr) {
-        double priority = defaultPriority;
-
         try {
             if (priorityStr == null || priorityStr.isEmpty()) {
                 LOG.debug("This item contains no priority (which is ok as text sitemaps don't have priority for example), defaulting priority value to: {}", defaultPriority);
+                this.priority = defaultPriority;
             } else {
-                priority = Double.parseDouble(priorityStr);
+                setPriority(Double.parseDouble(priorityStr));
             }
         } catch (NumberFormatException nfe) {
-            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priorityStr, defaultPriority);
+            LOG.warn("Can't set the priority, because I can't understand this value: {}, Priority should be between 0 to 1, reverting to default priority value: {}", priorityStr, defaultPriority);
+            this.priority = defaultPriority;
         }
-
-        setPriority(priority);
     }
 
     /**
