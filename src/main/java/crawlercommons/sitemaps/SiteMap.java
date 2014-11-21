@@ -120,13 +120,9 @@ public class SiteMap extends AbstractSiteMap {
      * @param sitemapUrl
      */
     private void setBaseUrl(URL sitemapUrl) {
-        baseUrl = sitemapUrl.toString().toLowerCase();
-
-        // baseUrl = "http://foo.org/abc/sitemap.xml";
-
         // Remove everything back to last slash.
         // So http://foo.org/abc/sitemap.xml becomes http://foo.org/abc/
-        baseUrl = baseUrl.replaceFirst("/[^/]*$", "/");
+        baseUrl = sitemapUrl.toString().replaceFirst("/[^/]*$", "/");
     }
 
     /**

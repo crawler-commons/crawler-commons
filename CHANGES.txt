@@ -1,8 +1,9 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT
+- Issue 56: [Sitemaps] SiteMap.setBaseUrl(...) causes the domain name to be lowered case which shouldn't happen (Avi Hayun)
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
-- Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value
+- Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value (Avi Hayun)
 
 Release 0.5 - 09/10/2014 (dd/mm/yyyy)
 - Issue 53:	Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
