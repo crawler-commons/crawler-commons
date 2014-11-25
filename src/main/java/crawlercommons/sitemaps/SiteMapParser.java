@@ -114,13 +114,12 @@ public class SiteMapParser {
     }
 
     /**
-     * Returns a processed copy of an unprocessed sitemap object, i.e. transfer the value of
-     * getLastModified and sets the original sitemap to processed.
+     * Returns a processed copy of an unprocessed sitemap object, i.e. transfer the value of getLastModified
+     * Please note that the sitemap input stays unchanged
      **/  
-    public AbstractSiteMap parseSiteMap(String contentType, byte[] content, AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
+    public AbstractSiteMap parseSiteMap(String contentType, byte[] content, final AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
         AbstractSiteMap asmCopy =  parseSiteMap(contentType, content, sitemap.getUrl());
         asmCopy.setLastModified(sitemap.getLastModified());
-        sitemap.setProcessed(true);        
         return asmCopy;
     }
 
