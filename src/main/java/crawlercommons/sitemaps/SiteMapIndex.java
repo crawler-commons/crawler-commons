@@ -20,16 +20,15 @@ package crawlercommons.sitemaps;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Map.Entry;
+import java.util.List;
 
 public class SiteMapIndex extends AbstractSiteMap {
 
     /** URLs found in this Sitemap Index */
-    private Hashtable<String, AbstractSiteMap> sitemaps;
+    private List<AbstractSiteMap> sitemaps;
 
     public SiteMapIndex() {
-        sitemaps = new Hashtable<String, AbstractSiteMap>();
+        sitemaps = new ArrayList<AbstractSiteMap>();
     }
 
     public SiteMapIndex(URL url) {
@@ -41,7 +40,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return a Collection of Sitemaps in this Sitemap Index.
      */
     public Collection<AbstractSiteMap> getSitemaps() {
-        return sitemaps.values();
+        return sitemaps;
     }
 
     /**
@@ -51,7 +50,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      *            - Sitemap to be added to the list of Sitemaps
      */
     void addSitemap(AbstractSiteMap sitemap) {
-        sitemaps.put(sitemap.getUrl().toString(), sitemap);
+        sitemaps.add(sitemap);
     }
 
     /**
@@ -63,7 +62,13 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return SiteMap corresponding to the URL or null
      */
     public AbstractSiteMap getSitemap(URL url) {
-        return sitemaps.get(url.toString());
+        for (AbstractSiteMap asm : sitemaps) {
+            if (asm.getUrl().equals(url)) {
+                return asm;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -80,8 +85,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could be found.
      */
     public AbstractSiteMap nextUnprocessedSitemap() {
-        for (Entry<String, AbstractSiteMap> sitemap : sitemaps.entrySet()) {
-        	AbstractSiteMap asm = sitemap.getValue();
+        for (AbstractSiteMap asm : sitemaps) {
             if (!asm.isProcessed()) {
                 return asm;
             }
