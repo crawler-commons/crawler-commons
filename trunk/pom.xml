@@ -293,7 +293,7 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<httpclient.version>4.2.6</httpclient.version>
+		<httpclient.version>4.3.5</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
 		<tika-core.version>1.6</tika-core.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>

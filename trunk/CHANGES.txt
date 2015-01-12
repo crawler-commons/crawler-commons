@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT
+- Issue 51:	Upgrade httpclient to the latest version
 - Issue 61:	[Sitemaps] Sitemap Parser changes the processed flag unnecessarily (Avi Hayun)
 - Issue 56: [Sitemaps] SiteMap.setBaseUrl(...) causes the domain name to be lowered case which shouldn't happen (Avi Hayun)
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
