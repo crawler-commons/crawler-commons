@@ -19,9 +19,7 @@ package crawlercommons.sitemaps;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Hashtable;
+import java.util.*;
 
 public class SiteMap extends AbstractSiteMap {
 
@@ -34,12 +32,12 @@ public class SiteMap extends AbstractSiteMap {
     private String baseUrl;
 
     /** URLs found in this Sitemap */
-    private Hashtable<String, SiteMapURL> urlList;
+    private List<SiteMapURL> urlList;
 
     public SiteMap() {
     	super();
     	
-        urlList = new Hashtable<String, SiteMapURL>();
+        urlList = new ArrayList<SiteMapURL>();
         setProcessed(false);
     }
 
@@ -67,7 +65,7 @@ public class SiteMap extends AbstractSiteMap {
      * @return the Collection of SitemapUrls in this Sitemap.
      */
     public Collection<SiteMapURL> getSiteMapUrls() {
-        return urlList.values();
+        return urlList;
     }
 
     /**
@@ -137,7 +135,7 @@ public class SiteMap extends AbstractSiteMap {
      *            The SitemapUrl to be added to the Sitemap.
      */
     public void addSiteMapUrl(SiteMapURL url) {
-        urlList.put(url.getUrl().toString(), url);
+        urlList.add(url);
     }
 
     public boolean isIndex() {

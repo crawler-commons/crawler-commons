@@ -239,7 +239,25 @@ public class SiteMapURL {
     public boolean isValid() {
         return valid;
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SiteMapURL that = (SiteMapURL) o;
+
+        if (!url.equals(that.url)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("url = \"").append(url).append("\"");
