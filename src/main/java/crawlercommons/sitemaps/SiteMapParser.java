@@ -101,16 +101,8 @@ public class SiteMapParser {
         if (onlineSitemapUrl == null) {
             return null;
         }
-
-        if (tika == null) {
-            tika = new Tika();
-        }
-
         byte[] bytes = IOUtils.toByteArray(onlineSitemapUrl);
-        String filename = FilenameUtils.getName(onlineSitemapUrl.getPath());
-        String contentType = tika.detect(bytes, filename);
-
-        return parseSiteMap(contentType, bytes, onlineSitemapUrl);
+        return parseSiteMap(bytes, onlineSitemapUrl);
     }
 
     /**
@@ -123,6 +115,23 @@ public class SiteMapParser {
         return asmCopy;
     }
 
+	/**
+	 * @return SiteMap/SiteMapIndex by guessing the content type from the binary
+	 *         content and URL
+	 **/
+	public AbstractSiteMap parseSiteMap(byte[] content, URL url)
+			throws UnknownFormatException, IOException {
+		if (tika == null) {
+			tika = new Tika();
+		}
+		if (url == null) {
+			return null;
+		}
+		String filename = FilenameUtils.getName(url.getPath());
+		String contentType = tika.detect(content, filename);
+		return parseSiteMap(contentType, content, url);
+	}
+    
     /**
      * @return SiteMap/SiteMapIndex given a content type, byte content and the URL of a sitemap
      **/
