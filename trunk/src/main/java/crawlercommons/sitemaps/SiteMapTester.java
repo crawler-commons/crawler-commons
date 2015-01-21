@@ -14,9 +14,14 @@ public class SiteMapTester {
     private void parse(URL url, String mt, boolean recursive) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
 
-        AbstractSiteMap sm = parser.parseSiteMap(mt, content, url);
-
-        // System.out.println(sm.toString());
+        AbstractSiteMap sm = null;
+        
+        // guesses the mimetype
+        if (mt == null || mt.equals("")){
+        	sm = parser.parseSiteMap(content, url);
+        }
+        else 
+        	sm = parser.parseSiteMap(mt, content, url);
 
         if (recursive && sm.isIndex()) {
             Collection<AbstractSiteMap> links = ((SiteMapIndex) sm).getSitemaps();
@@ -38,7 +43,7 @@ public class SiteMapTester {
 
         URL url = new URL(args[0]);
 
-        String mt = "";
+        String mt = null;
 
         if (args.length > 1)
             mt = args[1];
