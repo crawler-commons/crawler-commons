@@ -625,12 +625,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         
         String sitemap = token.getData();
         try {
-            String hostname = new URL(sitemap).getHost();
+        	URL sitemap_url = new URL(new URL(state.getUrl()), sitemap);
+            String hostname = sitemap_url.getHost();
             if ((hostname != null) && (hostname.length() > 0)) {
-                hostname = new URI(sitemap).getHost();
-                if ((hostname != null) && (hostname.length() > 0)) {
-                    state.addSitemap(sitemap);
-                }
+            	 state.addSitemap(sitemap_url.toExternalForm());
             }
         } catch (Exception e) {
             reportWarning("Invalid URL with sitemap directive: " + sitemap, state.getUrl());
