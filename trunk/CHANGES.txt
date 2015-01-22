@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT
+- Issue 32: [Robots] Resolve relative URL for sitemaps (jnioche)
 - Issue 62: [Sitemaps] Add new parseSiteMap method (jnioche)
 - Issue 57:	[Sitemaps] SiteMap should contain a list of SitemapUrls instead of a table of them
 - Issue 51:	Upgrade httpclient to the latest version
