@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
-Current Development 0.6-SNAPSHOT
+Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
+- Issue 59: [Robots] Let SimpleRobotRules and its members implements the Serializable interface  (kkrugler)
 - Issue 65:	[Sitemaps] Make SiteMapTool simpler by removing the Recursive flag (Avi Hayun)
 - Issue 64: Upgraded to Tika 1.7 (jnioche)
 - Issue 32: [Robots] Resolve relative URL for sitemaps (jnioche)
@@ -12,7 +13,7 @@ Current Development 0.6-SNAPSHOT
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
 - Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value (Avi Hayun)
 
-Release 0.5 - 09/10/2014 (dd/mm/yyyy)
+Release 0.5 - 09/10/2014
 - Issue 53:	Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
 - Issue 45: [Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
 - Issue 48: Upgraded to Tika 1.6 (jnioche)
