@@ -17,6 +17,7 @@
 
 package crawlercommons.robots;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Collections;
  * get a set of rules, and a crawl-delay.
  */
 
+@SuppressWarnings("serial")
 public class SimpleRobotRules extends BaseRobotRules {
 
     public enum RobotRulesMode {
@@ -63,6 +65,41 @@ public class SimpleRobotRules extends BaseRobotRules {
                 return 1;
             }
         }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (_allow ? 1231 : 1237);
+            result = prime * result + ((_prefix == null) ? 0 : _prefix.hashCode());
+            return result;
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            RobotRule other = (RobotRule) obj;
+            if (_allow != other._allow)
+                return false;
+            if (_prefix == null) {
+                if (other._prefix != null)
+                    return false;
+            } else if (!_prefix.equals(other._prefix))
+                return false;
+            return true;
+        }
+
     }
 
 
@@ -250,4 +287,39 @@ public class SimpleRobotRules extends BaseRobotRules {
     public boolean isAllowNone() {
         return _mode == RobotRulesMode.ALLOW_NONE;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((_mode == null) ? 0 : _mode.hashCode());
+        result = prime * result + ((_rules == null) ? 0 : _rules.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SimpleRobotRules other = (SimpleRobotRules) obj;
+        if (_mode != other._mode)
+            return false;
+        if (_rules == null) {
+            if (other._rules != null)
+                return false;
+        } else if (!_rules.equals(other._rules))
+            return false;
+        return true;
+    }
+    
 }
