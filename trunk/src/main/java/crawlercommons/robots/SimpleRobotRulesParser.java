@@ -228,12 +228,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             int prefixLength = prefix.length();
             if (lowerLine.startsWith(prefix)) {
                 RobotDirective directive = DIRECTIVE_PREFIX.get(prefix);
-                String dataPortion = lowerLine.substring(prefixLength);
+                String dataPortion = line.substring(prefixLength);
 
-                // preserve the original case for sitemaps
-                if (directive.equals(RobotDirective.SITEMAP))
-                    dataPortion = line.substring(prefixLength);
-                
                 if (directive.isPrefix()) {
                     Matcher m = DIRECTIVE_SUFFIX_PATTERN.matcher(dataPortion);
                     if (m.matches()) {
@@ -242,6 +238,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                         continue;
                     }
                 }
+                
                 Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(dataPortion);
                 if (!m.matches()) {
                     m = BLANK_DIRECTIVE_DELIMITER.matcher(dataPortion);
@@ -484,7 +481,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
        
         // Handle the case when there are multiple target names are passed
-        String[] targetNames = state.getTargetName().split(","); 
+        // TODO should we do lowercase comparison of target name? Assuming yes.
+        String[] targetNames = state.getTargetName().toLowerCase().split(","); 
 
         for(int count = 0; count < targetNames.length; count++) {
             // Extract possible match names from our target agent name, since it appears
@@ -494,13 +492,15 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             // TODO KKr - catch case of multiple names, log as non-standard.
             String[] agentNames = token.getData().split("[ \t,]");
             for (String agentName : agentNames) {
-                agentName = agentName.trim();
+                // TODO should we do case-insensitive matching? Probably yes.
+                agentName = agentName.trim().toLowerCase();
                 if (agentName.isEmpty()) {
                     // Ignore empty names
                 } else if (agentName.equals("*") && !state.isMatchedWildcard()) {
                     state.setMatchedWildcard(true);
                     state.setAddingRules(true);
                 } else {
+                    // TODO use longest match as winner
                     for (String targetName : targetNameSplits) {
                         if (targetName.startsWith(agentName)) {
                             state.setMatchedRealName(true);

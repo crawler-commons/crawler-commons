@@ -61,58 +61,100 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testPatternMatching() throws Exception{
+    public void testGooglePatternMatching() throws Exception {
+        
+        // Test for /fish
         final String simpleRobotsTxt1 = "User-agent: *" + CRLF
-                + "Disallow: /fish*" + CRLF;
+                        + "Disallow: /fish" + CRLF;
 
         BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1.getBytes());
-        assertTrue(rule1.isAllowed("http://www.fict.com/fis"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish.html"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish/salmon.html"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fishheads"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fishheads/yummy.html"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish.php?id=anything"));
+        
+        assertTrue(rule1.isAllowed("http://www.fict.com/Fish.asp"));
         assertTrue(rule1.isAllowed("http://www.fict.com/catfish"));
         assertTrue(rule1.isAllowed("http://www.fict.com/?id=fish"));
+        assertTrue(rule1.isAllowed("http://www.fict.com/fis"));
 
+        // Test for /fish*
         final String simpleRobotsTxt2 = "User-agent: *" + CRLF
-                + "Disallow: /*.php" + CRLF;
+                + "Disallow: /fish*" + CRLF;
 
         BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2.getBytes());
-        assertFalse(rule2.isAllowed("http://www.fict.com/filename.php"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/folder/filename.php"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/folder/filename.php?parameters"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/folder/any.php.file.html"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/filename.php/"));
-        assertTrue(rule2.isAllowed("http://www.fict.com/"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fish"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fish.html"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fish/salmon.html"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fishheads"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fishheads/yummy.html"));
+        assertFalse(rule2.isAllowed("http://www.fict.com/fish.php?id=anything"));
+        
+        assertTrue(rule2.isAllowed("http://www.fict.com/Fish.asp"));
+        assertTrue(rule2.isAllowed("http://www.fict.com/catfish"));
+        assertTrue(rule2.isAllowed("http://www.fict.com/?id=fish"));
+        assertTrue(rule2.isAllowed("http://www.fict.com/fis"));
 
+        // Test for /fish/
         final String simpleRobotsTxt3 = "User-agent: *" + CRLF
-                + "Disallow: /*.php$" + CRLF;
+                        + "Disallow: /fish/" + CRLF;
 
         BaseRobotRules rule3 = createRobotRules("Any-darn-crawler", simpleRobotsTxt3.getBytes());
-        assertFalse(rule3.isAllowed("http://www.fict.com/filename.php"));
-        assertFalse(rule3.isAllowed("http://www.fict.com/folder/filename.php"));
-        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php?parameters"));
-        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php/"));
-        assertTrue(rule3.isAllowed("http://www.fict.com/filename.php5"));
+        assertFalse(rule3.isAllowed("http://www.fict.com/fish/"));
+        assertFalse(rule3.isAllowed("http://www.fict.com/fish/?id=anything"));
+        assertFalse(rule3.isAllowed("http://www.fict.com/fish/salmon.htm"));
+        
+        assertTrue(rule3.isAllowed("http://www.fict.com/fish"));
+        assertTrue(rule3.isAllowed("http://www.fict.com/fish.html"));
+        assertTrue(rule3.isAllowed("http://www.fict.com/Fish/Salmon.asp"));
 
+        // Test for /*.php
         final String simpleRobotsTxt4 = "User-agent: *" + CRLF
-                        + "Disallow: /fish*.php" + CRLF;
+                + "Disallow: /*.php" + CRLF;
 
         BaseRobotRules rule4 = createRobotRules("Any-darn-crawler", simpleRobotsTxt4.getBytes());
-        assertFalse(rule4.isAllowed("http://www.fict.com/fish.php"));
-        assertFalse(rule4.isAllowed("http://www.fict.com/fishheads/catfish.php?parameters"));
-        assertTrue(rule4.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/filename.php"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php?parameters"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/folder/any.php.file.html"));
+        assertFalse(rule4.isAllowed("http://www.fict.com/filename.php/"));
         
-        // Test rule with multiple '*' characters
+        assertTrue(rule4.isAllowed("http://www.fict.com/"));
+        assertTrue(rule4.isAllowed("http://www.fict.com/windows.PHP"));
+
+        // Test for /*.php$
         final String simpleRobotsTxt5 = "User-agent: *" + CRLF
-                        + "Disallow: /*fish*.php" + CRLF;
+                + "Disallow: /*.php$" + CRLF;
 
         BaseRobotRules rule5 = createRobotRules("Any-darn-crawler", simpleRobotsTxt5.getBytes());
-        assertFalse(rule5.isAllowed("http://www.fict.com/fish.php"));
-        assertFalse(rule5.isAllowed("http://www.fict.com/superfishheads/catfish.php?parameters"));
-        assertTrue(rule5.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
+        assertFalse(rule5.isAllowed("http://www.fict.com/filename.php"));
+        assertFalse(rule5.isAllowed("http://www.fict.com/folder/filename.php"));
+        
+        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php?parameters"));
+        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php/"));
+        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php5"));
+        assertTrue(rule5.isAllowed("http://www.fict.com/windows.PHP"));
+
+        // Test for /fish*.php
+        final String simpleRobotsTxt6 = "User-agent: *" + CRLF
+                        + "Disallow: /fish*.php" + CRLF;
+
+        BaseRobotRules rule6 = createRobotRules("Any-darn-crawler", simpleRobotsTxt6.getBytes());
+        assertFalse(rule6.isAllowed("http://www.fict.com/fish.php"));
+        assertFalse(rule6.isAllowed("http://www.fict.com/fishheads/catfish.php?parameters"));
+        
+        assertTrue(rule6.isAllowed("http://www.fict.com/Fish.PHP"));
+        
+        // Test rule with multiple '*' characters
+        final String simpleRobotsTxt7 = "User-agent: *" + CRLF
+                        + "Disallow: /*fish*.php" + CRLF;
+
+        BaseRobotRules rule7 = createRobotRules("Any-darn-crawler", simpleRobotsTxt7.getBytes());
+        assertFalse(rule7.isAllowed("http://www.fict.com/fish.php"));
+        assertFalse(rule7.isAllowed("http://www.fict.com/superfishheads/catfish.php?parameters"));
+        assertTrue(rule7.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
     }
     
     @Test
@@ -540,8 +582,10 @@ public class SimpleRobotRulesParserTest {
         + "Disallow: /";
 
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
-        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/SomePage.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/AnyPage.html"));
+        assertFalse(rules.isAllowed("http://www.domain.com/anypage.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/somepage.html"));
+        assertFalse(rules.isAllowed("http://www.domain.com/SomePage.html"));
     }
     
     
