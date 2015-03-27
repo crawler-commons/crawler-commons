@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
+- Issue 68: [Robots] Path matching should be case-sensitive (kkrugler)
+- Issue 67: [Sitemaps] Parsing of lastMod date should use time portion (kkrugler)
 - Issue 59: [Robots] Let SimpleRobotRules and its members implements the Serializable interface  (kkrugler)
 - Issue 65:	[Sitemaps] Make SiteMapTool simpler by removing the Recursive flag (Avi Hayun)
 - Issue 64: Upgraded to Tika 1.7 (jnioche)
