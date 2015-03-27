@@ -22,6 +22,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -59,7 +62,7 @@ public class SiteMapParserTest {
                 .append("  <lastmod>2005-01-01</lastmod>")
                 .append("</sitemap>")
                 .append("</sitemapindex>");
-        byte[] content = scontent.toString().getBytes();
+        byte[] content = scontent.toString().getBytes("UTF-8");
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -73,11 +76,22 @@ public class SiteMapParserTest {
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap1.xml.gz", currentSiteMap.getUrl().toString());
         assertEquals(SiteMap.convertToDate("2004-10-01T18:23:17+00:00"), currentSiteMap.getLastModified());
-
+        
+        assertTrue(currentSiteMap.toString().contains("T18:23"));
+        
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/sitemap2.xml.gz"));
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap2.xml.gz", currentSiteMap.getUrl().toString());
         assertEquals(SiteMap.convertToDate("2005-01-01"), currentSiteMap.getLastModified());
+    }
+
+    @Test
+    public void testFullDateFormat() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00");
+        
+        Date date = new Date();
+        System.out.println(format.format(date));
+        System.out.println(SiteMap.getFullDateFormat().format(date));
     }
 
     @Test

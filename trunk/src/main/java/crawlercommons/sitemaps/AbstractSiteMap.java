@@ -23,6 +23,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.bind.DatatypeConverter;
 
 /** SiteMap or SiteMapIndex**/
 public abstract class AbstractSiteMap {
@@ -32,6 +37,24 @@ public abstract class AbstractSiteMap {
         INDEX, XML, ATOM, RSS, TEXT
     };
 
+    // 1997-07-16T19:20+01:00
+    private static final Pattern W3C_NO_SECONDS_PATTERN = Pattern.compile("(\\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d)(\\-|\\+)(\\d\\d):(\\d\\d)");
+    private static final ThreadLocal<DateFormat> W3C_NO_SECONDS_FORMAT = new ThreadLocal<DateFormat>() {
+        
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        }
+    };
+    
+    private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
+        
+        protected DateFormat initialValue() {
+            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            result.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return result;
+        }
+    };
+    
     /** W3C date the Sitemap was last modified */
     private Date lastModified;
     
@@ -48,26 +71,9 @@ public abstract class AbstractSiteMap {
     }
     
     public static DateFormat getFullDateFormat() {
-        return dateFormats.get()[1];
+        return W3C_FULLDATE_FORMAT.get();
     }
 
-    /**
-     * lastModified uses the W3C date format
-     * (http://www.w3.org/TR/NOTE-datetime)
-     */
-    private static final ThreadLocal<DateFormat[]> dateFormats = new ThreadLocal<DateFormat[]>() {
-        protected DateFormat[] initialValue() {
-            return new DateFormat[] { new SimpleDateFormat("yyyy-MM-dd"),
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00"),
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm-hh:00"),
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+hh:00"),
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-hh:00"),
-                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
-            };
-        }
-    };
-    
-    
     public boolean isIndex() {
     	return (type == SitemapType.INDEX);
     };
@@ -143,16 +149,28 @@ public abstract class AbstractSiteMap {
     public static Date convertToDate(String date) {
 
         if (date != null) {
-            for (DateFormat df : dateFormats.get()) {
-                try {
-                    return df.parse(date);
-                } catch (ParseException e) {
-                    // do nothing
+            try {
+                return DatatypeConverter.parseDateTime(date).getTime();
+            } catch (IllegalArgumentException e) {
+                // See if it's the one W3C case that the javax.xml.bind implementation (incorrectly) doesn't handle.
+                Matcher m = W3C_NO_SECONDS_PATTERN.matcher(date);
+                if (m.matches()) {
+                    try {
+                        // Convert to a format that Java can parse, which means time zone has to be "-/+HHMM", not "+/-HH:MM"
+                        StringBuffer mungedDate = new StringBuffer(m.group(1));
+                        mungedDate.append(m.group(2));
+                        mungedDate.append(m.group(3));
+                        mungedDate.append(m.group(4));
+                        return W3C_NO_SECONDS_FORMAT.get().parse(mungedDate.toString());
+                    } catch (ParseException e2) {
+                        return null;
+                    }
+                } else {
+                    return null;
                 }
             }
+        } else {
+            return null;
         }
-
-        // Not successful parsing any dates
-        return null;
     }
 }
