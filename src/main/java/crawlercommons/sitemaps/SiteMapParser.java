@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.tika.Tika;
-
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
 import org.apache.tika.parser.AutoDetectParser;
@@ -48,7 +48,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
-
 import static org.apache.tika.mime.MediaType.APPLICATION_XML;
 import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
@@ -166,7 +165,13 @@ public class SiteMapParser {
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(xmlContent));
         InputSource is = new InputSource();
-        is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs)));
+        try {
+            is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs, "UTF-8")));
+        } catch (UnsupportedEncodingException e) {
+            IOUtils.closeQuietly(bomIs);
+            throw new RuntimeException("Impossible exception", e);
+        }
+        
         return processXml(sitemapUrl, is);
     }
 
@@ -185,7 +190,7 @@ public class SiteMapParser {
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(content));
         @SuppressWarnings("resource")
-        BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, "UTF-8"));
 
         String line;
         int i = 1;

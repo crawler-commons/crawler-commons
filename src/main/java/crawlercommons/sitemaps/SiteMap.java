@@ -96,10 +96,13 @@ public class SiteMap extends AbstractSiteMap {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
+        Date lastModified = getLastModified();
+        String lastModStr = (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
+        
         sb.append("url = \"")
                 .append(url)
                 .append("\", lastMod = ")
-                .append((getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified()))
+                .append(lastModStr)
                 .append(", type = ")
                 .append(getType())
                 .append(", processed = ")
