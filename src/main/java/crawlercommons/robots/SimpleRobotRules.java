@@ -40,7 +40,7 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Single rule that maps from a path prefix to an allow flag.
      */
-    protected class RobotRule implements Comparable<RobotRule> {
+    protected class RobotRule implements Comparable<RobotRule>, Serializable {
         String _prefix;
         boolean _allow;
 
@@ -167,10 +167,8 @@ public class SimpleRobotRules extends BaseRobotRules {
             if ((path == null) || (path.equals(""))) {
                 return "/";
             } else {
-                // We always lower-case the path, as anybody who sets up rules that differ only by case
-                // is insane, but it's more likely that somebody will accidentally put in rules that don't
-                // match their target paths because of case differences.
-                return URLDecoder.decode(path, "UTF-8").toLowerCase();
+                // We used to lower-case the path, but Google says we need to do case-sensitive matching.
+                return URLDecoder.decode(path, "UTF-8");
             }
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
