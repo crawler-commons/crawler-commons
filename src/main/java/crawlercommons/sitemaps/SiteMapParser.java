@@ -38,7 +38,6 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
-import org.apache.tika.parser.AutoDetectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -61,14 +60,15 @@ public class SiteMapParser {
     public static int MAX_BYTES_ALLOWED = 10485760;
 
     /* Tika's MediaType components */
-    private static MediaTypeRegistry mediaTypeRegistry;
+    private final static Tika tika = new Tika();
+    private final static MediaTypeRegistry mediaTypeRegistry = MediaTypeRegistry.getDefaultRegistry();
+    
     private final static List<MediaType> XML_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> GZ_MEDIA_TYPES = new ArrayList<MediaType>();
     static {
         initMediaTypes();
     }
-    private static Tika tika;
 
     /** True (by default) if invalid URLs should be rejected */
     private boolean strict;
@@ -120,9 +120,6 @@ public class SiteMapParser {
 	 **/
 	public AbstractSiteMap parseSiteMap(byte[] content, URL url)
 			throws UnknownFormatException, IOException {
-		if (tika == null) {
-			tika = new Tika();
-		}
 		if (url == null) {
 			return null;
 		}
@@ -627,8 +624,6 @@ public class SiteMapParser {
     /** Performs a one time intialization of Tika's Media-Type components and media type collection constants <br/>
      * Please note that this is a private static method which is called once per CLASS (not per instance / object) */
     private static void initMediaTypes() {
-        mediaTypeRegistry = new AutoDetectParser().getMediaTypeRegistry(); // to find media type aliases
-
         /* XML media types (and all aliases) */
         XML_MEDIA_TYPES.add(APPLICATION_XML);
         XML_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(APPLICATION_XML));
