@@ -60,8 +60,8 @@ public class SiteMapParser {
     public static int MAX_BYTES_ALLOWED = 10485760;
 
     /* Tika's MediaType components */
-    private final static Tika tika = new Tika();
-    private final static MediaTypeRegistry mediaTypeRegistry = MediaTypeRegistry.getDefaultRegistry();
+    private final static Tika TIKA = new Tika();
+    private final static MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
     
     private final static List<MediaType> XML_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<MediaType>();
@@ -124,7 +124,7 @@ public class SiteMapParser {
 			return null;
 		}
 		String filename = FilenameUtils.getName(url.getPath());
-		String contentType = tika.detect(content, filename);
+		String contentType = TIKA.detect(content, filename);
 		return parseSiteMap(contentType, content, url);
 	}
     
@@ -142,7 +142,7 @@ public class SiteMapParser {
            } else if (GZ_MEDIA_TYPES.contains(mediaType)) { 
                return processGzip(url, content);
             } else {
-               mediaType = mediaTypeRegistry.getSupertype(mediaType); // Check parent
+               mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
                return parseSiteMap(mediaType.toString(), content, url);
            }
         }
@@ -626,15 +626,15 @@ public class SiteMapParser {
     private static void initMediaTypes() {
         /* XML media types (and all aliases) */
         XML_MEDIA_TYPES.add(APPLICATION_XML);
-        XML_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(APPLICATION_XML));
+        XML_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(APPLICATION_XML));
 
         /* TEXT media types (and all aliases) */
         TEXT_MEDIA_TYPES.add(TEXT_PLAIN);
-        TEXT_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(TEXT_PLAIN));
+        TEXT_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(TEXT_PLAIN));
 
         /* GZIP media types (and all aliases) */
         MediaType gzipMediaType = MediaType.parse("application/gzip");
         GZ_MEDIA_TYPES.add(gzipMediaType);
-        GZ_MEDIA_TYPES.addAll(mediaTypeRegistry.getAliases(gzipMediaType));
+        GZ_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(gzipMediaType));
     }
 }
