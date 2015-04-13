@@ -8,7 +8,7 @@ crawler-commons is a set of reusable Java components that implement functionalit
 
 We are glad to announce the 0.5 release of Crawler Commons. This release mainly improves Sitemap parsing as well as an upgrade to [Apache Tika 1.6](http://tika.apache.org).
 
-See the [CHANGES.txt](http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.5/CHANGES.txt) file included with the release for a full list of details. Additionally the Java documentation can be found [here](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html).
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details. Additionally the Java documentation can be found [here](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html).
 
 We suggest all users to upgrade to this version. The Crawler Commons project artifacts are released as Maven artifacts and can be found at [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.google.code.crawler-commons%22%20AND%20a%3A%22crawler-commons%22).
 
@@ -16,7 +16,7 @@ We suggest all users to upgrade to this version. The Crawler Commons project art
 
 We are glad to announce the 0.4 release of Crawler Commons. Amongst other improvements, this release includes support for Googlebot-compatible regular expressions in URL specifications, further imprvements to robots.txt parsing and an upgrade of httpclient to v4.2.6\.
 
-See the [CHANGES.txt](http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.4/CHANGES.txt) file included with the release for a full list of details.
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
 
 We suggest all users to upgrade to this version. Details of how to do so can be found on [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.google.code.crawler-commons%22%20AND%20a%3A%22crawler-commons%22).
 
@@ -24,7 +24,7 @@ We suggest all users to upgrade to this version. Details of how to do so can be 
 
 This release improves robots.txt and sitemap parsing support, updates Tika to the latest released version (1.4), and removes some left-over cruft from the pre-Maven build setup.
 
-See the [CHANGES.txt](http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.3/CHANGES.txt) file included with the release for a full list of details.
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
 
 ## 24 Jun 2013 - Nutch 1.7 now uses crawler-commons for robots.txt parsing
 
@@ -38,7 +38,7 @@ See [Apache Nutch v2.2 Released](http://nutch.apache.org/#08+June+2013+-+Apache+
 
 This release improves robots.txt and sitemap parsing support.
 
-See the [CHANGES.txt](http://crawler-commons.googlecode.com/svn/tags/crawler-commons-0.2/CHANGES.txt) file included with the release for a full list of details.
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
 
 # User Documentation
 
@@ -55,4 +55,4 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 
 # Issue Tracking
 
-If you find an issue, please file a report [here](http://code.google.com/p/crawler-commons/issues/list)
+If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
