@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -19,29 +20,32 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
-	<url>http://code.google.com/p/crawler-commons/</url>
+
+	<url>https://github.com/crawler-commons/crawler-commons</url>
+
 	<description>crawler-commons is a set of reusable Java components that implement 
 	functionality common to any web crawler.
 	</description>
 
 	<scm>
-		<connection>scm:svn:http://crawler-commons.googlecode.com/svn/trunk</connection>
-		<developerConnection>scm:svn:https://crawler-commons.googlecode.com/svn/trunk</developerConnection>
-		<url>http://crawler-commons.googlecode.com/svn/trunk</url>
+		<url>https://github.com/crawler-commons/crawler-commons</url>
+		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
+		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
 	</scm>
 
 	<distributionManagement>
 		<repository>
-		<id>sonatype-nexus-staging</id>
-		<name>Nexus Staging Repository</name>
-		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Staging Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 
 	<issueManagement>
-		<system>Google Issues</system>
-		<url>http://code.google.com/p/crawler-commons/issues/list</url>
+		<system>GitHub Issues</system>
+		<url>https://github.com/crawler-commons/crawler-commons/issues</url>
 	</issueManagement>
+
 	<mailingLists>
 		<mailingList>
 			<name>Project Mailing List</name>
@@ -393,7 +397,7 @@
 			<artifactId>servlet-api</artifactId>
 			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
-        </dependency>
+		</dependency>
 
 	</dependencies>
 </project>
