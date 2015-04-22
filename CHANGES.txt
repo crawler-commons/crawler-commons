@@ -1,7 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
-- Issue #71: Upgrade to Tika 1.8 (jnioche)
+- Issue 73: Switch groupID in pom from com.google.code.crawler-commons to crawler-commons (jnioche)
+- Issue 71: Upgrade to Tika 1.8 (jnioche)
 - Issue 68: [Robots] Path matching should be case-sensitive (kkrugler)
 - Issue 67: [Sitemaps] Parsing of lastMod date should use time portion (kkrugler)
 - Issue 59: [Robots] Let SimpleRobotRules and its members implements the Serializable interface  (kkrugler)
