@@ -4,6 +4,10 @@ crawler-commons is a set of reusable Java components that implement functionalit
 
 # Crawler-Commons News
 
+## 22nd April 2015 - crawler-commons has moved
+
+The crawler-commons project is now being hosted at GitHub, due to the demise of Google code hosting.
+
 ## 15th October 2014 - crawler-commons 0.5 is released
 
 We are glad to announce the 0.5 release of Crawler Commons. This release mainly improves Sitemap parsing as well as an upgrade to [Apache Tika 1.6](http://tika.apache.org).
