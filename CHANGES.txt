@@ -18,7 +18,7 @@ Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
 - Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value (Avi Hayun)
 
 Release 0.5 - 09/10/2014
-- Issue 53:	Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
+- Issue 53: Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
 - Issue 45: [Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
 - Issue 48: Upgraded to Tika 1.6 (jnioche)
 - Issue 47: [Sitemaps] SiteMapParser Tika detection doesn't work well on some cases (Avi Hayun)
