@@ -570,10 +570,7 @@ public class SiteMapParser {
         NodeList list = elem.getElementsByTagName(elementName);
         Element e = (Element) list.item(0);
         if (e != null) {
-            NodeList children = e.getChildNodes();
-            if (children.item(0) != null) {
-                return ((Node) children.item(0)).getNodeValue().trim();
-            }
+            return e.getTextContent();
         }
 
         return null;
