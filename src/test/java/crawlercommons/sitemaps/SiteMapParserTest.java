@@ -284,7 +284,7 @@ public class SiteMapParserTest {
                 .append("  <priority>0.3</priority>")
                 .append("</url>")
                 .append("<url>")
-                .append("  <loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>")
+                .append("  <loc><url><![CDATA[http://www.example.com/catalog?item=83&amp;desc=vacation_usa]]></url></loc>")
                 .append("  <lastmod>2004-11-23</lastmod>")
                 .append("</url>")
                 .append("</urlset>");
