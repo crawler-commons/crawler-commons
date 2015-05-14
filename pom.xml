@@ -177,28 +177,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>${build-helper-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>add-resource</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>add-resource</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>src/main/resources</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
 				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
 				<artifactId>maven-java-formatter-plugin</artifactId>
 				<version>0.4</version>
@@ -215,16 +193,6 @@
 			<id>release</id>
 			<build>
 				<plugins>
-					<!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
-						<version>${apache-rat-plugin.version}</version> <executions> <execution> 
-						<id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
-						</execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
-						<licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
-						Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
-						<patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
-						one or more contributor license agreements.</pattern> </patterns> </license> 
-						</licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
-						</excludes> </configuration> </plugin -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
@@ -321,7 +289,6 @@
 		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
 		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-		<build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
 		<maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
 		<maven-release-plugin.version>2.5.1</maven-release-plugin.version>
 		<maven-source-plugin.version>2.1.2</maven-source-plugin.version>
