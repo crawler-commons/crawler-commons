@@ -32,19 +32,20 @@ import org.mortbay.http.handler.AbstractHttpHandler;
 @SuppressWarnings("serial")
 public class ResourcesResponseHandler extends AbstractHttpHandler {
     private String _testContext = "";
-    
+
     /**
-     * Create an HTTP response handler that sends data back from files on the classpath
-     * TODO KKr - use regular Jetty support for this, via setting up HttpContext
+     * Create an HTTP response handler that sends data back from files on the
+     * classpath TODO KKr - use regular Jetty support for this, via setting up
+     * HttpContext
      * 
      */
     public ResourcesResponseHandler() {
     }
-    
+
     public ResourcesResponseHandler(String testContext) {
         _testContext = testContext;
     }
-    
+
     @Override
     public void handle(String pathInContext, String pathParams, HttpRequest request, HttpResponse response) throws HttpException, IOException {
         // Get the resource.
@@ -52,14 +53,14 @@ public class ResourcesResponseHandler extends AbstractHttpHandler {
         if (path == null) {
             throw new HttpException(404, "Resource not found: " + pathInContext);
         }
-        
+
         try {
             File file = new File(path.getFile());
             byte[] bytes = new byte[(int) file.length()];
             @SuppressWarnings("resource")
             DataInputStream in = new DataInputStream(new FileInputStream(file));
             in.readFully(bytes);
-            
+
             response.setContentLength(bytes.length);
             if (file.getName().endsWith(".png")) {
                 response.setContentType("image/png");
@@ -67,7 +68,7 @@ public class ResourcesResponseHandler extends AbstractHttpHandler {
                 response.setContentType("text/html");
             }
             response.setStatus(200);
-            
+
             OutputStream os = response.getOutputStream();
             os.write(bytes);
         } catch (Exception e) {

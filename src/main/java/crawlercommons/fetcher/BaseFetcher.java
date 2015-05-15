@@ -27,7 +27,7 @@ import org.apache.tika.mime.MediaType;
 
 @SuppressWarnings("serial")
 public abstract class BaseFetcher implements Serializable {
-    
+
     public static final int DEFAULT_MAX_CONTENT_SIZE = 64 * 1024;
 
     protected Map<String, Integer> _maxContentSizes = new HashMap<String, Integer>();
@@ -40,11 +40,11 @@ public abstract class BaseFetcher implements Serializable {
     public void setDefaultMaxContentSize(int defaultMaxContentSize) {
         _defaultMaxContentSize = defaultMaxContentSize;
     }
-    
+
     public int getDefaultMaxContentSize() {
         return _defaultMaxContentSize;
     }
-    
+
     public void setMaxContentSize(String mimeType, int maxContentSize) {
         _maxContentSizes.put(mimeType, maxContentSize);
     }
@@ -54,40 +54,40 @@ public abstract class BaseFetcher implements Serializable {
         if (result == null) {
             result = getDefaultMaxContentSize();
         }
-        
+
         return result;
     }
 
     public Set<String> getValidMimeTypes() {
         return _validMimeTypes;
     }
-    
+
     public void setValidMimeTypes(Set<String> validMimeTypes) {
         _validMimeTypes = new HashSet<String>(validMimeTypes);
     }
-    
+
     public void addValidMimeTypes(Set<String> validMimeTypes) {
         _validMimeTypes.addAll(validMimeTypes);
     }
-    
+
     public void addValidMimeType(String validMimeType) {
         _validMimeTypes.add(validMimeType);
     }
-    
+
     public FetchedResult get(String url) throws BaseFetchException {
         return get(url, null);
     }
-    
+
     protected static String getMimeTypeFromContentType(String contentType) {
         String result = "";
         MediaType mt = MediaType.parse(contentType);
         if (mt != null) {
             result = mt.getType() + "/" + mt.getSubtype();
         }
-        
+
         return result;
     }
-    
+
     /**
      * Get the content stored in the resource referenced by <url>
      * 
@@ -97,12 +97,11 @@ public abstract class BaseFetcher implements Serializable {
      * @throws BaseFetchException
      */
     public abstract FetchedResult get(String url, Payload payload) throws BaseFetchException;
-    
+
     /**
      * Terminate any async request being processed.
      * 
      */
     public abstract void abort();
-    
 
 }

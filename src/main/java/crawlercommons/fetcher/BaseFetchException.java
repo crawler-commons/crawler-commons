@@ -31,46 +31,46 @@ import java.io.PrintWriter;
 public abstract class BaseFetchException extends Exception {
     private String _url = "";
     private Exception _exception;
-    
-	protected BaseFetchException() {
-		super();
-		
+
+    protected BaseFetchException() {
+        super();
+
         _exception = new Exception();
     }
-    
+
     protected BaseFetchException(String url) {
-    	super();
-    	
+        super();
+
         _exception = new Exception();
         _url = url;
     }
-    
+
     protected BaseFetchException(String url, String msg) {
-    	super(msg);
-    	
+        super(msg);
+
         _exception = new Exception(msg);
         _url = url;
     }
-    
+
     protected BaseFetchException(String url, Exception e) {
-    	super(e);
-    	
+        super(e);
+
         _exception = new Exception(e);
         _url = url;
     }
-    
+
     protected BaseFetchException(String url, String msg, Exception e) {
-    	super(msg, e);
-    	
+        super(msg, e);
+
         _exception = new Exception(msg, e);
         _url = url;
     }
-    
+
     // Our specific methods
     public String getUrl() {
         return _url;
     }
-    
+
     protected int compareToBase(BaseFetchException e) {
         return _url.compareTo(e._url);
     }
@@ -97,27 +97,27 @@ public abstract class BaseFetchException extends Exception {
         return true;
     }
 
-	@Override
-	public Throwable getCause() {
-		return _exception.getCause();
-	}
+    @Override
+    public Throwable getCause() {
+        return _exception.getCause();
+    }
 
-	@Override
-	public String getLocalizedMessage() {
-		return _exception.getLocalizedMessage();
-	}
+    @Override
+    public String getLocalizedMessage() {
+        return _exception.getLocalizedMessage();
+    }
 
-	@Override
-	public String getMessage() {
-		return _exception.getMessage();
-	}
+    @Override
+    public String getMessage() {
+        return _exception.getMessage();
+    }
 
-	@Override
-	public StackTraceElement[] getStackTrace() {
-		return _exception.getStackTrace();
-	}
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return _exception.getStackTrace();
+    }
 
-	@Override
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -126,59 +126,59 @@ public abstract class BaseFetchException extends Exception {
         return result;
     }
 
-	@Override
-	public Throwable initCause(Throwable cause) {
-		return _exception.initCause(cause);
-	}
+    @Override
+    public Throwable initCause(Throwable cause) {
+        return _exception.initCause(cause);
+    }
 
-	@Override
-	public void printStackTrace() {
-		_exception.printStackTrace();
-	}
+    @Override
+    public void printStackTrace() {
+        _exception.printStackTrace();
+    }
 
-	@Override
-	public void printStackTrace(PrintStream s) {
-		_exception.printStackTrace(s);
-	}
+    @Override
+    public void printStackTrace(PrintStream s) {
+        _exception.printStackTrace(s);
+    }
 
-	@Override
-	public void printStackTrace(PrintWriter s) {
-		_exception.printStackTrace(s);
-	}
+    @Override
+    public void printStackTrace(PrintWriter s) {
+        _exception.printStackTrace(s);
+    }
 
-	@Override
-	public void setStackTrace(StackTraceElement[] stackTrace) {
-		_exception.setStackTrace(stackTrace);
-	}
+    @Override
+    public void setStackTrace(StackTraceElement[] stackTrace) {
+        _exception.setStackTrace(stackTrace);
+    }
 
-	@Override
-	public String toString() {
-		return _url + ": " + _exception.toString();
-	}
+    @Override
+    public String toString() {
+        return _url + ": " + _exception.toString();
+    }
 
     protected void readBaseFields(DataInput input) throws IOException {
-    	int serializedLen = input.readInt();
-    	byte[] serialized = new byte[serializedLen];
-    	input.readFully(serialized);
-    	ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized));
-    	
-    	try {
-    		_exception = (Exception)ois.readObject();
-    	} catch (ClassNotFoundException e) {
-    		throw new IOException(e);
-    	}
-    	
+        int serializedLen = input.readInt();
+        byte[] serialized = new byte[serializedLen];
+        input.readFully(serialized);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized));
+
+        try {
+            _exception = (Exception) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException(e);
+        }
+
         _url = input.readUTF();
     }
-    
+
     protected void writeBaseFields(DataOutput output) throws IOException {
-    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    	ObjectOutputStream oos = new ObjectOutputStream(bos);
-    	oos.writeObject(_exception);
-    	byte[] serialized = bos.toByteArray();
-    	output.writeInt(serialized.length);
-    	output.write(bos.toByteArray());
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(_exception);
+        byte[] serialized = bos.toByteArray();
+        output.writeInt(serialized.length);
+        output.write(bos.toByteArray());
         output.writeUTF(_url);
     }
-    
+
 }

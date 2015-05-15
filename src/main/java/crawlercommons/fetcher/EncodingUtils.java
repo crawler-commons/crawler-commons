@@ -30,15 +30,15 @@ import org.slf4j.LoggerFactory;
 
 public class EncodingUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncodingUtils.class);
-    
-    private static final int EXPECTED_GZIP_COMPRESSION_RATIO= 5;
-    private static final int EXPECTED_DEFLATE_COMPRESSION_RATIO= 5;
-    private static final int BUF_SIZE= 4096;
-    
+
+    private static final int EXPECTED_GZIP_COMPRESSION_RATIO = 5;
+    private static final int EXPECTED_DEFLATE_COMPRESSION_RATIO = 5;
+    private static final int BUF_SIZE = 4096;
+
     public static class ExpandedResult {
         private byte[] _expanded;
         private boolean _isTruncated;
-        
+
         public ExpandedResult(byte[] expanded, boolean isTruncated) {
             super();
             _expanded = expanded;
@@ -48,15 +48,15 @@ public class EncodingUtils {
         public byte[] getExpanded() {
             return _expanded;
         }
-        
+
         public void setExpanded(byte[] expanded) {
             _expanded = expanded;
         }
-        
+
         public boolean isTruncated() {
             return _isTruncated;
         }
-        
+
         public void setTruncated(boolean isTruncated) {
             _isTruncated = isTruncated;
         }
@@ -68,8 +68,8 @@ public class EncodingUtils {
 
     public static ExpandedResult processGzipEncoded(byte[] compressed, int sizeLimit) throws IOException {
 
-        ByteArrayOutputStream outStream =  new ByteArrayOutputStream(EXPECTED_GZIP_COMPRESSION_RATIO * compressed.length);
-        GZIPInputStream inStream = new GZIPInputStream (new ByteArrayInputStream(compressed));
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream(EXPECTED_GZIP_COMPRESSION_RATIO * compressed.length);
+        GZIPInputStream inStream = new GZIPInputStream(new ByteArrayInputStream(compressed));
 
         boolean isTruncated = false;
         byte[] buf = new byte[BUF_SIZE];
@@ -88,7 +88,7 @@ public class EncodingUtils {
                 }
 
                 outStream.write(buf, 0, size);
-                written+= size;
+                written += size;
             } catch (Exception e) {
                 LOGGER.trace("Exception unzipping content", e);
                 break;
@@ -103,7 +103,7 @@ public class EncodingUtils {
     // compression standard (RFC 1250) for HTTP 1.1 (RFC 2616). However,
     // I was unable to verify that they really work correctly, so I've
     // removed deflate from SimpleHttpFetcher.DEFAULT_ACCEPT_ENCODING.
-    
+
     public static byte[] processDeflateEncoded(byte[] content) throws IOException {
         return processDeflateEncoded(content, Integer.MAX_VALUE);
     }
@@ -123,12 +123,12 @@ public class EncodingUtils {
                 if (size <= 0) {
                     break;
                 }
-                
+
                 if ((written + size) > sizeLimit) {
                     outStream.write(buf, 0, sizeLimit - written);
                     break;
                 }
-                
+
                 outStream.write(buf, 0, size);
                 written += size;
             } catch (Exception e) {
@@ -136,24 +136,21 @@ public class EncodingUtils {
                 break;
             }
         }
-        
+
         safeClose(outStream);
         return outStream.toByteArray();
     }
-
 
     private static void safeClose(OutputStream os) {
         if (os == null) {
             return;
         }
-        
+
         try {
             os.close();
         } catch (IOException e) {
             LOGGER.warn("IOException closing input stream", e);
         }
     }
-    
-
 
 }

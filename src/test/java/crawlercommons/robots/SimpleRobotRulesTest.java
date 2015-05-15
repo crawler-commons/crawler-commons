@@ -23,12 +23,10 @@ public class SimpleRobotRulesTest {
         oos.writeObject(expectedRules);
         oos.close();
 
-        final ObjectInputStream iis = new ObjectInputStream(
-                        new ByteArrayInputStream(bytes.toByteArray()));
-        SimpleRobotRules actualRules = (SimpleRobotRules)iis.readObject();
+        final ObjectInputStream iis = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+        SimpleRobotRules actualRules = (SimpleRobotRules) iis.readObject();
 
         assertTrue(expectedRules.equals(actualRules));
     }
-
 
 }

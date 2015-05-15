@@ -23,7 +23,7 @@ public class BadProtocolFetchException extends BaseFetchException {
     public BadProtocolFetchException() {
         super();
     }
-    
+
     public BadProtocolFetchException(String url) {
         super(url);
     }

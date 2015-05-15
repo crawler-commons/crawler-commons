@@ -27,25 +27,25 @@ import org.mortbay.http.handler.AbstractHttpHandler;
 
 /**
  * Response handler that can be used to do redirects..
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class RedirectResponseHandler extends AbstractHttpHandler {
-    
+
     private String _originalPath;
     private String _redirectUrl;
     private boolean _doRedirects;
-    
+
     public RedirectResponseHandler() {
         _doRedirects = false;
     }
-    
+
     public RedirectResponseHandler(String originalPath, String redirectUrl) {
         _originalPath = originalPath;
         _redirectUrl = redirectUrl;
         _doRedirects = true;
     }
-    
+
     @Override
     public void handle(String pathInContext, String pathParams, HttpRequest request, HttpResponse response) throws HttpException, IOException {
         if (_doRedirects && pathInContext.equalsIgnoreCase(_originalPath)) {

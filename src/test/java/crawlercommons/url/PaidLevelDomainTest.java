@@ -27,7 +27,7 @@ import java.net.UnknownHostException;
 import org.junit.Test;
 
 public class PaidLevelDomainTest {
-    
+
     @Test
     public final void testIPv4() throws MalformedURLException {
         assertEquals("1.2.3.4", PaidLevelDomain.getPLD("1.2.3.4"));

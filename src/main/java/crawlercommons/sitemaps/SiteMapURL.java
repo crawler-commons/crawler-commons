@@ -52,7 +52,7 @@ public class SiteMapURL {
 
     /** could be false, if URL isn't found under base path **/
     private boolean valid;
-    
+
     public SiteMapURL(String url, boolean valid) {
         setUrl(url);
         setValid(valid);
@@ -99,7 +99,8 @@ public class SiteMapURL {
      * Set the URL.
      * 
      * @param url
-     * In case of Malformed URL, the current url in this instance will be set to NULL
+     *            In case of Malformed URL, the current url in this instance
+     *            will be set to NULL
      */
     public void setUrl(String url) {
         try {
@@ -147,8 +148,8 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
-     * given priority is out of range).
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
+     * is used if the given priority is out of range).
      * 
      * @param priority
      */
@@ -164,8 +165,8 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
-     * given priority missing or is out of range).
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
+     * is used if the given priority missing or is out of range).
      * 
      * @param priorityStr
      */
@@ -202,8 +203,8 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's change frequency
-     * In case of a bad ChangeFrequency, the current frequency in this instance will be set to NULL
+     * Set the URL's change frequency In case of a bad ChangeFrequency, the
+     * current frequency in this instance will be set to NULL
      * 
      * @param changeFreq
      */
@@ -235,19 +236,22 @@ public class SiteMapURL {
     public void setValid(boolean valid) {
         this.valid = valid;
     }
-    
+
     public boolean isValid() {
         return valid;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         SiteMapURL that = (SiteMapURL) o;
 
-        if (!url.equals(that.url)) return false;
+        if (!url.equals(that.url))
+            return false;
 
         return true;
     }

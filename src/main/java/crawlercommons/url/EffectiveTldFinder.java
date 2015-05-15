@@ -29,21 +29,23 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Given a URL's hostname, there are determining the actual domain requires
- * knowledge of the various domain registrars and their assignment policies.
- * The best publicly available knowledge of this is maintained by the Mozilla
+ * knowledge of the various domain registrars and their assignment policies. The
+ * best publicly available knowledge of this is maintained by the Mozilla
  * developers; this class uses their data file format. For more information, see
  * <ul>
- * <li><a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD Service</a></li>
+ * <li><a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective
+ * TLD Service</a></li>
  * <li><a href="http://www.publicsuffix.org">Public Suffix</a></li>
- * <li><a href="http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1">effective_tld_names</a></li>
+ * <li><a href=
+ * "http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1"
+ * >effective_tld_names</a></li>
  * </ul>
- *
+ * 
  * This class just needs "effective_tld_names.dat" in the classpath. If you want
- * to configure it with other data, call EffectiveTldFinder.getInstance.initialize(is)
- * and have at it.
+ * to configure it with other data, call
+ * EffectiveTldFinder.getInstance.initialize(is) and have at it.
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
@@ -63,7 +65,7 @@ public class EffectiveTldFinder {
     private EffectiveTldFinder() {
         initialize(null);
     }
-    
+
     public static EffectiveTldFinder getInstance() {
         if (null == instance) {
             instance = new EffectiveTldFinder();
@@ -80,7 +82,7 @@ public class EffectiveTldFinder {
             BufferedReader input = new BufferedReader(new InputStreamReader(effective_tld_data_stream));
             String line = null;
             while (null != (line = input.readLine())) {
-                if (line.length() == 0 || (line.length() > 1  && line.startsWith(COMMENT))) {
+                if (line.length() == 0 || (line.length() > 1 && line.startsWith(COMMENT))) {
                     continue;
                 } else {
                     EffectiveTLD entry = new EffectiveTLD(line);
@@ -96,14 +98,14 @@ public class EffectiveTldFinder {
         }
         return configured;
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Map<String, EffectiveTLD> getEffectiveTLDs() {
         // The keys and values are immutables but we don't want the caller
         // changing the repertoire of our internal Map entries, so we clone
-        return (Map<String, EffectiveTLD>) ((HashMap<String, EffectiveTLD>)getInstance().domains).clone();
+        return (Map<String, EffectiveTLD>) ((HashMap<String, EffectiveTLD>) getInstance().domains).clone();
     }
-    
+
     /**
      * @param hostname
      * @return the Effective TLD
@@ -113,7 +115,7 @@ public class EffectiveTldFinder {
             return getInstance().domains.get(hostname);
         }
         String[] parts = hostname.split(DOT_REGEX);
-        if (! getInstance().domains.containsKey(parts[parts.length-1])) {
+        if (!getInstance().domains.containsKey(parts[parts.length - 1])) {
             return null;
         }
         for (int i = 1; i < parts.length; i++) {
@@ -124,11 +126,11 @@ public class EffectiveTldFinder {
             }
             if (getInstance().domains.containsKey(tryTld)) {
                 EffectiveTLD foundTld = getInstance().domains.get(tryTld);
-                if (foundTld.isException() || ! foundTld.isWild()) {
+                if (foundTld.isException() || !foundTld.isWild()) {
                     return foundTld;
                 }
                 // wildcards create an open ETLD namespace
-                slice = Arrays.copyOfRange(parts, i-1, parts.length);
+                slice = Arrays.copyOfRange(parts, i - 1, parts.length);
                 String retryTld = join(slice);
                 foundTld = new EffectiveTLD(retryTld);
                 return foundTld;
@@ -136,10 +138,10 @@ public class EffectiveTldFinder {
         }
         return null;
     }
-    
+
     /**
-     * This method uses the effective TLD to determine which component of
-     * a FQDN is the NIC-assigned domain name.
+     * This method uses the effective TLD to determine which component of a FQDN
+     * is the NIC-assigned domain name.
      * 
      * @param hostname
      * @return the NIC-assigned domain name
@@ -149,11 +151,10 @@ public class EffectiveTldFinder {
         if (null == etld || etld.getDomain() == hostname.toLowerCase()) {
             return hostname.toLowerCase();
         }
-        String domain = hostname.replaceFirst(".*?([^.]+\\.)" + 
-                etld.getDomain() + "$", "$1" + etld.getDomain());
+        String domain = hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
         return domain;
     }
-    
+
     public boolean isConfigured() {
         return configured;
     }
@@ -163,7 +164,7 @@ public class EffectiveTldFinder {
         for (int i = 0; i < ary.length; i++) {
             sb.append(ary[i]).append(DOT);
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
@@ -172,7 +173,7 @@ public class EffectiveTldFinder {
         private boolean exception = false;
         private boolean wild = false;
         private String domain = null;
-        
+
         public EffectiveTLD(String line) {
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
@@ -197,7 +198,7 @@ public class EffectiveTldFinder {
             }
             return join(ary);
         }
-        
+
         private String asciiConvert(String str) {
             if (isAscii(str)) {
                 return str.toLowerCase();
@@ -207,14 +208,14 @@ public class EffectiveTldFinder {
 
         private boolean isAscii(String str) {
             char[] chars = str.toCharArray();
-            for (char c: chars) {
+            for (char c : chars) {
                 if (c > 127) {
                     return false;
                 }
             }
             return true;
         }
-        
+
         public String getDomain() {
             return domain;
         }
@@ -222,11 +223,11 @@ public class EffectiveTldFinder {
         public boolean isWild() {
             return wild;
         }
-        
+
         public boolean isException() {
             return exception;
         }
-        
+
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer("[");

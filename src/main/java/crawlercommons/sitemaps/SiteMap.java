@@ -23,7 +23,6 @@ import java.util.*;
 
 public class SiteMap extends AbstractSiteMap {
 
-
     /**
      * The base URL for the Sitemap is where the Sitemap was found If found at
      * http://foo.org/abc/sitemap.xml then baseUrl is http://foo.org/abc/
@@ -35,8 +34,8 @@ public class SiteMap extends AbstractSiteMap {
     private List<SiteMapURL> urlList;
 
     public SiteMap() {
-    	super();
-    	
+        super();
+
         urlList = new ArrayList<SiteMapURL>();
         setProcessed(false);
     }
@@ -79,8 +78,8 @@ public class SiteMap extends AbstractSiteMap {
 
     /**
      * @param url
-     *            - the URL of the Sitemap
-     * In the case of a Malformed URL the URL member is set to null
+     *            - the URL of the Sitemap In the case of a Malformed URL the
+     *            URL member is set to null
      */
     private void setUrl(String url) {
         try {
@@ -92,27 +91,17 @@ public class SiteMap extends AbstractSiteMap {
         }
     }
 
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
         Date lastModified = getLastModified();
         String lastModStr = (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-        
-        sb.append("url = \"")
-                .append(url)
-                .append("\", lastMod = ")
-                .append(lastModStr)
-                .append(", type = ")
-                .append(getType())
-                .append(", processed = ")
-                .append(isProcessed())
-                .append(", urlListSize = ")
-                .append(urlList.size());
+
+        sb.append("url = \"").append(url).append("\", lastMod = ").append(lastModStr).append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ")
+                        .append(urlList.size());
 
         return sb.toString();
     }
-
 
     /**
      * This is private because only once we know the Sitemap's URL can we

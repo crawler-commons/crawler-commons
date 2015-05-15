@@ -21,45 +21,39 @@ import org.junit.Test;
 
 /**
  * @author lmcgibbn
- *
+ * 
  */
 public class FetchedResultTest {
 
-  /**
-   * Test method for {@link crawlercommons.fetcher.FetchedResult#report()}.
-   * This does not actually test anything but simply allows us to see what 
-   * a generated report would look like.
-   */
-  @Test
-  public void testPrintReport() {
-    Metadata headerMetadata = new Metadata();
-    headerMetadata.add(Metadata.CONTENT_DISPOSITION, "This is content disposition");
-    headerMetadata.add(Metadata.CONTENT_ENCODING, "This is the encoding");
-    headerMetadata.add(Metadata.CONTENT_LANGUAGE, "This is some language");
-    headerMetadata.add(Metadata.CONTENT_LENGTH, "This is the length");
+    /**
+     * Test method for {@link crawlercommons.fetcher.FetchedResult#report()}.
+     * This does not actually test anything but simply allows us to see what a
+     * generated report would look like.
+     */
+    @Test
+    public void testPrintReport() {
+        Metadata headerMetadata = new Metadata();
+        headerMetadata.add(Metadata.CONTENT_DISPOSITION, "This is content disposition");
+        headerMetadata.add(Metadata.CONTENT_ENCODING, "This is the encoding");
+        headerMetadata.add(Metadata.CONTENT_LANGUAGE, "This is some language");
+        headerMetadata.add(Metadata.CONTENT_LENGTH, "This is the length");
 
-    Payload load = new Payload();
-    load.put("Item 1", 1234);
-    load.put("Item 2", 5678);
-    load.put("Item 3", 1357);
-    load.put("Item 4", 2468);
+        Payload load = new Payload();
+        load.put("Item 1", 1234);
+        load.put("Item 2", 5678);
+        load.put("Item 3", 1357);
+        load.put("Item 4", 2468);
 
-    FetchedResult result = new FetchedResult
-        //(, , , headers, content, contentType, responseRate, payload, newBaseUrl, numRedirects, hostAddress, statusCode, reasonPhrase)
-        ("http://en.wikipedia.org/wiki/Glasgow",         //baseUrl
-            "http://en.wikipedia.org/wiki/Glasgow",      //redirectedUrl
-            System.currentTimeMillis(),                        //fetchTime
-            headerMetadata,
-            new String("Glasgow (/ˈɡlɑːzɡoʊ, ˈɡlæz-/;[4] Scots: Glesca; Scottish Gaelic: Glaschu) "
-                + "is the largest city in Scotland, and the third largest in the United Kingdom.").getBytes(),
-            "ScotsText",
-            2014,
-            load,
-            "http://en.wikipedia.org/wiki/Glasgow",
-            0,
-            "wikipedia.org",
-            200,
-            "");
-    System.out.println(result.report());
-  }
+        FetchedResult result = new FetchedResult
+        // (, , , headers, content, contentType, responseRate, payload,
+        // newBaseUrl, numRedirects, hostAddress, statusCode, reasonPhrase)
+        (
+                        "http://en.wikipedia.org/wiki/Glasgow", // baseUrl
+                        "http://en.wikipedia.org/wiki/Glasgow", // redirectedUrl
+                        System.currentTimeMillis(), // fetchTime
+                        headerMetadata, new String("Glasgow (/ˈɡlɑːzɡoʊ, ˈɡlæz-/;[4] Scots: Glesca; Scottish Gaelic: Glaschu) "
+                                        + "is the largest city in Scotland, and the third largest in the United Kingdom.").getBytes(), "ScotsText", 2014, load, "http://en.wikipedia.org/wiki/Glasgow",
+                        0, "wikipedia.org", 200, "");
+        System.out.println(result.report());
+    }
 }

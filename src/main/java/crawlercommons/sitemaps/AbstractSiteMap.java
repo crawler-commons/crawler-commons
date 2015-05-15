@@ -29,9 +29,9 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
 
-/** SiteMap or SiteMapIndex**/
+/** SiteMap or SiteMapIndex **/
 public abstract class AbstractSiteMap {
-	
+
     /** Various Sitemap types */
     public enum SitemapType {
         INDEX, XML, ATOM, RSS, TEXT
@@ -40,51 +40,51 @@ public abstract class AbstractSiteMap {
     // 1997-07-16T19:20+01:00
     private static final Pattern W3C_NO_SECONDS_PATTERN = Pattern.compile("(\\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d)(\\-|\\+)(\\d\\d):(\\d\\d)");
     private static final ThreadLocal<DateFormat> W3C_NO_SECONDS_FORMAT = new ThreadLocal<DateFormat>() {
-        
+
         protected DateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
         }
     };
-    
+
     private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
-        
+
         protected DateFormat initialValue() {
             SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
             result.setTimeZone(TimeZone.getTimeZone("UTC"));
             return result;
         }
     };
-    
+
     /** W3C date the Sitemap was last modified */
     private Date lastModified;
-    
+
     /** This Sitemap's type */
     private SitemapType type;
 
     /** indicate if the Sitemap has been processed. */
     private boolean processed;
-    
+
     protected URL url;
-    
+
     public AbstractSiteMap() {
         lastModified = null;
     }
-    
+
     public static DateFormat getFullDateFormat() {
         return W3C_FULLDATE_FORMAT.get();
     }
 
     public boolean isIndex() {
-    	return (type == SitemapType.INDEX);
+        return (type == SitemapType.INDEX);
     };
-    
+
     /**
      * @return the URL of the Sitemap
      */
     public URL getUrl() {
         return url;
     }
-    
+
     /**
      * @param type
      *            the Sitemap type to set
@@ -99,7 +99,7 @@ public abstract class AbstractSiteMap {
     public SitemapType getType() {
         return type;
     }
-    
+
     /**
      * @param processed
      *            - indicate if the Sitemap has been processed.
@@ -109,12 +109,13 @@ public abstract class AbstractSiteMap {
     }
 
     /**
-     * @return true if the Sitemap has been processed i.e it contains at least one SiteMapURL
+     * @return true if the Sitemap has been processed i.e it contains at least
+     *         one SiteMapURL
      */
     public boolean isProcessed() {
         return processed;
     }
-    
+
     /**
      * @param lastModified
      *            - the lastModified to set
@@ -130,7 +131,7 @@ public abstract class AbstractSiteMap {
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
     }
-    
+
     /**
      * @return the lastModified date of the Sitemap
      */
@@ -144,7 +145,8 @@ public abstract class AbstractSiteMap {
      * 
      * @param date
      *            - the date to be parsed
-     * @return the Date equivalent or NULL when encountering an unparsable date string argument
+     * @return the Date equivalent or NULL when encountering an unparsable date
+     *         string argument
      */
     public static Date convertToDate(String date) {
 
@@ -152,11 +154,13 @@ public abstract class AbstractSiteMap {
             try {
                 return DatatypeConverter.parseDateTime(date).getTime();
             } catch (IllegalArgumentException e) {
-                // See if it's the one W3C case that the javax.xml.bind implementation (incorrectly) doesn't handle.
+                // See if it's the one W3C case that the javax.xml.bind
+                // implementation (incorrectly) doesn't handle.
                 Matcher m = W3C_NO_SECONDS_PATTERN.matcher(date);
                 if (m.matches()) {
                     try {
-                        // Convert to a format that Java can parse, which means time zone has to be "-/+HHMM", not "+/-HH:MM"
+                        // Convert to a format that Java can parse, which means
+                        // time zone has to be "-/+HHMM", not "+/-HH:MM"
                         StringBuffer mungedDate = new StringBuffer(m.group(1));
                         mungedDate.append(m.group(2));
                         mungedDate.append(m.group(3));

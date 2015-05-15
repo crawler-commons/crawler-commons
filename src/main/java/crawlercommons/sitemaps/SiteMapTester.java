@@ -6,7 +6,10 @@ import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
 
-/** Sitemap Tool for recursively fetching all URL's from a sitemap (and all of it's children) **/
+/**
+ * Sitemap Tool for recursively fetching all URL's from a sitemap (and all of
+ * it's children)
+ **/
 public class SiteMapTester {
     private static SiteMapParser parser = new SiteMapParser(false);
 
@@ -21,14 +24,17 @@ public class SiteMapTester {
         }
     }
 
-    /** Parses a Sitemap recursively meaning that if the sitemap is a sitemapIndex then it parses all of the internal sitemaps */
+    /**
+     * Parses a Sitemap recursively meaning that if the sitemap is a
+     * sitemapIndex then it parses all of the internal sitemaps
+     */
     private static void parse(URL url, String mt) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
 
         AbstractSiteMap sm = null;
         // guesses the mimetype
-        if (mt == null || mt.equals("")){
-        	  sm = parser.parseSiteMap(content, url);
+        if (mt == null || mt.equals("")) {
+            sm = parser.parseSiteMap(content, url);
         } else {
             sm = parser.parseSiteMap(mt, content, url);
         }

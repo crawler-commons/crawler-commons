@@ -24,17 +24,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Result from parsing a single robots.txt file - which means we
- * get a set of rules, and a crawl-delay.
+ * Result from parsing a single robots.txt file - which means we get a set of
+ * rules, and a crawl-delay.
  */
 
 @SuppressWarnings("serial")
 public class SimpleRobotRules extends BaseRobotRules {
 
     public enum RobotRulesMode {
-        ALLOW_ALL,
-        ALLOW_NONE,
-        ALLOW_SOME
+        ALLOW_ALL, ALLOW_NONE, ALLOW_SOME
     }
 
     /**
@@ -66,7 +64,9 @@ public class SimpleRobotRules extends BaseRobotRules {
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -78,7 +78,9 @@ public class SimpleRobotRules extends BaseRobotRules {
             return result;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -102,21 +104,20 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     }
 
-
     private ArrayList<RobotRule> _rules;
     private RobotRulesMode _mode;
-    
+
     public SimpleRobotRules() {
         this(RobotRulesMode.ALLOW_SOME);
     }
-    
+
     public SimpleRobotRules(RobotRulesMode mode) {
         super();
-        
+
         _mode = mode;
         _rules = new ArrayList<RobotRule>();
     }
-    
+
     public void clearRules() {
         _rules.clear();
     }
@@ -145,7 +146,7 @@ public class SimpleRobotRules extends BaseRobotRules {
             }
 
             for (RobotRule rule : _rules) {
-                if (ruleMatches(pathWithQuery, rule._prefix)){
+                if (ruleMatches(pathWithQuery, rule._prefix)) {
                     return rule._allow;
                 }
             }
@@ -160,14 +161,15 @@ public class SimpleRobotRules extends BaseRobotRules {
             URL urlObj = new URL(url);
             String path = urlObj.getPath();
             String query = urlObj.getQuery();
-            if (getWithQuery && query != null){
+            if (getWithQuery && query != null) {
                 path += "?" + query;
             }
-            
+
             if ((path == null) || (path.equals(""))) {
                 return "/";
             } else {
-                // We used to lower-case the path, but Google says we need to do case-sensitive matching.
+                // We used to lower-case the path, but Google says we need to do
+                // case-sensitive matching.
                 return URLDecoder.decode(path, "UTF-8");
             }
         } catch (Exception e) {
@@ -180,22 +182,22 @@ public class SimpleRobotRules extends BaseRobotRules {
     private boolean ruleMatches(String text, String pattern) {
         int patternPos = 0;
         int textPos = 0;
-        
+
         int patternEnd = pattern.length();
         int textEnd = text.length();
-        
+
         boolean containsEndChar = pattern.endsWith("$");
         if (containsEndChar) {
             patternEnd -= 1;
         }
-        
+
         while ((patternPos < patternEnd) && (textPos < textEnd)) {
             // Find next wildcard in the pattern.
             int wildcardPos = pattern.indexOf('*', patternPos);
             if (wildcardPos == -1) {
                 wildcardPos = patternEnd;
             }
-            
+
             // If we're at a wildcard in the pattern, find the place in the text
             // where the character(s) after the wildcard match up with what's in
             // the text.
@@ -207,36 +209,39 @@ public class SimpleRobotRules extends BaseRobotRules {
                 }
 
                 // TODO - don't worry about having two '*' in a row?
-                
+
                 // Find the end of the pattern piece we need to match.
                 int patternPieceEnd = pattern.indexOf('*', patternPos);
                 if (patternPieceEnd == -1) {
                     patternPieceEnd = patternEnd;
                 }
-                
+
                 boolean matched = false;
                 int patternPieceLen = patternPieceEnd - patternPos;
                 while ((textPos + patternPieceLen <= textEnd) && !matched) {
-                    // See if patternPieceLen chars from text at textPos match chars from pattern at patternPos
+                    // See if patternPieceLen chars from text at textPos match
+                    // chars from pattern at patternPos
                     matched = true;
                     for (int i = 0; i < patternPieceLen && matched; i++) {
                         if (text.charAt(textPos + i) != pattern.charAt(patternPos + i)) {
                             matched = false;
                         }
                     }
-                    
-                    // If we matched, we're all set, otherwise we have to advance textPos
+
+                    // If we matched, we're all set, otherwise we have to
+                    // advance textPos
                     if (!matched) {
                         textPos += 1;
                     }
                 }
-                
+
                 // If we matched, we're all set, otherwise we failed
                 if (!matched) {
                     return false;
                 }
             } else {
-                // See if the pattern from patternPos to wildcardPos matches the text
+                // See if the pattern from patternPos to wildcardPos matches the
+                // text
                 // starting at textPos
                 while ((patternPos < wildcardPos) && (textPos < textEnd)) {
                     if (text.charAt(textPos++) != pattern.charAt(patternPos++)) {
@@ -245,27 +250,30 @@ public class SimpleRobotRules extends BaseRobotRules {
                 }
             }
         }
-        
-        // If we didn't reach the end of the pattern, make sure we're not at a wildcard, sa
+
+        // If we didn't reach the end of the pattern, make sure we're not at a
+        // wildcard, sa
         // that's a 0 or more match, so then we're still OK.
         while ((patternPos < patternEnd) && (pattern.charAt(patternPos) == '*')) {
             patternPos += 1;
         }
-        
-        // We're at the end, so we have a match if the pattern was completely consumed,
-        // and either we consumed all the text or we didn't have to match it all (no '$' at end
+
+        // We're at the end, so we have a match if the pattern was completely
+        // consumed,
+        // and either we consumed all the text or we didn't have to match it all
+        // (no '$' at end
         // of the pattern)
         return (patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar);
     }
 
     /**
-     * In order to match up with Google's convention, we want to match rules from longest to shortest.
-     * So sort the rules.
+     * In order to match up with Google's convention, we want to match rules
+     * from longest to shortest. So sort the rules.
      */
     public void sortRules() {
         Collections.sort(_rules);
     }
-    
+
     /**
      * Is our ruleset set up to allow all access?
      * 
@@ -286,7 +294,9 @@ public class SimpleRobotRules extends BaseRobotRules {
         return _mode == RobotRulesMode.ALLOW_NONE;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -298,7 +308,9 @@ public class SimpleRobotRules extends BaseRobotRules {
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -319,5 +331,5 @@ public class SimpleRobotRules extends BaseRobotRules {
             return false;
         return true;
     }
-    
+
 }

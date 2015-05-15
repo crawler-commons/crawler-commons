@@ -82,7 +82,8 @@ public class SiteMapIndex extends AbstractSiteMap {
     }
 
     /**
-     * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could be found.
+     * @return an unprocessed Sitemap or null if no unprocessed Sitemaps could
+     *         be found.
      */
     public AbstractSiteMap nextUnprocessedSitemap() {
         for (AbstractSiteMap asm : sitemaps) {

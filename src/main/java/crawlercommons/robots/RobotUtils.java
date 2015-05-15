@@ -31,18 +31,20 @@ import crawlercommons.fetcher.http.BaseHttpFetcher;
 import crawlercommons.fetcher.http.SimpleHttpFetcher;
 import crawlercommons.fetcher.http.UserAgent;
 
-
 public class RobotUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RobotUtils.class);
-    
+
     // Some robots.txt files are > 64K, amazingly enough.
     private static final int MAX_ROBOTS_SIZE = 128 * 1024;
 
-    // subdomain.domain.com can direct to domain.com, so if we're simultaneously fetching
-    // a bunch of robots from subdomains that redirect, we'll exceed the default limit.
+    // subdomain.domain.com can direct to domain.com, so if we're simultaneously
+    // fetching
+    // a bunch of robots from subdomains that redirect, we'll exceed the default
+    // limit.
     private static final int MAX_CONNECTIONS_PER_HOST = 20;
-    
-    // Crank down default values when fetching robots.txt, as this should be super
+
+    // Crank down default values when fetching robots.txt, as this should be
+    // super
     // fast to get back.
     private static final int ROBOTS_CONNECTION_TIMEOUT = 10 * 1000;
     private static final int ROBOTS_SOCKET_TIMEOUT = 10 * 1000;
@@ -50,9 +52,11 @@ public class RobotUtils {
 
     // TODO KKr - set up min response rate, use it with max size to calc max
     // time for valid download, use it for COMMAND_TIMEOUT
-    
-    // Amount of time we'll wait for pending tasks to finish up. This is roughly equal
-    // to the max amount of time it might take to fetch a robots.txt file (excluding
+
+    // Amount of time we'll wait for pending tasks to finish up. This is roughly
+    // equal
+    // to the max amount of time it might take to fetch a robots.txt file
+    // (excluding
     // download time, which we could add).
     // FUTURE KKr - add in time to do the download.
     private static final long MAX_FETCH_TIME = (ROBOTS_CONNECTION_TIMEOUT + ROBOTS_SOCKET_TIMEOUT) * ROBOTS_RETRY_COUNT;
@@ -68,47 +72,52 @@ public class RobotUtils {
         fetcher.setMaxRetryCount(ROBOTS_RETRY_COUNT);
         fetcher.setConnectionTimeout(ROBOTS_CONNECTION_TIMEOUT);
         fetcher.setSocketTimeout(ROBOTS_SOCKET_TIMEOUT);
-        
+
         return fetcher;
     }
-    
+
     public static long getMaxFetchTime() {
         return MAX_FETCH_TIME;
     }
 
     /**
-     * Externally visible, static method for use in tools and for testing.
-     * Fetch the indicated robots.txt file, parse it, and generate rules.
+     * Externally visible, static method for use in tools and for testing. Fetch
+     * the indicated robots.txt file, parse it, and generate rules.
      * 
-     * @param fetcher Fetcher for downloading robots.txt file
-     * @param robotsUrl URL to robots.txt file
+     * @param fetcher
+     *            Fetcher for downloading robots.txt file
+     * @param robotsUrl
+     *            URL to robots.txt file
      * @return Robot rules
      */
     public static BaseRobotRules getRobotRules(BaseHttpFetcher fetcher, BaseRobotsParser parser, URL robotsUrl) {
-        
+
         try {
             String urlToFetch = robotsUrl.toExternalForm();
             FetchedResult result = fetcher.get(urlToFetch);
 
-            // HACK! DANGER! Some sites will redirect the request to the top-level domain
-            // page, without returning a 404. So look for a response which has a redirect,
-            // and the fetched content is not plain text, and assume it's one of these...
+            // HACK! DANGER! Some sites will redirect the request to the
+            // top-level domain
+            // page, without returning a 404. So look for a response which has a
+            // redirect,
+            // and the fetched content is not plain text, and assume it's one of
+            // these...
             // which is the same as not having a robots.txt file.
-            
+
             String contentType = result.getContentType();
             boolean isPlainText = (contentType != null) && (contentType.startsWith("text/plain"));
             if ((result.getNumRedirects() > 0) && !isPlainText) {
                 return parser.failedFetch(HttpStatus.SC_GONE);
             }
-            
-            return parser.parseContent(urlToFetch, result.getContent(), result.getContentType(), 
-                            fetcher.getUserAgent().getAgentName());
+
+            return parser.parseContent(urlToFetch, result.getContent(), result.getContentType(), fetcher.getUserAgent().getAgentName());
         } catch (HttpFetchException e) {
             return parser.failedFetch(e.getHttpStatus());
         } catch (IOFetchException e) {
             return parser.failedFetch(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         } catch (RedirectFetchException e) {
-            // Other sites will have circular redirects, so treat this as a missing robots.txt
+            // Other sites will have circular redirects, so treat this as a
+            // missing robots.txt
             return parser.failedFetch(HttpStatus.SC_GONE);
         } catch (Exception e) {
             LOGGER.error("Unexpected exception fetching robots.txt: " + robotsUrl, e);

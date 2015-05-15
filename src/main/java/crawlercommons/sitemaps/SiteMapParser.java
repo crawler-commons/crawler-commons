@@ -62,7 +62,7 @@ public class SiteMapParser {
     /* Tika's MediaType components */
     private final static Tika TIKA = new Tika();
     private final static MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
-    
+
     private final static List<MediaType> XML_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> GZ_MEDIA_TYPES = new ArrayList<MediaType>();
@@ -74,7 +74,7 @@ public class SiteMapParser {
     private boolean strict;
 
     public SiteMapParser() {
-        this(true); 
+        this(true);
     }
 
     public SiteMapParser(boolean strict) {
@@ -90,10 +90,14 @@ public class SiteMapParser {
 
     /**
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL<br/>
-     * Please note that this method is a static method which goes online and fetches the sitemap then parses it<br/><br/>
-     * This method is a convenience method for a user who has a sitemap URL and wants a "Keep it simple" way to parse it.
-     *
-     * @param onlineSitemapUrl URL of the online sitemap
+     * Please note that this method is a static method which goes online and
+     * fetches the sitemap then parses it<br/>
+     * <br/>
+     * This method is a convenience method for a user who has a sitemap URL and
+     * wants a "Keep it simple" way to parse it.
+     * 
+     * @param onlineSitemapUrl
+     *            URL of the online sitemap
      * @return AbstractSiteMap object or null if the onlineSitemap is null
      **/
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
@@ -105,46 +109,55 @@ public class SiteMapParser {
     }
 
     /**
-     * Returns a processed copy of an unprocessed sitemap object, i.e. transfer the value of getLastModified
-     * Please note that the sitemap input stays unchanged
-     **/  
+     * Returns a processed copy of an unprocessed sitemap object, i.e. transfer
+     * the value of getLastModified Please note that the sitemap input stays
+     * unchanged
+     **/
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, final AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
-        AbstractSiteMap asmCopy =  parseSiteMap(contentType, content, sitemap.getUrl());
+        AbstractSiteMap asmCopy = parseSiteMap(contentType, content, sitemap.getUrl());
         asmCopy.setLastModified(sitemap.getLastModified());
         return asmCopy;
     }
 
-	/**
-	 * @return SiteMap/SiteMapIndex by guessing the content type from the binary
-	 *         content and URL
-	 **/
-	public AbstractSiteMap parseSiteMap(byte[] content, URL url)
-			throws UnknownFormatException, IOException {
-		if (url == null) {
-			return null;
-		}
-		String filename = FilenameUtils.getName(url.getPath());
-		String contentType = TIKA.detect(content, filename);
-		return parseSiteMap(contentType, content, url);
-	}
-    
     /**
-     * @return SiteMap/SiteMapIndex given a content type, byte content and the URL of a sitemap
+     * @return SiteMap/SiteMapIndex by guessing the content type from the binary
+     *         content and URL
+     **/
+    public AbstractSiteMap parseSiteMap(byte[] content, URL url) throws UnknownFormatException, IOException {
+        if (url == null) {
+            return null;
+        }
+        String filename = FilenameUtils.getName(url.getPath());
+        String contentType = TIKA.detect(content, filename);
+        return parseSiteMap(contentType, content, url);
+    }
+
+    /**
+     * @return SiteMap/SiteMapIndex given a content type, byte content and the
+     *         URL of a sitemap
      **/
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         MediaType mediaType = MediaType.parse(contentType);
 
-        while (mediaType != null && !mediaType.equals(MediaType.OCTET_STREAM)) { // Octet-stream is the father of all binary types
-           if (XML_MEDIA_TYPES.contains(mediaType)) {
-               return processXml(url, content);
-           } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
-               return (AbstractSiteMap) processText(url.toString(), content);
-           } else if (GZ_MEDIA_TYPES.contains(mediaType)) { 
-               return processGzip(url, content);
+        while (mediaType != null && !mediaType.equals(MediaType.OCTET_STREAM)) { // Octet-stream
+                                                                                 // is
+                                                                                 // the
+                                                                                 // father
+                                                                                 // of
+                                                                                 // all
+                                                                                 // binary
+                                                                                 // types
+            if (XML_MEDIA_TYPES.contains(mediaType)) {
+                return processXml(url, content);
+            } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
+                return (AbstractSiteMap) processText(url.toString(), content);
+            } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
+                return processGzip(url, content);
             } else {
-               mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
-               return parseSiteMap(mediaType.toString(), content, url);
-           }
+                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
+                                                                         // parent
+                return parseSiteMap(mediaType.toString(), content, url);
+            }
         }
 
         throw new UnknownFormatException("Can't parse sitemap with MediaType of: " + contentType + " (at: " + url + ")");
@@ -168,7 +181,7 @@ public class SiteMapParser {
             IOUtils.closeQuietly(bomIs);
             throw new RuntimeException("Impossible exception", e);
         }
-        
+
         return processXml(sitemapUrl, is);
     }
 
@@ -196,9 +209,9 @@ public class SiteMapParser {
                 try {
                     URL url = new URL(line);
                     boolean valid = urlIsLegal(textSiteMap.getBaseUrl(), url.toString());
-                    
+
                     if (valid || !strict) {
-                        LOG.debug("  {}. {}",i++ , url);
+                        LOG.debug("  {}. {}", i++, url);
 
                         SiteMapURL surl = new SiteMapURL(url, valid);
                         textSiteMap.addSiteMapUrl(surl);
@@ -312,7 +325,7 @@ public class SiteMapParser {
                     String changeFreq = getElementValue(elem, "changefreq");
                     String priority = getElementValue(elem, "priority");
                     boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
-                    
+
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
                         sitemap.addSiteMapUrl(sUrl);
@@ -348,7 +361,7 @@ public class SiteMapParser {
 
         SiteMapIndex sitemapIndex = new SiteMapIndex(url);
         sitemapIndex.setType(SitemapType.INDEX);
-        
+
         // Loop through the <sitemap>s
         for (int i = 0; i < nodeList.getLength() && i < MAX_URLS; i++) {
 
@@ -358,7 +371,7 @@ public class SiteMapParser {
                 Element elem = (Element) firstNode;
                 String loc = getElementValue(elem, "loc");
 
-                // try the text content when no loc element 
+                // try the text content when no loc element
                 // has been specified
                 if (loc == null) {
                     loc = elem.getTextContent().trim();
@@ -386,9 +399,9 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse the XML document, looking for a
-     * <b>feed</b> element to determine if it's an <b>Atom doc</b>
-     * <b>rss</b> to determine if it's an <b>RSS doc</b>.
+     * Parse the XML document, looking for a <b>feed</b> element to determine if
+     * it's an <b>Atom doc</b> <b>rss</b> to determine if it's an <b>RSS
+     * doc</b>.
      * 
      * @param sitemapUrl
      * @param doc
@@ -470,7 +483,7 @@ public class SiteMapParser {
                 try {
                     URL url = new URL(href);
                     boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
-                    
+
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
@@ -544,7 +557,7 @@ public class SiteMapParser {
                 try {
                     URL url = new URL(link);
                     boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
-                    
+
                     if (valid || !strict) {
                         SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
                         sitemap.addSiteMapUrl(sUrl);
@@ -599,9 +612,10 @@ public class SiteMapParser {
     }
 
     /**
-     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl are legal.
-     * Both URLs are first converted to lowercase before the comparison is made
-     * (this could be an issue on web servers that are case sensitive).
+     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl
+     * are legal. Both URLs are first converted to lowercase before the
+     * comparison is made (this could be an issue on web servers that are case
+     * sensitive).
      * 
      * @param sitemapBaseUrl
      * @param testUrl
@@ -621,8 +635,12 @@ public class SiteMapParser {
         return ret;
     }
 
-    /** Performs a one time intialization of Tika's Media-Type components and media type collection constants <br/>
-     * Please note that this is a private static method which is called once per CLASS (not per instance / object) */
+    /**
+     * Performs a one time intialization of Tika's Media-Type components and
+     * media type collection constants <br/>
+     * Please note that this is a private static method which is called once per
+     * CLASS (not per instance / object)
+     */
     private static void initMediaTypes() {
         /* XML media types (and all aliases) */
         XML_MEDIA_TYPES.add(APPLICATION_XML);

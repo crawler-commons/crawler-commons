@@ -51,17 +51,9 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-                .append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-                .append("<sitemap>")
-                .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>")
-                .append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>")
-                .append("</sitemap>")
-                .append("<sitemap>")
-                .append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>")
-                .append("  <lastmod>2005-01-01</lastmod>")
-                .append("</sitemap>")
-                .append("</sitemapindex>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<sitemap>")
+                        .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>").append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>").append("</sitemap>").append("<sitemap>")
+                        .append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>").append("  <lastmod>2005-01-01</lastmod>").append("</sitemap>").append("</sitemapindex>");
         byte[] content = scontent.toString().getBytes("UTF-8");
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
@@ -76,9 +68,9 @@ public class SiteMapParserTest {
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap1.xml.gz", currentSiteMap.getUrl().toString());
         assertEquals(SiteMap.convertToDate("2004-10-01T18:23:17+00:00"), currentSiteMap.getLastModified());
-        
+
         assertTrue(currentSiteMap.toString().contains("T18:23"));
-        
+
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/sitemap2.xml.gz"));
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap2.xml.gz", currentSiteMap.getUrl().toString());
@@ -88,7 +80,7 @@ public class SiteMapParserTest {
     @Test
     public void testFullDateFormat() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00");
-        
+
         Date date = new Date();
         System.out.println(format.format(date));
         System.out.println(SiteMap.getFullDateFormat().format(date));
@@ -147,8 +139,8 @@ public class SiteMapParserTest {
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap.nonXmlExt");
 
-        final String[] XML_CONTENT_TYPES = new String[]{"text/xml", "application/x-xml", "application/xml", "application/atom+xml", "application/rss+xml"};
-        for (String contentType: XML_CONTENT_TYPES) {
+        final String[] XML_CONTENT_TYPES = new String[] { "text/xml", "application/x-xml", "application/xml", "application/atom+xml", "application/rss+xml" };
+        for (String contentType : XML_CONTENT_TYPES) {
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
             assertEquals(false, asm.isIndex());
             assertEquals(true, asm instanceof SiteMap);
@@ -160,20 +152,20 @@ public class SiteMapParserTest {
     /**
      * This Sitemap contains badly formatted XML and can't be read
      * */
-    @Test (expected = UnknownFormatException.class)
+    @Test(expected = UnknownFormatException.class)
     public void testSitemapParserBrokenXml() throws IOException, UnknownFormatException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-                .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-                .append("<url><!-- This file is not a valid XML file --></url>")
-                .append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
-                .append("</url><!-- missing opening url tag --></url></urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+                        .append("<url><!-- This file is not a valid XML file --></url>").append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
+                        .append("</url><!-- missing opening url tag --></url></urlset>");
         byte[] content = scontent.toString().getBytes();
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
-        parser.parseSiteMap(contentType, content, url); // This Sitemap contains badly formatted XML and can't be read
+        parser.parseSiteMap(contentType, content, url); // This Sitemap contains
+                                                        // badly formatted XML
+                                                        // and can't be read
     }
 
     @Test
@@ -199,9 +191,8 @@ public class SiteMapParserTest {
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
 
-        final String[] GZ_CONTENT_TYPES = new String[]{"application/gzip", "application/x-gzip", "application/x-gunzip",
-           "application/gzipped", "application/gzip-compressed", "gzip/document"};
-        for (String contentType: GZ_CONTENT_TYPES) {
+        final String[] GZ_CONTENT_TYPES = new String[] { "application/gzip", "application/x-gzip", "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" };
+        for (String contentType : GZ_CONTENT_TYPES) {
             URL url = new URL("http://www.example.com/sitemap");
             AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
             assertEquals(false, asm.isIndex());
@@ -211,7 +202,7 @@ public class SiteMapParserTest {
         }
     }
 
-    @Test (expected = UnknownFormatException.class)
+    @Test(expected = UnknownFormatException.class)
     public void testSitemapWithOctetMediaType() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/octet-stream";
@@ -231,12 +222,8 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-                .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-                .append("<url>")
-                .append("<loc>http://www.example.com/</loc>")
-                .append("</url>")
-                .append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
+                        .append("<loc>http://www.example.com/</loc>").append("</url>").append("</urlset>");
         byte[] content = scontent.toString().getBytes();
 
         URL url = new URL("http://www.example.com/subsection/sitemap.xml");
@@ -261,33 +248,13 @@ public class SiteMapParserTest {
     /** Returns a good simple default XML sitemap as a byte array */
     private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-                .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-                .append("<url>")
-                .append("  <loc>http://www.example.com/</loc>")
-                .append("  <lastmod>2005-01-01</lastmod>")
-                .append("  <changefreq>monthly</changefreq>")
-                .append("  <priority>0.8</priority>")
-                .append("</url>")
-                .append("<url>")
-                .append("  <loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>")
-                .append("  <changefreq>weekly</changefreq>")
-                .append("</url>")
-                .append("<url>")
-                .append("  <loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>")
-                .append("  <lastmod>2004-12-23</lastmod>")
-                .append("  <changefreq>weekly</changefreq>")
-                .append("</url>")
-                .append("<url>")
-                .append("  <loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>")
-                .append("  <lastmod>2004-12-23T18:00:15+00:00</lastmod>")
-                .append("  <priority>0.3</priority>")
-                .append("</url>")
-                .append("<url>")
-                .append("  <loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>")
-                .append("  <lastmod>2004-11-23</lastmod>")
-                .append("</url>")
-                .append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
+                        .append("  <loc>http://www.example.com/</loc>").append("  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
+                        .append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>").append("  <changefreq>weekly</changefreq>")
+                        .append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>").append("  <lastmod>2004-12-23</lastmod>")
+                        .append("  <changefreq>weekly</changefreq>").append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>")
+                        .append("  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>").append("<url>")
+                        .append("  <loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>").append("  <lastmod>2004-11-23</lastmod>").append("</url>").append("</urlset>");
 
         return scontent.toString().getBytes();
     }

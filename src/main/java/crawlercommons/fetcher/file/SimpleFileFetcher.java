@@ -40,53 +40,61 @@ import crawlercommons.fetcher.UrlFetchException;
 @SuppressWarnings("serial")
 public class SimpleFileFetcher extends BaseFetcher {
 
-    /* (non-Javadoc)
-     * @see crawlercommons.fetcher.BaseFetcher#get(java.lang.String, crawlercommons.fetcher.Payload)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see crawlercommons.fetcher.BaseFetcher#get(java.lang.String,
+     * crawlercommons.fetcher.Payload)
      */
     @Override
     public FetchedResult get(String url, Payload payload) throws BaseFetchException {
         String path = null;
-        
-            try {
-                URL realUrl = new URL(url);
-                if (!realUrl.getProtocol().equals("file")) {
-                    throw new BadProtocolFetchException(url);
-                }
-                
-                path = realUrl.getPath();
-                if (path.length() == 0) {
-                    path = "/";
-                }
-            } catch (MalformedURLException e) {
-                throw new UrlFetchException(url, e.getMessage());
+
+        try {
+            URL realUrl = new URL(url);
+            if (!realUrl.getProtocol().equals("file")) {
+                throw new BadProtocolFetchException(url);
             }
-            
+
+            path = realUrl.getPath();
+            if (path.length() == 0) {
+                path = "/";
+            }
+        } catch (MalformedURLException e) {
+            throw new UrlFetchException(url, e.getMessage());
+        }
+
         File f = new File(path);
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(f);
             long startTime = System.currentTimeMillis();
-            
-            // TODO - limit to be no more than maxContentSize. We should read in up to 16K,
-            // then call Tika to detect the content type and use that to do mime-type based
+
+            // TODO - limit to be no more than maxContentSize. We should read in
+            // up to 16K,
+            // then call Tika to detect the content type and use that to do
+            // mime-type based
             // max size.
-            
-            // TODO - see Nutch's File protocol for doing a better job of mapping file
+
+            // TODO - see Nutch's File protocol for doing a better job of
+            // mapping file
             // errors (e.g. file not found) to HttpBaseException such as 404.
-            
-            // TODO - see Nutch's File protocol for handling directories - return as HTML with links
-            
-            // TODO - see Nutch's File protocol for handling symlinks as redirects. We'd want
-            // to then enforce max redirects, which means moving the redirect support back into
+
+            // TODO - see Nutch's File protocol for handling directories -
+            // return as HTML with links
+
+            // TODO - see Nutch's File protocol for handling symlinks as
+            // redirects. We'd want
+            // to then enforce max redirects, which means moving the redirect
+            // support back into
             // the BaseFetcher class.
-            
+
             byte[] content = IOUtils.toByteArray(fis);
             long stopTime = System.currentTimeMillis();
             long totalReadTime = Math.max(1, stopTime - startTime);
             long responseRate = (content.length * 1000L) / totalReadTime;
             String contentType = "application/octet-stream";
-            return new FetchedResult(url, url, System.currentTimeMillis(), new Metadata(), content, contentType, 
-                    (int)responseRate, payload, url, 0, "localhost", HttpStatus.SC_OK, null);
+            return new FetchedResult(url, url, System.currentTimeMillis(), new Metadata(), content, contentType, (int) responseRate, payload, url, 0, "localhost", HttpStatus.SC_OK, null);
         } catch (FileNotFoundException e) {
             throw new HttpFetchException(url, "Error fetching " + url, HttpStatus.SC_NOT_FOUND, new Metadata());
         } catch (IOException e) {

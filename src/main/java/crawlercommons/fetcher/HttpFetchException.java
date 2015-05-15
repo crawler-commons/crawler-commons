@@ -21,24 +21,24 @@ import org.apache.tika.metadata.Metadata;
 
 @SuppressWarnings({ "serial" })
 public class HttpFetchException extends BaseFetchException {
-    
+
     private int _httpStatus;
     private Metadata _httpHeaders;
-    
+
     public HttpFetchException() {
         super();
     }
-    
+
     public HttpFetchException(String url, String msg, int httpStatus, Metadata httpHeaders) {
         super(url, msg);
         _httpStatus = httpStatus;
         _httpHeaders = httpHeaders;
     }
-    
+
     public int getHttpStatus() {
         return _httpStatus;
     }
-    
+
     public Metadata getHttpHeaders() {
         return _httpHeaders;
     }
@@ -50,8 +50,8 @@ public class HttpFetchException extends BaseFetchException {
         result.append(_httpStatus);
         result.append(") Headers: ");
         result.append(_httpHeaders.toString());
-        
+
         return result.toString();
     }
-    
+
 }

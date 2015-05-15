@@ -25,7 +25,7 @@ import java.util.Set;
 public class Payload implements Map<String, Object> {
 
     private Map<String, Object> _data;
-    
+
     public Payload() {
         _data = new HashMap<String, Object>();
     }
@@ -85,6 +85,5 @@ public class Payload implements Map<String, Object> {
     public Collection<Object> values() {
         return _data.values();
     }
-    
-    
+
 }

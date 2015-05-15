@@ -37,12 +37,11 @@ import crawlercommons.fetcher.http.UserAgent;
 import crawlercommons.test.SimulationWebServer;
 import crawlercommons.test.TestUtils;
 
-
 public class RobotUtilsTest {
 
     @SuppressWarnings("serial")
     private static class CircularRedirectResponseHandler extends AbstractHttpHandler {
-        
+
         @Override
         public void handle(String pathInContext, String pathParams, HttpRequest request, HttpResponse response) throws HttpException, IOException {
             response.sendRedirect(pathInContext);
@@ -51,7 +50,7 @@ public class RobotUtilsTest {
 
     @SuppressWarnings("serial")
     private static class RedirectToTopResponseHandler extends AbstractHttpHandler {
-        
+
         @Override
         public void handle(String pathInContext, String pathParams, HttpRequest request, HttpResponse response) throws HttpException, IOException {
             if (pathInContext.endsWith("robots.txt")) {
@@ -61,7 +60,7 @@ public class RobotUtilsTest {
                 response.setContentLength(bytes.length);
                 response.setContentType("text/html; charset=UTF-8");
                 response.setStatus(200);
-                
+
                 OutputStream os = response.getOutputStream();
                 os.write(bytes);
             }
@@ -69,8 +68,8 @@ public class RobotUtilsTest {
     }
 
     /**
-     * Verify that when the web server has a circular redirect bug for robots.txt, we
-     * treat it like "no robots".
+     * Verify that when the web server has a circular redirect bug for
+     * robots.txt, we treat it like "no robots".
      * 
      * @throws Exception
      */
@@ -78,10 +77,10 @@ public class RobotUtilsTest {
     public void testCircularRedirect() throws Exception {
         BaseHttpFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
         BaseRobotsParser parser = new SimpleRobotRulesParser();
-        
+
         SimulationWebServer webServer = new SimulationWebServer();
         HttpServer server = webServer.startServer(new CircularRedirectResponseHandler(), 8089);
-        
+
         try {
             BaseRobotRules rules = RobotUtils.getRobotRules(fetcher, parser, new URL("http://localhost:8089/robots.txt"));
             Assert.assertTrue(rules.isAllowAll());
@@ -94,10 +93,10 @@ public class RobotUtilsTest {
     public void testRedirectToHtml() throws Exception {
         BaseHttpFetcher fetcher = RobotUtils.createFetcher(TestUtils.CC_TEST_AGENT, 1);
         BaseRobotsParser parser = new SimpleRobotRulesParser();
-        
+
         SimulationWebServer webServer = new SimulationWebServer();
         HttpServer server = webServer.startServer(new RedirectToTopResponseHandler(), 8089);
-        
+
         try {
             BaseRobotRules rules = RobotUtils.getRobotRules(fetcher, parser, new URL("http://localhost:8089/robots.txt"));
             Assert.assertTrue(rules.isAllowAll());
@@ -105,13 +104,13 @@ public class RobotUtilsTest {
             server.stop();
         }
     }
-    
+
     @Test
     public void testMatchAgainstEmailAddress() throws Exception {
-        // The "crawler@domain.com" email address shouldn't trigger a match against the
+        // The "crawler@domain.com" email address shouldn't trigger a match
+        // against the
         // "crawler" user agent name in the robots.txt file.
-        final String simpleRobotsTxt = "User-agent: crawler" + "\r\n"
-        + "Disallow: /";
+        final String simpleRobotsTxt = "User-agent: crawler" + "\r\n" + "Disallow: /";
 
         BaseHttpFetcher fetcher = Mockito.mock(BaseHttpFetcher.class);
         FetchedResult result = Mockito.mock(FetchedResult.class);
@@ -119,13 +118,12 @@ public class RobotUtilsTest {
         Mockito.when(fetcher.get(Mockito.any(String.class))).thenReturn(result);
         UserAgent userAgent = new UserAgent("testAgent", "crawler@domain.com", "http://www.domain.com");
         Mockito.when(fetcher.getUserAgent()).thenReturn(userAgent);
-        
+
         URL robotsUrl = new URL("http://www.domain.com/robots.txt");
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
         BaseRobotRules rules = RobotUtils.getRobotRules(fetcher, parser, robotsUrl);
-        
+
         Assert.assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
-    
 
 }

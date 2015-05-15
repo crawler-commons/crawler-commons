@@ -23,14 +23,15 @@ import crawlercommons.fetcher.BaseFetcher;
 public abstract class BaseHttpFetcher extends BaseFetcher {
 
     public enum RedirectMode {
-        FOLLOW_ALL,         // Fetcher will try to follow all redirects
-        FOLLOW_TEMP,        // Temp redirects are automatically followed, but not permanent.
-        FOLLOW_NONE         // No redirects are followed.
+        FOLLOW_ALL, // Fetcher will try to follow all redirects
+        FOLLOW_TEMP, // Temp redirects are automatically followed, but not
+                     // permanent.
+        FOLLOW_NONE // No redirects are followed.
     }
-    
+
     public static final int NO_MIN_RESPONSE_RATE = Integer.MIN_VALUE;
     public static final int NO_REDIRECTS = 0;
-    
+
     public static final int DEFAULT_MIN_RESPONSE_RATE = NO_MIN_RESPONSE_RATE;
     public static final int DEFAULT_MAX_CONNECTIONS_PER_HOST = 2;
     public static final int DEFAULT_MAX_REDIRECTS = 20;
@@ -47,11 +48,11 @@ public abstract class BaseHttpFetcher extends BaseFetcher {
 
     public BaseHttpFetcher(int maxThreads, UserAgent userAgent) {
         super();
-        
+
         _maxThreads = maxThreads;
         _userAgent = userAgent;
     }
-    
+
     public int getMaxThreads() {
         return _maxThreads;
     }
@@ -59,22 +60,24 @@ public abstract class BaseHttpFetcher extends BaseFetcher {
     public UserAgent getUserAgent() {
         return _userAgent;
     }
-    
+
     public void setMaxConnectionsPerHost(int maxConnectionsPerHost) {
         _maxConnectionsPerHost = maxConnectionsPerHost;
     }
-    
+
     public int getMaxConnectionsPerHost() {
         return _maxConnectionsPerHost;
     }
-    
+
     public void setMinResponseRate(int minResponseRate) {
         _minResponseRate = minResponseRate;
     }
 
     /**
-     * Return the minimum response rate. If the speed at which bytes are being returned
-     * from the server drops below this, the fetch of that page will be aborted.
+     * Return the minimum response rate. If the speed at which bytes are being
+     * returned from the server drops below this, the fetch of that page will be
+     * aborted.
+     * 
      * @return bytes/second
      */
     public int getMinResponseRate() {
@@ -84,27 +87,25 @@ public abstract class BaseHttpFetcher extends BaseFetcher {
     public void setAcceptLanguage(String acceptLanguage) {
         _acceptLanguage = acceptLanguage;
     }
-    
+
     public String getAcceptLanguage() {
         return _acceptLanguage;
     }
-    
+
     public void setMaxRedirects(int maxRedirects) {
         _maxRedirects = maxRedirects;
     }
-    
+
     public int getMaxRedirects() {
         return _maxRedirects;
     }
-    
+
     public void setRedirectMode(RedirectMode mode) {
         _redirectMode = mode;
     }
-    
+
     public RedirectMode getRedirectMode() {
         return _redirectMode;
     }
-    
-
 
 }
