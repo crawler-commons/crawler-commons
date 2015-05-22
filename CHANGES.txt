@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
+- Issue 75: [Sitemaps] more robust parsing of XML elements (jnioche, kkrugler)
 - Issue 76: maven-java-formatter-plugin (jnioche)
 - Issue 73: Switch groupID in pom from com.google.code.crawler-commons to crawler-commons (jnioche)
 - Issue 71: Upgrade to Tika 1.8 (jnioche)

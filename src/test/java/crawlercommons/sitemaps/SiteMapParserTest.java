@@ -254,7 +254,7 @@ public class SiteMapParserTest {
                         .append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>").append("  <lastmod>2004-12-23</lastmod>")
                         .append("  <changefreq>weekly</changefreq>").append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>")
                         .append("  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>").append("<url>")
-                        .append("  <loc>http://www.example.com/catalog?item=83&amp;desc=vacation_usa</loc>").append("  <lastmod>2004-11-23</lastmod>").append("</url>").append("</urlset>");
+                        .append("  <loc><url><![CDATA[http://www.example.com/catalog?item=83&amp;desc=vacation_usa]]></url></loc>").append("  <lastmod>2004-11-23</lastmod>").append("</url>").append("</urlset>");
 
         return scontent.toString().getBytes();
     }

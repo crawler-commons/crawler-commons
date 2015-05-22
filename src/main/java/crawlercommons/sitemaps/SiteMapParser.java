@@ -581,14 +581,12 @@ public class SiteMapParser {
     private String getElementValue(Element elem, String elementName) {
 
         NodeList list = elem.getElementsByTagName(elementName);
+        if (list == null)
+            return null;
         Element e = (Element) list.item(0);
         if (e != null) {
-            NodeList children = e.getChildNodes();
-            if (children.item(0) != null) {
-                return ((Node) children.item(0)).getNodeValue().trim();
-            }
+            return e.getTextContent();
         }
-
         return null;
     }
 
