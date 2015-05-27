@@ -129,7 +129,6 @@
 					<version>${maven-release-plugin.version}</version>
 					<configuration>
 						<mavenExecutorId>forked-path</mavenExecutorId>
-						<tagBase>https://crawler-commons.googlecode.com/svn/tags/</tagBase>
 						<useReleaseProfile>false</useReleaseProfile>
 						<arguments>-Prelease</arguments>
 						<!--autoVersionSubmodules>true</autoVersionSubmodules -->
