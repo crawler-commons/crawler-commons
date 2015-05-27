@@ -17,6 +17,12 @@
 
 package crawlercommons.sitemaps;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,7 +30,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -32,8 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class SiteMapParserTest {
@@ -245,6 +248,98 @@ public class SiteMapParserTest {
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
     }
 
+    
+    @Test
+    public void testPartialSitemapsAllowed() throws Throwable {
+
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
+                        .append("<loc>http://www.example.com/</lo");
+        byte[] content = scontent.toString().getBytes();
+
+        URL url = new URL("http://www.example.com/subsection/sitemap.xml");
+        try {
+            parser.parseSiteMap(contentType, content, url);
+            fail("partial sitemap should fail by default");
+        } catch (UnknownFormatException e) {
+            assertNotNull(e);
+        }
+
+        // Now try again with partial parsing; we should get 1 URL
+        parser = new SiteMapParser(false, true);
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+
+    @Test
+    public void testUrlLocUrl() throws Throwable {
+        SiteMapParser parser = new SiteMapParser(false);
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+            .append("<url>")
+            .append("<loc>")
+            .append("<url>")
+            .append("<![CDATA[")
+            .append("http://jobs.optistaffing.com/EXPERIENCED-DISPATCHER-NEEDED-NOW----Jobs-in-Vancouver-WA/2333221")
+            .append("]]>")
+            .append("</url>")
+            .append("</loc>")
+            .append("<lastmod>2015-04-28</lastmod>")
+            .append("<changefreq>daily</changefreq>")
+            .append("</url>")
+            .append("</urlset>");
+        
+        
+        byte[] content = scontent.toString().getBytes();
+
+        URL url = new URL("http://www.example.com/subsection/sitemap.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+    
+    @Test
+    public void testPartialSitemapIndicesAllowed() throws Throwable {
+
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+                        .append("<sitemap><loc>http://www.example.com/sitemap1.xml.gz</loc><las");
+
+        byte[] content = scontent.toString().getBytes();
+
+        URL url = new URL("http://www.example.com/subsection/sitemap.xml");
+        try {
+            parser.parseSiteMap(contentType, content, url);
+            fail("partial sitemap should fail by default");
+        } catch (UnknownFormatException e) {
+            assertNotNull(e);
+        }
+
+        // Now try again with partial parsing; we should get 1 URL
+        parser = new SiteMapParser(false, true);
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+
+        SiteMapIndex smi = (SiteMapIndex) asm;
+        assertEquals(1, smi.getSitemaps().size());
+    }
+    
     /** Returns a good simple default XML sitemap as a byte array */
     private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
