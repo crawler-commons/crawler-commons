@@ -12,7 +12,7 @@ The crawler-commons project is now being hosted at GitHub, due to the demise of 
 
 We are glad to announce the 0.5 release of Crawler Commons. This release mainly improves Sitemap parsing as well as an upgrade to [Apache Tika 1.6](http://tika.apache.org).
 
-See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details. Additionally the Java documentation can be found [here](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html).
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-0.5/CHANGES.txt) file included with the release for a full list of details. Additionally the Java documentation can be found [here](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html).
 
 We suggest all users to upgrade to this version. The Crawler Commons project artifacts are released as Maven artifacts and can be found at [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.google.code.crawler-commons%22%20AND%20a%3A%22crawler-commons%22).
 
