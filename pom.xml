@@ -8,11 +8,11 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>crawler-commons</groupId>
+	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
-	<version>0.7-SNAPSHOT</version>
+	<version>0.6-SNAPSHOT</version>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -30,8 +30,7 @@
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+	</scm>
 
 	<distributionManagement>
 		<repository>
