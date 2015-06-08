@@ -47,16 +47,21 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+
 import static org.apache.tika.mime.MediaType.APPLICATION_XML;
 import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
 
-    /** According to the specs, 50K URLs per Sitemap is the max */
+    /**
+     * According to the specs, 50K URLs per Sitemap is the max
+     */
     private static final int MAX_URLS = 50000;
 
-    /** Sitemap docs must be limited to 10MB (10,485,760 bytes) */
+    /**
+     * Sitemap docs must be limited to 10MB (10,485,760 bytes)
+     */
     public static int MAX_BYTES_ALLOWED = 10485760;
 
     /* Tika's MediaType components */
@@ -66,15 +71,19 @@ public class SiteMapParser {
     private final static List<MediaType> XML_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<MediaType>();
     private final static List<MediaType> GZ_MEDIA_TYPES = new ArrayList<MediaType>();
+
     static {
         initMediaTypes();
     }
 
-    /** True (by default) if invalid URLs should be rejected */
-    private boolean strict;
+    /**
+     * True (by default) meaning that invalid URLs should be rejected, as the official docs allow the siteMapURLs
+     * to be only under the base url: http://www.sitemaps.org/protocol.html#location
+     */
+    private boolean strict = true;
 
     public SiteMapParser() {
-        this(true);
+
     }
 
     public SiteMapParser(boolean strict) {
@@ -82,7 +91,7 @@ public class SiteMapParser {
     }
 
     /**
-     * @return whether invalid URLs will be rejected
+     * @return whether invalid URLs will be rejected (where invalid means that the url is not under the base url)
      */
     public boolean isStrict() {
         return strict;
@@ -95,11 +104,10 @@ public class SiteMapParser {
      * <br/>
      * This method is a convenience method for a user who has a sitemap URL and
      * wants a "Keep it simple" way to parse it.
-     * 
-     * @param onlineSitemapUrl
-     *            URL of the online sitemap
+     *
+     * @param onlineSitemapUrl URL of the online sitemap
      * @return AbstractSiteMap object or null if the onlineSitemap is null
-     **/
+     */
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
         if (onlineSitemapUrl == null) {
             return null;
@@ -112,7 +120,7 @@ public class SiteMapParser {
      * Returns a processed copy of an unprocessed sitemap object, i.e. transfer
      * the value of getLastModified Please note that the sitemap input stays
      * unchanged
-     **/
+     */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, final AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
         AbstractSiteMap asmCopy = parseSiteMap(contentType, content, sitemap.getUrl());
         asmCopy.setLastModified(sitemap.getLastModified());
@@ -121,8 +129,8 @@ public class SiteMapParser {
 
     /**
      * @return SiteMap/SiteMapIndex by guessing the content type from the binary
-     *         content and URL
-     **/
+     * content and URL
+     */
     public AbstractSiteMap parseSiteMap(byte[] content, URL url) throws UnknownFormatException, IOException {
         if (url == null) {
             return null;
@@ -134,19 +142,13 @@ public class SiteMapParser {
 
     /**
      * @return SiteMap/SiteMapIndex given a content type, byte content and the
-     *         URL of a sitemap
-     **/
+     * URL of a sitemap
+     */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         MediaType mediaType = MediaType.parse(contentType);
 
-        while (mediaType != null && !mediaType.equals(MediaType.OCTET_STREAM)) { // Octet-stream
-                                                                                 // is
-                                                                                 // the
-                                                                                 // father
-                                                                                 // of
-                                                                                 // all
-                                                                                 // binary
-                                                                                 // types
+        // Octet-stream is the father of all binary types
+        while (mediaType != null && !mediaType.equals(MediaType.OCTET_STREAM)) {
             if (XML_MEDIA_TYPES.contains(mediaType)) {
                 return processXml(url, content);
             } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
@@ -154,18 +156,17 @@ public class SiteMapParser {
             } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
                 return processGzip(url, content);
             } else {
-                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
-                                                                         // parent
+                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
                 return parseSiteMap(mediaType.toString(), content, url);
             }
         }
 
-        throw new UnknownFormatException("Can't parse sitemap with MediaType of: " + contentType + " (at: " + url + ")");
+        throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
     }
 
     /**
      * Parse the given XML content.
-     * 
+     *
      * @param sitemapUrl
      * @param xmlContent
      * @return
@@ -188,7 +189,7 @@ public class SiteMapParser {
     /**
      * Process a text-based Sitemap. Text sitemaps only list URLs but no
      * priorities, last mods, etc.
-     * 
+     *
      * @param content
      * @throws IOException
      */
@@ -206,19 +207,7 @@ public class SiteMapParser {
         int i = 1;
         while ((line = reader.readLine()) != null) {
             if (line.length() > 0 && i <= MAX_URLS) {
-                try {
-                    URL url = new URL(line);
-                    boolean valid = urlIsLegal(textSiteMap.getBaseUrl(), url.toString());
-
-                    if (valid || !strict) {
-                        LOG.debug("  {}. {}", i++, url);
-
-                        SiteMapURL surl = new SiteMapURL(url, valid);
-                        textSiteMap.addSiteMapUrl(surl);
-                    }
-                } catch (MalformedURLException e) {
-                    LOG.warn("Bad URL [{}]. From Sitemap: [{}]", line, sitemapUrl);
-                }
+                addUrlIntoSitemap(line, textSiteMap, null, null, null, i++);
             }
         }
         textSiteMap.setProcessed(true);
@@ -228,11 +217,9 @@ public class SiteMapParser {
 
     /**
      * Decompress the gzipped content and process the resulting XML Sitemap.
-     * 
-     * @param url
-     *            - URL of the gzipped content
-     * @param response
-     *            - Gzipped content
+     *
+     * @param url      - URL of the gzipped content
+     * @param response - Gzipped content
      * @throws MalformedURLException
      * @throws IOException
      * @throws UnknownFormatException
@@ -259,7 +246,7 @@ public class SiteMapParser {
 
     /**
      * Parse the given XML content.
-     * 
+     *
      * @param sitemapUrl
      * @param is
      * @throws UnknownFormatException
@@ -301,7 +288,7 @@ public class SiteMapParser {
      * <loc
      * >http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
      * <changefreq>weekly</changefreq> </url> </urlset>
-     * 
+     *
      * @param doc
      */
     private SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
@@ -317,42 +304,30 @@ public class SiteMapParser {
             Node n = list.item(i);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) n;
-
+                String lastMod = getElementValue(elem, "lastmod");
+                String changeFreq = getElementValue(elem, "changefreq");
+                String priority = getElementValue(elem, "priority");
                 String loc = getElementValue(elem, "loc");
-                try {
-                    URL url = new URL(loc);
-                    String lastMod = getElementValue(elem, "lastmod");
-                    String changeFreq = getElementValue(elem, "changefreq");
-                    String priority = getElementValue(elem, "priority");
-                    boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
 
-                    if (valid || !strict) {
-                        SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
-                        sitemap.addSiteMapUrl(sUrl);
-                        LOG.debug("  {}. {}", (i + 1), sUrl);
-                    }
-                } catch (MalformedURLException e) {
-                    LOG.debug("Bad url: [{}]", loc);
-                    LOG.trace("Can't create an entry with a bad URL", e);
-                }
+                addUrlIntoSitemap(loc, sitemap, lastMod, changeFreq, priority, i);
             }
         }
+
         sitemap.setProcessed(true);
         return sitemap;
     }
 
     /**
      * Parse XML that contains a Sitemap Index. Example Sitemap Index:
-     * 
+     * <p/>
      * <?xml version="1.0" encoding="UTF-8"?> <sitemapindex
      * xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> <sitemap>
      * <loc>http://www.example.com/sitemap1.xml.gz</loc>
      * <lastmod>2004-10-01T18:23:17+00:00</lastmod> </sitemap> <sitemap>
      * <loc>http://www.example.com/sitemap2.xml.gz</loc>
      * <lastmod>2005-01-01</lastmod> </sitemap> </sitemapindex>
-     * 
-     * @param url
-     *            - URL of Sitemap Index
+     *
+     * @param url      - URL of Sitemap Index
      * @param nodeList
      */
     private SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
@@ -402,12 +377,10 @@ public class SiteMapParser {
      * Parse the XML document, looking for a <b>feed</b> element to determine if
      * it's an <b>Atom doc</b> <b>rss</b> to determine if it's an <b>RSS
      * doc</b>.
-     * 
+     *
      * @param sitemapUrl
-     * @param doc
-     *            - XML document to parse
-     * @throws UnknownFormatException
-     *             if XML does not appear to be Atom or RSS
+     * @param doc        - XML document to parse
+     * @throws UnknownFormatException if XML does not appear to be Atom or RSS
      */
     private SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
 
@@ -435,24 +408,24 @@ public class SiteMapParser {
     /**
      * Parse the XML document which is assumed to be in Atom format. Atom 1.0
      * example:
-     * 
+     * <p/>
      * <?xml version="1.0" encoding="utf-8"?> <feed
      * xmlns="http://www.w3.org/2005/Atom">
-     * 
+     * <p/>
      * <title>Example Feed</title> <subtitle>A subtitle.</subtitle> <link
      * href="http://example.org/feed/" rel="self"/> <link
      * href="http://example.org/"/> <modified>2003-12-13T18:30:02Z</modified>
      * <author> <name>John Doe</name> <email>johndoe@example.com</email>
      * </author> <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
-     * 
+     * <p/>
      * <entry> <title>Atom-Powered Robots Run Amok</title> <link
      * href="http://example.org/2003/12/13/atom03"/>
      * <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
      * <updated>2003-12-13T18:30:02Z</updated> <summary>Some text.</summary>
      * </entry>
-     * 
+     * <p/>
      * </feed>
-     * 
+     *
      * @param elem
      * @param doc
      */
@@ -476,30 +449,16 @@ public class SiteMapParser {
             Node n = list.item(i);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) n;
-
                 String href = getElementAttributeValue(elem, "link", "href");
-                LOG.debug("href = {}", href);
 
-                try {
-                    URL url = new URL(href);
-                    boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
-
-                    if (valid || !strict) {
-                        SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
-                        sitemap.addSiteMapUrl(sUrl);
-                        LOG.debug("  {}. {}", (i + 1), sUrl);
-                    }
-                } catch (MalformedURLException e) {
-                    LOG.trace("Can't create an entry with a bad URL", e);
-                    LOG.debug("Bad url: [{}]", href);
-                }
+                addUrlIntoSitemap(href, sitemap, lastMod, null, null, i);
             }
         }
     }
 
     /**
      * Parse XML document which is assumed to be in RSS format. RSS 2.0 example:
-     * 
+     * <p/>
      * <?xml version="1.0"?> <rss version="2.0"> <channel> <title>Lift Off
      * News</title> <link>http://liftoff.msfc.nasa.gov/</link>
      * <description>Liftoff to Space Exploration.</description>
@@ -509,7 +468,7 @@ public class SiteMapParser {
      * <generator>Weblog Editor 2.0</generator>
      * <managingEditor>editor@example.com</managingEditor>
      * <webMaster>webmaster@example.com</webMaster> <ttl>5</ttl>
-     * 
+     * <p/>
      * <item> <title>Star City</title>
      * <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
      * <description>How do Americans get ready to work with Russians aboard the
@@ -517,16 +476,16 @@ public class SiteMapParser {
      * language and protocol at Russia's Star City.</description> <pubDate>Tue,
      * 03 Jun 2003 09:39:21 GMT</pubDate>
      * <guid>http://liftoff.msfc.nasa.gov/2003/06/03.html#item573</guid> </item>
-     * 
+     * <p/>
      * <item> <title>Space Exploration</title>
      * <link>http://liftoff.msfc.nasa.gov/</link> <description>Sky watchers in
      * Europe, Asia, and parts of Alaska and Canada will experience a partial
      * eclipse of the Sun on Saturday, May 31.</description> <pubDate>Fri, 30
      * May 2003 11:06:42 GMT</pubDate>
      * <guid>http://liftoff.msfc.nasa.gov/2003/05/30.html#item572</guid> </item>
-     * 
+     * <p/>
      * </channel> </rss>
-     * 
+     *
      * @param sitemap
      * @param doc
      */
@@ -552,28 +511,15 @@ public class SiteMapParser {
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) n;
                 String link = getElementValue(elem, "link");
-                LOG.debug("link = {}", link);
 
-                try {
-                    URL url = new URL(link);
-                    boolean valid = urlIsLegal(sitemap.getBaseUrl(), url.toString());
-
-                    if (valid || !strict) {
-                        SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, null, null, valid);
-                        sitemap.addSiteMapUrl(sUrl);
-                        LOG.debug("  {}. {}", (i + 1), sUrl);
-                    }
-                } catch (MalformedURLException e) {
-                    LOG.trace("Can't create an entry with a bad URL", e);
-                    LOG.debug("Bad url: [{}]", link);
-                }
+                addUrlIntoSitemap(link, sitemap, lastMod, null, null, i);
             }
         }
     }
 
     /**
      * Get the element's textual content.
-     * 
+     *
      * @param elem
      * @param elementName
      * @return
@@ -592,7 +538,7 @@ public class SiteMapParser {
 
     /**
      * Get the element's attribute value.
-     * 
+     *
      * @param elem
      * @param elementName
      * @param attributeName
@@ -610,25 +556,42 @@ public class SiteMapParser {
     }
 
     /**
-     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl
-     * are legal. Both URLs are first converted to lowercase before the
-     * comparison is made (this could be an issue on web servers that are case
-     * sensitive).
-     * 
+     * Adds the given URL to the given sitemap while showing the relevant logs
+     */
+    private void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex) {
+        try {
+            URL url = new URL(urlStr); // Checking the URL
+            boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
+
+            if (valid || !strict) {
+                SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
+                siteMap.addSiteMapUrl(sUrl);
+                LOG.debug("  {}. {}", (urlIndex + 1), sUrl);
+            } else {
+                LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}",
+                                url.toExternalForm(), siteMap.getBaseUrl());
+            }
+        } catch (MalformedURLException e) {
+            LOG.warn("Bad url: [{}]", urlStr);
+            LOG.trace("Can't create a sitemap entry with a bad URL", e);
+        }
+    }
+
+    /**
+     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl are valid.
+     *
      * @param sitemapBaseUrl
      * @param testUrl
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
-    private boolean urlIsLegal(String sitemapBaseUrl, String testUrl) {
-
+    private boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         boolean ret = false;
 
         // Don't try a comparison if the URL is too short to match
         if (sitemapBaseUrl != null && sitemapBaseUrl.length() <= testUrl.length()) {
-            String u = testUrl.substring(0, sitemapBaseUrl.length()).toLowerCase();
+            String u = testUrl.substring(0, sitemapBaseUrl.length());
             ret = sitemapBaseUrl.equals(u);
         }
-        LOG.trace("urlIsLegal: {}  <= {}  ? {}", sitemapBaseUrl, testUrl, ret);
 
         return ret;
     }

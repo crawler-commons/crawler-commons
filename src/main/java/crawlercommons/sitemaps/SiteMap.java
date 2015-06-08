@@ -30,7 +30,9 @@ public class SiteMap extends AbstractSiteMap {
      */
     private String baseUrl;
 
-    /** URLs found in this Sitemap */
+    /**
+     * URLs found in this Sitemap
+     */
     private List<SiteMapURL> urlList;
 
     public SiteMap() {
@@ -68,8 +70,7 @@ public class SiteMap extends AbstractSiteMap {
     }
 
     /**
-     * @param url
-     *            - the URL of the Sitemap
+     * @param url - the URL of the Sitemap
      */
     private void setUrl(URL url) {
         this.url = url;
@@ -77,9 +78,8 @@ public class SiteMap extends AbstractSiteMap {
     }
 
     /**
-     * @param url
-     *            - the URL of the Sitemap In the case of a Malformed URL the
-     *            URL member is set to null
+     * @param url - the URL of the Sitemap
+     *            In the case of a Malformed URL the URL member is set to null
      */
     private void setUrl(String url) {
         try {
@@ -94,10 +94,15 @@ public class SiteMap extends AbstractSiteMap {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Date lastModified = getLastModified();
-        String lastModStr = (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-
-        sb.append("url = \"").append(url).append("\", lastMod = ").append(lastModStr).append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ")
+        sb.append("url = \"")
+                        .append(url)
+                        .append("\", lastMod = ")
+                        .append((getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified()))
+                        .append(", type = ")
+                        .append(getType())
+                        .append(", processed = ")
+                        .append(isProcessed())
+                        .append(", urlListSize = ")
                         .append(urlList.size());
 
         return sb.toString();
@@ -106,7 +111,7 @@ public class SiteMap extends AbstractSiteMap {
     /**
      * This is private because only once we know the Sitemap's URL can we
      * determine the base URL.
-     * 
+     *
      * @param sitemapUrl
      */
     private void setBaseUrl(URL sitemapUrl) {
@@ -123,8 +128,7 @@ public class SiteMap extends AbstractSiteMap {
     }
 
     /**
-     * @param url
-     *            The SitemapUrl to be added to the Sitemap.
+     * @param url The SitemapUrl to be added to the Sitemap.
      */
     public void addSiteMapUrl(SiteMapURL url) {
         urlList.add(url);
