@@ -26,7 +26,7 @@ import java.util.Date;
 
 /**
  * The SitemapUrl class represents a URL found in a Sitemap.
- *
+ * 
  * @author fmccown
  */
 public class SiteMapURL {
@@ -63,7 +63,8 @@ public class SiteMapURL {
     private double priority = defaultPriority;
 
     /**
-     * could be false, if URL isn't found under base path as indicated here: http://www.sitemaps.org/protocol.html#location *
+     * could be false, if URL isn't found under base path as indicated here:
+     * http://www.sitemaps.org/protocol.html#location *
      */
     private boolean valid;
 
@@ -93,7 +94,7 @@ public class SiteMapURL {
 
     /**
      * Return the URL.
-     *
+     * 
      * @return URL
      */
     public URL getUrl() {
@@ -102,7 +103,7 @@ public class SiteMapURL {
 
     /**
      * Set the URL.
-     *
+     * 
      * @param url
      */
     public void setUrl(URL url) {
@@ -111,8 +112,10 @@ public class SiteMapURL {
 
     /**
      * Set the URL.
-     *
-     * @param url In case of Malformed URL, the current url in this instance will be set to NULL
+     * 
+     * @param url
+     *            In case of Malformed URL, the current url in this instance
+     *            will be set to NULL
      */
     public void setUrl(String url) {
         try {
@@ -125,7 +128,7 @@ public class SiteMapURL {
 
     /**
      * Return when this URL was last modified.
-     *
+     * 
      * @return last modified date
      */
     public Date getLastModified() {
@@ -134,7 +137,7 @@ public class SiteMapURL {
 
     /**
      * Set when this URL was last modified.
-     *
+     * 
      * @param lastModified
      */
     public void setLastModified(String lastModified) {
@@ -143,7 +146,7 @@ public class SiteMapURL {
 
     /**
      * Set when this URL was last modified.
-     *
+     * 
      * @param lastModified
      */
     public void setLastModified(Date lastModified) {
@@ -152,7 +155,7 @@ public class SiteMapURL {
 
     /**
      * Return this URL's priority (a value between [0.0 - 1.0]).
-     *
+     * 
      * @return URL's priority (a value between [0.0 - 1.0])
      */
     public double getPriority() {
@@ -160,9 +163,9 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
-     * given priority is out of range).
-     *
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
+     * is used if the given priority is out of range).
+     * 
      * @param priority
      */
     public void setPriority(double priority) {
@@ -177,9 +180,9 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority is used if the
-     * given priority missing or is out of range).
-     *
+     * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
+     * is used if the given priority missing or is out of range).
+     * 
      * @param priorityStr
      */
     public void setPriority(String priorityStr) {
@@ -198,7 +201,7 @@ public class SiteMapURL {
 
     /**
      * Return the URL's change frequency
-     *
+     * 
      * @return the URL's change frequency
      */
     public ChangeFrequency getChangeFrequency() {
@@ -207,7 +210,7 @@ public class SiteMapURL {
 
     /**
      * Set the URL's change frequency
-     *
+     * 
      * @param changeFreq
      */
     public void setChangeFrequency(ChangeFrequency changeFreq) {
@@ -215,9 +218,9 @@ public class SiteMapURL {
     }
 
     /**
-     * Set the URL's change frequency
-     * In case of a bad ChangeFrequency, the current frequency in this instance will be set to NULL
-     *
+     * Set the URL's change frequency In case of a bad ChangeFrequency, the
+     * current frequency in this instance will be set to NULL
+     * 
      * @param changeFreq
      */
     public void setChangeFrequency(String changeFreq) {
@@ -246,7 +249,8 @@ public class SiteMapURL {
     }
 
     /**
-     * Valid means that it follows the official guidelines that the siteMapURL must be under the base url
+     * Valid means that it follows the official guidelines that the siteMapURL
+     * must be under the base url
      */
     public void setValid(boolean valid) {
         this.valid = valid;

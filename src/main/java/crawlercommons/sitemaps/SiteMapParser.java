@@ -77,8 +77,9 @@ public class SiteMapParser {
     }
 
     /**
-     * True (by default) meaning that invalid URLs should be rejected, as the official docs allow the siteMapURLs
-     * to be only under the base url: http://www.sitemaps.org/protocol.html#location
+     * True (by default) meaning that invalid URLs should be rejected, as the
+     * official docs allow the siteMapURLs to be only under the base url:
+     * http://www.sitemaps.org/protocol.html#location
      */
     private boolean strict = true;
 
@@ -91,7 +92,8 @@ public class SiteMapParser {
     }
 
     /**
-     * @return whether invalid URLs will be rejected (where invalid means that the url is not under the base url)
+     * @return whether invalid URLs will be rejected (where invalid means that
+     *         the url is not under the base url)
      */
     public boolean isStrict() {
         return strict;
@@ -104,8 +106,9 @@ public class SiteMapParser {
      * <br/>
      * This method is a convenience method for a user who has a sitemap URL and
      * wants a "Keep it simple" way to parse it.
-     *
-     * @param onlineSitemapUrl URL of the online sitemap
+     * 
+     * @param onlineSitemapUrl
+     *            URL of the online sitemap
      * @return AbstractSiteMap object or null if the onlineSitemap is null
      */
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
@@ -129,7 +132,7 @@ public class SiteMapParser {
 
     /**
      * @return SiteMap/SiteMapIndex by guessing the content type from the binary
-     * content and URL
+     *         content and URL
      */
     public AbstractSiteMap parseSiteMap(byte[] content, URL url) throws UnknownFormatException, IOException {
         if (url == null) {
@@ -142,7 +145,7 @@ public class SiteMapParser {
 
     /**
      * @return SiteMap/SiteMapIndex given a content type, byte content and the
-     * URL of a sitemap
+     *         URL of a sitemap
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         MediaType mediaType = MediaType.parse(contentType);
@@ -156,7 +159,8 @@ public class SiteMapParser {
             } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
                 return processGzip(url, content);
             } else {
-                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
+                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
+                                                                         // parent
                 return parseSiteMap(mediaType.toString(), content, url);
             }
         }
@@ -166,7 +170,7 @@ public class SiteMapParser {
 
     /**
      * Parse the given XML content.
-     *
+     * 
      * @param sitemapUrl
      * @param xmlContent
      * @return
@@ -189,7 +193,7 @@ public class SiteMapParser {
     /**
      * Process a text-based Sitemap. Text sitemaps only list URLs but no
      * priorities, last mods, etc.
-     *
+     * 
      * @param content
      * @throws IOException
      */
@@ -217,9 +221,11 @@ public class SiteMapParser {
 
     /**
      * Decompress the gzipped content and process the resulting XML Sitemap.
-     *
-     * @param url      - URL of the gzipped content
-     * @param response - Gzipped content
+     * 
+     * @param url
+     *            - URL of the gzipped content
+     * @param response
+     *            - Gzipped content
      * @throws MalformedURLException
      * @throws IOException
      * @throws UnknownFormatException
@@ -246,7 +252,7 @@ public class SiteMapParser {
 
     /**
      * Parse the given XML content.
-     *
+     * 
      * @param sitemapUrl
      * @param is
      * @throws UnknownFormatException
@@ -288,7 +294,7 @@ public class SiteMapParser {
      * <loc
      * >http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
      * <changefreq>weekly</changefreq> </url> </urlset>
-     *
+     * 
      * @param doc
      */
     private SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
@@ -326,8 +332,9 @@ public class SiteMapParser {
      * <lastmod>2004-10-01T18:23:17+00:00</lastmod> </sitemap> <sitemap>
      * <loc>http://www.example.com/sitemap2.xml.gz</loc>
      * <lastmod>2005-01-01</lastmod> </sitemap> </sitemapindex>
-     *
-     * @param url      - URL of Sitemap Index
+     * 
+     * @param url
+     *            - URL of Sitemap Index
      * @param nodeList
      */
     private SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
@@ -377,10 +384,12 @@ public class SiteMapParser {
      * Parse the XML document, looking for a <b>feed</b> element to determine if
      * it's an <b>Atom doc</b> <b>rss</b> to determine if it's an <b>RSS
      * doc</b>.
-     *
+     * 
      * @param sitemapUrl
-     * @param doc        - XML document to parse
-     * @throws UnknownFormatException if XML does not appear to be Atom or RSS
+     * @param doc
+     *            - XML document to parse
+     * @throws UnknownFormatException
+     *             if XML does not appear to be Atom or RSS
      */
     private SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
 
@@ -425,7 +434,7 @@ public class SiteMapParser {
      * </entry>
      * <p/>
      * </feed>
-     *
+     * 
      * @param elem
      * @param doc
      */
@@ -485,7 +494,7 @@ public class SiteMapParser {
      * <guid>http://liftoff.msfc.nasa.gov/2003/05/30.html#item572</guid> </item>
      * <p/>
      * </channel> </rss>
-     *
+     * 
      * @param sitemap
      * @param doc
      */
@@ -519,7 +528,7 @@ public class SiteMapParser {
 
     /**
      * Get the element's textual content.
-     *
+     * 
      * @param elem
      * @param elementName
      * @return
@@ -538,7 +547,7 @@ public class SiteMapParser {
 
     /**
      * Get the element's attribute value.
-     *
+     * 
      * @param elem
      * @param elementName
      * @param attributeName
@@ -568,8 +577,7 @@ public class SiteMapParser {
                 siteMap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", (urlIndex + 1), sUrl);
             } else {
-                LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}",
-                                url.toExternalForm(), siteMap.getBaseUrl());
+                LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), siteMap.getBaseUrl());
             }
         } catch (MalformedURLException e) {
             LOG.warn("Bad url: [{}]", urlStr);
@@ -578,8 +586,9 @@ public class SiteMapParser {
     }
 
     /**
-     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl are valid.
-     *
+     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl
+     * are valid.
+     * 
      * @param sitemapBaseUrl
      * @param testUrl
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
