@@ -4,6 +4,14 @@ crawler-commons is a set of reusable Java components that implement functionalit
 
 # Crawler-Commons News
 
+## 11th June 2015 - crawler-commons 0.6 is released
+
+We are glad to announce the 0.6 release of Crawler Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-0.6/CHANGES.txt) file included with the release for a full list of details.
+
+We suggest all users to upgrade to this version. Details of how to do so can be found on  [Maven Central](http://search.maven.org/#artifactdetails%7Ccom.github.crawler-commons%7Ccrawler-commons%7C0.6%7Cjar). Please note that the groupId has changed to com.github.crawler-commons.
+
+The Java documentation can be found [here](http://crawler-commons.github.io/crawler-commons/0.6/apidocs/).
+
 ## 22nd April 2015 - crawler-commons has moved
 
 The crawler-commons project is now being hosted at GitHub, due to the demise of Google code hosting.
