@@ -18,7 +18,6 @@
 package crawlercommons.robots;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
