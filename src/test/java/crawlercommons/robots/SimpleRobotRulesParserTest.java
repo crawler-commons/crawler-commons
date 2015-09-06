@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,8 +46,8 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testEmptyRules() throws MalformedURLException {
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", "".getBytes());
+    public void testEmptyRules() throws MalformedURLException, UnsupportedEncodingException {
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", "".getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
@@ -54,7 +55,7 @@ public class SimpleRobotRulesParserTest {
     public void testQueryParamInDisallow() throws Exception {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /index.cfm?fuseaction=sitesearch.results*";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://searchservice.domain.com/index.cfm?fuseaction=sitesearch.results&type=People&qry=california&pg=2"));
     }
 
@@ -64,7 +65,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /fish
         final String simpleRobotsTxt1 = "User-agent: *" + CRLF + "Disallow: /fish" + CRLF;
 
-        BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1.getBytes());
+        BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1.getBytes("UTF-8"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish.html"));
         assertFalse(rule1.isAllowed("http://www.fict.com/fish/salmon.html"));
@@ -80,7 +81,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /fish*
         final String simpleRobotsTxt2 = "User-agent: *" + CRLF + "Disallow: /fish*" + CRLF;
 
-        BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2.getBytes());
+        BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2.getBytes("UTF-8"));
         assertFalse(rule2.isAllowed("http://www.fict.com/fish"));
         assertFalse(rule2.isAllowed("http://www.fict.com/fish.html"));
         assertFalse(rule2.isAllowed("http://www.fict.com/fish/salmon.html"));
@@ -96,7 +97,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /fish/
         final String simpleRobotsTxt3 = "User-agent: *" + CRLF + "Disallow: /fish/" + CRLF;
 
-        BaseRobotRules rule3 = createRobotRules("Any-darn-crawler", simpleRobotsTxt3.getBytes());
+        BaseRobotRules rule3 = createRobotRules("Any-darn-crawler", simpleRobotsTxt3.getBytes("UTF-8"));
         assertFalse(rule3.isAllowed("http://www.fict.com/fish/"));
         assertFalse(rule3.isAllowed("http://www.fict.com/fish/?id=anything"));
         assertFalse(rule3.isAllowed("http://www.fict.com/fish/salmon.htm"));
@@ -108,7 +109,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /*.php
         final String simpleRobotsTxt4 = "User-agent: *" + CRLF + "Disallow: /*.php" + CRLF;
 
-        BaseRobotRules rule4 = createRobotRules("Any-darn-crawler", simpleRobotsTxt4.getBytes());
+        BaseRobotRules rule4 = createRobotRules("Any-darn-crawler", simpleRobotsTxt4.getBytes("UTF-8"));
         assertFalse(rule4.isAllowed("http://www.fict.com/filename.php"));
         assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php"));
         assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php?parameters"));
@@ -121,7 +122,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /*.php$
         final String simpleRobotsTxt5 = "User-agent: *" + CRLF + "Disallow: /*.php$" + CRLF;
 
-        BaseRobotRules rule5 = createRobotRules("Any-darn-crawler", simpleRobotsTxt5.getBytes());
+        BaseRobotRules rule5 = createRobotRules("Any-darn-crawler", simpleRobotsTxt5.getBytes("UTF-8"));
         assertFalse(rule5.isAllowed("http://www.fict.com/filename.php"));
         assertFalse(rule5.isAllowed("http://www.fict.com/folder/filename.php"));
 
@@ -133,7 +134,7 @@ public class SimpleRobotRulesParserTest {
         // Test for /fish*.php
         final String simpleRobotsTxt6 = "User-agent: *" + CRLF + "Disallow: /fish*.php" + CRLF;
 
-        BaseRobotRules rule6 = createRobotRules("Any-darn-crawler", simpleRobotsTxt6.getBytes());
+        BaseRobotRules rule6 = createRobotRules("Any-darn-crawler", simpleRobotsTxt6.getBytes("UTF-8"));
         assertFalse(rule6.isAllowed("http://www.fict.com/fish.php"));
         assertFalse(rule6.isAllowed("http://www.fict.com/fishheads/catfish.php?parameters"));
 
@@ -142,35 +143,35 @@ public class SimpleRobotRulesParserTest {
         // Test rule with multiple '*' characters
         final String simpleRobotsTxt7 = "User-agent: *" + CRLF + "Disallow: /*fish*.php" + CRLF;
 
-        BaseRobotRules rule7 = createRobotRules("Any-darn-crawler", simpleRobotsTxt7.getBytes());
+        BaseRobotRules rule7 = createRobotRules("Any-darn-crawler", simpleRobotsTxt7.getBytes("UTF-8"));
         assertFalse(rule7.isAllowed("http://www.fict.com/fish.php"));
         assertFalse(rule7.isAllowed("http://www.fict.com/superfishheads/catfish.php?parameters"));
         assertTrue(rule7.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
     }
 
     @Test
-    public void testCommentedOutLines() throws MalformedURLException {
+    public void testCommentedOutLines() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "#user-agent: testAgent" + LF + LF + "#allow: /index.html" + LF + "#allow: /test" + LF + LF + "#user-agent: test" + LF + LF + "#allow: /index.html" + LF
                         + "#disallow: /test" + LF + LF + "#user-agent: someAgent" + LF + LF + "#disallow: /index.html" + LF + "#disallow: /test" + LF + LF;
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         Assert.assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testRobotsTxtAlwaysAllowed() throws MalformedURLException {
+    public void testRobotsTxtAlwaysAllowed() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/robots.txt"));
     }
 
     @Test
-    public void testAgentNotListed() throws MalformedURLException {
+    public void testAgentNotListed() throws MalformedURLException, UnsupportedEncodingException {
         // Access is assumed to be allowed, if no rules match an agent.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: crawler2" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler3", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("crawler3", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/index.html"));
     }
@@ -184,26 +185,26 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testSimplestAllowAll() throws MalformedURLException {
+    public void testSimplestAllowAll() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMixedEndings() throws MalformedURLException {
+    public void testMixedEndings() throws MalformedURLException, UnsupportedEncodingException {
         final String mixedEndingsRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CR + LF + "User-agent: unhipbot" + LF + "Disallow: /" + CR + ""
                         + CRLF + "User-agent: webcrawler" + LF + "User-agent: excite" + CR + "Disallow: " + "\u0085" + CR + "User-agent: *" + CRLF + "Disallow: /org/plans.html" + LF + "Allow: /org/"
                         + CR + "Allow: /serv" + CRLF + "Allow: /~mak" + LF + "Disallow: /" + CRLF;
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt.getBytes());
+        rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.fict.org/"));
         assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
 
-        rules = createRobotRules("Unknown/1.0", mixedEndingsRobotsTxt.getBytes());
+        rules = createRobotRules("Unknown/1.0", mixedEndingsRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.org/"));
         assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
@@ -219,7 +220,7 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testRfpCases() throws MalformedURLException {
+    public void testRfpCases() throws MalformedURLException, UnsupportedEncodingException {
         // Run through all of the tests that are part of the robots.txt RFP
         // http://www.robotstxt.org/norobots-rfc.txt
         final String rfpExampleRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CRLF + CRLF + "User-agent: unhipbot" + CRLF + "Disallow: /" + CRLF
@@ -228,7 +229,7 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt.getBytes());
+        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.org/"));
         assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
@@ -241,7 +242,7 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
         assertFalse(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
 
-        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt.getBytes());
+        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.fict.org/"));
         assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
@@ -254,7 +255,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
 
-        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt.getBytes());
+        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.fict.org/"));
         assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
@@ -267,7 +268,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
 
-        rules = createRobotRules("Unknown/1.0", rfpExampleRobotsTxt.getBytes());
+        rules = createRobotRules("Unknown/1.0", rfpExampleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.org/"));
         assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
         assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
@@ -282,7 +283,7 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testNutchCases() throws MalformedURLException {
+    public void testNutchCases() throws MalformedURLException, UnsupportedEncodingException {
         // Run through the Nutch test cases.
 
         final String nutchRobotsTxt = "User-Agent: Agent1 #foo" + CR + "Disallow: /a" + CR + "Disallow: /b/a" + CR + "#Disallow: /c" + CR + "" + CR + "" + CR + "User-Agent: Agent2 Agent3#foo" + CR
@@ -290,7 +291,7 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("Agent1", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent1", nutchRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/a"));
         assertFalse(rules.isAllowed("http://www.domain.com/a/"));
         assertFalse(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -312,7 +313,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
-        rules = createRobotRules("Agent2", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent2", nutchRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/a"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -334,7 +335,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
-        rules = createRobotRules("Agent3", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent3", nutchRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/a"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -356,7 +357,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
-        rules = createRobotRules("Agent4", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent4", nutchRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/a"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -378,7 +379,7 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
-        rules = createRobotRules("Agent5", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent5", nutchRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/a"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/"));
         assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -400,7 +401,7 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
-        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt.getBytes());
+        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/a"));
         assertFalse(rules.isAllowed("http://www.domain.com/a/"));
         assertFalse(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
@@ -424,18 +425,18 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testHtmlMarkupInRobotsTxt() throws MalformedURLException {
+    public void testHtmlMarkupInRobotsTxt() throws MalformedURLException, UnsupportedEncodingException {
         final String htmlRobotsTxt = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><HTML>\n" + "<HEAD>\n" + "<TITLE>/robots.txt</TITLE>\n" + "</HEAD>\n" + "<BODY>\n"
                         + "User-agent: anybot<BR>\n" + "Disallow: <BR>\n" + "Crawl-Delay: 10<BR>\n" + "\n" + "User-agent: *<BR>\n" + "Disallow: /<BR>\n" + "Crawl-Delay: 30<BR>\n" + "\n" + "</BODY>\n"
                         + "</HTML>\n";
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("anybot", htmlRobotsTxt.getBytes());
+        rules = createRobotRules("anybot", htmlRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/index.html"));
         assertEquals(10000, rules.getCrawlDelay());
 
-        rules = createRobotRules("bogusbot", htmlRobotsTxt.getBytes());
+        rules = createRobotRules("bogusbot", htmlRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertEquals(30000, rules.getCrawlDelay());
     }
@@ -450,39 +451,39 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testHeritrixCases() throws MalformedURLException {
+    public void testHeritrixCases() throws MalformedURLException, UnsupportedEncodingException {
         final String heritrixRobotsTxt = "User-agent: *\n" + "Disallow: /cgi-bin/\n" + "Disallow: /details/software\n" + "\n" + "User-agent: denybot\n" + "Disallow: /\n" + "\n"
                         + "User-agent: allowbot1\n" + "Disallow: \n" + "\n" + "User-agent: allowbot2\n" + "Disallow: /foo\n" + "Allow: /\n" + "\n" + "User-agent: delaybot\n" + "Disallow: /\n"
                         + "Crawl-Delay: 20\n" + "Allow: /images/\n";
 
         BaseRobotRules rules;
-        rules = createRobotRules("Mozilla allowbot1 99.9", heritrixRobotsTxt.getBytes());
+        rules = createRobotRules("Mozilla allowbot1 99.9", heritrixRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertTrue(rules.isAllowed("http://www.domain.com/"));
 
-        rules = createRobotRules("Mozilla allowbot2 99.9", heritrixRobotsTxt.getBytes());
+        rules = createRobotRules("Mozilla allowbot2 99.9", heritrixRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertTrue(rules.isAllowed("http://www.domain.com/"));
         assertFalse(rules.isAllowed("http://www.domain.com/foo"));
 
-        rules = createRobotRules("Mozilla denybot 99.9", heritrixRobotsTxt.getBytes());
+        rules = createRobotRules("Mozilla denybot 99.9", heritrixRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/path"));
         assertFalse(rules.isAllowed("http://www.domain.com/"));
         assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, rules.getCrawlDelay());
 
-        rules = createRobotRules("Mozilla anonbot 99.9", heritrixRobotsTxt.getBytes());
+        rules = createRobotRules("Mozilla anonbot 99.9", heritrixRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertFalse(rules.isAllowed("http://www.domain.com/cgi-bin/foo.pl"));
 
-        rules = createRobotRules("Mozilla delaybot 99.9", heritrixRobotsTxt.getBytes());
+        rules = createRobotRules("Mozilla delaybot 99.9", heritrixRobotsTxt.getBytes("UTF-8"));
         assertEquals(20000, rules.getCrawlDelay());
     }
 
     @Test
-    public void testCaseSensitivePaths() throws MalformedURLException {
+    public void testCaseSensitivePaths() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Allow: /AnyPage.html" + CRLF + "Allow: /somepage.html" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/AnyPage.html"));
         assertFalse(rules.isAllowed("http://www.domain.com/anypage.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/somepage.html"));
@@ -490,76 +491,76 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testEmptyDisallow() throws MalformedURLException {
+    public void testEmptyDisallow() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testEmptyAllow() throws MalformedURLException {
+    public void testEmptyAllow() throws MalformedURLException, UnsupportedEncodingException {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Allow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiWildcard() throws MalformedURLException {
+    public void testMultiWildcard() throws MalformedURLException, UnsupportedEncodingException {
         // Make sure we only take the first wildcard entry.
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: *" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiMatches() throws MalformedURLException {
+    public void testMultiMatches() throws MalformedURLException, UnsupportedEncodingException {
         // Make sure we only take the first record that matches.
         final String simpleRobotsTxt = "User-agent: crawlerbot" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: crawler" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawlerbot", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("crawlerbot", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiAgentNames() throws MalformedURLException {
+    public void testMultiAgentNames() throws MalformedURLException, UnsupportedEncodingException {
         // When there are more than one agent name on a line.
         final String simpleRobotsTxt = "User-agent: crawler1 crawler2" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiWordAgentName() throws MalformedURLException {
+    public void testMultiWordAgentName() throws MalformedURLException, UnsupportedEncodingException {
         // When the user agent name has a space in it.
         final String simpleRobotsTxt = "User-agent: Download Ninja" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /";
 
-        BaseRobotRules rules = createRobotRules("Download Ninja", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Download Ninja", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testUnsupportedFields() throws MalformedURLException {
+    public void testUnsupportedFields() throws MalformedURLException, UnsupportedEncodingException {
         // When we have a new field type that we don't know about.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + "newfield: 234" + CRLF + "User-agent: crawler2" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testAcapFields() throws MalformedURLException {
+    public void testAcapFields() throws MalformedURLException, UnsupportedEncodingException {
         final String robotsTxt = "acap-crawler: *" + CRLF + "acap-disallow-crawl: /ultima_ora/";
 
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
-        parser.parseContent("url", robotsTxt.getBytes(), "text/plain", "foobot");
+        parser.parseContent("url", robotsTxt.getBytes("UTF-8"), "text/plain", "foobot");
         assertEquals(0, parser.getNumWarnings());
     }
 
@@ -597,34 +598,34 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testCrawlDelay() {
+    public void testCrawlDelay() throws UnsupportedEncodingException {
         final String delayRules1RobotsTxt = "User-agent: bixo" + CR + "Crawl-delay: 10" + CR + "User-agent: foobot" + CR + "Crawl-delay: 20" + CR + "User-agent: *" + CR + "Disallow:/baz" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", delayRules1RobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("bixo", delayRules1RobotsTxt.getBytes("UTF-8"));
         long crawlDelay = rules.getCrawlDelay();
         assertEquals("testing crawl delay for agent bixo - rule 1", 10000, crawlDelay);
 
         final String delayRules2RobotsTxt = "User-agent: foobot" + CR + "Crawl-delay: 20" + CR + "User-agent: *" + CR + "Disallow:/baz" + CR;
 
-        rules = createRobotRules("bixo", delayRules2RobotsTxt.getBytes());
+        rules = createRobotRules("bixo", delayRules2RobotsTxt.getBytes("UTF-8"));
         crawlDelay = rules.getCrawlDelay();
         assertEquals("testing crawl delay for agent bixo - rule 2", BaseRobotRules.UNSET_CRAWL_DELAY, crawlDelay);
     }
 
     @Test
-    public void testBigCrawlDelay() throws MalformedURLException {
+    public void testBigCrawlDelay() throws MalformedURLException, UnsupportedEncodingException {
         final String robotsTxt = "User-agent: *" + CR + "Crawl-delay: 3600" + CR + "Disallow:" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes("UTF-8"));
         assertFalse("disallow all if huge crawl delay", rules.isAllowed("http://www.domain.com/"));
     }
 
     @Test
-    public void testBrokenKrugleRobotsTxtFile() throws MalformedURLException {
+    public void testBrokenKrugleRobotsTxtFile() throws MalformedURLException, UnsupportedEncodingException {
         final String krugleRobotsTxt = "User-agent: *" + CR + "Disallow: /maintenance.html" + CR + "Disallow: /perl/" + CR + "Disallow: /cgi-bin/" + CR + "Disallow: /examples/" + CR
                         + "Crawl-delay: 3" + CR + "" + CR + "User-agent: googlebot" + CR + "Crawl-delay: 1" + CR + "" + CR + "User-agent: qihoobot" + CR + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
     }
 
@@ -647,10 +648,10 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testFloatingPointCrawlDelay() throws MalformedURLException {
+    public void testFloatingPointCrawlDelay() throws MalformedURLException, UnsupportedEncodingException {
         final String robotsTxt = "User-agent: *" + CR + "Crawl-delay: 0.5" + CR + "Disallow:" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes("UTF-8"));
         assertEquals(500, rules.getCrawlDelay());
     }
 
@@ -703,7 +704,7 @@ public class SimpleRobotRulesParserTest {
         assertEquals("Found sitemap", 3, rules.getSitemaps().size());
         // check that the last one is not lowercase only
         String url = rules.getSitemaps().get(2);
-        boolean lowercased = url.equals(url.toLowerCase());
+        boolean lowercased = url.equals(url.toLowerCase(Locale.getDefault()));
         assertFalse("Sitemap case check", lowercased);
     }
 
@@ -749,7 +750,7 @@ public class SimpleRobotRulesParserTest {
     public void testAllowBeforeDisallow() throws Exception {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /fish" + CRLF + "Allow: /fish" + CRLF;
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
 
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
@@ -758,16 +759,16 @@ public class SimpleRobotRulesParserTest {
     public void testSpacesInMultipleUserAgentNames() throws Exception {
         final String simpleRobotsTxt = "User-agent: One, Two, Three" + CRLF + "Disallow: /" + CRLF + "" + CRLF + "User-agent: *" + CRLF + "Allow: /" + CRLF;
 
-        BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt.getBytes());
+        BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Two", simpleRobotsTxt.getBytes());
+        rules = createRobotRules("Two", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Three", simpleRobotsTxt.getBytes());
+        rules = createRobotRules("Three", simpleRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes());
+        rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes("UTF-8"));
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
 

@@ -20,6 +20,7 @@ package crawlercommons.url;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -76,7 +77,7 @@ public class PaidLevelDomain {
         }
 
         int firstHostPiece = 0;
-        if (ccTLDs.contains(subNames[numPieces - 1].toLowerCase())) {
+        if (ccTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.getDefault()))) {
             // We have a country code at the end. See if the preceding piece is
             // either
             // a two-letter name (country code or funky short gTLD), or one of
@@ -85,15 +86,15 @@ public class PaidLevelDomain {
             if (subNames[numPieces - 2].length() <= 2) {
                 // Must be xxx.co.jp format
                 firstHostPiece = numPieces - 3;
-            } else if (gTLDs.contains(subNames[numPieces - 2].toLowerCase())) {
+            } else if (gTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.getDefault()))) {
                 // Must be xxx.com.mx format
                 firstHostPiece = numPieces - 3;
             } else {
                 // Must be xxx.it format
                 firstHostPiece = numPieces - 2;
             }
-        } else if (gTLDs.contains(subNames[numPieces - 1].toLowerCase())) {
-            if (ccTLDs.contains(subNames[numPieces - 2].toLowerCase())) {
+        } else if (gTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.getDefault()))) {
+            if (ccTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.getDefault()))) {
                 // Must be xxx.de.com format
                 firstHostPiece = numPieces - 3;
             } else {

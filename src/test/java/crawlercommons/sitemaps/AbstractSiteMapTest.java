@@ -3,6 +3,7 @@ package crawlercommons.sitemaps;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.Test;
@@ -14,7 +15,7 @@ public class AbstractSiteMapTest {
         assertNull(AbstractSiteMap.convertToDate("blah"));
         assertNull(AbstractSiteMap.convertToDate(null));
 
-        SimpleDateFormat isoFormatNoTimezone = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat isoFormatNoTimezone = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
 
         // For formats where there's no time zone information, the time zone is
         // undefined, so we can
@@ -23,7 +24,7 @@ public class AbstractSiteMapTest {
         assertEquals("20140601", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06")));
         assertEquals("20140603", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06-03")));
 
-        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.getDefault());
         isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         // Complete date plus hours and minutes
@@ -38,7 +39,7 @@ public class AbstractSiteMapTest {
 
         // Complete date plus hours, minutes, seconds and a decimal fraction of
         // a second
-        SimpleDateFormat isoFormatWithFractionSeconds = new SimpleDateFormat("yyyyMMdd'T'HHmmss.S");
+        SimpleDateFormat isoFormatWithFractionSeconds = new SimpleDateFormat("yyyyMMdd'T'HHmmss.S", Locale.getDefault());
         isoFormatWithFractionSeconds.setTimeZone(TimeZone.getTimeZone("UTC"));
         assertEquals("20140603T103045.820", isoFormatWithFractionSeconds.format(AbstractSiteMap.convertToDate("2014-06-03T10:30:45.82+00:00")));
 

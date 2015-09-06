@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -118,7 +119,7 @@ public class SimpleHttpFetcherTest {
 
                 String content = "redirected";
                 response.setContentLength(content.length());
-                response.getOutputStream().write(content.getBytes());
+                response.getOutputStream().write(content.getBytes("UTF-8"));
             }
         }
     }
@@ -148,7 +149,7 @@ public class SimpleHttpFetcherTest {
             response.setContentType("text/plain");
 
             response.setContentLength(content.length());
-            response.getOutputStream().write(content.getBytes());
+            response.getOutputStream().write(content.getBytes("UTF-8"));
         }
     }
 
@@ -170,7 +171,7 @@ public class SimpleHttpFetcherTest {
             }
 
             response.setContentLength(content.length());
-            response.getOutputStream().write(content.getBytes());
+            response.getOutputStream().write(content.getBytes("UTF-8"));
         }
     }
 
@@ -380,7 +381,7 @@ public class SimpleHttpFetcherTest {
         BaseFetcher fetcher = new SimpleHttpFetcher(1, TestUtils.CC_TEST_AGENT);
         String url = "http://localhost:8089/";
         FetchedResult result = fetcher.get(url);
-        String contentStr = new String(result.getContent(), 0, result.getContentLength());
+        String contentStr = new String(result.getContent(), 0, result.getContentLength(), Charset.defaultCharset());
         assertTrue(englishContent.equals(contentStr));
     }
 

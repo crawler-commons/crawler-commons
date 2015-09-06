@@ -114,7 +114,7 @@ public class RobotUtilsTest {
 
         BaseHttpFetcher fetcher = Mockito.mock(BaseHttpFetcher.class);
         FetchedResult result = Mockito.mock(FetchedResult.class);
-        Mockito.when(result.getContent()).thenReturn(simpleRobotsTxt.getBytes());
+        Mockito.when(result.getContent()).thenReturn(simpleRobotsTxt.getBytes("UTF-8"));
         Mockito.when(fetcher.get(Mockito.any(String.class))).thenReturn(result);
         UserAgent userAgent = new UserAgent("testAgent", "crawler@domain.com", "http://www.domain.com");
         Mockito.when(fetcher.getUserAgent()).thenReturn(userAgent);

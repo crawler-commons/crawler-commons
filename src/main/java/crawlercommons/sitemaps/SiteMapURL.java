@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * The SitemapUrl class represents a URL found in a Sitemap.
@@ -226,7 +227,7 @@ public class SiteMapURL {
     public void setChangeFrequency(String changeFreq) {
 
         if (changeFreq != null) {
-            changeFreq = changeFreq.toUpperCase();
+            changeFreq = changeFreq.toUpperCase(Locale.getDefault());
 
             if (changeFreq.contains("ALWAYS")) {
                 this.changeFreq = ChangeFrequency.ALWAYS;

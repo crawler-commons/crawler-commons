@@ -18,6 +18,7 @@
 package crawlercommons.fetcher.http;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 import crawlercommons.CrawlerCommons;
 
@@ -103,6 +104,6 @@ public class UserAgent implements Serializable {
     public String getUserAgentString() {
         // Mozilla/5.0 (compatible; mycrawler/1.0; +http://www.mydomain.com;
         // mycrawler@mydomain.com)
-        return String.format("%s (compatible; %s%s; +%s; %s)", _browserVersion, getAgentName(), _crawlerVersion, _webAddress, _emailAddress);
+        return String.format(Locale.getDefault(), "%s (compatible; %s%s; +%s; %s)", _browserVersion, getAgentName(), _crawlerVersion, _webAddress, _emailAddress);
     }
 }
