@@ -18,7 +18,6 @@
 package crawlercommons.robots;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
@@ -87,9 +86,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     }
 
     private static class ParseState {
+        /**
+         * Flag indicating whether the given name of the agent matched.
+         */
         private boolean _matchedRealName;
+        /**
+         * Flag that is true if not the given agent name but a wildcard matched.
+         */
         private boolean _matchedWildcard;
+        /**
+         * Flag that is true as long as it is allowed to add rules for the given
+         * agent.
+         */
         private boolean _addingRules;
+        /**
+         * Flag indicating whether all consecutive agent fields has been seen.
+         * It is set to false if an agent field is found and back to true if
+         * something else has been found.
+         */
         private boolean _finishedAgentFields;
 
         private String _url;
@@ -310,7 +324,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         String encoding = "us-ascii";
 
         // Check for a UTF-8 BOM at the beginning (EF BB BF)
-        if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB) && (content[2] == (byte) 0xBF)) {
+        if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB)
+                && (content[2] == (byte) 0xBF)) {
             offset = 3;
             bytesLen -= 3;
             encoding = "UTF-8";
@@ -395,47 +410,48 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
             RobotToken token = tokenize(line);
             switch (token.getDirective()) {
-                case USER_AGENT:
+            case USER_AGENT:
                 keepGoing = handleUserAgent(parseState, token);
-                    break;
+                break;
 
-                case DISALLOW:
+            case DISALLOW:
                 keepGoing = handleDisallow(parseState, token);
-                    break;
+                break;
 
-                case ALLOW:
+            case ALLOW:
                 keepGoing = handleAllow(parseState, token);
-                    break;
+                break;
 
-                case CRAWL_DELAY:
+            case CRAWL_DELAY:
                 keepGoing = handleCrawlDelay(parseState, token);
-                    break;
+                break;
 
-                case SITEMAP:
+            case SITEMAP:
                 keepGoing = handleSitemap(parseState, token);
-                    break;
+                break;
 
-                case HTTP:
+            case HTTP:
                 keepGoing = handleHttp(parseState, token);
-                    break;
+                break;
 
-                case UNKNOWN:
+            case UNKNOWN:
                 reportWarning("Unknown directive in robots.txt file: " + line, url);
                 parseState.setFinishedAgentFields(true);
-                    break;
+                break;
 
-                case MISSING:
-                reportWarning(String.format("Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+            case MISSING:
+                reportWarning(String.format("Unknown line in robots.txt file (size %d): %s", content.length, line),
+                        url);
                 parseState.setFinishedAgentFields(true);
-                    break;
+                break;
 
-                default:
-                    // All others we just ignore
-                    // TODO KKr - which of these should be setting
-                    // finishedAgentFields to true?
-                    // TODO KKr - handle no-index
-                    // TODO KKr - handle request-rate and visit-time
-                    break;
+            default:
+                // All others we just ignore
+                // TODO KKr - which of these should be setting
+                // finishedAgentFields to true?
+                // TODO KKr - handle no-index
+                // TODO KKr - handle request-rate and visit-time
+                break;
             }
         }
 
@@ -474,24 +490,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * @return true to keep going, false if we're done
      */
     private boolean handleUserAgent(ParseState state, RobotToken token) {
-        if (state.isMatchedRealName()) {
-            if (state.isFinishedAgentFields()) {
-                // We're all done.
-                return false;
-            } else {
-                // Skip any more of these, once we have a real name match. We're
-                // waiting for some
-                // allow/disallow/crawl delay fields.
-                return true;
-            }
-        }
-
+        // If the agent fields already have been finished before
         if (state.isFinishedAgentFields()) {
-            // We've got a user agent field, so we haven't yet seen anything
-            // that tells us
-            // we're done with this set of agent names.
-            state.setFinishedAgentFields(false);
+            // Before adding rules (again) we should watch for the agent name
             state.setAddingRules(false);
+            // we have found an agent field and their might come more
+            state.setFinishedAgentFields(false);
         }
 
         // Handle the case when there are multiple target names are passed
@@ -511,7 +515,9 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 agentName = agentName.trim().toLowerCase();
                 if (agentName.isEmpty()) {
                     // Ignore empty names
-                } else if (agentName.equals("*") && !state.isMatchedWildcard()) {
+                } else if (agentName.equals("*") && !state.isMatchedRealName()) {
+                    // We have found a wildcard and didn't matched the real name
+                    // (until now)
                     state.setMatchedWildcard(true);
                     state.setAddingRules(true);
                 } else {
@@ -520,8 +526,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                         if (targetName.startsWith(agentName)) {
                             state.setMatchedRealName(true);
                             state.setAddingRules(true);
-                            state.clearRules(); // In case we previously hit a
-                                                // wildcard rule match
+                            if (state.isMatchedWildcard()) {
+                                state.setMatchedWildcard(false);
+                                state.clearRules(); // In case we previously hit
+                                                    // a
+                                                    // wildcard rule match
+                            }
                             break;
                         }
                     }
