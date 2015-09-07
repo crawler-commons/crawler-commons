@@ -520,7 +520,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
         } catch (HttpFetchException e) {
             // Don't bother generating a trace for a 404 (not found)
             if (LOGGER.isTraceEnabled() && (e.getHttpStatus() != HttpStatus.SC_NOT_FOUND)) {
-                LOGGER.trace(String.format(Locale.getDefault(), "Exception fetching %s (%s)", url, e.getMessage()));
+                LOGGER.trace("Exception fetching {} {}", url, e.getMessage());
             }
 
             throw e;
@@ -528,11 +528,11 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
             // Don't bother reporting that we bailed because the mime-type
             // wasn't one that we wanted.
             if (e.getAbortReason() != AbortedFetchReason.INVALID_MIMETYPE) {
-                LOGGER.debug(String.format(Locale.getDefault(), "Exception fetching %s (%s)", url, e.getMessage()));
+                LOGGER.debug("Exception fetching {} {}", url, e.getMessage());
             }
             throw e;
         } catch (BaseFetchException e) {
-            LOGGER.debug(String.format(Locale.getDefault(), "Exception fetching %s (%s)", url, e.getMessage()));
+            LOGGER.debug("Exception fetching {} {}", url, e.getMessage());
             throw e;
         }
     }
@@ -548,7 +548,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
             return doRequest(request, url, payload);
         } catch (BaseFetchException e) {
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace(String.format(Locale.getDefault(), "Exception fetching %s", url), e);
+                LOGGER.trace("Exception fetching {} {}", url, e.getMessage());
             }
             throw e;
         }

@@ -444,7 +444,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             // Some evil sites use a value like 3600 (seconds) for the crawl
             // delay, which would
             // cause lots of problems for us.
-            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: " + url);
+            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: {}", url);
             return new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
         } else {
             result.sortRules();
@@ -456,11 +456,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         _numWarnings += 1;
 
         if (_numWarnings == 1) {
-            LOGGER.warn("Problem processing robots.txt for " + url);
+            LOGGER.warn("Problem processing robots.txt for {}", url);
         }
 
         if (_numWarnings < MAX_WARNINGS) {
-            LOGGER.warn("\t" + msg);
+            LOGGER.warn("\t {}", msg);
         }
     }
 
