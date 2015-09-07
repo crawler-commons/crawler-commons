@@ -33,24 +33,39 @@ public class SiteMapURL {
     private static Logger LOG = LoggerFactory.getLogger(SiteMapURL.class);
     public static double defaultPriority = 0.5;
 
-    /** Allowed change frequencies */
+    /**
+     * Allowed change frequencies
+     */
     public enum ChangeFrequency {
         ALWAYS, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY, NEVER
-    };
+    }
 
-    /** URL found in Sitemap (required) */
+    ;
+
+    /**
+     * URL found in Sitemap (required)
+     */
     private URL url;
 
-    /** When URL was last modified (optional) */
+    /**
+     * When URL was last modified (optional)
+     */
     private Date lastModified;
 
-    /** How often the URL changes (optional) */
+    /**
+     * How often the URL changes (optional)
+     */
     private ChangeFrequency changeFreq;
 
-    /** Value between [0.0 - 1.0] (optional) */
+    /**
+     * Value between [0.0 - 1.0] (optional)
+     */
     private double priority = defaultPriority;
 
-    /** could be false, if URL isn't found under base path **/
+    /**
+     * could be false, if URL isn't found under base path as indicated here:
+     * http://www.sitemaps.org/protocol.html#location *
+     */
     private boolean valid;
 
     public SiteMapURL(String url, boolean valid) {
@@ -233,10 +248,17 @@ public class SiteMapURL {
         }
     }
 
+    /**
+     * Valid means that it follows the official guidelines that the siteMapURL
+     * must be under the base url
+     */
     public void setValid(boolean valid) {
         this.valid = valid;
     }
 
+    /**
+     * Is the siteMapURL under the base url ?
+     */
     public boolean isValid() {
         return valid;
     }

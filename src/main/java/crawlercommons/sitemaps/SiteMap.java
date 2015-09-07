@@ -30,7 +30,9 @@ public class SiteMap extends AbstractSiteMap {
      */
     private String baseUrl;
 
-    /** URLs found in this Sitemap */
+    /**
+     * URLs found in this Sitemap
+     */
     private List<SiteMapURL> urlList;
 
     public SiteMap() {
@@ -94,11 +96,8 @@ public class SiteMap extends AbstractSiteMap {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Date lastModified = getLastModified();
-        String lastModStr = (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-
-        sb.append("url = \"").append(url).append("\", lastMod = ").append(lastModStr).append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ")
-                        .append(urlList.size());
+        sb.append("url = \"").append(url).append("\", lastMod = ").append((getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified())).append(", type = ")
+                        .append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ").append(urlList.size());
 
         return sb.toString();
     }
