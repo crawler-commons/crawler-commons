@@ -296,8 +296,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String, byte[], java.lang.String, java.lang.String)
+     */
     @Override
-    public BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotName) {
+    public BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
         _numWarnings = 0;
 
         // If there's nothing there, treat it like we have no restrictions.
@@ -361,12 +364,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         // Break on anything that might be used as a line ending. Since
-        // tokenizer doesn't
-        // return empty tokens, a \r\n sequence still works since it looks like
-        // an empty
-        // string between the \r and \n.
+        // tokenizer doesn't return empty tokens, a \r\n sequence still 
+        // works since it looks like an empty string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
-        ParseState parseState = new ParseState(url, robotName.toLowerCase(Locale.getDefault()));
+        ParseState parseState = new ParseState(url, robotNames.toLowerCase(Locale.getDefault()));
         boolean keepGoing = true;
 
         while (keepGoing && lineParser.hasMoreTokens()) {
@@ -495,13 +496,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         // Handle the case when there are multiple target names are passed
-        // TODO should we do lowercase comparison of target name? Assuming yes.
+        // We assume we should do case-insensitive comparison of target name.
         String[] targetNames = state.getTargetName().toLowerCase(Locale.getDefault()).split(",");
 
         for (int count = 0; count < targetNames.length; count++) {
             // Extract possible match names from our target agent name, since it
-            // appears
-            // to be expected that "Mozilla botname 1.0" matches "botname"
+            // appears to be expected that "Mozilla botname 1.0" matches "botname"
             String[] targetNameSplits = targetNames[count].trim().split(" ");
 
             // TODO KKr - catch case of multiple names, log as non-standard.
@@ -520,8 +520,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                         if (targetName.startsWith(agentName)) {
                             state.setMatchedRealName(true);
                             state.setAddingRules(true);
-                            state.clearRules(); // In case we previously hit a
-                                                // wildcard rule match
+                            // In case we previously hit a wildcard rule match
+                            state.clearRules(); 
                             break;
                         }
                     }

@@ -24,7 +24,19 @@ public abstract class BaseRobotsParser implements Serializable {
 
     /**
      * Parse the robots.txt file in <content>, and return rules appropriate for
-     * processing paths by <userAgent>
+     * processing paths by <userAgent>. Note that multiple agent names may be
+     * provided as comma-separated values; the order of these shouldn't matter,
+     * as the file is parsed in order, and each agent name found in the file
+     * will be compared to every agent name found in robotNames.
+     * 
+     * Also note that names are lower-cased before comparison, and that any
+     * robot name you pass shouldn't contain commas or spaces; if the name
+     * has spaces, it will be split into multiple names, each of which will
+     * be compared against agent names in the robots.txt file. An agent name
+     * is considered a match if it's a prefix match on the provided robot name.
+     * For example, if you pass in "Mozilla Crawlerbot-super 1.0", this would match
+     * "crawlerbot" as the agent name, because of splitting on spaces, lower-casing,
+     * and the prefix match rule.
      * 
      * @param url
      *            URL that content was fetched from (for reporting purposes)
@@ -32,13 +44,13 @@ public abstract class BaseRobotsParser implements Serializable {
      *            raw bytes from the site's robots.txt file
      * @param contentType
      *            HTTP response header (mime-type)
-     * @param robotName
-     *            name of crawler, to be used when processing file contents
+     * @param robotNames
+     *            name(s) of crawler, to be used when processing file contents
      *            (just the name portion, w/o version or other details)
      * @return robot rules.
      */
 
-    public abstract BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotName);
+    public abstract BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotNames);
 
     /**
      * The fetch of robots.txt failed, so return rules appropriate give the HTTP
