@@ -56,14 +56,14 @@ public class RedirectResponseHandler extends AbstractHttpHandler {
 
             String content = "redirected content";
             response.setContentLength(content.length());
-            response.getOutputStream().write(content.getBytes());
+            response.getOutputStream().write(content.getBytes("UTF-8"));
         } else {
             response.setStatus(HttpStatus.SC_OK);
             response.setContentType("text/plain");
 
             String content = "other content";
             response.setContentLength(content.length());
-            response.getOutputStream().write(content.getBytes());
+            response.getOutputStream().write(content.getBytes("UTF-8"));
         }
     }
 }

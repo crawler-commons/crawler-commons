@@ -21,8 +21,8 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,14 +42,14 @@ public abstract class AbstractSiteMap {
     private static final ThreadLocal<DateFormat> W3C_NO_SECONDS_FORMAT = new ThreadLocal<DateFormat>() {
 
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.getDefault());
         }
     };
 
     private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
 
         protected DateFormat initialValue() {
-            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
             result.setTimeZone(TimeZone.getTimeZone("UTC"));
             return result;
         }

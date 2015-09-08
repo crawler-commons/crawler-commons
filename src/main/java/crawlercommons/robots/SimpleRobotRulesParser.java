@@ -18,10 +18,10 @@
 package crawlercommons.robots;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -188,7 +188,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     static {
         for (RobotDirective directive : RobotDirective.values()) {
             if (!directive.isSpecial()) {
-                String prefix = directive.name().toLowerCase().replaceAll("_", "-");
+                String prefix = directive.name().toLowerCase(Locale.getDefault()).replaceAll("_", "-");
                 DIRECTIVE_PREFIX.put(prefix, directive);
             }
         }
@@ -220,7 +220,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * @return robot command found on line
      */
     private static RobotToken tokenize(String line) {
-        String lowerLine = line.toLowerCase();
+        String lowerLine = line.toLowerCase(Locale.getDefault());
         for (String prefix : DIRECTIVE_PREFIX.keySet()) {
             int prefixLength = prefix.length();
             if (lowerLine.startsWith(prefix)) {
@@ -336,7 +336,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         // Decide if we need to do special HTML processing.
-        boolean isHtmlType = ((contentType != null) && contentType.toLowerCase().startsWith("text/html"));
+        boolean isHtmlType = ((contentType != null) && contentType.toLowerCase(Locale.getDefault()).startsWith("text/html"));
 
         // If it looks like it contains HTML, but doesn't have a user agent
         // field, then
@@ -366,7 +366,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // an empty
         // string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
-        ParseState parseState = new ParseState(url, robotName.toLowerCase());
+        ParseState parseState = new ParseState(url, robotName.toLowerCase(Locale.getDefault()));
         boolean keepGoing = true;
 
         while (keepGoing && lineParser.hasMoreTokens()) {
@@ -425,7 +425,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case MISSING:
-                reportWarning(String.format("Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+                reportWarning(String.format(Locale.getDefault(), "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
                 parseState.setFinishedAgentFields(true);
                     break;
 
@@ -444,7 +444,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             // Some evil sites use a value like 3600 (seconds) for the crawl
             // delay, which would
             // cause lots of problems for us.
-            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: " + url);
+            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: {}", url);
             return new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
         } else {
             result.sortRules();
@@ -456,11 +456,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         _numWarnings += 1;
 
         if (_numWarnings == 1) {
-            LOGGER.warn("Problem processing robots.txt for " + url);
+            LOGGER.warn("Problem processing robots.txt for {}", url);
         }
 
         if (_numWarnings < MAX_WARNINGS) {
-            LOGGER.warn("\t" + msg);
+            LOGGER.warn("\t {}", msg);
         }
     }
 
@@ -496,7 +496,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         // Handle the case when there are multiple target names are passed
         // TODO should we do lowercase comparison of target name? Assuming yes.
-        String[] targetNames = state.getTargetName().toLowerCase().split(",");
+        String[] targetNames = state.getTargetName().toLowerCase(Locale.getDefault()).split(",");
 
         for (int count = 0; count < targetNames.length; count++) {
             // Extract possible match names from our target agent name, since it
@@ -508,7 +508,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             String[] agentNames = token.getData().split("[ \t,]");
             for (String agentName : agentNames) {
                 // TODO should we do case-insensitive matching? Probably yes.
-                agentName = agentName.trim().toLowerCase();
+                agentName = agentName.trim().toLowerCase(Locale.getDefault());
                 if (agentName.isEmpty()) {
                     // Ignore empty names
                 } else if (agentName.equals("*") && !state.isMatchedWildcard()) {

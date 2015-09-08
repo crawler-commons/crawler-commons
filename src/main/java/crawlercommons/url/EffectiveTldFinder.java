@@ -25,6 +25,8 @@ import java.net.IDN;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
+import java.nio.charset.Charset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +81,7 @@ public class EffectiveTldFinder {
             if (null == effective_tld_data_stream && null != this.getClass().getResource(ETLD_DATA)) {
                 effective_tld_data_stream = this.getClass().getResourceAsStream(ETLD_DATA);
             }
-            BufferedReader input = new BufferedReader(new InputStreamReader(effective_tld_data_stream));
+            BufferedReader input = new BufferedReader(new InputStreamReader(effective_tld_data_stream, Charset.defaultCharset()));
             String line = null;
             while (null != (line = input.readLine())) {
                 if (line.length() == 0 || (line.length() > 1 && line.startsWith(COMMENT))) {
@@ -148,8 +150,8 @@ public class EffectiveTldFinder {
      */
     public static String getAssignedDomain(String hostname) {
         EffectiveTLD etld = getEffectiveTLD(hostname);
-        if (null == etld || etld.getDomain() == hostname.toLowerCase()) {
-            return hostname.toLowerCase();
+        if (null == etld || etld.getDomain() == hostname.toLowerCase(Locale.getDefault())) {
+            return hostname.toLowerCase(Locale.getDefault());
         }
         String domain = hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
         return domain;
@@ -201,7 +203,7 @@ public class EffectiveTldFinder {
 
         private String asciiConvert(String str) {
             if (isAscii(str)) {
-                return str.toLowerCase();
+                return str.toLowerCase(Locale.getDefault());
             }
             return IDN.toASCII(str);
         }

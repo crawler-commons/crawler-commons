@@ -21,10 +21,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -32,11 +33,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class SiteMapParserTest {
+  
+    private static final Logger LOG = LoggerFactory.getLogger(SiteMapParserTest.class);
 
     @Before
     public void setUp() throws Exception {
@@ -79,11 +84,10 @@ public class SiteMapParserTest {
 
     @Test
     public void testFullDateFormat() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00");
-
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00", Locale.getDefault());
         Date date = new Date();
-        System.out.println(format.format(date));
-        System.out.println(SiteMap.getFullDateFormat().format(date));
+        LOG.info(format.format(date));
+        LOG.info(SiteMap.getFullDateFormat().format(date));
     }
 
     @Test
@@ -91,7 +95,7 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/plain";
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
-        byte[] content = scontent.getBytes();
+        byte[] content = scontent.getBytes("UTF-8");
         URL url = new URL("http://www.example.com/sitemap.txt");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -106,7 +110,7 @@ public class SiteMapParserTest {
     public void testSitemapTXTWithXMLExt() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
-        byte[] content = scontent.getBytes();
+        byte[] content = scontent.getBytes("UTF-8");
         URL url = new URL("http://www.example.com/sitemap.xml");
         String contentType = "text/plain";
 
@@ -160,7 +164,7 @@ public class SiteMapParserTest {
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
                         .append("<url><!-- This file is not a valid XML file --></url>").append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
                         .append("</url><!-- missing opening url tag --></url></urlset>");
-        byte[] content = scontent.toString().getBytes();
+        byte[] content = scontent.toString().getBytes("UTF-8");
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         parser.parseSiteMap(contentType, content, url); // This Sitemap contains
@@ -224,7 +228,7 @@ public class SiteMapParserTest {
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
                         .append("<loc>http://www.example.com/</loc>").append("</url>").append("</urlset>");
-        byte[] content = scontent.toString().getBytes();
+        byte[] content = scontent.toString().getBytes("UTF-8");
 
         URL url = new URL("http://www.example.com/subsection/sitemap.xml");
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -245,8 +249,9 @@ public class SiteMapParserTest {
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
     }
 
-    /** Returns a good simple default XML sitemap as a byte array */
-    private byte[] getXMLSitemapAsBytes() {
+    /** Returns a good simple default XML sitemap as a byte array 
+     * @throws UnsupportedEncodingException */
+    private byte[] getXMLSitemapAsBytes() throws UnsupportedEncodingException {
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
                         .append("  <loc>http://www.example.com/</loc>").append("  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
@@ -257,6 +262,6 @@ public class SiteMapParserTest {
                         .append("  <loc><url><![CDATA[http://www.example.com/catalog?item=83&amp;desc=vacation_usa]]></url></loc>").append("  <lastmod>2004-11-23</lastmod>").append("</url>")
                         .append("</urlset>");
 
-        return scontent.toString().getBytes();
+        return scontent.toString().getBytes("UTF-8");
     }
 }

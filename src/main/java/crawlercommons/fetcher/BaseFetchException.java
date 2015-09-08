@@ -133,7 +133,7 @@ public abstract class BaseFetchException extends Exception {
 
     @Override
     public void printStackTrace() {
-        _exception.printStackTrace();
+        _exception.getMessage();
     }
 
     @Override

@@ -16,22 +16,29 @@
  */
 package crawlercommons.fetcher;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.tika.metadata.Metadata;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author lmcgibbn
  * 
  */
 public class FetchedResultTest {
+  
+    private static final Logger LOG = LoggerFactory.getLogger(FetchedResultTest.class);
 
     /**
      * Test method for {@link crawlercommons.fetcher.FetchedResult#report()}.
      * This does not actually test anything but simply allows us to see what a
      * generated report would look like.
+     * @throws UnsupportedEncodingException 
      */
     @Test
-    public void testPrintReport() {
+    public void testPrintReport() throws UnsupportedEncodingException {
         Metadata headerMetadata = new Metadata();
         headerMetadata.add(Metadata.CONTENT_DISPOSITION, "This is content disposition");
         headerMetadata.add(Metadata.CONTENT_ENCODING, "This is the encoding");
@@ -52,8 +59,8 @@ public class FetchedResultTest {
                         "http://en.wikipedia.org/wiki/Glasgow", // redirectedUrl
                         System.currentTimeMillis(), // fetchTime
                         headerMetadata, new String("Glasgow (/ˈɡlɑːzɡoʊ, ˈɡlæz-/;[4] Scots: Glesca; Scottish Gaelic: Glaschu) "
-                                        + "is the largest city in Scotland, and the third largest in the United Kingdom.").getBytes(), "ScotsText", 2014, load, "http://en.wikipedia.org/wiki/Glasgow",
+                                        + "is the largest city in Scotland, and the third largest in the United Kingdom.").getBytes("UTF-8"), "ScotsText", 2014, load, "http://en.wikipedia.org/wiki/Glasgow",
                         0, "wikipedia.org", 200, "");
-        System.out.println(result.report());
+        LOG.error(result.report());
     }
 }

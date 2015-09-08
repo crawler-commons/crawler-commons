@@ -17,6 +17,7 @@
 
 package crawlercommons.fetcher;
 
+import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 
@@ -174,7 +175,7 @@ public class FetchedResult {
         report.append("    FetchedUrl    : " + getFetchedUrl() + "\n");
         report.append("    ContentType   : " + getContentType() + "\n");
         report.append("    ContentLength : " + getContentLength() + "\n");
-        report.append("    Content       : " + new String(getContent()) + "\n"); // byte
+        report.append("    Content       : " + new String(getContent(), Charset.defaultCharset()) + "\n"); // byte
                                                                                  // array
                                                                                  // to
                                                                                  // string
