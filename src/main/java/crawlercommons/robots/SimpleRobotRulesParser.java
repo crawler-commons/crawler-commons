@@ -34,7 +34,7 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
 /**
  * <p>
- * This extension of the {@link BaseRobotsParser} retrieves a set of
+ * This implementation of {@link BaseRobotsParser} retrieves a set of
  * {@link SimpleRobotRules rules} for an agent with the given name from the
  * <code>robots.txt</code> file of a given domain.
  * </p>
@@ -43,18 +43,23 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * The class fulfills two tasks. The first one is the parsing of the
  * <code>robots.txt</code> file done in
  * {@link #parseContent(String, byte[], String, String)}. During the parsing
- * process the parser searches for the given agent name(s). If the parser finds
+ * process the parser searches for the provided agent name(s). If the parser finds
  * a matching name, the set of rules for this name is parsed and returned as
- * result. <b>Note</b> that if more than one agent name is given to the parser,
+ * the result. <b>Note</b> that if more than one agent name is given to the parser,
  * it parses the rules for the first matching agent name inside the file and
- * aborts the parsing process. It doesn't matter which of the other given agent
+ * skips all following user agent groups. It doesn't matter which of the other given agent
  * names would match additional rules inside the file. Thus, if more than one
  * agent name is given to the parser, the result can be influenced by the order
  * of rule sets inside the <code>robots.txt</code> file.
  * </p>
  * 
  * <p>
- * If no rule set matching a given agent name could be found, the rule set for
+ * Note that the parser always parses the entire file, even if a matching agent
+ * name group has been found, as it needs to collect all of the sitemap directives.
+ * </p>
+ * 
+ * <p>
+ * If no rule set matches any of the provided agent names, the rule set for
  * the <code>'*'</code> agent is returned. If there is no such rule set inside
  * the <code>robots.txt</code> file, a rule set allowing all resource to be
  * crawled is returned.
@@ -69,7 +74,7 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * 
  * <p>
  * The second task of this class is to generate a set of rules if the fetching
- * of the <code>robots.txt</code> fiel fails. The {@link #failedFetch(int)}
+ * of the <code>robots.txt</code> file fails. The {@link #failedFetch(int)}
  * method returns a predefined set of rules based on the given error code. If
  * the status code is indicating a client error (status code = 4xx) we can
  * assume that the <code>robots.txt</code> file is not there and crawling of all
