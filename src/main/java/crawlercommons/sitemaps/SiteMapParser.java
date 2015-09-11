@@ -402,8 +402,12 @@ public class SiteMapParser {
             sitemap.setProcessed(true);
             return sitemap;
         } else {
-            // See if it is a RSS feed by looking for a "rss" element
-            list = doc.getElementsByTagName("rss");
+            // See if it is a RSS feed by looking for a "channel" element. This avoids the issue
+        	// of having the outer tag named <rdf:RDF> that was causing this code to fail. Inside of
+        	// the <rss> or <rdf> tag is a <channel> tag, so we can use that.
+        	// See https://github.com/crawler-commons/crawler-commons/issues/87
+        	// and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
+            list = doc.getElementsByTagName("channel");
             if (list.getLength() > 0) {
                 parseRSS(sitemap, doc);
                 sitemap.setProcessed(true);

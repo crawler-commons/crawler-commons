@@ -249,6 +249,47 @@ public class SiteMapParserTest {
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
     }
 
+    
+    /**
+     * Test processing RSS 1.0 sitemaps, which don't have an <rss> tag.
+     * E.g. http://rss.slashdot.org/slashdot/slashdotMain?format=xml
+     * 
+     * See https://github.com/crawler-commons/crawler-commons/issues/87
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRSS10SyndicationFormat() throws Exception {
+    	SiteMapParser parser = new SiteMapParser();
+    	
+    	String contentType = "text/xml";
+    	URL url = new URL("http://www.example.com/sitemapindex.xml");
+    	StringBuilder scontent = new StringBuilder(1024);
+    	scontent.append("<?xml version=\"1.0\"?>")
+    		.append("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"  xmlns=\"http://purl.org/rss/1.0/\">")
+	    	.append("<channel rdf:about=\"http://www.xml.com/xml/news.rss\">")
+	    	.append("<title>XML.com</title>")
+	    	.append("<link>http://www.example.com/pub</link>")
+	    	.append("<description>example.com</description>")
+	    	.append("<image rdf:resource=\"http://www.example.com/universal/images/xml_tiny.gif\" />")
+	    	.append("<items><rdf:Seq><rdf:li resource=\"http://www.example.com/pub/2000/08/09/xslt/xslt.html\" />")
+	    	.append("<rdf:li resource=\"http://www.example.com/pub/2000/08/09/rdfdb/index.html\" /></rdf:Seq></items></channel>")
+	    	.append("<image rdf:about=\"http://www.example.com/universal/images/xml_tiny.gif\"><title>XML.com</title><link>http://www.xml.com</link>")
+	    	.append("<url>http://www.example.com/universal/images/xml_tiny.gif</url></image>")
+	    	.append("<item rdf:about=\"http://www.example.com/pub/2000/08/09/xslt/xslt.html\"><title>Processing Inclusions with XSLT</title>")
+	    	.append("<link>http://www.example.com/pub/2000/08/09/xslt/xslt.html</link>")
+	    	.append("<description>Processing document inclusions with general XML tools can be problematic. This article proposes a way of preserving inclusion"
+	    			+"information through SAX-based processing. </description> </item> </rdf:RDF>");
+    	byte[] content = scontent.toString().getBytes("UTF-8");
+    	AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+    	assertEquals(false, asm.isIndex());
+    	assertEquals(true, asm instanceof SiteMap);
+    	
+    	SiteMap sm = (SiteMap)asm;
+    	assertEquals(1, sm.getSiteMapUrls().size());
+    	assertEquals("http://www.example.com/pub/2000/08/09/xslt/xslt.html", sm.getSiteMapUrls().iterator().next().getUrl().toString());
+    }
+    
     /** Returns a good simple default XML sitemap as a byte array 
      * @throws UnsupportedEncodingException */
     private byte[] getXMLSitemapAsBytes() throws UnsupportedEncodingException {
