@@ -401,6 +401,9 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/f/"));
 
+        // Note that the SimpleRobotRulesParser only parses the rule set of the
+        // first matching agent name. For the following example, the parser
+        // returns only the rules matching 'Agent1'.
         rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt.getBytes("UTF-8"));
         assertFalse(rules.isAllowed("http://www.domain.com/a"));
         assertFalse(rules.isAllowed("http://www.domain.com/a/"));

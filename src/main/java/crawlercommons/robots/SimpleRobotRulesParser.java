@@ -32,6 +32,52 @@ import org.slf4j.LoggerFactory;
 
 import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
+/**
+ * <p>
+ * This extension of the {@link BaseRobotsParser} retrieves a set of
+ * {@link SimpleRobotRules rules} for an agent with the given name from the
+ * <code>robots.txt</code> file of a given domain.
+ * </p>
+ * 
+ * <p>
+ * The class fulfills two tasks. The first one is the parsing of the
+ * <code>robots.txt</code> file done in
+ * {@link #parseContent(String, byte[], String, String)}. During the parsing
+ * process the parser searches for the given agent name(s). If the parser finds
+ * a matching name, the set of rules for this name is parsed and returned as
+ * result. <b>Note</b> that if more than one agent name is given to the parser,
+ * it parses the rules for the first matching agent name inside the file and
+ * aborts the parsing process. It doesn't matter which of the other given agent
+ * names would match additional rules inside the file. Thus, if more than one
+ * agent name is given to the parser, the result can be influenced by the order
+ * of rule sets inside the <code>robots.txt</code> file.
+ * </p>
+ * 
+ * <p>
+ * If no rule set matching a given agent name could be found, the rule set for
+ * the <code>'*'</code> agent is returned. If there is no such rule set inside
+ * the <code>robots.txt</code> file, a rule set allowing all resource to be
+ * crawled is returned.
+ * </p>
+ * 
+ * <p>
+ * The crawl delay is parsed and added to the rules. Note that if the crawl
+ * delay inside the file exceeds a maximum value, the crawling of all resources
+ * is prohibited. The maximum value is defined with {@link #MAX_CRAWL_DELAY}=
+ * {@value #MAX_CRAWL_DELAY}.
+ * </p>
+ * 
+ * <p>
+ * The second task of this class is to generate a set of rules if the fetching
+ * of the <code>robots.txt</code> fiel fails. The {@link #failedFetch(int)}
+ * method returns a predefined set of rules based on the given error code. If
+ * the status code is indicating a client error (status code = 4xx) we can
+ * assume that the <code>robots.txt</code> file is not there and crawling of all
+ * resources is allowed. If the status code equals a different error code (3xx
+ * or 5xx) the parser assumes a temporary error and a set of rules prohibiting
+ * any crawling is returned.
+ * </p>
+ */
 @SuppressWarnings("serial")
 public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleRobotRulesParser.class);
@@ -87,9 +133,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     }
 
     private static class ParseState {
+        /**
+         * Flag indicating whether the given name of the agent matched.
+         */
         private boolean _matchedRealName;
+        /**
+         * Flag that is true if not the given agent name but a wildcard matched.
+         */
         private boolean _matchedWildcard;
+        /**
+         * Flag that is true as long as it is allowed to add rules for the given
+         * agent.
+         */
         private boolean _addingRules;
+        /**
+         * Flag indicating whether all consecutive agent fields has been seen.
+         * It is set to false if an agent field is found and back to true if
+         * something else has been found.
+         */
         private boolean _finishedAgentFields;
 
         private String _url;
