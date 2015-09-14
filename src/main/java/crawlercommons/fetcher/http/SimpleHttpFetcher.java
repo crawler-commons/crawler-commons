@@ -31,7 +31,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -107,6 +106,12 @@ import crawlercommons.fetcher.RedirectFetchException;
 import crawlercommons.fetcher.RedirectFetchException.RedirectExceptionReason;
 import crawlercommons.fetcher.UrlFetchException;
 
+/**
+ * @deprecated As of release 0.6. We recommend directly using Apache HttpClient, 
+ * async-http-client, or any other robust, industrial-strength HTTP clients.
+ *
+ */
+@Deprecated
 @SuppressWarnings("serial")
 public class SimpleHttpFetcher extends BaseHttpFetcher {
     private static Logger LOGGER = LoggerFactory.getLogger(SimpleHttpFetcher.class);

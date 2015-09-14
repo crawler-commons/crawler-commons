@@ -23,6 +23,12 @@ import java.util.Arrays;
 
 import org.apache.tika.metadata.Metadata;
 
+/**
+ * @deprecated As of release 0.6. We recommend directly using Apache HttpClient, 
+ * async-http-client, or any other robust, industrial-strength HTTP clients.
+ *
+ */
+@Deprecated
 public class FetchedResult {
     private final String _baseUrl;
     private final String _fetchedUrl;
