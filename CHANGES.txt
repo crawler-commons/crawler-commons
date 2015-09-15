@@ -1,13 +1,16 @@
 Crawler-Commons Change Log
 
-Current Development 0.7-SNAPSHOT (dd/mm/yyyy)
-- Issue #89: Upgraded Tika 1.10 (jnioche)
+Current Development 0.7-SNAPSHOT (yyyy-mm-dd)
+- Issue 89: Upgraded Tika 1.10 (jnioche)
 - Issue 82: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
 - Issue 60: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
 - Issue 77: simplify pom file (jnioche, lewismc)
 - Issue 93: Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc)
+- Issue 92: Deprecate HTTP fetcher support (kkrugler)
+- Issue 87: [Sitemaps] Not able to detect RSS feeds (yogendrasoni via kkrugler)
+- Issue 95: [Robots] Added javadoc comments to the SimpleRobotRulesParser class (MichaelRoeder, kkrugler)
 
-Release 0.6 (27/05/2015)
+Release 0.6 (2015-05-27)
 - Issue 75: [Sitemaps] more robust parsing of XML elements (jnioche, kkrugler)
 - Issue 76: maven-java-formatter-plugin (jnioche)
 - Issue 73: Switch groupID in pom from com.google.code.crawler-commons to crawler-commons (jnioche)
@@ -26,7 +29,7 @@ Release 0.6 (27/05/2015)
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
 - Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value (Avi Hayun)
 
-Release 0.5 - 09/10/2014
+Release 0.5 (2014-10-15)
 - Issue 53: Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
 - Issue 45: [Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
 - Issue 48: Upgraded to Tika 1.6 (jnioche)
@@ -38,7 +41,7 @@ Release 0.5 - 09/10/2014
 - Issue 41: Upgrade to JUnit v4 conventions in SiteMapParser (Avi Hayun via lewismc)
 - Issue 34: Upgrade the Slf4j logging in SiteMaps (Avi Hayun via lewismc)
 
-Release 0.4
+Release 0.4 (2014-04-11)
 - Issue 13: Fix deprecation in Crawler Commons Code (lewismc via kkrugler)
 - Issue 8 : Upgrade of httpclient to v4.2.6 (Fuad Efendi, lewismc via kkrugler)
 - Issue 18: Support matching against query parameters in robots.txt rules (alparslanavci, kkrugler)
@@ -50,7 +53,7 @@ Release 0.4
 - Issue 30: SitemapIndex should allow to skip sitemaps (Sebastian Nagel, kkrugler)
 - cleanup of ANT build remnants [lib and lib-ext] (jnioche)
 
-Release 0.3
+Release 0.3 (2013-10-11)
 - Upgraded to Tika 1.4 (jnioche)
 - [SiteMap] added utility class for testing sitemaps (jnioche)
 - Issue 16: remove ant scripts and configuration (lewismc)
@@ -59,7 +62,7 @@ Release 0.3
 - Issue 25: [Robots] Robots parser should not lowercase sitemap URLs (jnioche)
 - Issue 29: [SiteMap] try urls when <loc> element is missing (jnioche)
 
-Release 0.2
+Release 0.2 (2013-02-02)
 - Move to pure Maven for CC build lifecycle (lewismc)
 - Move Javadoc out of core code (lewismc)
 - Substantiate Javadoc (lewismc)
