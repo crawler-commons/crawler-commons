@@ -1,7 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT (dd/mm/yyyy)
-
+- Issue #89: Upgraded Tika 1.10 (jnioche)
 - Issue 82: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
 - Issue 60: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
 - Issue 77: simplify pom file (jnioche, lewismc)
