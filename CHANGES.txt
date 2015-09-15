@@ -1,6 +1,13 @@
 Crawler-Commons Change Log
 
-Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
+Current Development 0.7-SNAPSHOT (dd/mm/yyyy)
+
+- Issue 82: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
+- Issue 60: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
+- Issue 77: simplify pom file (jnioche, lewismc)
+- Issue 93: Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc)
+
+Release 0.6 (27/05/2015)
 - Issue 75: [Sitemaps] more robust parsing of XML elements (jnioche, kkrugler)
 - Issue 76: maven-java-formatter-plugin (jnioche)
 - Issue 73: Switch groupID in pom from com.google.code.crawler-commons to crawler-commons (jnioche)
