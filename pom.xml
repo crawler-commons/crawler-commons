@@ -330,7 +330,6 @@
 		<httpclient.version>4.3.5</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
 		<tika-core.version>1.10</tika-core.version>
-		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>4.7</junit.version>
 		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
 		<mockito-core.version>1.8.0</mockito-core.version>
@@ -383,12 +382,6 @@
 			<version>${tika-core.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j-api.version}</version>
-		</dependency>
-
 		<!-- Test dependencies -->
 
 		<dependency>
@@ -402,7 +395,7 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j-log4j12.version}</version>
-			<scope>test</scope>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>

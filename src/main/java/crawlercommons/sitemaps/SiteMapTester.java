@@ -22,8 +22,8 @@ public class SiteMapTester {
             LOG.error("Usage: SiteMapTester <URL_TO_TEST> [MIME_TYPE]");
         } else {
             URL url = new URL(args[0]);
+            LOG.info("Input URL detected as {}", url.toString());
             String mt = (args.length > 1) ? args[1] : null;
-
             parse(url, mt);
         }
     }
