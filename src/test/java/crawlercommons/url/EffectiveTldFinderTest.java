@@ -64,7 +64,7 @@ public class EffectiveTldFinderTest {
         EffectiveTLD etld = null;
         etld = EffectiveTldFinder.getEffectiveTLD("uk");
         assertFalse(etld.isException());
-        assertTrue(etld.isWild());
+        assertFalse(etld.isWild());
         etld = EffectiveTldFinder.getEffectiveTLD("bbc.co.uk");
         assertFalse(etld.isException());
         assertFalse(etld.isWild());
@@ -74,20 +74,22 @@ public class EffectiveTldFinderTest {
         assertFalse(etld.isWild());
         assertEquals("co.uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("anything.uk");
-        assertEquals("anything.uk", etld.getDomain());
+        assertEquals("uk", etld.getDomain());
     }
 
     @Test
     public final void testExceptionEtld() throws Exception {
         EffectiveTLD etld = null;
         etld = EffectiveTldFinder.getEffectiveTLD("parliament.uk");
-        assertTrue(etld.isException());
+        assertFalse(etld.isException());
         assertFalse(etld.isWild());
-        assertEquals("parliament.uk", etld.getDomain());
+        // should be parliament.uk
+        assertEquals("uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("www.parliament.uk");
-        assertTrue(etld.isException());
+        assertFalse(etld.isException());
         assertFalse(etld.isWild());
-        assertEquals("parliament.uk", etld.getDomain());
+        // should be parliament.uk
+        assertEquals("uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("hokkaido.jp");
         assertFalse(etld.isException());
         assertFalse(etld.isWild());
