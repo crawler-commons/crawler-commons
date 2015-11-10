@@ -148,7 +148,7 @@ public class BasicURLNormalizerTest {
     }
 
     private void normalizeTest(String weird, String normal) throws Exception {
-        Assert.assertEquals("normalizing: " + weird, normal, normalizer.normalize(weird));
+        Assert.assertEquals("normalizing: " + weird, normal, normalizer.filter(weird));
     }
 
     public static void main(String[] args) throws Exception {

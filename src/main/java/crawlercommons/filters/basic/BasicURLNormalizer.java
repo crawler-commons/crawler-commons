@@ -82,7 +82,7 @@ public class BasicURLNormalizer implements URLFilter {
     }
 
     @Override
-    public String normalize(String urlString) {
+    public String filter(String urlString) {
 
         if ("".equals(urlString)) // permit empty
             return urlString;
@@ -281,7 +281,7 @@ public class BasicURLNormalizer implements URLFilter {
         String line, normUrl;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in, utf8));
         while ((line = in.readLine()) != null) {
-            normUrl = normalizer.normalize(line);
+            normUrl = normalizer.filter(line);
             LOG.info("{} => {}", line, normUrl);
         }
         System.exit(0);
