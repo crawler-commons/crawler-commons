@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT (yyyy-mm-dd)
+- Issue 106: Added URLFilter interface + BasicURLNormalizer (jnioche)
 - Issue 100: Updated tld names from publicsuffix.org (jnioche)
 - Issue 84: Upgraded http-client to version 4.5.1 (aecio via kkrugler)
 - Issue 89: Upgraded Tika 1.10 (jnioche)
