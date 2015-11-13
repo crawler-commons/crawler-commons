@@ -43,7 +43,7 @@ import crawlercommons.filters.URLFilter;
  * percent-encoding</a> in URL paths</li>
  * </ul>
  */
-public class BasicURLNormalizer implements URLFilter {
+public class BasicURLNormalizer extends URLFilter {
     public static final Logger LOG = LoggerFactory.getLogger(BasicURLNormalizer.class);
 
     /**
