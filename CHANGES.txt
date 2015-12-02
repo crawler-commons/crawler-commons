@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
-Current Development 0.7-SNAPSHOT (yyyy-mm-dd)
+Current Development 0.7-SNAPSHOT
+- Issue 92: Deprecate HTTP fetcher support (kkrugler)
 - Issue 106: Added URLFilter interface + BasicURLNormalizer (jnioche)
 - Issue 100: Updated tld names from publicsuffix.org (jnioche)
 - Issue 84: Upgraded http-client to version 4.5.1 (aecio via kkrugler)
@@ -9,7 +10,6 @@ Current Development 0.7-SNAPSHOT (yyyy-mm-dd)
 - Issue 60: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
 - Issue 77: simplify pom file (jnioche, lewismc)
 - Issue 93: Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc)
-- Issue 92: Deprecate HTTP fetcher support (kkrugler)
 - Issue 87: [Sitemaps] Not able to detect RSS feeds (yogendrasoni via kkrugler)
 - Issue 95: [Robots] Added javadoc comments to the SimpleRobotRulesParser class (MichaelRoeder, kkrugler)
 

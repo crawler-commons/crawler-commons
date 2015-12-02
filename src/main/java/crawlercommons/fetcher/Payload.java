@@ -22,6 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @deprecated As of release 0.6. We recommend directly using Apache HttpClient, 
+ * async-http-client, or any other robust, industrial-strength HTTP clients.
+ *
+ */
+@Deprecated
 public class Payload implements Map<String, Object> {
 
     private Map<String, Object> _data;

@@ -37,6 +37,11 @@ import crawlercommons.fetcher.IOFetchException;
 import crawlercommons.fetcher.Payload;
 import crawlercommons.fetcher.UrlFetchException;
 
+/**
+ * @deprecated As of release 0.6.
+ *
+ */
+@Deprecated
 @SuppressWarnings("serial")
 public class SimpleFileFetcher extends BaseFetcher {
 
