@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.url;
+package crawlercommons.domains;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -15,14 +15,16 @@
  * limitations under the License.
  */
 
-package crawlercommons.url;
+package crawlercommons.domains;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import crawlercommons.url.EffectiveTldFinder.EffectiveTLD;
 import org.junit.Test;
+
+import crawlercommons.domains.EffectiveTldFinder;
+import crawlercommons.domains.EffectiveTldFinder.EffectiveTLD;
 
 public class EffectiveTldFinderTest {
 
