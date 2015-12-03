@@ -26,6 +26,8 @@
 	functionality common to any web crawler.
 	</description>
 
+	<inceptionYear>2009</inceptionYear>
+
 	<scm>
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
@@ -53,6 +55,11 @@
 		</mailingList>
 	</mailingLists>
 
+	<organization>
+		<name>Crawler-Commons</name>
+		<url>http://github.com/crawler-commons</url>
+	</organization>
+
 	<developers>
 		<developer>
 			<id>KKrugler</id>
@@ -69,7 +76,9 @@
 		<developer>
 			<id>jnioche</id>
 			<name>Julien Nioche</name>
-			<email>jnioche@apache.org</email>
+			<email>julien@digitalpebble.com</email>
+			<organization>DigitalPebble Ltd</organization>
+			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
 		</developer>
 
 		<developer>
