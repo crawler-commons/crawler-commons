@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.url;
+package crawlercommons.domains;
 
 import java.net.URL;
 import java.util.Arrays;
