@@ -775,6 +775,26 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
 
+    // https://github.com/crawler-commons/crawler-commons/issues/112
+    @Test
+    public void testSitemapAtEndOfFile() throws Exception {
+        final String simpleRobotsTxt = "User-agent: a" + CRLF
+                + "Disallow: /content/dam/" + CRLF
+                + CRLF
+                + "User-agent: b" + CRLF
+                + "Disallow: /content/dam/" + CRLF
+                + CRLF
+                + "User-agent: c" + CRLF
+                + "Disallow: /content/dam/" + CRLF
+                + CRLF
+                + CRLF
+                + "Sitemap: https://wwwfoocom/sitemapxml";
+        		
+        BaseRobotRules rules = createRobotRules("a", simpleRobotsTxt.getBytes("UTF-8"));
+        assertEquals(1, rules.getSitemaps().size());
+        assertEquals("https://wwwfoocom/sitemapxml", rules.getSitemaps().get(0));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);

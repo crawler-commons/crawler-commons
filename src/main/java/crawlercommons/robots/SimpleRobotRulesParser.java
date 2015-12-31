@@ -157,6 +157,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          * something else has been found.
          */
         private boolean _finishedAgentFields;
+        
+        // True if we're done adding rules for a matched (not wildcard) agent name.
+        // When this is true, we only consider sitemap directives, so we skip all
+        // remaining user agent blocks.
+        private boolean _skipAgents;
 
         private String _url;
         private String _targetName;
@@ -203,6 +208,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         public void setFinishedAgentFields(boolean finishedAgentFields) {
             _finishedAgentFields = finishedAgentFields;
+        }
+
+        public boolean isSkipAgents() {
+            return _skipAgents;
+        }
+
+        public void setSkipAgents(boolean skipAgents) {
+        	_skipAgents = skipAgents;
         }
 
         public void clearRules() {
@@ -434,9 +447,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // works since it looks like an empty string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
         ParseState parseState = new ParseState(url, robotNames.toLowerCase(Locale.getDefault()));
-        boolean keepGoing = true;
 
-        while (keepGoing && lineParser.hasMoreTokens()) {
+        while (lineParser.hasMoreTokens()) {
             String line = lineParser.nextToken();
 
             // Get rid of HTML markup, in case some brain-dead webmaster has
@@ -463,43 +475,42 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             RobotToken token = tokenize(line);
             switch (token.getDirective()) {
                 case USER_AGENT:
-                keepGoing = handleUserAgent(parseState, token);
+                	handleUserAgent(parseState, token);
                     break;
 
                 case DISALLOW:
-                keepGoing = handleDisallow(parseState, token);
+                	handleDisallow(parseState, token);
                     break;
 
                 case ALLOW:
-                keepGoing = handleAllow(parseState, token);
+                	handleAllow(parseState, token);
                     break;
 
                 case CRAWL_DELAY:
-                keepGoing = handleCrawlDelay(parseState, token);
+                	handleCrawlDelay(parseState, token);
                     break;
 
                 case SITEMAP:
-                keepGoing = handleSitemap(parseState, token);
+                	handleSitemap(parseState, token);
                     break;
 
                 case HTTP:
-                keepGoing = handleHttp(parseState, token);
+                	handleHttp(parseState, token);
                     break;
 
                 case UNKNOWN:
-                reportWarning("Unknown directive in robots.txt file: " + line, url);
-                parseState.setFinishedAgentFields(true);
+                	reportWarning("Unknown directive in robots.txt file: " + line, url);
+                	parseState.setFinishedAgentFields(true);
                     break;
 
                 case MISSING:
-                reportWarning(String.format(Locale.getDefault(), "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
-                parseState.setFinishedAgentFields(true);
+                	reportWarning(String.format(Locale.getDefault(), "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+                	parseState.setFinishedAgentFields(true);
                     break;
 
                 default:
                     // All others we just ignore
-                    // TODO KKr - which of these should be setting
-                    // finishedAgentFields to true?
+                    // TODO KKr - which of these should be setting finishedAgentFields to true?
                     // TODO KKr - handle no-index
                     // TODO KKr - handle request-rate and visit-time
                     break;
@@ -538,25 +549,19 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleUserAgent(ParseState state, RobotToken token) {
+    private void handleUserAgent(ParseState state, RobotToken token) {
         if (state.isMatchedRealName()) {
             if (state.isFinishedAgentFields()) {
-                // We're all done.
-                return false;
-            } else {
-                // Skip any more of these, once we have a real name match. We're
-                // waiting for some
-                // allow/disallow/crawl delay fields.
-                return true;
+            	state.setSkipAgents(true);
             }
+            
+            return;
         }
 
         if (state.isFinishedAgentFields()) {
             // We've got a user agent field, so we haven't yet seen anything
-            // that tells us
-            // we're done with this set of agent names.
+            // that tells us we're done with this set of agent names.
             state.setFinishedAgentFields(false);
             state.setAddingRules(false);
         }
@@ -594,9 +599,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 }
             }
         }
-
-        // Keep going
-        return true;
     }
 
     /**
@@ -606,13 +608,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleDisallow(ParseState state, RobotToken token) {
+    private void handleDisallow(ParseState state, RobotToken token) {
+    	if (state.isSkipAgents()) {
+    		return;
+    	}
+    	
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String path = token.getData();
@@ -629,8 +634,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } catch (Exception e) {
             reportWarning("Error parsing robots rules - can't decode path: " + path, state.getUrl());
         }
-
-        return true;
     }
 
     /**
@@ -640,13 +643,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleAllow(ParseState state, RobotToken token) {
+    private void handleAllow(ParseState state, RobotToken token) {
+    	if (state.isSkipAgents()) {
+    		return;
+    	}
+    	
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String path = token.getData();
@@ -663,8 +669,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } else {
             state.addRule(path, true);
         }
-
-        return true;
     }
 
     /**
@@ -674,13 +678,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleCrawlDelay(ParseState state, RobotToken token) {
+    private void handleCrawlDelay(ParseState state, RobotToken token) {
+    	if (state.isSkipAgents()) {
+    		return;
+    	}
+    	
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String delayString = token.getData();
@@ -700,8 +707,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 reportWarning("Error parsing robots rules - can't decode crawl delay: " + delayString, state.getUrl());
             }
         }
-
-        return true;
     }
 
     /**
@@ -711,9 +716,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleSitemap(ParseState state, RobotToken token) {
+    private void handleSitemap(ParseState state, RobotToken token) {
 
         String sitemap = token.getData();
         try {
@@ -725,8 +729,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } catch (Exception e) {
             reportWarning("Invalid URL with sitemap directive: " + sitemap, state.getUrl());
         }
-
-        return true;
     }
 
     /**
@@ -737,16 +739,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleHttp(ParseState state, RobotToken token) {
+    private void handleHttp(ParseState state, RobotToken token) {
         String urlFragment = token.getData();
         if (urlFragment.contains("sitemap")) {
             RobotToken fixedToken = new RobotToken(RobotDirective.SITEMAP, "http:" + token.getData());
-            return handleSitemap(state, fixedToken);
+            handleSitemap(state, fixedToken);
         } else {
             reportWarning("Found raw non-sitemap URL: http:" + urlFragment, state.getUrl());
-            return true;
         }
     }
 
