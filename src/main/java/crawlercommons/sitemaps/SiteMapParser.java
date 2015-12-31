@@ -107,9 +107,8 @@ public class SiteMapParser {
      * This method is a convenience method for a user who has a sitemap URL and
      * wants a "Keep it simple" way to parse it.
      * 
-     * @param onlineSitemapUrl
-     *            URL of the online sitemap
-     * @return AbstractSiteMap object or null if the onlineSitemap is null
+     * @param onlineSitemapUrl URL of the online sitemap
+     * @return Extracted SiteMap/SiteMapIndex or null if the onlineSitemapUrl is null
      */
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
         if (onlineSitemapUrl == null) {
@@ -121,8 +120,17 @@ public class SiteMapParser {
 
     /**
      * Returns a processed copy of an unprocessed sitemap object, i.e. transfer
-     * the value of getLastModified Please note that the sitemap input stays
-     * unchanged
+     * the value of getLastModified(). Please note that the sitemap input stays
+     * unchanged. Note that contentType is assumed to be correct; in general it
+     * is more robust to use the method that doesn't take a contentType, but
+     * instead detects this using Tika.
+	 *
+     * @param contentType MIME type of content
+     * @param content raw bytes of sitemap file
+     * @param sitemap
+     * @return Extracted SiteMap/SiteMapIndex
+     * @throws UnknownFormatException
+     * @throws IOException
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, final AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
         AbstractSiteMap asmCopy = parseSiteMap(contentType, content, sitemap.getUrl());
@@ -131,8 +139,13 @@ public class SiteMapParser {
     }
 
     /**
-     * @return SiteMap/SiteMapIndex by guessing the content type from the binary
-     *         content and URL
+     * Parse a sitemap, given the content bytes and the URL.
+     * 
+     * @param content raw bytes of sitemap file
+     * @param url URL to sitemap file
+     * @return Extracted SiteMap/SiteMapIndex
+     * @throws UnknownFormatException
+     * @throws IOException
      */
     public AbstractSiteMap parseSiteMap(byte[] content, URL url) throws UnknownFormatException, IOException {
         if (url == null) {
@@ -144,8 +157,17 @@ public class SiteMapParser {
     }
 
     /**
-     * @return SiteMap/SiteMapIndex given a content type, byte content and the
-     *         URL of a sitemap
+     * Parse a sitemap, given the MIME type, the content bytes, and the URL.
+     * Note that contentType is assumed to be correct; in general it
+     * is more robust to use the method that doesn't take a contentType, but
+     * instead detects this using Tika.
+     * 
+     * @param contentType MIME type of content
+     * @param content raw bytes of sitemap file
+     * @param url URL to sitemap file
+     * @return Extracted SiteMap/SiteMapIndex
+     * @throws UnknownFormatException
+     * @throws IOException
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         MediaType mediaType = MediaType.parse(contentType);
