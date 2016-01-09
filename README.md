@@ -2,6 +2,21 @@
 
 crawler-commons is a set of reusable Java components that implement functionality common to any web crawler. These components benefit from collaboration among various existing web crawler projects, and reduce duplication of effort.
 
+# User Documentation
+
+## Javadocs
+
+* [0.6](http://crawler-commons.github.io/crawler-commons/0.6/apidocs/)
+* [0.5](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html)
+
+# Mailing List
+
+There is a mailing list on [Google Groups](https://groups.google.com/forum/?fromgroups#!forum/crawler-commons).
+
+# Issue Tracking
+
+If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
+
 # Crawler-Commons News
 
 ## 11th June 2015 - crawler-commons 0.6 is released
@@ -51,20 +66,3 @@ See [Apache Nutch v2.2 Released](http://nutch.apache.org/#08+June+2013+-+Apache+
 This release improves robots.txt and sitemap parsing support.
 
 See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
-
-# User Documentation
-
-## Javadocs
-
-*   [0.5](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html)
-*   [0.4](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.4/index.html)
-*   [0.3](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.3/index.html)
-*   [0.2](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.2/index.html)
-
-# Mailing List
-
-There is a mailing list on [Google Groups](https://groups.google.com/forum/?fromgroups#!forum/crawler-commons).
-
-# Issue Tracking
-
-If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
