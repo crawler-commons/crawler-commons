@@ -170,6 +170,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
     private HttpVersion _httpVersion;
     private int _socketTimeout;
     private int _connectionTimeout;
+    private int _connectionRequestTimeout;
     private int _maxRetryCount;
 
     transient private CloseableHttpClient _httpClient;
@@ -492,6 +493,18 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
             _connectionTimeout = connectionTimeoutInMs;
         } else {
             throw new IllegalStateException("Can't change connection timeout after HttpClient has been initialized");
+        }
+    }
+
+    public int getConnectionRequestTimeout() {
+        return _connectionRequestTimeout;
+    }
+
+    public void setConnectionRequestTimeout(int _connectionRequestTimeoutInMs) {
+        if (_httpClient == null) {
+            _connectionRequestTimeout = _connectionRequestTimeoutInMs;
+        } else {
+            throw new IllegalStateException("Can't change connection request timeout after HttpClient has been initialized");
         }
     }
 
@@ -901,6 +914,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 // reasonable.
                 requestConfigBuilder.setSocketTimeout(_socketTimeout);
                 requestConfigBuilder.setConnectTimeout(_connectionTimeout);
+                requestConfigBuilder.setConnectionRequestTimeout(_connectionRequestTimeout);
 
                 /*
                  * CoreConnectionPNames.TCP_NODELAY='http.tcp.nodelay':
@@ -1030,6 +1044,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 monitor = new IdleConnectionMonitorThread(_connectionManager);
                 monitor.start();
                 
+                httpClientBuilder.setDefaultRequestConfig(requestConfigBuilder.build());
                 _httpClient = httpClientBuilder.build();
             }
         }
