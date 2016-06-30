@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -105,9 +104,10 @@ import crawlercommons.fetcher.RedirectFetchException.RedirectExceptionReason;
 import crawlercommons.fetcher.UrlFetchException;
 
 /**
- * @deprecated As of release 0.6. We recommend directly using Apache HttpClient, 
- * async-http-client, or any other robust, industrial-strength HTTP clients.
- *
+ * @deprecated As of release 0.6. We recommend directly using Apache HttpClient,
+ *             async-http-client, or any other robust, industrial-strength HTTP
+ *             clients.
+ * 
  */
 @Deprecated
 @SuppressWarnings("serial")
@@ -175,7 +175,6 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
 
     transient private CloseableHttpClient _httpClient;
     transient private PoolingHttpClientConnectionManager _connectionManager;
-
 
     private static class MyRequestRetryHandler implements HttpRequestRetryHandler {
         private int _maxRetryCount;
@@ -327,13 +326,12 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
      */
     static class MyHttpRequestExecutor extends HttpRequestExecutor {
         @Override
-        public HttpResponse execute(HttpRequest request, HttpClientConnection conn, HttpContext context)
-                throws IOException, HttpException {
+        public HttpResponse execute(HttpRequest request, HttpClientConnection conn, HttpContext context) throws IOException, HttpException {
             HttpInetConnection connection = (HttpInetConnection) conn;
             context.setAttribute(HOST_ADDRESS, connection.getRemoteAddress().getHostAddress());
             return super.execute(request, conn, context);
         }
-        
+
     }
 
     private static class DummyX509TrustManager implements X509TrustManager {
@@ -928,14 +926,15 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                  * java.lang.Boolean. If this parameter is not set, TCP_NODELAY
                  * will be enabled (no delay).
                  */
-//                FIXME Could not find this parameter in http-client version 4.5
-//                HttpConnectionParams.setTcpNoDelay(params, true);
-//                HttpProtocolParams.setVersion(params, _httpVersion);
-                
+                // FIXME Could not find this parameter in http-client version
+                // 4.5
+                // HttpConnectionParams.setTcpNoDelay(params, true);
+                // HttpProtocolParams.setVersion(params, _httpVersion);
+
                 httpClientBuilder.setUserAgent(_userAgent.getUserAgentString());
-                
-//                HttpProtocolParams.setContentCharset(params, "UTF-8");
-//                HttpProtocolParams.setHttpElementCharset(params, "UTF-8");
+
+                // HttpProtocolParams.setContentCharset(params, "UTF-8");
+                // HttpProtocolParams.setHttpElementCharset(params, "UTF-8");
 
                 /*
                  * CoreProtocolPNames.USE_EXPECT_CONTINUE=
@@ -966,15 +965,19 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                  * will wait 3 seconds for a confirmation before resuming the
                  * transmission of the request body.
                  */
-//                FIXME Could not find this parameter in http-client version 4.5
-//                params.setIntParameter(CoreProtocolPNames.WAIT_FOR_CONTINUE, 5000);
+                // FIXME Could not find this parameter in http-client version
+                // 4.5
+                // params.setIntParameter(CoreProtocolPNames.WAIT_FOR_CONTINUE,
+                // 5000);
 
-//                FIXME Could not find this parameter in http-client version 4.5
-//                CookieSpecParamBean cookieParams = new CookieSpecParamBean(params);
-//                cookieParams.setSingleHeader(false);
-                
+                // FIXME Could not find this parameter in http-client version
+                // 4.5
+                // CookieSpecParamBean cookieParams = new
+                // CookieSpecParamBean(params);
+                // cookieParams.setSingleHeader(false);
+
                 // Create and initialize connection socket factory registry
-                RegistryBuilder<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create();
+                RegistryBuilder<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create();
                 registry.register("http", PlainConnectionSocketFactory.getSocketFactory());
                 SSLConnectionSocketFactory sf = createSSLConnectionSocketFactory();
                 if (sf != null) {
@@ -986,7 +989,7 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 _connectionManager = new PoolingHttpClientConnectionManager(registry.build());
                 _connectionManager.setMaxTotal(_maxThreads);
                 _connectionManager.setDefaultMaxPerRoute(getMaxConnectionsPerHost());
-                
+
                 /*
                  * CoreConnectionPNames.STALE_CONNECTION_CHECK=
                  * 'http.connection.stalecheck': determines whether stale
@@ -1008,18 +1011,20 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 // between the check and the next request. So we still need to
                 // handle the case of a closed socket (from the server side),
                 // and disabling this check improves performance.
-                // Stale connections will be checked in a separate monitor thread
+                // Stale connections will be checked in a separate monitor
+                // thread
                 _connectionManager.setValidateAfterInactivity(-1);
-                
+
                 httpClientBuilder.setConnectionManager(_connectionManager);
                 httpClientBuilder.setRetryHandler(new MyRequestRetryHandler(_maxRetryCount));
                 httpClientBuilder.setRedirectStrategy(new MyRedirectStrategy(getRedirectMode()));
                 httpClientBuilder.setRequestExecutor(new MyHttpRequestExecutor());
 
                 // FUTURE KKr - support authentication
-//                FIXME Could not find this parameter in http-client version 4.5
-//                HttpClientParams.setAuthenticating(params, false);
-                
+                // FIXME Could not find this parameter in http-client version
+                // 4.5
+                // HttpClientParams.setAuthenticating(params, false);
+
                 requestConfigBuilder.setCookieSpec(CookieSpecs.DEFAULT);
 
                 if (getMaxRedirects() == 0) {
@@ -1038,12 +1043,12 @@ public class SimpleHttpFetcher extends BaseHttpFetcher {
                 defaultHeaders.add(new BasicHeader(HttpHeaders.ACCEPT, DEFAULT_ACCEPT));
 
                 httpClientBuilder.setDefaultHeaders(defaultHeaders);
-                
+
                 httpClientBuilder.setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
-                
+
                 monitor = new IdleConnectionMonitorThread(_connectionManager);
                 monitor.start();
-                
+
                 httpClientBuilder.setDefaultRequestConfig(requestConfigBuilder.build());
                 _httpClient = httpClientBuilder.build();
             }

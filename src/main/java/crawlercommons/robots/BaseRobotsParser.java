@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -30,13 +29,13 @@ public abstract class BaseRobotsParser implements Serializable {
      * will be compared to every agent name found in robotNames.
      * 
      * Also note that names are lower-cased before comparison, and that any
-     * robot name you pass shouldn't contain commas or spaces; if the name
-     * has spaces, it will be split into multiple names, each of which will
-     * be compared against agent names in the robots.txt file. An agent name
-     * is considered a match if it's a prefix match on the provided robot name.
-     * For example, if you pass in "Mozilla Crawlerbot-super 1.0", this would match
-     * "crawlerbot" as the agent name, because of splitting on spaces, lower-casing,
-     * and the prefix match rule.
+     * robot name you pass shouldn't contain commas or spaces; if the name has
+     * spaces, it will be split into multiple names, each of which will be
+     * compared against agent names in the robots.txt file. An agent name is
+     * considered a match if it's a prefix match on the provided robot name. For
+     * example, if you pass in "Mozilla Crawlerbot-super 1.0", this would match
+     * "crawlerbot" as the agent name, because of splitting on spaces,
+     * lower-casing, and the prefix match rule.
      * 
      * @param url
      *            URL that content was fetched from (for reporting purposes)

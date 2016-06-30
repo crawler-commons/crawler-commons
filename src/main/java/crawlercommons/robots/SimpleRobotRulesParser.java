@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -43,26 +42,27 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * The class fulfills two tasks. The first one is the parsing of the
  * <code>robots.txt</code> file done in
  * {@link #parseContent(String, byte[], String, String)}. During the parsing
- * process the parser searches for the provided agent name(s). If the parser finds
- * a matching name, the set of rules for this name is parsed and returned as
- * the result. <b>Note</b> that if more than one agent name is given to the parser,
- * it parses the rules for the first matching agent name inside the file and
- * skips all following user agent groups. It doesn't matter which of the other given agent
- * names would match additional rules inside the file. Thus, if more than one
- * agent name is given to the parser, the result can be influenced by the order
- * of rule sets inside the <code>robots.txt</code> file.
+ * process the parser searches for the provided agent name(s). If the parser
+ * finds a matching name, the set of rules for this name is parsed and returned
+ * as the result. <b>Note</b> that if more than one agent name is given to the
+ * parser, it parses the rules for the first matching agent name inside the file
+ * and skips all following user agent groups. It doesn't matter which of the
+ * other given agent names would match additional rules inside the file. Thus,
+ * if more than one agent name is given to the parser, the result can be
+ * influenced by the order of rule sets inside the <code>robots.txt</code> file.
  * </p>
  * 
  * <p>
  * Note that the parser always parses the entire file, even if a matching agent
- * name group has been found, as it needs to collect all of the sitemap directives.
+ * name group has been found, as it needs to collect all of the sitemap
+ * directives.
  * </p>
  * 
  * <p>
- * If no rule set matches any of the provided agent names, the rule set for
- * the <code>'*'</code> agent is returned. If there is no such rule set inside
- * the <code>robots.txt</code> file, a rule set allowing all resource to be
- * crawled is returned.
+ * If no rule set matches any of the provided agent names, the rule set for the
+ * <code>'*'</code> agent is returned. If there is no such rule set inside the
+ * <code>robots.txt</code> file, a rule set allowing all resource to be crawled
+ * is returned.
  * </p>
  * 
  * <p>
@@ -157,9 +157,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          * something else has been found.
          */
         private boolean _finishedAgentFields;
-        
-        // True if we're done adding rules for a matched (not wildcard) agent name.
-        // When this is true, we only consider sitemap directives, so we skip all
+
+        // True if we're done adding rules for a matched (not wildcard) agent
+        // name.
+        // When this is true, we only consider sitemap directives, so we skip
+        // all
         // remaining user agent blocks.
         private boolean _skipAgents;
 
@@ -215,7 +217,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         public void setSkipAgents(boolean skipAgents) {
-        	_skipAgents = skipAgents;
+            _skipAgents = skipAgents;
         }
 
         public void clearRules() {
@@ -375,8 +377,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String, byte[], java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String,
+     * byte[], java.lang.String, java.lang.String)
      */
     @Override
     public BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
@@ -443,7 +449,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         // Break on anything that might be used as a line ending. Since
-        // tokenizer doesn't return empty tokens, a \r\n sequence still 
+        // tokenizer doesn't return empty tokens, a \r\n sequence still
         // works since it looks like an empty string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
         ParseState parseState = new ParseState(url, robotNames.toLowerCase(Locale.getDefault()));
@@ -475,42 +481,43 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             RobotToken token = tokenize(line);
             switch (token.getDirective()) {
                 case USER_AGENT:
-                	handleUserAgent(parseState, token);
+                handleUserAgent(parseState, token);
                     break;
 
                 case DISALLOW:
-                	handleDisallow(parseState, token);
+                handleDisallow(parseState, token);
                     break;
 
                 case ALLOW:
-                	handleAllow(parseState, token);
+                handleAllow(parseState, token);
                     break;
 
                 case CRAWL_DELAY:
-                	handleCrawlDelay(parseState, token);
+                handleCrawlDelay(parseState, token);
                     break;
 
                 case SITEMAP:
-                	handleSitemap(parseState, token);
+                handleSitemap(parseState, token);
                     break;
 
                 case HTTP:
-                	handleHttp(parseState, token);
+                handleHttp(parseState, token);
                     break;
 
                 case UNKNOWN:
-                	reportWarning("Unknown directive in robots.txt file: " + line, url);
-                	parseState.setFinishedAgentFields(true);
+                reportWarning("Unknown directive in robots.txt file: " + line, url);
+                parseState.setFinishedAgentFields(true);
                     break;
 
                 case MISSING:
-                	reportWarning(String.format(Locale.getDefault(), "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
-                	parseState.setFinishedAgentFields(true);
+                reportWarning(String.format(Locale.getDefault(), "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+                parseState.setFinishedAgentFields(true);
                     break;
 
                 default:
                     // All others we just ignore
-                    // TODO KKr - which of these should be setting finishedAgentFields to true?
+                    // TODO KKr - which of these should be setting
+                    // finishedAgentFields to true?
                     // TODO KKr - handle no-index
                     // TODO KKr - handle request-rate and visit-time
                     break;
@@ -553,9 +560,9 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private void handleUserAgent(ParseState state, RobotToken token) {
         if (state.isMatchedRealName()) {
             if (state.isFinishedAgentFields()) {
-            	state.setSkipAgents(true);
+                state.setSkipAgents(true);
             }
-            
+
             return;
         }
 
@@ -572,7 +579,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         for (int count = 0; count < targetNames.length; count++) {
             // Extract possible match names from our target agent name, since it
-            // appears to be expected that "Mozilla botname 1.0" matches "botname"
+            // appears to be expected that "Mozilla botname 1.0" matches
+            // "botname"
             String[] targetNameSplits = targetNames[count].trim().split(" ");
 
             // TODO KKr - catch case of multiple names, log as non-standard.
@@ -592,7 +600,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                             state.setMatchedRealName(true);
                             state.setAddingRules(true);
                             // In case we previously hit a wildcard rule match
-                            state.clearRules(); 
+                            state.clearRules();
                             break;
                         }
                     }
@@ -610,10 +618,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleDisallow(ParseState state, RobotToken token) {
-    	if (state.isSkipAgents()) {
-    		return;
-    	}
-    	
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
@@ -645,10 +653,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleAllow(ParseState state, RobotToken token) {
-    	if (state.isSkipAgents()) {
-    		return;
-    	}
-    	
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
@@ -680,10 +688,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleCrawlDelay(ParseState state, RobotToken token) {
-    	if (state.isSkipAgents()) {
-    		return;
-    	}
-    	
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {

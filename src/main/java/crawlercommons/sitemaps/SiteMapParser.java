@@ -1,13 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -107,8 +106,10 @@ public class SiteMapParser {
      * This method is a convenience method for a user who has a sitemap URL and
      * wants a "Keep it simple" way to parse it.
      * 
-     * @param onlineSitemapUrl URL of the online sitemap
-     * @return Extracted SiteMap/SiteMapIndex or null if the onlineSitemapUrl is null
+     * @param onlineSitemapUrl
+     *            URL of the online sitemap
+     * @return Extracted SiteMap/SiteMapIndex or null if the onlineSitemapUrl is
+     *         null
      */
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
         if (onlineSitemapUrl == null) {
@@ -124,9 +125,11 @@ public class SiteMapParser {
      * unchanged. Note that contentType is assumed to be correct; in general it
      * is more robust to use the method that doesn't take a contentType, but
      * instead detects this using Tika.
-	 *
-     * @param contentType MIME type of content
-     * @param content raw bytes of sitemap file
+     * 
+     * @param contentType
+     *            MIME type of content
+     * @param content
+     *            raw bytes of sitemap file
      * @param sitemap
      * @return Extracted SiteMap/SiteMapIndex
      * @throws UnknownFormatException
@@ -141,8 +144,10 @@ public class SiteMapParser {
     /**
      * Parse a sitemap, given the content bytes and the URL.
      * 
-     * @param content raw bytes of sitemap file
-     * @param url URL to sitemap file
+     * @param content
+     *            raw bytes of sitemap file
+     * @param url
+     *            URL to sitemap file
      * @return Extracted SiteMap/SiteMapIndex
      * @throws UnknownFormatException
      * @throws IOException
@@ -158,13 +163,16 @@ public class SiteMapParser {
 
     /**
      * Parse a sitemap, given the MIME type, the content bytes, and the URL.
-     * Note that contentType is assumed to be correct; in general it
-     * is more robust to use the method that doesn't take a contentType, but
-     * instead detects this using Tika.
+     * Note that contentType is assumed to be correct; in general it is more
+     * robust to use the method that doesn't take a contentType, but instead
+     * detects this using Tika.
      * 
-     * @param contentType MIME type of content
-     * @param content raw bytes of sitemap file
-     * @param url URL to sitemap file
+     * @param contentType
+     *            MIME type of content
+     * @param content
+     *            raw bytes of sitemap file
+     * @param url
+     *            URL to sitemap file
      * @return Extracted SiteMap/SiteMapIndex
      * @throws UnknownFormatException
      * @throws IOException
@@ -424,11 +432,14 @@ public class SiteMapParser {
             sitemap.setProcessed(true);
             return sitemap;
         } else {
-            // See if it is a RSS feed by looking for a "channel" element. This avoids the issue
-        	// of having the outer tag named <rdf:RDF> that was causing this code to fail. Inside of
-        	// the <rss> or <rdf> tag is a <channel> tag, so we can use that.
-        	// See https://github.com/crawler-commons/crawler-commons/issues/87
-        	// and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
+            // See if it is a RSS feed by looking for a "channel" element. This
+            // avoids the issue
+            // of having the outer tag named <rdf:RDF> that was causing this
+            // code to fail. Inside of
+            // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
+            // See https://github.com/crawler-commons/crawler-commons/issues/87
+            // and also RSS 1.0 specification
+            // http://web.resource.org/rss/1.0/spec
             list = doc.getElementsByTagName("channel");
             if (list.getLength() > 0) {
                 parseRSS(sitemap, doc);

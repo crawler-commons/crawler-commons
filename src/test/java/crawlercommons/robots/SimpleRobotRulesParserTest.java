@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -778,18 +777,9 @@ public class SimpleRobotRulesParserTest {
     // https://github.com/crawler-commons/crawler-commons/issues/112
     @Test
     public void testSitemapAtEndOfFile() throws Exception {
-        final String simpleRobotsTxt = "User-agent: a" + CRLF
-                + "Disallow: /content/dam/" + CRLF
-                + CRLF
-                + "User-agent: b" + CRLF
-                + "Disallow: /content/dam/" + CRLF
-                + CRLF
-                + "User-agent: c" + CRLF
-                + "Disallow: /content/dam/" + CRLF
-                + CRLF
-                + CRLF
-                + "Sitemap: https://wwwfoocom/sitemapxml";
-        		
+        final String simpleRobotsTxt = "User-agent: a" + CRLF + "Disallow: /content/dam/" + CRLF + CRLF + "User-agent: b" + CRLF + "Disallow: /content/dam/" + CRLF + CRLF + "User-agent: c" + CRLF
+                        + "Disallow: /content/dam/" + CRLF + CRLF + CRLF + "Sitemap: https://wwwfoocom/sitemapxml";
+
         BaseRobotRules rules = createRobotRules("a", simpleRobotsTxt.getBytes("UTF-8"));
         assertEquals(1, rules.getSitemaps().size());
         assertEquals("https://wwwfoocom/sitemapxml", rules.getSitemaps().get(0));

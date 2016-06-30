@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -24,9 +23,10 @@ import java.util.Arrays;
 import org.apache.tika.metadata.Metadata;
 
 /**
- * @deprecated As of release 0.6. We recommend directly using Apache HttpClient, 
- * async-http-client, or any other robust, industrial-strength HTTP clients.
- *
+ * @deprecated As of release 0.6. We recommend directly using Apache HttpClient,
+ *             async-http-client, or any other robust, industrial-strength HTTP
+ *             clients.
+ * 
  */
 @Deprecated
 public class FetchedResult {
@@ -182,9 +182,9 @@ public class FetchedResult {
         report.append("    ContentType   : " + getContentType() + "\n");
         report.append("    ContentLength : " + getContentLength() + "\n");
         report.append("    Content       : " + new String(getContent(), Charset.defaultCharset()) + "\n"); // byte
-                                                                                 // array
-                                                                                 // to
-                                                                                 // string
+        // array
+        // to
+        // string
         report.append("*********************\n");
         report.append("End of Report:\n");
         return report.toString();
