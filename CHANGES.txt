@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT
+- Issue 107: Rename package crawlercommons.url (jnioche)
 - Issue 112: Sitemap url is not extracted if user agent matches earlier in file (srwilson, kkrugler)
 - Issue 92: Deprecate HTTP fetcher support (kkrugler)
 - Issue 106: Added URLFilter interface + BasicURLNormalizer (jnioche)

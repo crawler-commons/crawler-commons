@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.url;
+package crawlercommons.domains;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,6 +25,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 
 import org.junit.Test;
+
+import crawlercommons.domains.PaidLevelDomain;
 
 public class PaidLevelDomainTest {
 
