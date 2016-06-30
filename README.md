@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/crawler-commons/crawler-commons.svg?branch=master)](https://travis-ci.org/crawler-commons/crawler-commons)
+
 # Overview
 
 crawler-commons is a set of reusable Java components that implement functionality common to any web crawler. These components benefit from collaboration among various existing web crawler projects, and reduce duplication of effort.
