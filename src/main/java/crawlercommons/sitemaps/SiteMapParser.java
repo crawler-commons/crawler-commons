@@ -16,6 +16,9 @@
 
 package crawlercommons.sitemaps;
 
+import static org.apache.tika.mime.MediaType.APPLICATION_XML;
+import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +28,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,16 +43,10 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
-
-import static org.apache.tika.mime.MediaType.APPLICATION_XML;
-import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
@@ -82,12 +80,19 @@ public class SiteMapParser {
      */
     private boolean strict = true;
 
-    public SiteMapParser() {
+    private boolean allowPartial = false;
 
+    public SiteMapParser() {
+        this(true, false);
     }
 
     public SiteMapParser(boolean strict) {
+        this(strict, false);
+    }
+
+    public SiteMapParser(boolean strict, boolean allowPartial) {
         this.strict = strict;
+        this.allowPartial = allowPartial;
     }
 
     /**
@@ -289,316 +294,30 @@ public class SiteMapParser {
      */
     private AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
-        Document doc = null;
-
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        AbstractSiteMapSAXHandler handler = new AbstractSiteMapSAXHandler(sitemapUrl, strict);
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            doc = dbf.newDocumentBuilder().parse(is);
-        } catch (Exception e) {
-            LOG.debug(e.toString());
-            throw new UnknownFormatException("Error parsing XML for: " + sitemapUrl);
-        }
-
-        // See if this is a sitemap index
-        NodeList nodeList = doc.getElementsByTagName("sitemapindex");
-        if (nodeList.getLength() > 0) {
-            nodeList = doc.getElementsByTagName("sitemap");
-            return parseSitemapIndex(sitemapUrl, nodeList);
-        } else if (doc.getElementsByTagName("urlset").getLength() > 0) {
-            // This is a regular Sitemap
-            return parseXmlSitemap(sitemapUrl, doc);
-        } else if (doc.getElementsByTagName("link").getLength() > 0) {
-            // Could be RSS or Atom
-            return parseSyndicationFormat(sitemapUrl, doc);
-        }
-
-        throw new UnknownFormatException("Unknown XML format for: " + sitemapUrl);
-    }
-
-    /**
-     * Parse XML that contains a valid Sitemap. Example of a Sitemap: <?xml
-     * version="1.0" encoding="UTF-8"?> <urlset
-     * xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> <url>
-     * <loc>http://www.example.com/</loc> <lastmod>2005-01-01</lastmod>
-     * <changefreq>monthly</changefreq> <priority>0.8</priority> </url> <url>
-     * <loc
-     * >http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
-     * <changefreq>weekly</changefreq> </url> </urlset>
-     * 
-     * @param doc
-     */
-    private SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
-
-        SiteMap sitemap = new SiteMap(sitemapUrl);
-        sitemap.setType(SitemapType.XML);
-
-        NodeList list = doc.getElementsByTagName("url");
-
-        // Loop through the <url>s
-        for (int i = 0; i < list.getLength(); i++) {
-
-            Node n = list.item(i);
-            if (n.getNodeType() == Node.ELEMENT_NODE) {
-                Element elem = (Element) n;
-                String lastMod = getElementValue(elem, "lastmod");
-                String changeFreq = getElementValue(elem, "changefreq");
-                String priority = getElementValue(elem, "priority");
-                String loc = getElementValue(elem, "loc");
-
-                addUrlIntoSitemap(loc, sitemap, lastMod, changeFreq, priority, i);
-            }
-        }
-
-        sitemap.setProcessed(true);
-        return sitemap;
-    }
-
-    /**
-     * Parse XML that contains a Sitemap Index. Example Sitemap Index:
-     * <p/>
-     * <?xml version="1.0" encoding="UTF-8"?> <sitemapindex
-     * xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> <sitemap>
-     * <loc>http://www.example.com/sitemap1.xml.gz</loc>
-     * <lastmod>2004-10-01T18:23:17+00:00</lastmod> </sitemap> <sitemap>
-     * <loc>http://www.example.com/sitemap2.xml.gz</loc>
-     * <lastmod>2005-01-01</lastmod> </sitemap> </sitemapindex>
-     * 
-     * @param url
-     *            - URL of Sitemap Index
-     * @param nodeList
-     */
-    private SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
-
-        LOG.debug("Parsing Sitemap Index");
-
-        SiteMapIndex sitemapIndex = new SiteMapIndex(url);
-        sitemapIndex.setType(SitemapType.INDEX);
-
-        // Loop through the <sitemap>s
-        for (int i = 0; i < nodeList.getLength() && i < MAX_URLS; i++) {
-
-            Node firstNode = nodeList.item(i);
-
-            if (firstNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element elem = (Element) firstNode;
-                String loc = getElementValue(elem, "loc");
-
-                // try the text content when no loc element
-                // has been specified
-                if (loc == null) {
-                    loc = elem.getTextContent().trim();
-                }
-
-                try {
-                    URL sitemapUrl = new URL(loc);
-                    String lastmod = getElementValue(elem, "lastmod");
-                    Date lastModified = SiteMap.convertToDate(lastmod);
-
-                    // Right now we are not worried about sitemapUrls that point
-                    // to different websites.
-
-                    SiteMap s = new SiteMap(sitemapUrl, lastModified);
-                    sitemapIndex.addSitemap(s);
-                    LOG.debug("  {}. {}", (i + 1), s);
-                } catch (MalformedURLException e) {
-                    LOG.trace("Don't create an entry with a bad URL", e);
-                    LOG.debug("Bad url: [{}]", loc);
-                }
-            }
-        }
-        sitemapIndex.setProcessed(true);
-        return sitemapIndex;
-    }
-
-    /**
-     * Parse the XML document, looking for a <b>feed</b> element to determine if
-     * it's an <b>Atom doc</b> <b>rss</b> to determine if it's an <b>RSS
-     * doc</b>.
-     * 
-     * @param sitemapUrl
-     * @param doc
-     *            - XML document to parse
-     * @throws UnknownFormatException
-     *             if XML does not appear to be Atom or RSS
-     */
-    private SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
-
-        SiteMap sitemap = new SiteMap(sitemapUrl);
-
-        // See if this is an Atom feed by looking for "feed" element
-        NodeList list = doc.getElementsByTagName("feed");
-        if (list.getLength() > 0) {
-            parseAtom(sitemap, (Element) list.item(0), doc);
-            sitemap.setProcessed(true);
-            return sitemap;
-        } else {
-            // See if it is a RSS feed by looking for a "channel" element. This
-            // avoids the issue
-            // of having the outer tag named <rdf:RDF> that was causing this
-            // code to fail. Inside of
-            // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
-            // See https://github.com/crawler-commons/crawler-commons/issues/87
-            // and also RSS 1.0 specification
-            // http://web.resource.org/rss/1.0/spec
-            list = doc.getElementsByTagName("channel");
-            if (list.getLength() > 0) {
-                parseRSS(sitemap, doc);
+            SAXParser saxParser = factory.newSAXParser();
+            saxParser.parse(is, handler);
+            return handler.getSiteMap();
+        } catch (IOException e) {
+            UnknownFormatException ufe = new UnknownFormatException("Failed to parse " + sitemapUrl);
+            ufe.initCause(e);
+            throw ufe;
+        } catch (SAXException e) {
+            if (allowPartial) {
+                LOG.warn("Processed broken/partial sitemap for '" + sitemapUrl + "'");
+                AbstractSiteMap sitemap = handler.getSiteMap();
                 sitemap.setProcessed(true);
                 return sitemap;
             } else {
-                throw new UnknownFormatException("Unknown syndication format at " + sitemapUrl);
+                UnknownFormatException ufe = new UnknownFormatException("Failed to parse " + sitemapUrl);
+                ufe.initCause(e);
+                throw ufe;
             }
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException(e);
         }
-    }
-
-    /**
-     * Parse the XML document which is assumed to be in Atom format. Atom 1.0
-     * example:
-     * <p/>
-     * <?xml version="1.0" encoding="utf-8"?> <feed
-     * xmlns="http://www.w3.org/2005/Atom">
-     * <p/>
-     * <title>Example Feed</title> <subtitle>A subtitle.</subtitle> <link
-     * href="http://example.org/feed/" rel="self"/> <link
-     * href="http://example.org/"/> <modified>2003-12-13T18:30:02Z</modified>
-     * <author> <name>John Doe</name> <email>johndoe@example.com</email>
-     * </author> <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
-     * <p/>
-     * <entry> <title>Atom-Powered Robots Run Amok</title> <link
-     * href="http://example.org/2003/12/13/atom03"/>
-     * <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
-     * <updated>2003-12-13T18:30:02Z</updated> <summary>Some text.</summary>
-     * </entry>
-     * <p/>
-     * </feed>
-     * 
-     * @param elem
-     * @param doc
-     */
-    private void parseAtom(SiteMap sitemap, Element elem, Document doc) {
-
-        // Grab items from <feed><entry><link href="URL" /></entry></feed>
-        // Use lastmod date from <feed><modified>DATE</modified></feed>
-
-        LOG.debug("Parsing Atom XML");
-
-        sitemap.setType(SitemapType.ATOM);
-
-        String lastMod = getElementValue(elem, "modified");
-        LOG.debug("lastMod = {}", lastMod);
-
-        NodeList list = doc.getElementsByTagName("entry");
-
-        // Loop through the <entry>s
-        for (int i = 0; i < list.getLength() && i < MAX_URLS; i++) {
-
-            Node n = list.item(i);
-            if (n.getNodeType() == Node.ELEMENT_NODE) {
-                elem = (Element) n;
-                String href = getElementAttributeValue(elem, "link", "href");
-
-                addUrlIntoSitemap(href, sitemap, lastMod, null, null, i);
-            }
-        }
-    }
-
-    /**
-     * Parse XML document which is assumed to be in RSS format. RSS 2.0 example:
-     * <p/>
-     * <?xml version="1.0"?> <rss version="2.0"> <channel> <title>Lift Off
-     * News</title> <link>http://liftoff.msfc.nasa.gov/</link>
-     * <description>Liftoff to Space Exploration.</description>
-     * <language>en-us</language> <pubDate>Tue, 10 Jun 2003 04:00:00
-     * GMT</pubDate> <lastBuildDate>Tue, 10 Jun 2003 09:41:01
-     * GMT</lastBuildDate> <docs>http://blogs.law.harvard.edu/tech/rss</docs>
-     * <generator>Weblog Editor 2.0</generator>
-     * <managingEditor>editor@example.com</managingEditor>
-     * <webMaster>webmaster@example.com</webMaster> <ttl>5</ttl>
-     * <p/>
-     * <item> <title>Star City</title>
-     * <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
-     * <description>How do Americans get ready to work with Russians aboard the
-     * International Space Station? They take a crash course in culture,
-     * language and protocol at Russia's Star City.</description> <pubDate>Tue,
-     * 03 Jun 2003 09:39:21 GMT</pubDate>
-     * <guid>http://liftoff.msfc.nasa.gov/2003/06/03.html#item573</guid> </item>
-     * <p/>
-     * <item> <title>Space Exploration</title>
-     * <link>http://liftoff.msfc.nasa.gov/</link> <description>Sky watchers in
-     * Europe, Asia, and parts of Alaska and Canada will experience a partial
-     * eclipse of the Sun on Saturday, May 31.</description> <pubDate>Fri, 30
-     * May 2003 11:06:42 GMT</pubDate>
-     * <guid>http://liftoff.msfc.nasa.gov/2003/05/30.html#item572</guid> </item>
-     * <p/>
-     * </channel> </rss>
-     * 
-     * @param sitemap
-     * @param doc
-     */
-    private void parseRSS(SiteMap sitemap, Document doc) {
-
-        // Grab items from <item><link>URL</link></item>
-        // and last modified date from <pubDate>DATE</pubDate>
-
-        LOG.debug("Parsing RSS doc");
-        sitemap.setType(SitemapType.RSS);
-        NodeList list = doc.getElementsByTagName("channel");
-        Element elem = (Element) list.item(0);
-
-        // Treat publication date as last mod (Tue, 10 Jun 2003 04:00:00 GMT)
-        String lastMod = getElementValue(elem, "pubDate");
-        LOG.debug("lastMod = ", lastMod);
-
-        list = doc.getElementsByTagName("item");
-        // Loop through the <item>s
-        for (int i = 0; i < list.getLength() && i < MAX_URLS; i++) {
-
-            Node n = list.item(i);
-            if (n.getNodeType() == Node.ELEMENT_NODE) {
-                elem = (Element) n;
-                String link = getElementValue(elem, "link");
-
-                addUrlIntoSitemap(link, sitemap, lastMod, null, null, i);
-            }
-        }
-    }
-
-    /**
-     * Get the element's textual content.
-     * 
-     * @param elem
-     * @param elementName
-     * @return
-     */
-    private String getElementValue(Element elem, String elementName) {
-
-        NodeList list = elem.getElementsByTagName(elementName);
-        if (list == null)
-            return null;
-        Element e = (Element) list.item(0);
-        if (e != null) {
-            return e.getTextContent();
-        }
-        return null;
-    }
-
-    /**
-     * Get the element's attribute value.
-     * 
-     * @param elem
-     * @param elementName
-     * @param attributeName
-     * @return
-     */
-    private String getElementAttributeValue(Element elem, String elementName, String attributeName) {
-
-        NodeList list = elem.getElementsByTagName(elementName);
-        Element e = (Element) list.item(0);
-        if (e != null) {
-            return e.getAttribute(attributeName);
-        }
-
-        return null;
     }
 
     /**
@@ -630,7 +349,7 @@ public class SiteMapParser {
      * @param testUrl
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
-    private boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
+    protected static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         boolean ret = false;
 
         // Don't try a comparison if the URL is too short to match
