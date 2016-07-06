@@ -134,6 +134,11 @@ public class SiteMapParserTest {
 
         SiteMap sm = (SiteMap) asm;
         assertEquals(5, sm.getSiteMapUrls().size());
+
+        SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
+        for (int i = 0; i < found.length; i++) {
+            assertEquals(sitemapURLs[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+        }
     }
 
     @Test
@@ -149,6 +154,10 @@ public class SiteMapParserTest {
             assertEquals(true, asm instanceof SiteMap);
             SiteMap sm = (SiteMap) asm;
             assertEquals(5, sm.getSiteMapUrls().size());
+            SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
+            for (int i = 0; i < found.length; i++) {
+                assertEquals(sitemapURLs[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+            }
         }
     }
 
@@ -233,6 +242,11 @@ public class SiteMapParserTest {
 
         SiteMap sm = (SiteMap) asm;
         assertEquals(5, sm.getSiteMapUrls().size());
+
+        SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
+        for (int i = 0; i < found.length; i++) {
+            assertEquals(sitemapURLs[i], found[i].getUrl().toExternalForm());
+        }
     }
 
     @Test
@@ -389,15 +403,20 @@ public class SiteMapParserTest {
      */
     private byte[] getXMLSitemapAsBytes() throws UnsupportedEncodingException {
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
-                        .append("  <loc>http://www.example.com/</loc>").append("  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
-                        .append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>").append("  <changefreq>weekly</changefreq>")
-                        .append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand</loc>").append("  <lastmod>2004-12-23</lastmod>")
-                        .append("  <changefreq>weekly</changefreq>").append("</url>").append("<url>").append("  <loc>http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland</loc>")
-                        .append("  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>").append("<url>")
-                        .append("  <loc><url><![CDATA[http://www.example.com/catalog?item=83&amp;desc=vacation_usa]]></url></loc>").append("  <lastmod>2004-11-23</lastmod>").append("</url>")
-                        .append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+        scontent.append("<url>  <loc>").append(sitemapURLs[0]).append("</loc>  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
+                        .append("</url>");
+        scontent.append("<url>  <loc>").append(sitemapURLs[1]).append("</loc>  <changefreq>weekly</changefreq>").append("</url>");
+        scontent.append("<url>  <loc>").append(sitemapURLs[2]).append("</loc>  <lastmod>2004-12-23</lastmod>").append("  <changefreq>weekly</changefreq>").append("</url>");
+        scontent.append("<url>  <loc>").append(sitemapURLs[3]).append("</loc>  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>");
+        scontent.append("<url>  <loc><url><![CDATA[").append(sitemapURLs[4]).append("]]></url></loc>  <lastmod>2004-11-23</lastmod>").append("</url>");
+        scontent.append("</urlset>");
 
         return scontent.toString().getBytes("UTF-8");
     }
+
+    private static String[] sitemapURLs = new String[] { "http://www.example.com/", "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii",
+                    "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland",
+                    "http://www.example.com/catalog?item=83&desc=vacation_usa" };
+
 }
