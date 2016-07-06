@@ -23,14 +23,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 
-import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapURL;
-import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 /**
  * Parse XML that contains a valid Sitemap. Example of a Sitemap: <?xml
@@ -46,21 +45,17 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 class XMLHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
-    private URL loc;
+    private StringBuilder loc;
     private String lastMod;
     private String changeFreq;
     private String priority;
-    boolean valid;
     private int i = 0;
 
     XMLHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.XML);
-    }
-
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        LOG.debug("here we go");
+        loc = new StringBuilder();
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
@@ -75,13 +70,7 @@ class XMLHandler extends DelegatorHandler {
         String qName = super.currentElement();
         String value = String.valueOf(ch, start, length);
         if ("loc".equals(qName) || "url".equals(qName)) {
-            try {
-                loc = new URL(value);
-                valid = urlIsValid(sitemap.getBaseUrl(), value);
-            } catch (MalformedURLException e) {
-                LOG.debug("Bad url: [{}]", value);
-                LOG.trace("Can't create an entry with a bad URL", e);
-            }
+            loc.append(value);
         } else if ("changefreq".equals(qName)) {
             changeFreq = value;
         } else if ("lastmod".equals(qName)) {
@@ -96,20 +85,28 @@ class XMLHandler extends DelegatorHandler {
     }
 
     private void maybeAddSiteMapUrl() {
-        if (valid || !isStrict()) {
-            if (loc == null) {
-                LOG.debug("Missing url");
-                LOG.trace("Can't create an entry with a missing URL");
-            } else {
-                SiteMapURL sUrl = new SiteMapURL(loc.toString(), lastMod, changeFreq, priority, valid);
+        String value = loc.toString().trim();
+        try {
+            // check that the value is a valid URL
+            URL locURL = new URL(value);
+            boolean valid = urlIsValid(sitemap.getBaseUrl(), value);
+            if (valid || !isStrict()) {
+                SiteMapURL sUrl = new SiteMapURL(locURL, valid);
+                sUrl.setLastModified(lastMod);
+                sUrl.setChangeFrequency(changeFreq);
+                sUrl.setPriority(priority);
                 sitemap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", (++i), sUrl);
             }
+        } catch (MalformedURLException e) {
+            LOG.debug("Bad url: [{}]", value);
+            LOG.trace("Can't create an entry with a bad URL", e);
+        } finally {
+            loc = new StringBuilder();
+            lastMod = null;
+            changeFreq = null;
+            priority = null;
         }
-        loc = null;
-        lastMod = null;
-        changeFreq = null;
-        priority = null;
     }
 
     public void error(SAXParseException e) throws SAXException {
