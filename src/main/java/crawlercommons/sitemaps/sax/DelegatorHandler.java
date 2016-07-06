@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.sitemaps;
+package crawlercommons.sitemaps.sax;
 
 import java.net.URL;
 import java.util.LinkedList;
@@ -24,24 +24,27 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.UnknownFormatException;
+
 /**
  * Provides a base SAX handler for parsing of XML documents representing
  * sub-classes of AbstractSiteMap.
  */
-public class AbstractSiteMapSAXHandler extends DefaultHandler {
+public class DelegatorHandler extends DefaultHandler {
 
     private LinkedList<String> elementStack;
-    private AbstractSiteMapSAXHandler delegate;
+    private DelegatorHandler delegate;
     private URL url;
     private boolean strict;
     private UnknownFormatException exception;
 
-    protected AbstractSiteMapSAXHandler(LinkedList<String> elementStack, boolean strict) {
+    protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
         this.strict = strict;
     }
 
-    public AbstractSiteMapSAXHandler(URL url, boolean strict) {
+    public DelegatorHandler(URL url, boolean strict) {
         this.elementStack = new LinkedList<String>();
         this.url = url;
         this.strict = strict;
@@ -74,11 +77,11 @@ public class AbstractSiteMapSAXHandler extends DefaultHandler {
     private void startRootElement(String uri, String localName, String qName, Attributes attributes) {
         elementStack.push(qName);
         if ("sitemapindex".equals(qName)) {
-            delegate = new SiteMapIndexSAXHandler(url, elementStack, strict);
+            delegate = new XMLIndexHandler(url, elementStack, strict);
         } else if ("urlset".equals(qName)) {
-            delegate = new SiteMapSAXHandler(url, elementStack, strict);
+            delegate = new XMLHandler(url, elementStack, strict);
         } else if ("feed".equals(qName)) {
-            delegate = new SiteMapAtomSAXHandler(url, elementStack, strict);
+            delegate = new AtomHandler(url, elementStack, strict);
         }
         // See if it is a RSS feed by looking for a "channel" element. This
         // avoids the issue
@@ -88,13 +91,14 @@ public class AbstractSiteMapSAXHandler extends DefaultHandler {
         // See https://github.com/crawler-commons/crawler-commons/issues/87
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
         else if ("channel".equals(qName)) {
-            delegate = new SiteMapRSSSAXHandler(url, elementStack, strict);
+            delegate = new RSSHandler(url, elementStack, strict);
         }
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (delegate != null)
+        if (delegate != null) {
             delegate.endElement(uri, localName, qName);
+        }
         elementStack.pop();
     }
 
@@ -113,6 +117,8 @@ public class AbstractSiteMapSAXHandler extends DefaultHandler {
     }
 
     public AbstractSiteMap getSiteMap() {
+        if (delegate == null)
+            return null;
         return delegate.getSiteMap();
     }
 

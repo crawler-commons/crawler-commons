@@ -47,6 +47,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+import crawlercommons.sitemaps.sax.DelegatorHandler;
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
@@ -295,7 +296,7 @@ public class SiteMapParser {
     private AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        AbstractSiteMapSAXHandler handler = new AbstractSiteMapSAXHandler(sitemapUrl, strict);
+        DelegatorHandler handler = new DelegatorHandler(sitemapUrl, strict);
         try {
             SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(is, handler);
@@ -349,7 +350,7 @@ public class SiteMapParser {
      * @param testUrl
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
-    protected static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
+    public static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         boolean ret = false;
 
         // Don't try a comparison if the URL is too short to match

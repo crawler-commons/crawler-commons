@@ -88,7 +88,7 @@ public abstract class AbstractSiteMap {
      * @param type
      *            the Sitemap type to set
      */
-    void setType(SitemapType type) {
+    public void setType(SitemapType type) {
         this.type = type;
     }
 

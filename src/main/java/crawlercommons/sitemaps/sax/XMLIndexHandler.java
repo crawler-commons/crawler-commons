@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.sitemaps;
+package crawlercommons.sitemaps.sax;
 
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
@@ -27,6 +27,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.SiteMap;
+import crawlercommons.sitemaps.SiteMapIndex;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 /**
@@ -40,14 +43,14 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
  * <lastmod>2005-01-01</lastmod> </sitemap> </sitemapindex>
  * 
  */
-class SiteMapIndexSAXHandler extends AbstractSiteMapSAXHandler {
+class XMLIndexHandler extends DelegatorHandler {
 
     private SiteMapIndex sitemap;
     private URL loc;
     private Date lastMod;
     private int i = 0;
 
-    SiteMapIndexSAXHandler(URL url, LinkedList<String> elementStack, boolean strict) {
+    XMLIndexHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
         sitemap = new SiteMapIndex(url);
         sitemap.setType(SitemapType.INDEX);
@@ -66,7 +69,7 @@ class SiteMapIndexSAXHandler extends AbstractSiteMapSAXHandler {
 
     public void characters(char[] ch, int start, int length) throws SAXException {
         String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length);
+        String value = String.valueOf(ch, start, length).trim();
         if ("loc".equals(localName)) {
             try {
                 loc = new URL(value);
@@ -76,7 +79,16 @@ class SiteMapIndexSAXHandler extends AbstractSiteMapSAXHandler {
             }
         } else if ("lastmod".equals(localName)) {
             lastMod = SiteMap.convertToDate(value);
-            ;
+        }
+        // try the text content when no loc element
+        // has been specified
+        else if (loc == null) {
+            try {
+                loc = new URL(value);
+            } catch (MalformedURLException e) {
+                LOG.trace("Don't create an entry with a bad URL", e);
+                LOG.debug("Bad url: [{}]", loc);
+            }
         }
     }
 

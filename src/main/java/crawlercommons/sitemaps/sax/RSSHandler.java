@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.sitemaps;
+package crawlercommons.sitemaps.sax;
 
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
@@ -27,6 +27,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.SiteMap;
+import crawlercommons.sitemaps.SiteMapURL;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 /**
@@ -58,7 +61,7 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
  * 
  * </channel> </rss>
  */
-class SiteMapRSSSAXHandler extends AbstractSiteMapSAXHandler {
+class RSSHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
     private URL loc;
@@ -66,7 +69,7 @@ class SiteMapRSSSAXHandler extends AbstractSiteMapSAXHandler {
     boolean valid;
     private int i = 0;
 
-    SiteMapRSSSAXHandler(URL url, LinkedList<String> elementStack, boolean strict) {
+    RSSHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.RSS);
@@ -75,8 +78,7 @@ class SiteMapRSSSAXHandler extends AbstractSiteMapSAXHandler {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * crawlercommons.sitemaps.AbstractSiteMapSAXHandler#startElement(java.lang
+     * @see crawlercommons.sitemaps.sax.DelegatorHandler#startElement(java.lang
      * .String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
     @Override
@@ -86,8 +88,7 @@ class SiteMapRSSSAXHandler extends AbstractSiteMapSAXHandler {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * crawlercommons.sitemaps.AbstractSiteMapSAXHandler#endElement(java.lang
+     * @see crawlercommons.sitemaps.sax.DelegatorHandler#endElement(java.lang
      * .String, java.lang.String, java.lang.String)
      */
     @Override

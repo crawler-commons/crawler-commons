@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.sitemaps;
+package crawlercommons.sitemaps.sax;
 
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
@@ -27,6 +27,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.SiteMap;
+import crawlercommons.sitemaps.SiteMapURL;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 /**
@@ -40,7 +43,7 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
  * 
  * @author mdeboer
  */
-class SiteMapSAXHandler extends AbstractSiteMapSAXHandler {
+class XMLHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
     private URL loc;
@@ -50,13 +53,14 @@ class SiteMapSAXHandler extends AbstractSiteMapSAXHandler {
     boolean valid;
     private int i = 0;
 
-    SiteMapSAXHandler(URL url, LinkedList<String> elementStack, boolean strict) {
+    XMLHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.XML);
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        LOG.debug("here we go");
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
