@@ -172,10 +172,25 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testMissingLocSitemapIndexFile() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        File smFile = new File("src/test/resources/sitemaps/sitemap.index.xml");
+        InputStream is = new FileInputStream(smFile);
+        byte[] content = IOUtils.toByteArray(is);
+
+        URL url = new URL("http://www.example.com/sitemap.index.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        SiteMapIndex sm = (SiteMapIndex) asm;
+        assertEquals(15, sm.getSitemaps().size());
+    }
+
+    @Test
     public void testSitemapGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/gzip";
-        File gzSitemapFile = new File("src/test/resources/xmlSitemap.gz");
+        File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
 
@@ -190,7 +205,7 @@ public class SiteMapParserTest {
     @Test
     public void testSitemapGZMediaTypes() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
-        File gzSitemapFile = new File("src/test/resources/xmlSitemap.gz");
+        File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
 
