@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Crawler-Commons
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Single rule that maps from a path prefix to an allow flag.
      */
-    protected class RobotRule implements Comparable<RobotRule>, Serializable {
+    public static class RobotRule implements Comparable<RobotRule>, Serializable {
         String _prefix;
         boolean _allow;
 
@@ -65,7 +65,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -79,7 +79,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -275,7 +275,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     /**
      * Is our ruleset set up to allow all access?
-     * 
+     *
      * @return true if all URLs are allowed.
      */
     @Override
@@ -285,7 +285,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     /**
      * Is our ruleset set up to disallow all access?
-     * 
+     *
      * @return true if no URLs are allowed.
      */
     @Override
