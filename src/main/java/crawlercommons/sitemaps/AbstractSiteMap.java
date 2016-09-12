@@ -46,9 +46,8 @@ public abstract class AbstractSiteMap {
     };
 
     private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
-
         protected DateFormat initialValue() {
-            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
+            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.getDefault());
             result.setTimeZone(TimeZone.getTimeZone("UTC"));
             return result;
         }
@@ -149,31 +148,36 @@ public abstract class AbstractSiteMap {
      */
     public static Date convertToDate(String date) {
 
-        if (date != null) {
-            try {
-                return DatatypeConverter.parseDateTime(date).getTime();
-            } catch (IllegalArgumentException e) {
-                // See if it's the one W3C case that the javax.xml.bind
-                // implementation (incorrectly) doesn't handle.
-                Matcher m = W3C_NO_SECONDS_PATTERN.matcher(date);
-                if (m.matches()) {
-                    try {
-                        // Convert to a format that Java can parse, which means
-                        // time zone has to be "-/+HHMM", not "+/-HH:MM"
-                        StringBuffer mungedDate = new StringBuffer(m.group(1));
-                        mungedDate.append(m.group(2));
-                        mungedDate.append(m.group(3));
-                        mungedDate.append(m.group(4));
-                        return W3C_NO_SECONDS_FORMAT.get().parse(mungedDate.toString());
-                    } catch (ParseException e2) {
-                        return null;
-                    }
-                } else {
+        if (date == null) {
+            return null;
+        }
+
+        try {
+            return getFullDateFormat().parse(date);
+        } catch (ParseException e1) {
+        }
+
+        try {
+            return DatatypeConverter.parseDateTime(date).getTime();
+        } catch (IllegalArgumentException e) {
+            // See if it's the one W3C case that the javax.xml.bind
+            // implementation (incorrectly) doesn't handle.
+            Matcher m = W3C_NO_SECONDS_PATTERN.matcher(date);
+            if (m.matches()) {
+                try {
+                    // Convert to a format that Java can parse, which means
+                    // time zone has to be "-/+HHMM", not "+/-HH:MM"
+                    StringBuffer mungedDate = new StringBuffer(m.group(1));
+                    mungedDate.append(m.group(2));
+                    mungedDate.append(m.group(3));
+                    mungedDate.append(m.group(4));
+                    return W3C_NO_SECONDS_FORMAT.get().parse(mungedDate.toString());
+                } catch (ParseException e2) {
                     return null;
                 }
+            } else {
+                return null;
             }
-        } else {
-            return null;
         }
     }
 }
