@@ -118,7 +118,7 @@ public class SiteMapParser {
         byte[] bytes = IOUtils.toByteArray(onlineSitemapUrl);
         return parseSiteMap(bytes, onlineSitemapUrl);
     }
-
+    
     /**
      * Returns a processed copy of an unprocessed sitemap object, i.e. transfer
      * the value of getLastModified(). Please note that the sitemap input stays
@@ -305,8 +305,13 @@ public class SiteMapParser {
             nodeList = doc.getElementsByTagName("sitemap");
             return parseSitemapIndex(sitemapUrl, nodeList);
         } else if (doc.getElementsByTagName("urlset").getLength() > 0) {
-            // This is a regular Sitemap
-            return parseXmlSitemap(sitemapUrl, doc);
+            if (doc.getElementsByTagName("news:news").getLength() > 0) {
+              return parseGoogleNewsXmlSitemap(sitemapUrl, doc);
+            } else
+            {
+           // This is a regular Sitemap
+              return parseXmlSitemap(sitemapUrl, doc);
+            }
         } else if (doc.getElementsByTagName("link").getLength() > 0) {
             // Could be RSS or Atom
             return parseSyndicationFormat(sitemapUrl, doc);
@@ -352,6 +357,53 @@ public class SiteMapParser {
         sitemap.setProcessed(true);
         return sitemap;
     }
+    
+    /**
+     * Parse XML that contains a valid Google News Sitemap. 
+     * https://support.google.com/news/publisher/answer/74288?hl=en-GB
+     * 
+     * @param doc
+     */
+    private SiteMap parseGoogleNewsXmlSitemap(URL sitemapUrl, Document doc) {
+
+        SiteMap sitemap = new SiteMap(sitemapUrl);
+        sitemap.setType(SitemapType.XML);
+
+        NodeList list = doc.getElementsByTagName("url");
+
+        // Loop through the <url>s
+        for (int i = 0; i < list.getLength(); i++) {
+
+            Node n = list.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                Element elem = (Element) n;
+                String lastMod = getElementValue(elem, "lastmod");
+                String changeFreq = getElementValue(elem, "changefreq");
+                String priority = getElementValue(elem, "priority");
+                String loc = getElementValue(elem, "loc");
+                Element news = getElement(elem,"news:news");
+                String publicationName = null;
+                String publicationLanguage = null;
+                String title = getElementValue(news, "news:title");
+                String keywords = getElementValue(news,"news:keywords");
+                String genres = getElementValue(news,"news:genres");
+                String stockTickers = getElementValue(news,"news:stock_tickers");
+                String publicationDate = getElementValue(news,"news:publication_date");
+                Element publication = getElement(news, "news:publication");
+                if (publication != null) {
+                  publicationName = getElementValue(publication,"news:name");
+                  publicationLanguage = getElementValue(publication,"news:language");
+                }   
+                addGoogleNewsUrlIntoGoogleNewsSitemap(loc, sitemap, publicationName, publicationLanguage, 
+                    title, publicationDate, lastMod, changeFreq, 
+                    priority, i, genres, keywords, stockTickers);
+            }
+        }
+
+        sitemap.setProcessed(true);
+        return sitemap;
+    }
+
 
     /**
      * Parse XML that contains a Sitemap Index. Example Sitemap Index:
@@ -581,6 +633,22 @@ public class SiteMapParser {
         }
         return null;
     }
+    
+    /**
+     * Get the first element with elementName
+     * 
+     * @param elem
+     * @param elementName
+     * @return
+     */
+    private Element getElement(Element elem, String elementName) {
+
+        NodeList list = elem.getElementsByTagName(elementName);
+        if (list == null)
+            return null;
+        Element e = (Element) list.item(0);
+        return e;
+    }
 
     /**
      * Get the element's attribute value.
@@ -621,7 +689,51 @@ public class SiteMapParser {
             LOG.trace("Can't create a sitemap entry with a bad URL", e);
         }
     }
+    
+    /**
+     * Adds the given URL to the given sitemap while showing the relevant logs
+     */
+    private void addGoogleNewsUrlIntoGoogleNewsSitemap(String urlStr, SiteMap siteMap, 
+        String publicationName, String publicationLanguage, String title, String publicationDate ,
+        String lastMod, String changeFreq, String priority, int urlIndex, String genres, 
+        String keywords, String stockTickers) {
+        try {
+            URL url = new URL(urlStr); // Checking the URL
+            boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
 
+            if (valid || !strict) {
+                GoogleNewsSiteMapURL sUrl = new GoogleNewsSiteMapURL(url.toString(), 
+                    publicationName, publicationLanguage, title, publicationDate, 
+                    lastMod, changeFreq, priority, valid);
+                
+                List<String> keywordList = parseCsvStringIntoStringList(keywords);
+                List<String> genreList = parseCsvStringIntoStringList(genres);
+                List<String> stockTickerList = parseCsvStringIntoStringList(stockTickers);
+                sUrl.setKeywords(keywordList);
+                sUrl.setGenres(genreList);
+                sUrl.setStockTickers(stockTickerList);
+                siteMap.addSiteMapUrl(sUrl);
+                LOG.debug("  {}. {}", (urlIndex + 1), sUrl);
+            } else {
+                LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), siteMap.getBaseUrl());
+            }
+        } catch (MalformedURLException e) {
+            LOG.warn("Bad url: [{}]", urlStr);
+            LOG.trace("Can't create a sitemap entry with a bad URL", e);
+        }
+    }
+
+
+  private List<String> parseCsvStringIntoStringList(String inputString) {
+    List<String> stringList = new ArrayList<String>();
+    if (inputString != null) {
+      for (String part : inputString.split(",")) {
+        stringList.add(part.trim());
+      }
+    }
+    return stringList;
+  }
+    
     /**
      * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl
      * are valid.
