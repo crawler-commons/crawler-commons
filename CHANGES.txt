@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT
+- Issue 117 : [Sitemaps] Faster parsing of dates (jnioche)
+- Issue 113 : Upgraded Tika 1.13 (jnioche)
 - Issue 108: Fix license headers (jnioche)
 - Issue 107: Rename package crawlercommons.url (jnioche)
 - Issue 112: Sitemap url is not extracted if user agent matches earlier in file (srwilson, kkrugler)
