@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT
+- Issue 124 : [Sitemaps] SitemapParser methods now protected (michaellavelle)
 - Issue 117 : [Sitemaps] Faster parsing of dates (jnioche)
 - Issue 113 : Upgraded Tika 1.13 (jnioche)
 - Issue 108: Fix license headers (jnioche)
