@@ -203,10 +203,10 @@ public class SiteMapParser {
      * 
      * @param sitemapUrl
      * @param xmlContent
-     * @return
+     * @return The site map
      * @throws UnknownFormatException
      */
-    private AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
+    protected AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(xmlContent));
         InputSource is = new InputSource();
@@ -223,11 +223,13 @@ public class SiteMapParser {
     /**
      * Process a text-based Sitemap. Text sitemaps only list URLs but no
      * priorities, last mods, etc.
+     * @param sitemapUrl 
      * 
      * @param content
+     * @return The site map
      * @throws IOException
      */
-    private SiteMap processText(String sitemapUrl, byte[] content) throws IOException {
+    protected SiteMap processText(String sitemapUrl, byte[] content) throws IOException {
         LOG.debug("Processing textual Sitemap");
 
         SiteMap textSiteMap = new SiteMap(sitemapUrl);
@@ -256,11 +258,12 @@ public class SiteMapParser {
      *            - URL of the gzipped content
      * @param response
      *            - Gzipped content
+     * @return the site map
      * @throws MalformedURLException
      * @throws IOException
      * @throws UnknownFormatException
      */
-    private AbstractSiteMap processGzip(URL url, byte[] response) throws MalformedURLException, IOException, UnknownFormatException {
+    protected AbstractSiteMap processGzip(URL url, byte[] response) throws MalformedURLException, IOException, UnknownFormatException {
 
         LOG.debug("Processing gzip");
 
@@ -285,9 +288,10 @@ public class SiteMapParser {
      * 
      * @param sitemapUrl
      * @param is
+     * @return the site map
      * @throws UnknownFormatException
      */
-    private AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
+    protected AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
         Document doc = null;
 
@@ -324,10 +328,12 @@ public class SiteMapParser {
      * <loc
      * >http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
      * <changefreq>weekly</changefreq> </url> </urlset>
+     * @param sitemapUrl 
      * 
      * @param doc
+     * @return The sitemap
      */
-    private SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
+    protected SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
 
         SiteMap sitemap = new SiteMap(sitemapUrl);
         sitemap.setType(SitemapType.XML);
@@ -366,8 +372,9 @@ public class SiteMapParser {
      * @param url
      *            - URL of Sitemap Index
      * @param nodeList
+     * @return The site map index
      */
-    private SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
+    protected SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
 
         LOG.debug("Parsing Sitemap Index");
 
@@ -418,10 +425,11 @@ public class SiteMapParser {
      * @param sitemapUrl
      * @param doc
      *            - XML document to parse
+     * @return The sitemap
      * @throws UnknownFormatException
      *             if XML does not appear to be Atom or RSS
      */
-    private SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
+    protected SiteMap parseSyndicationFormat(URL sitemapUrl, Document doc) throws UnknownFormatException {
 
         SiteMap sitemap = new SiteMap(sitemapUrl);
 
@@ -471,11 +479,11 @@ public class SiteMapParser {
      * </entry>
      * <p/>
      * </feed>
-     * 
+     * @param sitemap 
      * @param elem
      * @param doc
      */
-    private void parseAtom(SiteMap sitemap, Element elem, Document doc) {
+    protected void parseAtom(SiteMap sitemap, Element elem, Document doc) {
 
         // Grab items from <feed><entry><link href="URL" /></entry></feed>
         // Use lastmod date from <feed><modified>DATE</modified></feed>
@@ -535,7 +543,7 @@ public class SiteMapParser {
      * @param sitemap
      * @param doc
      */
-    private void parseRSS(SiteMap sitemap, Document doc) {
+    protected void parseRSS(SiteMap sitemap, Document doc) {
 
         // Grab items from <item><link>URL</link></item>
         // and last modified date from <pubDate>DATE</pubDate>
@@ -603,8 +611,14 @@ public class SiteMapParser {
 
     /**
      * Adds the given URL to the given sitemap while showing the relevant logs
+     * @param urlStr 
+     * @param siteMap 
+     * @param lastMod 
+     * @param changeFreq 
+     * @param priority 
+     * @param urlIndex 
      */
-    private void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex) {
+    protected void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex) {
         try {
             URL url = new URL(urlStr); // Checking the URL
             boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
