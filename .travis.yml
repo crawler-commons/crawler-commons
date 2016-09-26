@@ -1,5 +1,9 @@
 language: java
 
+script:
+  - jdk_switcher use oraclejdk8
+  - mvn install javadoc:aggregate
+
 notifications:
   email:
     - crawler-commons@googlegroups.com
