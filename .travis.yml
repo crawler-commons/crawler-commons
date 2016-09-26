@@ -1,5 +1,16 @@
 language: java
 
+install:
+  - sudo apt-get update
+
+script:
+  - jdk_switcher use oraclejdk8
+  - mvn install javadoc:aggregate
+
+after_success:
+  - mvn clean test jacoco:report org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarqube.com -Dsonar.login=803861c9f2087ac0b7ca049677f0f7382b8476b7
+  - bash <(curl -s https://codecov.io/bash)
+
 notifications:
   email:
     - crawler-commons@googlegroups.com

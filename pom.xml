@@ -1,442 +1,522 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.github.crawler-commons</groupId>
-	<artifactId>crawler-commons</artifactId>
-	<name>Crawler-commons</name>
-	<packaging>jar</packaging>
-	<version>0.7-SNAPSHOT</version>
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		</license>
-	</licenses>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.crawler-commons</groupId>
+  <artifactId>crawler-commons</artifactId>
+  <name>Crawler-commons</name>
+  <packaging>jar</packaging>
+  <version>0.7-SNAPSHOT</version>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
-	<url>https://github.com/crawler-commons/crawler-commons</url>
+  <url>https://github.com/crawler-commons/crawler-commons</url>
 
-	<description>crawler-commons is a set of reusable Java components that implement 
-	functionality common to any web crawler.
-	</description>
+  <description>crawler-commons is a set of reusable Java components that implement functionality common to any web crawler.</description>
 
-	<inceptionYear>2009</inceptionYear>
+  <inceptionYear>2009</inceptionYear>
 
-	<scm>
-		<url>https://github.com/crawler-commons/crawler-commons</url>
-		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
-		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
-	  <tag>HEAD</tag>
-    </scm>
+  <scm>
+    <url>https://github.com/crawler-commons/crawler-commons</url>
+    <connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
+    <developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
-	<distributionManagement>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Staging Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
+  <distributionManagement>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Staging Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/crawler-commons/crawler-commons/issues</url>
-	</issueManagement>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/crawler-commons/crawler-commons/issues</url>
+  </issueManagement>
 
-	<mailingLists>
-		<mailingList>
-			<name>Project Mailing List</name>
-			<post>crawler-commons [at] googlegroups [dot] com</post>
-		</mailingList>
-	</mailingLists>
+  <mailingLists>
+    <mailingList>
+      <name>Project Mailing List</name>
+      <post>crawler-commons [at] googlegroups [dot] com</post>
+    </mailingList>
+  </mailingLists>
 
-	<organization>
-		<name>Crawler-Commons</name>
-		<url>http://github.com/crawler-commons</url>
-	</organization>
+  <ciManagement>
+    <system>TravisCI</system>
+    <url>https://travis-ci.org/crawler-commons/crawler-commons</url>
+  </ciManagement>
 
-	<developers>
-		<developer>
-			<id>KKrugler</id>
-			<name>Ken Krugler</name>
-			<email>kkrugler_lists@transpac.com</email>
-		</developer>
+  <organization>
+    <name>Crawler-Commons</name>
+    <url>http://github.com/crawler-commons</url>
+  </organization>
 
-		<developer>
-			<id>ab</id>
-			<name>Andrzej Bialecki</name>
-			<email>ab@apache.org</email>
-		</developer>
+  <developers>
+    <developer>
+      <id>KKrugler</id>
+      <name>Ken Krugler</name>
+      <email>kkrugler_lists@transpac.com</email>
+    </developer>
 
-		<developer>
-			<id>jnioche</id>
-			<name>Julien Nioche</name>
-			<email>julien@digitalpebble.com</email>
-			<organization>DigitalPebble Ltd</organization>
-			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
-		</developer>
+    <developer>
+      <id>ab</id>
+      <name>Andrzej Bialecki</name>
+      <email>ab@apache.org</email>
+    </developer>
 
-		<developer>
-			<id>lewismc</id>
-			<name>Lewis John McGibbney</name>
-			<email>lewismc [at] apache [dot] org</email>
-		</developer>
+    <developer>
+      <id>jnioche</id>
+      <name>Julien Nioche</name>
+      <email>julien@digitalpebble.com</email>
+      <organization>DigitalPebble Ltd</organization>
+      <organizationUrl>http://www.digitalpebble.com</organizationUrl>
+    </developer>
 
-		<developer>
-			<id>avi_hayun</id>
-			<name>Avi Hayun</name>
-			<email>avraham2@gmail.com</email>
-		</developer>
-	</developers>
+    <developer>
+      <id>lewismc</id>
+      <name>Lewis John McGibbney</name>
+      <email>lewismc [at] apache [dot] org</email>
+    </developer>
 
-	<build>
-		<defaultGoal>install</defaultGoal>
-		<directory>target</directory>
-		<outputDirectory>${basedir}/target/classes</outputDirectory>
-		<finalName>${project.artifactId}-${project.version}</finalName>
-		<testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
-		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-		<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources/</directory>
-				<includes>
-					<include>**</include>
-				</includes>
-			</testResource>
-		</testResources>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/version.prop</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
-				<excludes>
-					<exclude>**/version.prop</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>${maven-deploy-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>${maven-release-plugin.version}</version>
-					<configuration>
-						<mavenExecutorId>forked-path</mavenExecutorId>
-						<useReleaseProfile>false</useReleaseProfile>
-						<arguments>-Prelease</arguments>
-						<!--autoVersionSubmodules>true</autoVersionSubmodules -->
-					</configuration>
-				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-				  <groupId>org.eclipse.m2e</groupId>
-				  <artifactId>lifecycle-mapping</artifactId>
-				  <version>1.0.0</version>
-				  <configuration>
-				    <lifecycleMappingMetadata>
-				      <pluginExecutions>
-				        <pluginExecution>
-				          <pluginExecutionFilter>
-				            <groupId>de.thetaphi</groupId>
-				            <artifactId>forbiddenapis</artifactId>
-				            <versionRange>[1.8,)</versionRange>
-				            <goals>
-				              <goal>testCheck</goal>
-				              <goal>check</goal>
-				            </goals>
-				          </pluginExecutionFilter>
-				          <action>
-				            <ignore></ignore>
-				          </action>
-				        </pluginExecution>
-				      </pluginExecutions>
-				    </lifecycleMappingMetadata>
-				  </configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+    <developer>
+      <id>avi_hayun</id>
+      <name>Avi Hayun</name>
+      <email>avraham2@gmail.com</email>
+    </developer>
+  </developers>
 
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-				<inherited>true</inherited>
-				<configuration>
-					<source>${javac.src.version}</source>
-					<target>${javac.target.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven-surfire-plugin.version}</version>
-				<inherited>true</inherited>
-				<configuration>
-					<systemPropertyVariables>
-						<test.build.data>${project.basedir}/target/test-data/</test.build.data>
-					</systemPropertyVariables>
-					<argLine>-Xmx512m</argLine>
-					<forkMode>always</forkMode>
-					<testFailureIgnore>false</testFailureIgnore>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-				<artifactId>maven-java-formatter-plugin</artifactId>
-				<version>0.4</version>
-				<configuration>
-					<configFile>${project.basedir}/doc/eclipse-formatter.xml</configFile>
-				</configuration>
-			</plugin>
-            <plugin>
-                <groupId>de.thetaphi</groupId>
-                <artifactId>forbiddenapis</artifactId>
-                <version>1.8</version>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <directory>target</directory>
+    <outputDirectory>${basedir}/target/classes</outputDirectory>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+    <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+    <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources/</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+      </testResource>
+    </testResources>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/version.prop</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/version.prop</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <mavenExecutorId>forked-path</mavenExecutorId>
+            <useReleaseProfile>false</useReleaseProfile>
+            <arguments>-Prelease</arguments>
+            <!--autoVersionSubmodules>true</autoVersionSubmodules -->
+          </configuration>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>de.thetaphi</groupId>
+                    <artifactId>forbiddenapis</artifactId>
+                    <versionRange>[1.8,)</versionRange>
+                    <goals>
+                      <goal>testCheck</goal>
+                      <goal>check</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <configuration>
+          <destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</destfile>
+          <datafile>${basedir}/target/coverage-reports/jacoco-unit.exec</datafile>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-unit-tests</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <!-- prepare agent for measuring integration tests -->
+          <execution>
+            <id>prepare-integration-tests</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <propertyName>itCoverageAgent</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-site</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <inherited>true</inherited>
+        <configuration>
+          <source>${javac.src.version}</source>
+          <target>${javac.target.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surfire-plugin.version}</version>
+        <inherited>true</inherited>
+        <configuration>
+          <systemPropertyVariables>
+            <test.build.data>${project.basedir}/target/test-data/</test.build.data>
+          </systemPropertyVariables>
+          <argLine>-Xmx512m</argLine>
+          <forkMode>always</forkMode>
+          <testFailureIgnore>false</testFailureIgnore>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+        <artifactId>maven-java-formatter-plugin</artifactId>
+        <version>0.4</version>
+        <configuration>
+          <configFile>${project.basedir}/doc/eclipse-formatter.xml</configFile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>de.thetaphi</groupId>
+        <artifactId>forbiddenapis</artifactId>
+        <version>1.8</version>
+        <configuration>
+          <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+          <internalRuntimeForbidden>true</internalRuntimeForbidden>
+          <!-- if the used Java version is too new, don't fail, just do nothing: -->
+          <failOnUnsupportedJava>false</failOnUnsupportedJava>
+          <bundledSignatures>
+            <bundledSignature>jdk-unsafe</bundledSignature>
+            <bundledSignature>jdk-deprecated</bundledSignature>
+            <bundledSignature>jdk-system-out</bundledSignature>
+            <!--bundledSignature>commons-io-unsafe-${commons-io.version}</bundledSignature -->
+          </bundledSignatures>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+              <goal>testCheck</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>${maven-source-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
                 <configuration>
-                    <!-- disallow undocumented classes like sun.misc.Unsafe: -->
-                    <internalRuntimeForbidden>true</internalRuntimeForbidden>
-                    <!--
-                    if the used Java version is too new,
-                    don't fail, just do nothing:
-                    -->
-                    <failOnUnsupportedJava>false</failOnUnsupportedJava>
-                    <bundledSignatures>
-                        <bundledSignature>jdk-unsafe</bundledSignature>
-                        <bundledSignature>jdk-deprecated</bundledSignature>
-                        <bundledSignature>jdk-system-out</bundledSignature>
-                        <!--bundledSignature>commons-io-unsafe-${commons-io.version}</bundledSignature-->
-                    </bundledSignatures>
+                  <archive>
+                    <manifest>
+                      <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                    </manifest>
+                    <manifestEntries>
+                      <Implementation-Build>${implementation.build}</Implementation-Build>
+                      <Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                      <X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                      <X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                    </manifestEntries>
+                  </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                            <goal>testCheck</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-		</plugins>
-	</build>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <quiet>true</quiet>
+                  <archive>
+                    <manifest>
+                      <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                    </manifest>
+                    <manifestEntries>
+                      <Implementation-Build>${implementation.build}</Implementation-Build>
+                      <Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                      <X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                      <X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                    </manifestEntries>
+                  </archive>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>net.ju-n.maven.plugins</groupId>
+            <artifactId>checksum-maven-plugin</artifactId>
+            <version>${checksum-maven-plugin.version}</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>test-coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <configuration>
+              <destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</destfile>
+              <datafile>${basedir}/target/coverage-reports/jacoco-unit.exec</datafile>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-unit-tests</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <!-- prepare agent for measuring integration tests -->
+              <execution>
+                <id>prepare-integration-tests</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <phase>pre-integration-test</phase>
+                <configuration>
+                  <propertyName>itCoverageAgent</propertyName>
+                </configuration>
+              </execution>
+              <execution>
+                <id>jacoco-site</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
-	<profiles>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>${maven-source-plugin.version}</version>
-						<executions>
-							<execution>
-								<id>attach-sources</id>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
-								<configuration>
-									<archive>
-										<manifest>
-											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-										</manifest>
-										<manifestEntries>
-											<Implementation-Build>${implementation.build}</Implementation-Build>
-											<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
-											<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
-											<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
-										</manifestEntries>
-									</archive>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>${maven-javadoc-plugin.version}</version>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-								<configuration>
-									<quiet>true</quiet>
-									<archive>
-										<manifest>
-											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-										</manifest>
-										<manifestEntries>
-											<Implementation-Build>${implementation.build}</Implementation-Build>
-											<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
-											<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
-											<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
-										</manifestEntries>
-									</archive>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>${maven-gpg-plugin.version}</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>net.ju-n.maven.plugins</groupId>
-						<artifactId>checksum-maven-plugin</artifactId>
-						<version>${checksum-maven-plugin.version}</version>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+  <properties>
+    <!-- Dependencies -->
 
-	<properties>
-		<!-- Dependencies -->
+    <httpclient.version>4.5.1</httpclient.version>
+    <commons-io.version>2.4</commons-io.version>
+    <tika-core.version>1.13</tika-core.version>
+    <slf4j-api.version>1.7.7</slf4j-api.version>
+    <junit.version>4.7</junit.version>
+    <slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
+    <mockito-core.version>1.8.0</mockito-core.version>
+    <jetty.version>5.1.10</jetty.version>
+    <servlet-api.version>2.5</servlet-api.version>
 
-		<httpclient.version>4.5.1</httpclient.version>
-		<commons-io.version>2.4</commons-io.version>
-		<tika-core.version>1.13</tika-core.version>
-		<slf4j-api.version>1.7.7</slf4j-api.version>
-		<junit.version>4.7</junit.version>
-		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
-		<mockito-core.version>1.8.0</mockito-core.version>
-		<jetty.version>5.1.10</jetty.version>
-		<servlet-api.version>2.5</servlet-api.version>
+    <!-- Maven Plugin Dependencies -->
+    <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+    <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
+    <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+    <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+    <maven-release-plugin.version>2.5.1</maven-release-plugin.version>
+    <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
+    <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
+    <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
+    <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
+    <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
+    <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+    <jacoco.version>0.7.6.201602180812</jacoco.version>
 
-		<!-- Maven Plugin Dependencies -->
-		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
-		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
-		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-		<maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
-		<maven-release-plugin.version>2.5.1</maven-release-plugin.version>
-		<maven-source-plugin.version>2.1.2</maven-source-plugin.version>
-		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
-		<maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
-		<apache-rat-plugin.version>0.8</apache-rat-plugin.version>
-		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
-		<maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
-		<checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+    <!-- General Properties -->
+    <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
+    <javac.src.version>1.7</javac.src.version>
+    <javac.target.version>1.7</javac.target.version>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
+    <skipTests>false</skipTests>
+    <assembly.finalName>${project.build.finalName}</assembly.finalName>
+  </properties>
 
-		<!-- General Properties -->
-		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
-		<javac.src.version>1.7</javac.src.version>
-		<javac.target.version>1.7</javac.target.version>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
-		<skipTests>false</skipTests>
-		<assembly.finalName>${project.build.finalName}</assembly.finalName>
-	</properties>
+  <dependencies>
 
-	<dependencies>
+    <!-- Compile time dependencies -->
 
-		<!-- Compile time dependencies -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${commons-io.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>${tika-core.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika-core.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j-api.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j-api.version}</version>
-		</dependency>
+    <!-- Test dependencies -->
 
-		<!-- Test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j-log4j12.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j-log4j12.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito-core.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito-core.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <!-- we'd like to use 6.0.2, but the version in central is missing 
+        the pom -->
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<!-- we'd like to use 6.0.2, but the version in central is missing the 
-				pom -->
-			<version>${jetty.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <!-- Provided dependencies -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${servlet-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-		<!-- Provided dependencies -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>${servlet-api.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-	</dependencies>
+  </dependencies>
 </project>
