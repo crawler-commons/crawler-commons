@@ -22,8 +22,8 @@ import java.io.Serializable;
 public abstract class BaseRobotsParser implements Serializable {
 
     /**
-     * Parse the robots.txt file in <content>, and return rules appropriate for
-     * processing paths by <userAgent>. Note that multiple agent names may be
+     * Parse the robots.txt file in <i>content</i>, and return rules appropriate for
+     * processing paths by <i>userAgent</i>. Note that multiple agent names may be
      * provided as comma-separated values; the order of these shouldn't matter,
      * as the file is parsed in order, and each agent name found in the file
      * will be compared to every agent name found in robotNames.

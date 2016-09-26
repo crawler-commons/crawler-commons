@@ -61,15 +61,15 @@ public class SiteMapParser {
     /**
      * Sitemap docs must be limited to 10MB (10,485,760 bytes)
      */
-    public static int MAX_BYTES_ALLOWED = 10485760;
+    public static final int MAX_BYTES_ALLOWED = 10485760;
 
     /* Tika's MediaType components */
-    private final static Tika TIKA = new Tika();
-    private final static MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
+    private static final Tika TIKA = new Tika();
+    private static final MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
 
-    private final static List<MediaType> XML_MEDIA_TYPES = new ArrayList<MediaType>();
-    private final static List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<MediaType>();
-    private final static List<MediaType> GZ_MEDIA_TYPES = new ArrayList<MediaType>();
+    private static final List<MediaType> XML_MEDIA_TYPES = new ArrayList<>();
+    private static final List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<>();
+    private static final List<MediaType> GZ_MEDIA_TYPES = new ArrayList<>();
 
     static {
         initMediaTypes();
@@ -83,7 +83,7 @@ public class SiteMapParser {
     private boolean strict = true;
 
     public SiteMapParser() {
-
+      //default constructor
     }
 
     public SiteMapParser(boolean strict) {
@@ -99,10 +99,9 @@ public class SiteMapParser {
     }
 
     /**
-     * Returns a SiteMap or SiteMapIndex given an online sitemap URL<br/>
-     * Please note that this method is a static method which goes online and
-     * fetches the sitemap then parses it<br/>
-     * <br/>
+     * <p>Returns a SiteMap or SiteMapIndex given an online sitemap URL</p>
+     * <p>Please note that this method is a static method which goes online and
+     * fetches the sitemap then parses it</p>
      * This method is a convenience method for a user who has a sitemap URL and
      * wants a "Keep it simple" way to parse it.
      * 
@@ -110,6 +109,8 @@ public class SiteMapParser {
      *            URL of the online sitemap
      * @return Extracted SiteMap/SiteMapIndex or null if the onlineSitemapUrl is
      *         null
+     * @throws UnknownFormatException if there is an error parsing the sitemap
+     * @throws IOException if there is an error reading in the site map {@link java.net.URL}
      */
     public AbstractSiteMap parseSiteMap(URL onlineSitemapUrl) throws UnknownFormatException, IOException {
         if (onlineSitemapUrl == null) {
@@ -131,9 +132,10 @@ public class SiteMapParser {
      * @param content
      *            raw bytes of sitemap file
      * @param sitemap
+     *            an {@link crawlercommons.sitemaps.AbstractSiteMap} implementation
      * @return Extracted SiteMap/SiteMapIndex
-     * @throws UnknownFormatException
-     * @throws IOException
+     * @throws UnknownFormatException if there is an error parsing the sitemap
+     * @throws IOException if there is an error reading in the site map {@link java.net.URL}
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, final AbstractSiteMap sitemap) throws UnknownFormatException, IOException {
         AbstractSiteMap asmCopy = parseSiteMap(contentType, content, sitemap.getUrl());
@@ -149,8 +151,8 @@ public class SiteMapParser {
      * @param url
      *            URL to sitemap file
      * @return Extracted SiteMap/SiteMapIndex
-     * @throws UnknownFormatException
-     * @throws IOException
+     * @throws UnknownFormatException if there is an error parsing the sitemap
+     * @throws IOException if there is an error reading in the site map {@link java.net.URL}
      */
     public AbstractSiteMap parseSiteMap(byte[] content, URL url) throws UnknownFormatException, IOException {
         if (url == null) {
@@ -174,8 +176,8 @@ public class SiteMapParser {
      * @param url
      *            URL to sitemap file
      * @return Extracted SiteMap/SiteMapIndex
-     * @throws UnknownFormatException
-     * @throws IOException
+     * @throws UnknownFormatException if there is an error parsing the sitemap
+     * @throws IOException if there is an error reading in the site map {@link java.net.URL}
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         MediaType mediaType = MediaType.parse(contentType);
@@ -185,12 +187,11 @@ public class SiteMapParser {
             if (XML_MEDIA_TYPES.contains(mediaType)) {
                 return processXml(url, content);
             } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
-                return (AbstractSiteMap) processText(url.toString(), content);
+                return processText(url.toString(), content);
             } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
                 return processGzip(url, content);
             } else {
-                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
-                                                                         // parent
+                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
                 return parseSiteMap(mediaType.toString(), content, url);
             }
         }
@@ -201,10 +202,10 @@ public class SiteMapParser {
     /**
      * Parse the given XML content.
      * 
-     * @param sitemapUrl
-     * @param xmlContent
+     * @param sitemapUrl URL to sitemap file
+     * @param xmlContent the byte[] backing the sitemapUrl
      * @return The site map
-     * @throws UnknownFormatException
+     * @throws UnknownFormatException if there is an error parsing the sitemap
      */
     protected AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
 
@@ -223,11 +224,11 @@ public class SiteMapParser {
     /**
      * Process a text-based Sitemap. Text sitemaps only list URLs but no
      * priorities, last mods, etc.
-     * @param sitemapUrl 
-     * 
-     * @param content
+     * @param sitemapUrl a string sitemap URL
+     * @param sitemapUrl URL to sitemap file
+     * @param content the byte[] backing the sitemapUrl
      * @return The site map
-     * @throws IOException
+     * @throws IOException if there is an error reading in the site map String
      */
     protected SiteMap processText(String sitemapUrl, byte[] content) throws IOException {
         LOG.debug("Processing textual Sitemap");
@@ -259,11 +260,10 @@ public class SiteMapParser {
      * @param response
      *            - Gzipped content
      * @return the site map
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws UnknownFormatException
+     * @throws UnknownFormatException if there is an error parsing the gzip
+     * @throws IOException if there is an error reading in the gzip {@link java.net.URL}
      */
-    protected AbstractSiteMap processGzip(URL url, byte[] response) throws MalformedURLException, IOException, UnknownFormatException {
+    protected AbstractSiteMap processGzip(URL url, byte[] response) throws IOException, UnknownFormatException {
 
         LOG.debug("Processing gzip");
 
@@ -286,10 +286,10 @@ public class SiteMapParser {
     /**
      * Parse the given XML content.
      * 
-     * @param sitemapUrl
-     * @param is
+     * @param sitemapUrl a sitemap {@link java.net.URL}
+     * @param is an {@link org.xml.sax.InputSource} backing the sitemap
      * @return the site map
-     * @throws UnknownFormatException
+     * @throws UnknownFormatException if there is an error parsing the {@link org.xml.sax.InputSource}
      */
     protected AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
@@ -299,7 +299,7 @@ public class SiteMapParser {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             doc = dbf.newDocumentBuilder().parse(is);
         } catch (Exception e) {
-            LOG.debug(e.toString());
+            LOG.debug(e.toString(), e);
             throw new UnknownFormatException("Error parsing XML for: " + sitemapUrl);
         }
 
@@ -320,17 +320,26 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse XML that contains a valid Sitemap. Example of a Sitemap: <?xml
-     * version="1.0" encoding="UTF-8"?> <urlset
-     * xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> <url>
-     * <loc>http://www.example.com/</loc> <lastmod>2005-01-01</lastmod>
-     * <changefreq>monthly</changefreq> <priority>0.8</priority> </url> <url>
-     * <loc
-     * >http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
-     * <changefreq>weekly</changefreq> </url> </urlset>
-     * @param sitemapUrl 
-     * 
-     * @param doc
+     * Parse XML that contains a valid Sitemap. Example of a Sitemap: 
+     * <pre>
+     * {@code 
+     * <?xml version="1.0" encoding="UTF-8"?> 
+     *   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> 
+     *     <url>
+     *       <loc>http://www.example.com/</loc> 
+     *       <lastmod>lastmod>2005-01-01</lastmod>
+     *       <changefreq>monthly</changefreq>
+     *       <priority>0.8</priority>
+     *     </url> 
+     *     <url>
+     *       <loc>http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii</loc>
+     *       <changefreq>weekly</changefreq>
+     *     </url>
+     *   </urlset>
+     * }
+     * </pre>
+     * @param sitemapUrl a sitemap {@link java.net.URL}
+     * @param doc a {@link org.w3c.dom.Document} sitemap snippet
      * @return The sitemap
      */
     protected SiteMap parseXmlSitemap(URL sitemapUrl, Document doc) {
@@ -360,18 +369,25 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse XML that contains a Sitemap Index. Example Sitemap Index:
-     * <p/>
-     * <?xml version="1.0" encoding="UTF-8"?> <sitemapindex
-     * xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> <sitemap>
-     * <loc>http://www.example.com/sitemap1.xml.gz</loc>
-     * <lastmod>2004-10-01T18:23:17+00:00</lastmod> </sitemap> <sitemap>
-     * <loc>http://www.example.com/sitemap2.xml.gz</loc>
-     * <lastmod>2005-01-01</lastmod> </sitemap> </sitemapindex>
-     * 
+     * <p>Parse XML that contains a Sitemap Index. Example Sitemap Index:</p>
+     * <pre>
+     * {@code
+     * <?xml version="1.0" encoding="UTF-8"?> 
+     *   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+     *     <sitemap>
+     *       <loc>http://www.example.com/sitemap1.xml.gz</loc>
+     *       <lastmod>2004-10-01T18:23:17+00:00</lastmod>
+     *     </sitemap>
+     *     <sitemap>
+     *       <loc>http://www.example.com/sitemap2.xml.gz</loc>
+     *       <lastmod>2005-01-01</lastmod>
+     *     </sitemap>
+     *   </sitemapindex>
+     * }
+     * </pre>
      * @param url
      *            - URL of Sitemap Index
-     * @param nodeList
+     * @param nodeList a {@link org.w3c.dom.NodeList} backing the sitemap
      * @return The site map index
      */
     protected SiteMapIndex parseSitemapIndex(URL url, NodeList nodeList) {
@@ -422,7 +438,7 @@ public class SiteMapParser {
      * it's an <b>Atom doc</b> <b>rss</b> to determine if it's an <b>RSS
      * doc</b>.
      * 
-     * @param sitemapUrl
+     * @param sitemapUrl the URL location of the Sitemap
      * @param doc
      *            - XML document to parse
      * @return The sitemap
@@ -460,28 +476,37 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse the XML document which is assumed to be in Atom format. Atom 1.0
+     * <p>Parse the XML document which is assumed to be in Atom format. Atom 1.0
      * example:
-     * <p/>
-     * <?xml version="1.0" encoding="utf-8"?> <feed
-     * xmlns="http://www.w3.org/2005/Atom">
-     * <p/>
-     * <title>Example Feed</title> <subtitle>A subtitle.</subtitle> <link
-     * href="http://example.org/feed/" rel="self"/> <link
-     * href="http://example.org/"/> <modified>2003-12-13T18:30:02Z</modified>
-     * <author> <name>John Doe</name> <email>johndoe@example.com</email>
-     * </author> <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
-     * <p/>
-     * <entry> <title>Atom-Powered Robots Run Amok</title> <link
-     * href="http://example.org/2003/12/13/atom03"/>
-     * <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
-     * <updated>2003-12-13T18:30:02Z</updated> <summary>Some text.</summary>
-     * </entry>
-     * <p/>
-     * </feed>
-     * @param sitemap 
-     * @param elem
-     * @param doc
+     * </p>
+     * <pre>
+     * {@code
+     * <?xml version="1.0" encoding="utf-8"?>
+     *   <feed xmlns="http://www.w3.org/2005/Atom">
+     *     <title>Example Feed</title>
+     *     <subtitle>A subtitle.</subtitle>
+     *     <link href="http://example.org/feed/" rel="self"/>
+     *     <link href="http://example.org/"/>
+     *     <modified>2003-12-13T18:30:02Z</modified>
+     *     <author>
+     *       <name>John Doe</name>
+     *       <email>johndoe@example.com</email>
+     *     </author>
+     *     <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
+     *     <entry>
+     *       <title>Atom-Powered Robots Run Amok</title>
+     *       <link href="http://example.org/2003/12/13/atom03"/>
+     *       <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+     *       <updated>2003-12-13T18:30:02Z</updated>
+     *       <summary>Some text.</summary>
+     *     </entry>
+     *     ...
+     *   </feed>
+     * }
+     * </pre>
+     * @param sitemap a {@link crawlercommons.sitemaps.SiteMap} backing the Atom feed
+     * @param elem {@link org.w3c.dom.Element}'s to populate from the Sitemap
+     * @param doc {@link org.w3c.dom.Document} to populate with the parse output
      */
     protected void parseAtom(SiteMap sitemap, Element elem, Document doc) {
 
@@ -511,37 +536,49 @@ public class SiteMapParser {
     }
 
     /**
-     * Parse XML document which is assumed to be in RSS format. RSS 2.0 example:
-     * <p/>
-     * <?xml version="1.0"?> <rss version="2.0"> <channel> <title>Lift Off
-     * News</title> <link>http://liftoff.msfc.nasa.gov/</link>
-     * <description>Liftoff to Space Exploration.</description>
-     * <language>en-us</language> <pubDate>Tue, 10 Jun 2003 04:00:00
-     * GMT</pubDate> <lastBuildDate>Tue, 10 Jun 2003 09:41:01
-     * GMT</lastBuildDate> <docs>http://blogs.law.harvard.edu/tech/rss</docs>
-     * <generator>Weblog Editor 2.0</generator>
-     * <managingEditor>editor@example.com</managingEditor>
-     * <webMaster>webmaster@example.com</webMaster> <ttl>5</ttl>
-     * <p/>
-     * <item> <title>Star City</title>
-     * <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
-     * <description>How do Americans get ready to work with Russians aboard the
-     * International Space Station? They take a crash course in culture,
-     * language and protocol at Russia's Star City.</description> <pubDate>Tue,
-     * 03 Jun 2003 09:39:21 GMT</pubDate>
-     * <guid>http://liftoff.msfc.nasa.gov/2003/06/03.html#item573</guid> </item>
-     * <p/>
-     * <item> <title>Space Exploration</title>
-     * <link>http://liftoff.msfc.nasa.gov/</link> <description>Sky watchers in
-     * Europe, Asia, and parts of Alaska and Canada will experience a partial
-     * eclipse of the Sun on Saturday, May 31.</description> <pubDate>Fri, 30
-     * May 2003 11:06:42 GMT</pubDate>
-     * <guid>http://liftoff.msfc.nasa.gov/2003/05/30.html#item572</guid> </item>
-     * <p/>
-     * </channel> </rss>
-     * 
-     * @param sitemap
-     * @param doc
+     * <p>Parse XML document which is assumed to be in RSS format. RSS 2.0 example:
+     * </p>
+     * <pre>
+     * {@code
+     * <?xml version="1.0"?>
+     *   <rss version="2.0">
+     *     <channel> 
+     *       <title>Lift Off News</title>
+     *       <link>http://liftoff.msfc.nasa.gov/</link>
+     *       <description>Liftoff to Space Exploration.</description>
+     *       <language>en-us</language>
+     *       <pubDate>Tue, 10 Jun 2003 04:00:00 GMT</pubDate>
+     *       <lastBuildDate>Tue, 10 Jun 2003 09:41:01 GMT</lastBuildDate>
+     *       <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+     *       <generator>Weblog Editor 2.0</generator>
+     *       <managingEditor>editor@example.com</managingEditor>
+     *       <webMaster>webmaster@example.com</webMaster>
+     *       <ttl>5</ttl>
+     *       <item>
+     *         <title>Star City</title>
+     *         <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
+     *         <description>How do Americans get ready to work with Russians aboard the
+     *         International Space Station? They take a crash course in culture,
+     *         language and protocol at Russia's Star City.
+     *         </description>
+     *         <pubDate>Tue, 03 Jun 2003 09:39:21 GMT</pubDate>
+     *         <guid>http://liftoff.msfc.nasa.gov/2003/06/03.html#item573</guid>
+     *       </item>
+     *       <item>
+     *         <title>Space Exploration</title>
+     *         <link>http://liftoff.msfc.nasa.gov/</link>
+     *         <description>Sky watchers in Europe, Asia, and parts of Alaska and Canada 
+     *         will experience a partial eclipse of the Sun on Saturday, May 31.
+     *         </description>
+     *         <pubDate>Fri, 30 May 2003 11:06:42 GMT</pubDate>
+     *         <guid>http://liftoff.msfc.nasa.gov/2003/05/30.html#item572</guid>
+     *       </item>
+     *     </channel>
+     *   </rss>
+     * }
+     * </pre>
+     * @param sitemap a {@link crawlercommons.sitemaps.SiteMap} object to populate with the RCC content
+     * @param doc {@link org.w3c.dom.Document} to populate with the parse output
      */
     protected void parseRSS(SiteMap sitemap, Document doc) {
 
@@ -611,12 +648,12 @@ public class SiteMapParser {
 
     /**
      * Adds the given URL to the given sitemap while showing the relevant logs
-     * @param urlStr 
-     * @param siteMap 
-     * @param lastMod 
-     * @param changeFreq 
-     * @param priority 
-     * @param urlIndex 
+     * @param urlStr an URL string to add to the {@link crawlercommons.sitemaps.SiteMap}
+     * @param siteMap the sitemap to add URL(s) to
+     * @param lastMod last time the {@link crawlercommons.sitemaps.SiteMapURL} was modified
+     * @param changeFreq the {@link crawlercommons.sitemaps.SiteMapURL} change frquency
+     * @param priority priority of this {@link crawlercommons.sitemaps.SiteMapURL}
+     * @param urlIndex index position to which this entry has been added 
      */
     protected void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex) {
         try {
@@ -626,7 +663,7 @@ public class SiteMapParser {
             if (valid || !strict) {
                 SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
                 siteMap.addSiteMapUrl(sUrl);
-                LOG.debug("  {}. {}", (urlIndex + 1), sUrl);
+                LOG.debug("  {}. {}", urlIndex + 1, sUrl);
             } else {
                 LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), siteMap.getBaseUrl());
             }

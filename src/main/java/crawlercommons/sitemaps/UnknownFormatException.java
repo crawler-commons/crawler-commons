@@ -19,7 +19,7 @@ package crawlercommons.sitemaps;
 @SuppressWarnings("serial")
 public class UnknownFormatException extends Exception {
 
-    private String error;
+    private final String error;
 
     /** Default constructor - initializes instance variable to unknown */
     public UnknownFormatException() {
@@ -30,6 +30,7 @@ public class UnknownFormatException extends Exception {
     /**
      * Constructor receives some kind of message that is saved in an instance
      * variable.
+     * @param err a String object to use within the Execption
      */
     public UnknownFormatException(String err) {
         super(err);
@@ -39,6 +40,7 @@ public class UnknownFormatException extends Exception {
     /**
      * public method, callable by exception catcher. It returns the error
      * message.
+     * @return a populated Exception as a String
      */
     public String getError() {
         return error;

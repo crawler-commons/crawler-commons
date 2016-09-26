@@ -85,6 +85,8 @@ public class RobotUtils {
      * 
      * @param fetcher
      *            Fetcher for downloading robots.txt file
+     * @param parser
+     *            a {@link crawlercommons.robots.BaseRobotsParser} to use for obtaining appropriate rules
      * @param robotsUrl
      *            URL to robots.txt file
      * @return Robot rules
