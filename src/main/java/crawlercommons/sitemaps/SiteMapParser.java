@@ -80,7 +80,7 @@ public class SiteMapParser {
      * official docs allow the siteMapURLs to be only under the base url:
      * http://www.sitemaps.org/protocol.html#location
      */
-    private boolean strict = true;
+    protected boolean strict = true;
 
     public SiteMapParser() {
 
@@ -576,9 +576,9 @@ public class SiteMapParser {
      * 
      * @param elem
      * @param elementName
-     * @return
+     * @return The element value
      */
-    private String getElementValue(Element elem, String elementName) {
+    protected String getElementValue(Element elem, String elementName) {
 
         NodeList list = elem.getElementsByTagName(elementName);
         if (list == null)
@@ -596,9 +596,9 @@ public class SiteMapParser {
      * @param elem
      * @param elementName
      * @param attributeName
-     * @return
+     * @return The element attribute value
      */
-    private String getElementAttributeValue(Element elem, String elementName, String attributeName) {
+    protected String getElementAttributeValue(Element elem, String elementName, String attributeName) {
 
         NodeList list = elem.getElementsByTagName(elementName);
         Element e = (Element) list.item(0);
@@ -644,7 +644,7 @@ public class SiteMapParser {
      * @param testUrl
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
-    private boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
+    protected boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         boolean ret = false;
 
         // Don't try a comparison if the URL is too short to match
