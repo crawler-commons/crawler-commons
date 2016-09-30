@@ -104,7 +104,8 @@ public class SiteMapURL {
     /**
      * Set the URL.
      * 
-     * @param url of the sitemap
+     * @param url
+     *            of the sitemap
      */
     public void setUrl(URL url) {
         this.url = url;
@@ -138,7 +139,8 @@ public class SiteMapURL {
     /**
      * Set when this URL was last modified.
      * 
-     * @param lastModified the last time the sitemap was modified
+     * @param lastModified
+     *            the last time the sitemap was modified
      */
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
@@ -147,7 +149,8 @@ public class SiteMapURL {
     /**
      * Set when this URL was last modified.
      * 
-     * @param lastModified the last time the sitemap was modified
+     * @param lastModified
+     *            the last time the sitemap was modified
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
@@ -166,7 +169,8 @@ public class SiteMapURL {
      * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
      * is used if the given priority is out of range).
      * 
-     * @param priority a value between [0.0 - 1.0]
+     * @param priority
+     *            a value between [0.0 - 1.0]
      */
     public void setPriority(double priority) {
 
@@ -183,7 +187,8 @@ public class SiteMapURL {
      * Set the URL's priority to a value between [0.0 - 1.0] (Default Priority
      * is used if the given priority missing or is out of range).
      * 
-     * @param priorityStr a value between [0.0 - 1.0]
+     * @param priorityStr
+     *            a value between [0.0 - 1.0]
      */
     public void setPriority(String priorityStr) {
         try {
@@ -211,8 +216,9 @@ public class SiteMapURL {
     /**
      * Set the URL's change frequency
      * 
-     * @param changeFreq a {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency}
-     * for this sitemap
+     * @param changeFreq
+     *            a {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency}
+     *            for this sitemap
      */
     public void setChangeFrequency(ChangeFrequency changeFreq) {
         this.changeFreq = changeFreq;
@@ -222,8 +228,10 @@ public class SiteMapURL {
      * Set the URL's change frequency In case of a bad ChangeFrequency, the
      * current frequency in this instance will be set to NULL
      * 
-     * @param changeFreq a string representing a 
-     * {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency} for this sitemap
+     * @param changeFreq
+     *            a string representing a
+     *            {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency} for
+     *            this sitemap
      */
     public void setChangeFrequency(String changeFreq) {
 
@@ -253,7 +261,9 @@ public class SiteMapURL {
     /**
      * Valid means that it follows the official guidelines that the siteMapURL
      * must be under the base url
-     * @param valid whether the Sitemap is valid syntax or not
+     * 
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
      */
     public void setValid(boolean valid) {
         this.valid = valid;
@@ -261,6 +271,7 @@ public class SiteMapURL {
 
     /**
      * Is the siteMapURL under the base url ?
+     * 
      * @return true if the syntax is valid, false otherwise
      */
     public boolean isValid() {

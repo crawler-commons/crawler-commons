@@ -54,9 +54,12 @@ public class UserAgent implements Serializable {
     /**
      * Set user agent characteristics
      * 
-     * @param agentName an agent name string to associate with the crawler
-     * @param emailAddress an agent email address string to associate with the crawler
-     * @param webAddress a Web address string to associate with the crawler
+     * @param agentName
+     *            an agent name string to associate with the crawler
+     * @param emailAddress
+     *            an agent email address string to associate with the crawler
+     * @param webAddress
+     *            a Web address string to associate with the crawler
      */
     public UserAgent(String agentName, String emailAddress, String webAddress) {
         this(agentName, emailAddress, webAddress, DEFAULT_BROWSER_VERSION);
@@ -65,10 +68,14 @@ public class UserAgent implements Serializable {
     /**
      * Set user agent characteristics
      * 
-     * @param agentName an agent name string to associate with the crawler
-     * @param emailAddress an agent email address string to associate with the crawler
-     * @param webAddress a Web address string to associate with the crawler
-     * @param browserVersion a browser version to mimic
+     * @param agentName
+     *            an agent name string to associate with the crawler
+     * @param emailAddress
+     *            an agent email address string to associate with the crawler
+     * @param webAddress
+     *            a Web address string to associate with the crawler
+     * @param browserVersion
+     *            a browser version to mimic
      */
     public UserAgent(String agentName, String emailAddress, String webAddress, String browserVersion) {
         this(agentName, emailAddress, webAddress, browserVersion, DEFAULT_CRAWLER_VERSION);
@@ -77,11 +84,16 @@ public class UserAgent implements Serializable {
     /**
      * Set user agent characteristics
      * 
-     * @param agentName an agent name string to associate with the crawler
-     * @param emailAddress an agent email address string to associate with the crawler
-     * @param webAddress a Web address string to associate with the crawler
-     * @param browserVersion a browser version to mimic
-     * @param crawlerVersion the version of your crawler/crawl agent
+     * @param agentName
+     *            an agent name string to associate with the crawler
+     * @param emailAddress
+     *            an agent email address string to associate with the crawler
+     * @param webAddress
+     *            a Web address string to associate with the crawler
+     * @param browserVersion
+     *            a browser version to mimic
+     * @param crawlerVersion
+     *            the version of your crawler/crawl agent
      */
     public UserAgent(String agentName, String emailAddress, String webAddress, String browserVersion, String crawlerVersion) {
         this.agentName = agentName;
@@ -106,7 +118,8 @@ public class UserAgent implements Serializable {
      * @return User Agent String
      */
     public String getUserAgentString() {
-        // Mozilla/5.0 (compatible; mycrawler/1.0; +http://www.mydomain.com; mycrawler@mydomain.com)
+        // Mozilla/5.0 (compatible; mycrawler/1.0; +http://www.mydomain.com;
+        // mycrawler@mydomain.com)
         return String.format(Locale.getDefault(), "%s (compatible; %s%s; +%s; %s)", browserVersion, getAgentName(), crawlerConfiguration, webAddress, emailAddress);
     }
 }

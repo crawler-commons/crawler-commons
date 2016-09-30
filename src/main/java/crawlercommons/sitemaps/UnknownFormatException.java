@@ -30,7 +30,9 @@ public class UnknownFormatException extends Exception {
     /**
      * Constructor receives some kind of message that is saved in an instance
      * variable.
-     * @param err a String object to use within the Execption
+     * 
+     * @param err
+     *            a String object to use within the Execption
      */
     public UnknownFormatException(String err) {
         super(err);
@@ -40,6 +42,7 @@ public class UnknownFormatException extends Exception {
     /**
      * public method, callable by exception catcher. It returns the error
      * message.
+     * 
      * @return a populated Exception as a String
      */
     public String getError() {

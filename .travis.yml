@@ -1,7 +1,9 @@
 language: java
 
+jdk:
+  - oraclejdk8
+
 script:
-  - jdk_switcher use oraclejdk8
   - mvn install javadoc:aggregate
 
 notifications:

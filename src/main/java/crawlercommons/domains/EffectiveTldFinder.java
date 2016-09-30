@@ -108,9 +108,11 @@ public class EffectiveTldFinder {
     }
 
     /**
-     * @param hostname the hostname for which to find the 
-     * {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
-     * @return the {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
+     * @param hostname
+     *            the hostname for which to find the
+     *            {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
+     * @return the
+     *         {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname) {
         if (getInstance().domains.containsKey(hostname)) {
@@ -145,7 +147,8 @@ public class EffectiveTldFinder {
      * This method uses the effective TLD to determine which component of a FQDN
      * is the NIC-assigned domain name.
      * 
-     * @param hostname a string for which to obtain a NIC-assigned domain name
+     * @param hostname
+     *            a string for which to obtain a NIC-assigned domain name
      * @return the NIC-assigned domain name
      */
     public static String getAssignedDomain(String hostname) {

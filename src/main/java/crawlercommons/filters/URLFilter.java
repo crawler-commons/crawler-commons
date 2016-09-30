@@ -21,7 +21,9 @@ public abstract class URLFilter {
     /**
      * Returns a modified version of the input URL or null if the URL should be
      * removed
-     * @param urlString a URL string to check against filter(s)
+     * 
+     * @param urlString
+     *            a URL string to check against filter(s)
      * @return a filtered URL
      **/
     public abstract String filter(String urlString);
