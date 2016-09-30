@@ -44,22 +44,22 @@ public class SiteMapURLTest {
 
     @Test
     public void testSetPriority() {
-        assertEquals(SiteMapURL.defaultPriority, siteMapURL.getPriority(), 0);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
         siteMapURL.setPriority(0.6);
         assertEquals(0.6, siteMapURL.getPriority(), 0);
 
         siteMapURL.setPriority(1.1);
-        assertEquals(SiteMapURL.defaultPriority, siteMapURL.getPriority(), 0);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
 
         siteMapURL.setPriority("0.6");
         assertEquals(0.6, siteMapURL.getPriority(), 0);
 
         siteMapURL.setPriority("BAD VALUE");
-        assertEquals(SiteMapURL.defaultPriority, siteMapURL.getPriority(), 0);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
 
         siteMapURL.setPriority("0.6");
         assertEquals(0.6, siteMapURL.getPriority(), 0);
         siteMapURL.setPriority("1.1");
-        assertEquals(SiteMapURL.defaultPriority, siteMapURL.getPriority(), 0);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
     }
 }
