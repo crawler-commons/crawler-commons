@@ -65,7 +65,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -79,7 +79,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -275,7 +275,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     /**
      * Is our ruleset set up to allow all access?
-     *
+     * 
      * @return true if all URLs are allowed.
      */
     @Override
@@ -285,7 +285,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     /**
      * Is our ruleset set up to disallow all access?
-     *
+     * 
      * @return true if no URLs are allowed.
      */
     @Override

@@ -1,23 +1,24 @@
 Crawler-Commons Change Log
 
 Current Development 0.7-SNAPSHOT
-- Issue 124 : [Sitemaps] SitemapParser methods now protected (michaellavelle)
-- Issue 117 : [Sitemaps] Faster parsing of dates (jnioche)
-- Issue 113 : Upgraded Tika 1.13 (jnioche)
-- Issue 108: Fix license headers (jnioche)
-- Issue 107: Rename package crawlercommons.url (jnioche)
-- Issue 112: Sitemap url is not extracted if user agent matches earlier in file (srwilson, kkrugler)
-- Issue 92: Deprecate HTTP fetcher support (kkrugler)
-- Issue 106: Added URLFilter interface + BasicURLNormalizer (jnioche)
-- Issue 100: Updated tld names from publicsuffix.org (jnioche)
-- Issue 84: Upgraded http-client to version 4.5.1 (aecio via kkrugler)
-- Issue 89: Upgraded Tika 1.10 (jnioche)
-- Issue 82: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
-- Issue 60: [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun)
-- Issue 77: simplify pom file (jnioche, lewismc)
-- Issue 93: Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc)
-- Issue 87: [Sitemaps] Not able to detect RSS feeds (yogendrasoni via kkrugler)
-- Issue 95: [Robots] Added javadoc comments to the SimpleRobotRulesParser class (MichaelRoeder, kkrugler)
+- Upgrade to JDK 1.8 (lewismc) #126
+- [Sitemaps] SitemapParser methods now protected (michaellavelle) #124
+- [Sitemaps] Faster parsing of dates (jnioche) #117
+- Upgraded Tika 1.13 (jnioche) #113
+- Fix license headers (jnioche) #108
+- Rename package crawlercommons.url (jnioche) #107
+- Sitemap url is not extracted if user agent matches earlier in file (srwilson, kkrugler) #112
+- Deprecate HTTP fetcher support (kkrugler) #92
+- Added URLFilter interface + BasicURLNormalizer (jnioche) #106
+- Updated tld names from publicsuffix.org (jnioche) #100
+- Upgraded http-client to version 4.5.1 (aecio via kkrugler) #84
+- Upgraded Tika 1.10 (jnioche) #89
+- [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun) #82
+- [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun) #60
+- Simplify pom file (jnioche, lewismc) #77
+- Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc) #93
+- [Sitemaps] Not able to detect RSS feeds (yogendrasoni via kkrugler) #87
+- [Robots] Added javadoc comments to the SimpleRobotRulesParser class (MichaelRoeder, kkrugler) #95
 
 Release 0.6 (2015-05-27)
 - Issue 75: [Sitemaps] more robust parsing of XML elements (jnioche, kkrugler)

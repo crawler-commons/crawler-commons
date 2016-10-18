@@ -74,13 +74,13 @@ public class EffectiveTldFinder {
         return instance;
     }
 
-    public boolean initialize(InputStream effective_tld_data_stream) {
-        domains = new HashMap<String, EffectiveTLD>();
+    public boolean initialize(InputStream effectiveTldDataStream) {
+        domains = new HashMap<>();
         try {
-            if (null == effective_tld_data_stream && null != this.getClass().getResource(ETLD_DATA)) {
-                effective_tld_data_stream = this.getClass().getResourceAsStream(ETLD_DATA);
+            if (null == effectiveTldDataStream && null != this.getClass().getResource(ETLD_DATA)) {
+              effectiveTldDataStream = this.getClass().getResourceAsStream(ETLD_DATA);
             }
-            BufferedReader input = new BufferedReader(new InputStreamReader(effective_tld_data_stream, Charset.defaultCharset()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, Charset.defaultCharset()));
             String line = null;
             while (null != (line = input.readLine())) {
                 if (line.length() == 0 || (line.length() > 1 && line.startsWith(COMMENT))) {
@@ -109,7 +109,10 @@ public class EffectiveTldFinder {
 
     /**
      * @param hostname
-     * @return the Effective TLD
+     *            the hostname for which to find the
+     *            {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
+     * @return the
+     *         {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname) {
         if (getInstance().domains.containsKey(hostname)) {
@@ -145,6 +148,7 @@ public class EffectiveTldFinder {
      * is the NIC-assigned domain name.
      * 
      * @param hostname
+     *            a string for which to obtain a NIC-assigned domain name
      * @return the NIC-assigned domain name
      */
     public static String getAssignedDomain(String hostname) {
@@ -152,8 +156,7 @@ public class EffectiveTldFinder {
         if (null == etld || etld.getDomain() == hostname.toLowerCase(Locale.getDefault())) {
             return hostname.toLowerCase(Locale.getDefault());
         }
-        String domain = hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
-        return domain;
+        return hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
     }
 
     public boolean isConfigured() {
@@ -185,10 +188,10 @@ public class EffectiveTldFinder {
             } else {
                 domain = line;
             }
-            domain = normalize_name(domain);
+            domain = normalizeName(domain);
         }
 
-        private String normalize_name(String name) {
+        private String normalizeName(String name) {
             String[] parts = name.split(DOT_REGEX);
             if (parts.length < 2) {
                 return name;

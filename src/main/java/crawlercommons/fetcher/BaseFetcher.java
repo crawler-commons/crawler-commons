@@ -36,9 +36,9 @@ public abstract class BaseFetcher implements Serializable {
 
     public static final int DEFAULT_MAX_CONTENT_SIZE = 64 * 1024;
 
-    protected Map<String, Integer> _maxContentSizes = new HashMap<String, Integer>();
+    protected Map<String, Integer> _maxContentSizes = new HashMap<>();
     protected int _defaultMaxContentSize = DEFAULT_MAX_CONTENT_SIZE;
-    protected Set<String> _validMimeTypes = new HashSet<String>();
+    protected Set<String> _validMimeTypes = new HashSet<>();
 
     public BaseFetcher() {
     }
@@ -95,12 +95,12 @@ public abstract class BaseFetcher implements Serializable {
     }
 
     /**
-     * Get the content stored in the resource referenced by <url>
+     * Get the content stored in the resource referenced by the 'url' parameter.
      * 
-     * @param url
-     * @param payload
-     * @return
-     * @throws BaseFetchException
+     * @param url a string url for which to get content
+     * @param payload a populated {@link crawlercommons.fetcher.Payload}
+     * @return the {@link crawlercommons.fetcher.FetchedResult} associated with the URL
+     * @throws BaseFetchException if an error results from fetching the url.
      */
     public abstract FetchedResult get(String url, Payload payload) throws BaseFetchException;
 

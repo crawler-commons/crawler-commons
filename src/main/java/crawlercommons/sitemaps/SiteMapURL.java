@@ -30,8 +30,8 @@ import java.util.Locale;
  * @author fmccown
  */
 public class SiteMapURL {
-    private static Logger LOG = LoggerFactory.getLogger(SiteMapURL.class);
-    public static double defaultPriority = 0.5;
+    private static final Logger LOG = LoggerFactory.getLogger(SiteMapURL.class);
+    public static final double DEFAULT_PRIORITY = 0.5;
 
     /**
      * Allowed change frequencies
@@ -60,7 +60,7 @@ public class SiteMapURL {
     /**
      * Value between [0.0 - 1.0] (optional)
      */
-    private double priority = defaultPriority;
+    private double priority = DEFAULT_PRIORITY;
 
     /**
      * could be false, if URL isn't found under base path as indicated here:
@@ -105,6 +105,7 @@ public class SiteMapURL {
      * Set the URL.
      * 
      * @param url
+     *            of the sitemap
      */
     public void setUrl(URL url) {
         this.url = url;
@@ -139,6 +140,7 @@ public class SiteMapURL {
      * Set when this URL was last modified.
      * 
      * @param lastModified
+     *            the last time the sitemap was modified
      */
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
@@ -148,6 +150,7 @@ public class SiteMapURL {
      * Set when this URL was last modified.
      * 
      * @param lastModified
+     *            the last time the sitemap was modified
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
@@ -167,13 +170,14 @@ public class SiteMapURL {
      * is used if the given priority is out of range).
      * 
      * @param priority
+     *            a value between [0.0 - 1.0]
      */
     public void setPriority(double priority) {
 
         // Ensure proper value
         if (priority < 0.0 || priority > 1.0) {
-            this.priority = defaultPriority;
-            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, defaultPriority);
+            this.priority = DEFAULT_PRIORITY;
+            LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, DEFAULT_PRIORITY);
         } else {
             this.priority = priority;
         }
@@ -184,18 +188,19 @@ public class SiteMapURL {
      * is used if the given priority missing or is out of range).
      * 
      * @param priorityStr
+     *            a value between [0.0 - 1.0]
      */
     public void setPriority(String priorityStr) {
         try {
             if (priorityStr == null || priorityStr.isEmpty()) {
-                LOG.debug("This item contains no priority (which is ok as text sitemaps don't have priority for example), defaulting priority value to: {}", defaultPriority);
-                this.priority = defaultPriority;
+                LOG.debug("This item contains no priority (which is ok as text sitemaps don't have priority for example), defaulting priority value to: {}", DEFAULT_PRIORITY);
+                this.priority = DEFAULT_PRIORITY;
             } else {
                 setPriority(Double.parseDouble(priorityStr));
             }
         } catch (NumberFormatException nfe) {
-            LOG.warn("Can't set the priority, because I can't understand this value: {}, Priority should be between 0 to 1, reverting to default priority value: {}", priorityStr, defaultPriority);
-            this.priority = defaultPriority;
+            LOG.warn("Can't set the priority, because I can't understand this value: {}, Priority should be between 0 to 1, reverting to default priority value: {}", priorityStr, DEFAULT_PRIORITY);
+            this.priority = DEFAULT_PRIORITY;
         }
     }
 
@@ -212,6 +217,8 @@ public class SiteMapURL {
      * Set the URL's change frequency
      * 
      * @param changeFreq
+     *            a {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency}
+     *            for this sitemap
      */
     public void setChangeFrequency(ChangeFrequency changeFreq) {
         this.changeFreq = changeFreq;
@@ -222,6 +229,9 @@ public class SiteMapURL {
      * current frequency in this instance will be set to NULL
      * 
      * @param changeFreq
+     *            a string representing a
+     *            {@link crawlercommons.sitemaps.SiteMapURL.ChangeFrequency} for
+     *            this sitemap
      */
     public void setChangeFrequency(String changeFreq) {
 
@@ -251,6 +261,9 @@ public class SiteMapURL {
     /**
      * Valid means that it follows the official guidelines that the siteMapURL
      * must be under the base url
+     * 
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
      */
     public void setValid(boolean valid) {
         this.valid = valid;
@@ -258,6 +271,8 @@ public class SiteMapURL {
 
     /**
      * Is the siteMapURL under the base url ?
+     * 
+     * @return true if the syntax is valid, false otherwise
      */
     public boolean isValid() {
         return valid;
