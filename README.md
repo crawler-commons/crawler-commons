@@ -1,8 +1,7 @@
-[![license](https://img.shields.io/github/license/crawler-commons/crawler-commons.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Build Status](https://api.travis-ci.org/crawler-commons/crawler-commons.svg?branch=master)](https://travis-ci.org/crawler-commons/crawler-commons)
 [![SonarQube Tech Debt](https://img.shields.io/sonar/http/nemo.sonarqube.org/com.github.crawler-commons:crawler-commons/tech_debt.svg?maxAge=2592000?style=plastic)](https://nemo.sonarqube.com/dashboard/index/com.github.crawler-commons:crawler-commons)
 [![codecov](https://codecov.io/gh/crawler-commons/crawler-commons/branch/master/graph/badge.svg)](https://codecov.io/gh/crawler-commons/crawler-commons)
-
+[![license](https://img.shields.io/github/license/crawler-commons/crawler-commons.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # Overview
 
