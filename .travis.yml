@@ -1,10 +1,16 @@
 language: java
 
+install:
+  - sudo apt-get update
+
 jdk:
   - oraclejdk8
 
 script:
-  - mvn install javadoc:aggregate
+  - mvn clean javadoc:aggregate test jacoco:report org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarqube.com -Dsonar.login=803861c9f2087ac0b7ca049677f0f7382b8476b7 -Ptest-coverage
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:
