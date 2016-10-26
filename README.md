@@ -1,4 +1,5 @@
 [![Build Status](https://api.travis-ci.org/crawler-commons/crawler-commons.svg?branch=master)](https://travis-ci.org/crawler-commons/crawler-commons)
+[![license](https://img.shields.io/github/license/crawler-commons/crawler-commons.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # Overview
 
