@@ -9,6 +9,7 @@ crawler-commons is a set of reusable Java components that implement functionalit
 
 ## Javadocs
 
+* [0.7](http://crawler-commons.github.io/crawler-commons/0.7/)
 * [0.6](http://crawler-commons.github.io/crawler-commons/0.6/apidocs/)
 * [0.5](http://crawler-commons.googlecode.com/svn/wiki/javadoc/0.5/index.html)
 
@@ -21,6 +22,20 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
 
 # Crawler-Commons News
+
+## 24th November 2016  - crawler-commons 0.7 released
+
+We are glad to announce the 0.7 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-0.7/CHANGES.txt) file included with the release for a full list of details.
+The main changes are that Crawler-Commons now requires JAVA 8 and that the package crawlercommons.url has been replaced with crawlercommons.domains. If your project uses CC then you might want to run the following command on it
+
+```
+find . -type f -print0 | xargs -0 sed -i 's/import crawlercommons\.url\./import crawlercommons\.domains\./'
+```
+
+Please note also that this is the last release containing the HTTP fetcher support, which is deprecated and will be removed from the next version.
+
+The version 0.7 contains numerous improvements and bugfixes and all users are invited to upgrade to this version.
+
 
 ## 11th June 2015 - crawler-commons 0.6 is released
 

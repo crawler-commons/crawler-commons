@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
-Current Development 0.7-SNAPSHOT
+Current Development 0.8-SNAPSHOT
+
+Release 0.7 (2016-11-24)
 - Upgrade to JDK 1.8 (lewismc) #126
 - [Sitemaps] SitemapParser methods now protected (michaellavelle) #124
 - [Sitemaps] Faster parsing of dates (jnioche) #117
