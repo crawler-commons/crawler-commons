@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.8-SNAPSHOT
+- Remove deprecated HTTP fetcher (kkrugler) #96
 
 Release 0.7 (2016-11-24)
 - Upgrade to JDK 1.8 (lewismc) #126
