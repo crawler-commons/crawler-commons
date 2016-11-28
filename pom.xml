@@ -65,6 +65,8 @@
 			<id>KKrugler</id>
 			<name>Ken Krugler</name>
 			<email>kkrugler_lists@transpac.com</email>
+			<organization>Scale Unlimited</organization>
+			<organizationUrl>http://www.scaleunlimited.com</organizationUrl>
 		</developer>
 
 		<developer>
@@ -336,7 +338,6 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<httpclient.version>4.5.1</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
 		<tika-core.version>1.13</tika-core.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>
@@ -373,12 +374,6 @@
 	<dependencies>
 
 		<!-- Compile time dependencies -->
-
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>
