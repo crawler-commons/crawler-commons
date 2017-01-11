@@ -147,6 +147,13 @@ public class BasicURLNormalizerTest {
         normalizeTest("http://foo.com//aa//bb//foo.html", "http://foo.com/aa/bb/foo.html");
         normalizeTest("http://foo.com////aa////bb////foo.html", "http://foo.com/aa/bb/foo.html");
         normalizeTest("http://foo.com/aa?referer=http://bar.com", "http://foo.com/aa?referer=http://bar.com");
+
+        // check URLs without host (authority)
+        normalizeTest("file:///foo/bar.txt", "file:///foo/bar.txt");
+        normalizeTest("ftp:/", "ftp:/");
+        normalizeTest("http:", "http:/");
+        normalizeTest("http:////", "http:/");
+        normalizeTest("http:///////", "http:/");
     }
 
     private void normalizeTest(String weird, String normal) throws Exception {

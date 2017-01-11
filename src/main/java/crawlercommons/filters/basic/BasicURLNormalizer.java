@@ -108,7 +108,7 @@ public class BasicURLNormalizer extends URLFilter {
 
         if ("http".equals(protocol) || "https".equals(protocol) || "ftp".equals(protocol)) {
 
-            if (host != null) {
+            if (host != null && url.getAuthority() != null) {
                 String newHost = host.toLowerCase(Locale.ROOT); // lowercase
                                                                 // host
                 if (!host.equals(newHost)) {
@@ -119,6 +119,9 @@ public class BasicURLNormalizer extends URLFilter {
                     // user, etc.) which will likely cause a change if left away
                     changed = true;
                 }
+            } else {
+                // no host or authority: recompose the URL from components
+                changed = true;
             }
 
             if (port == url.getDefaultPort()) { // uses default port
