@@ -236,7 +236,7 @@ public class SiteMapURL {
     public void setChangeFrequency(String changeFreq) {
 
         if (changeFreq != null) {
-            changeFreq = changeFreq.toUpperCase(Locale.getDefault());
+            changeFreq = changeFreq.toUpperCase(Locale.ROOT);
 
             if (changeFreq.contains("ALWAYS")) {
                 this.changeFreq = ChangeFrequency.ALWAYS;

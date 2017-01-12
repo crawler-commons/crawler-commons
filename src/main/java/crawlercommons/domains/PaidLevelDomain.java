@@ -76,7 +76,7 @@ public class PaidLevelDomain {
         }
 
         int firstHostPiece = 0;
-        if (ccTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.getDefault()))) {
+        if (ccTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.ROOT))) {
             // We have a country code at the end. See if the preceding piece is
             // either
             // a two-letter name (country code or funky short gTLD), or one of
@@ -85,15 +85,15 @@ public class PaidLevelDomain {
             if (subNames[numPieces - 2].length() <= 2) {
                 // Must be xxx.co.jp format
                 firstHostPiece = numPieces - 3;
-            } else if (gTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.getDefault()))) {
+            } else if (gTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.ROOT))) {
                 // Must be xxx.com.mx format
                 firstHostPiece = numPieces - 3;
             } else {
                 // Must be xxx.it format
                 firstHostPiece = numPieces - 2;
             }
-        } else if (gTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.getDefault()))) {
-            if (ccTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.getDefault()))) {
+        } else if (gTLDs.contains(subNames[numPieces - 1].toLowerCase(Locale.ROOT))) {
+            if (ccTLDs.contains(subNames[numPieces - 2].toLowerCase(Locale.ROOT))) {
                 // Must be xxx.de.com format
                 firstHostPiece = numPieces - 3;
             } else {
