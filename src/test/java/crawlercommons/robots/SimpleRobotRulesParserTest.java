@@ -706,7 +706,7 @@ public class SimpleRobotRulesParserTest {
         assertEquals("Found sitemap", 3, rules.getSitemaps().size());
         // check that the last one is not lowercase only
         String url = rules.getSitemaps().get(2);
-        boolean lowercased = url.equals(url.toLowerCase(Locale.getDefault()));
+        boolean lowercased = url.equals(url.toLowerCase(Locale.ROOT));
         assertFalse("Sitemap case check", lowercased);
     }
 

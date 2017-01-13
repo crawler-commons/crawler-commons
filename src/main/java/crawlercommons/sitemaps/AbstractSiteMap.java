@@ -41,13 +41,13 @@ public abstract class AbstractSiteMap {
     private static final ThreadLocal<DateFormat> W3C_NO_SECONDS_FORMAT = new ThreadLocal<DateFormat>() {
 
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.getDefault());
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.ROOT);
         }
     };
 
     private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
         protected DateFormat initialValue() {
-            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.getDefault());
+            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.ROOT);
             result.setTimeZone(TimeZone.getTimeZone("UTC"));
             return result;
         }
