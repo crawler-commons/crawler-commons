@@ -59,9 +59,12 @@ public class SiteMapParser {
     private static final int MAX_URLS = 50000;
 
     /**
-     * Sitemap docs must be limited to 10MB (10,485,760 bytes)
+     * Sitemaps (including sitemap index files) &quot;must be no larger than
+     * 50MB (52,428,800 bytes)&quot; as specified in the
+     * <a href="https://www.sitemaps.org/protocol.html#index">Sitemaps XML
+     * format</a> (before Nov. 2016 the limit has been 10MB).
      */
-    public static final int MAX_BYTES_ALLOWED = 10485760;
+    public static final int MAX_BYTES_ALLOWED = 52428800;
 
     /* Tika's MediaType components */
     private static final Tika TIKA = new Tika();
