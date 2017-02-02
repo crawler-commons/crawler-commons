@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.8-SNAPSHOT
+- Use StandardCharsets where applicable (sebastian-nagel) #141
 - Increase sitemap size limit to 50MB (Chaiavi) #132
 - Remove dependencies to system-specific locale (sebastian-nagel) #137
 - BasicURLNormalizer: NPE for URLs without authority (sebastian-nagel) #136

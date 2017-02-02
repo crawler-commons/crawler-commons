@@ -16,12 +16,13 @@
 
 package crawlercommons.sitemaps;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -214,12 +215,7 @@ public class SiteMapParser {
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(xmlContent));
         InputSource is = new InputSource();
-        try {
-            is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs, "UTF-8")));
-        } catch (UnsupportedEncodingException e) {
-            IOUtils.closeQuietly(bomIs);
-            throw new RuntimeException("Impossible exception", e);
-        }
+        is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs, UTF_8)));
 
         return processXml(sitemapUrl, is);
     }
@@ -241,7 +237,7 @@ public class SiteMapParser {
 
         BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(content));
         @SuppressWarnings("resource")
-        BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, UTF_8));
 
         String line;
         int i = 1;

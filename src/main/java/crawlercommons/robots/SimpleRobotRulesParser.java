@@ -16,9 +16,10 @@
 
 package crawlercommons.robots;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -395,33 +396,29 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         int bytesLen = content.length;
         int offset = 0;
-        String encoding = "us-ascii";
+        Charset encoding = StandardCharsets.US_ASCII;
 
         // Check for a UTF-8 BOM at the beginning (EF BB BF)
         if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB) && (content[2] == (byte) 0xBF)) {
             offset = 3;
             bytesLen -= 3;
-            encoding = "UTF-8";
+            encoding = StandardCharsets.UTF_8;
         }
         // Check for UTF-16LE BOM at the beginning (FF FE)
         else if ((bytesLen >= 2) && (content[0] == (byte) 0xFF) && (content[1] == (byte) 0xFE)) {
             offset = 2;
             bytesLen -= 2;
-            encoding = "UTF-16LE";
+            encoding = StandardCharsets.UTF_16LE;
         }
         // Check for UTF-16BE BOM at the beginning (FE FF)
         else if ((bytesLen >= 2) && (content[0] == (byte) 0xFE) && (content[1] == (byte) 0xFF)) {
             offset = 2;
             bytesLen -= 2;
-            encoding = "UTF-16BE";
+            encoding = StandardCharsets.UTF_16BE;
         }
 
         String contentAsStr;
-        try {
-            contentAsStr = new String(content, offset, bytesLen, encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Impossible unsupported encoding exception for " + encoding);
-        }
+        contentAsStr = new String(content, offset, bytesLen, encoding);
 
         // Decide if we need to do special HTML processing.
         boolean isHtmlType = ((contentType != null) && contentType.toLowerCase(Locale.ROOT).startsWith("text/html"));
