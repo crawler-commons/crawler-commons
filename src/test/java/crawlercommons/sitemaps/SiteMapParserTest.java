@@ -16,13 +16,14 @@
 
 package crawlercommons.sitemaps;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -59,7 +60,7 @@ public class SiteMapParserTest {
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<sitemap>")
                         .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>").append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>").append("</sitemap>").append("<sitemap>")
                         .append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>").append("  <lastmod>2005-01-01</lastmod>").append("</sitemap>").append("</sitemapindex>");
-        byte[] content = scontent.toString().getBytes("UTF-8");
+        byte[] content = scontent.toString().getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -95,7 +96,7 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/plain";
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
-        byte[] content = scontent.getBytes("UTF-8");
+        byte[] content = scontent.getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemap.txt");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -110,7 +111,7 @@ public class SiteMapParserTest {
     public void testSitemapTXTWithXMLExt() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
-        byte[] content = scontent.getBytes("UTF-8");
+        byte[] content = scontent.getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemap.xml");
         String contentType = "text/plain";
 
@@ -173,7 +174,7 @@ public class SiteMapParserTest {
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
                         .append("<url><!-- This file is not a valid XML file --></url>").append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
                         .append("</url><!-- missing opening url tag --></url></urlset>");
-        byte[] content = scontent.toString().getBytes("UTF-8");
+        byte[] content = scontent.toString().getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         parser.parseSiteMap(contentType, content, url); // This Sitemap contains
@@ -257,7 +258,7 @@ public class SiteMapParserTest {
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
                         .append("<loc>http://www.example.com/</loc>").append("</url>").append("</urlset>");
-        byte[] content = scontent.toString().getBytes("UTF-8");
+        byte[] content = scontent.toString().getBytes(UTF_8);
 
         URL url = new URL("http://www.example.com/subsection/sitemap.xml");
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -284,10 +285,11 @@ public class SiteMapParserTest {
      * 
      * See https://github.com/crawler-commons/crawler-commons/issues/87
      * 
-     * @throws Exception
+     * @throws IOException
+     * @throws UnknownFormatException
      */
     @Test
-    public void testRSS10SyndicationFormat() throws Exception {
+    public void testRSS10SyndicationFormat() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
 
         String contentType = "text/xml";
@@ -308,7 +310,7 @@ public class SiteMapParserTest {
                         .append("<link>http://www.example.com/pub/2000/08/09/xslt/xslt.html</link>")
                         .append("<description>Processing document inclusions with general XML tools can be problematic. This article proposes a way of preserving inclusion"
                                         + "information through SAX-based processing. </description> </item> </rdf:RDF>");
-        byte[] content = scontent.toString().getBytes("UTF-8");
+        byte[] content = scontent.toString().getBytes(UTF_8);
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
@@ -321,9 +323,8 @@ public class SiteMapParserTest {
     /**
      * Returns a good simple default XML sitemap as a byte array
      * 
-     * @throws UnsupportedEncodingException
      */
-    private byte[] getXMLSitemapAsBytes() throws UnsupportedEncodingException {
+    private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
         scontent.append("<url>  <loc>").append(sitemapURLs[0]).append("</loc>  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
@@ -334,7 +335,7 @@ public class SiteMapParserTest {
         scontent.append("<url>  <loc><url><![CDATA[").append(sitemapURLs[4]).append("]]></url></loc>  <lastmod>2004-11-23</lastmod>").append("</url>");
         scontent.append("</urlset>");
 
-        return scontent.toString().getBytes("UTF-8");
+        return scontent.toString().getBytes(UTF_8);
     }
 
     private static String[] sitemapURLs = new String[] { "http://www.example.com/", "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii",

@@ -16,13 +16,14 @@
 
 package crawlercommons.filters.basic;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,9 +56,6 @@ public class BasicURLNormalizer extends URLFilter {
      * Nutch 1098 - finds URL encoded parts of the URL
      */
     private final static Pattern unescapeRulePattern = Pattern.compile("%([0-9A-Fa-f]{2})");
-
-    // charset used for encoding URLs before escaping
-    private final static Charset utf8 = Charset.forName("UTF-8");
 
     /** look-up table for characters which should not be escaped in URL paths */
     private final static boolean[] unescapedCharacters = new boolean[128];
@@ -256,7 +254,7 @@ public class BasicURLNormalizer extends URLFilter {
         StringBuilder sb = new StringBuilder(path.length());
 
         // Traverse over all bytes in this URL
-        for (byte b : path.getBytes(utf8)) {
+        for (byte b : path.getBytes(UTF_8)) {
             // Is this a control character?
             if (b < 33 || b == 91 || b == 93) {
                 // Start escape sequence
@@ -285,7 +283,7 @@ public class BasicURLNormalizer extends URLFilter {
     public static void main(String args[]) throws IOException {
         BasicURLNormalizer normalizer = new BasicURLNormalizer();
         String line, normUrl;
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, utf8));
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, UTF_8));
         while ((line = in.readLine()) != null) {
             normUrl = normalizer.filter(line);
             LOG.info("{} => {}", line, normUrl);
