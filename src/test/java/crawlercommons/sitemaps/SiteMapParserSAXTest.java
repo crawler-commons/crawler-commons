@@ -30,7 +30,6 @@ import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,9 +39,9 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
-public class SiteMapParserTest {
+public class SiteMapParserSAXTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SiteMapParserTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SiteMapParserSAXTest.class);
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +53,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapIndex() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<sitemap>")
@@ -93,7 +92,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapTXT() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "text/plain";
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
         byte[] content = scontent.getBytes(UTF_8);
@@ -109,7 +108,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapTXTWithXMLExt() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String scontent = "http://www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11";
         byte[] content = scontent.getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemap.xml");
@@ -125,7 +124,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapXML() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "text/xml";
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap.xml");
@@ -145,7 +144,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapXMLMediaTypes() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap.nonXmlExt");
 
@@ -168,7 +167,7 @@ public class SiteMapParserTest {
      */
     @Test(expected = UnknownFormatException.class)
     public void testSitemapParserBrokenXml() throws IOException, UnknownFormatException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
@@ -184,7 +183,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testMissingLocSitemapIndexFile() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         File smFile = new File("src/test/resources/sitemaps/sitemap.index.xml");
         InputStream is = new FileInputStream(smFile);
         byte[] content = IOUtils.toByteArray(is);
@@ -199,7 +198,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapGZ() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "application/gzip";
         File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
         InputStream is = new FileInputStream(gzSitemapFile);
@@ -215,7 +214,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapGZMediaTypes() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
         InputStream is = new FileInputStream(gzSitemapFile);
         byte[] content = IOUtils.toByteArray(is);
@@ -233,7 +232,7 @@ public class SiteMapParserTest {
 
     @Test(expected = UnknownFormatException.class)
     public void testSitemapWithOctetMediaType() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "application/octet-stream";
         byte[] content = getXMLSitemapAsBytes();
         URL url = new URL("http://www.example.com/sitemap");
@@ -253,7 +252,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testLenientParser() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
@@ -269,7 +268,7 @@ public class SiteMapParserTest {
         assertEquals(0, sm.getSiteMapUrls().size());
 
         // Now try again with lenient parsing. We should get one invalid URL
-        parser = new SiteMapParser(false);
+        parser = new SiteMapParserSAX(false);
         asm = parser.parseSiteMap(contentType, content, url);
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
@@ -290,7 +289,7 @@ public class SiteMapParserTest {
      */
     @Test
     public void testRSS10SyndicationFormat() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
 
         String contentType = "text/xml";
         URL url = new URL("http://www.example.com/sitemapindex.xml");
@@ -320,11 +319,10 @@ public class SiteMapParserTest {
         assertEquals("http://www.example.com/pub/2000/08/09/xslt/xslt.html", sm.getSiteMapUrls().iterator().next().getUrl().toString());
     }
 
-    @Ignore("fails for DOM-based parser")
     @Test
     public void testPartialSitemapsAllowed() throws UnknownFormatException, IOException {
 
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX(false, true);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
@@ -345,7 +343,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testUrlLocUrl() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser(false);
+        SiteMapParser parser = new SiteMapParserSAX(false);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>").append("<loc>").append("<url>")
@@ -364,11 +362,10 @@ public class SiteMapParserTest {
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
     }
 
-    @Ignore("fails for DOM-based parser")
     @Test
     public void testPartialSitemapIndicesAllowed() throws UnknownFormatException, IOException {
 
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX(false, true);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")

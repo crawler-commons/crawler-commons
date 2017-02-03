@@ -32,10 +32,18 @@ public class SiteMapTester {
 
     private static final Logger LOG = LoggerFactory.getLogger(SiteMapTester.class);
     private static SiteMapParser parser = new SiteMapParser(false);
+    private static SiteMapParser saxParser = new SiteMapParserSAX(false, true);
 
     public static void main(String[] args) throws IOException, UnknownFormatException {
         if (args.length < 1) {
+            LOG.error("Fetch and process a sitemap (recursively if a sitemap index)");
             LOG.error("Usage: SiteMapTester <URL_TO_TEST> [MIME_TYPE]");
+            LOG.error("Options:");
+            LOG.error("  URL_TO_TEST  URL of sitemap");
+            LOG.error("  MIME_TYPE    force processing sitemap as MIME type,");
+            LOG.error("               bypass automatic MIME type detection");
+            LOG.error("Java properties:");
+            LOG.error("  sitemap.useSax  if true use SAX parser to process sitemaps");
         } else {
             URL url = new URL(args[0]);
             String mt = (args.length > 1) ? args[1] : null;
@@ -51,12 +59,21 @@ public class SiteMapTester {
     private static void parse(URL url, String mt) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
 
+        boolean useSaxParser = new Boolean(System.getProperty("sitemap.useSax"));
+
+        LOG.info("Parsing {} {} using {} parser", url, ((mt != null && !mt.isEmpty()) ? "as MIME type " + mt : ""), (useSaxParser ? "SAX" : "DOM"));
+
+        SiteMapParser p = parser;
+        if (useSaxParser) {
+            p = saxParser;
+        }
+
         AbstractSiteMap sm = null;
         // guesses the mimetype
         if (mt == null || mt.equals("")) {
-            sm = parser.parseSiteMap(content, url);
+            sm = p.parseSiteMap(content, url);
         } else {
-            sm = parser.parseSiteMap(mt, content, url);
+            sm = p.parseSiteMap(mt, content, url);
         }
 
         if (sm.isIndex()) {

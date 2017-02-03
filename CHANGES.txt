@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.8-SNAPSHOT
+- [Sitemaps] Optionally use SAX parser (matt-deboer, jnioche, sebastian-nagel) #116
+- [Sitemaps] Properly log XML parsing errors (sebastian-nagel) #146
 - Use StandardCharsets where applicable (sebastian-nagel) #141
 - Increase sitemap size limit to 50MB (Chaiavi) #132
 - Remove dependencies to system-specific locale (sebastian-nagel) #137
