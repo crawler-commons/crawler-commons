@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FilenameUtils;
@@ -44,7 +45,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
@@ -296,7 +300,21 @@ public class SiteMapParser {
 
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            doc = dbf.newDocumentBuilder().parse(is);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            db.setErrorHandler(new ErrorHandler() {
+                public void warning(SAXParseException e) throws SAXException {
+                    LOG.warn("Warning parsing XML: {}", e.toString());
+                }
+                public void fatalError(SAXParseException e) throws SAXException {
+                    LOG.error("Fatal error parsing XML: {}", e.toString());
+                    throw e;
+                }
+                public void error(SAXParseException e) throws SAXException {
+                    LOG.error("Error parsing XML: {}", e.toString());
+                    throw e;
+                }
+            });
+            doc = db.parse(is);
         } catch (Exception e) {
             LOG.debug(e.toString(), e);
             throw new UnknownFormatException("Error parsing XML for: " + sitemapUrl);
