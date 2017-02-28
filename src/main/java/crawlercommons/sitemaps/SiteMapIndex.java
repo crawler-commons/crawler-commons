@@ -48,7 +48,7 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @param sitemap
      *            - Sitemap to be added to the list of Sitemaps
      */
-    void addSitemap(AbstractSiteMap sitemap) {
+    public void addSitemap(AbstractSiteMap sitemap) {
         sitemaps.add(sitemap);
     }
 
