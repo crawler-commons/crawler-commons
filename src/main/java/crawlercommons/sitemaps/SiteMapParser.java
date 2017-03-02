@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -328,7 +330,18 @@ public class SiteMapParser {
 
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            // disable validation and avoid that remote DTDs, schemas, etc. are fetched
+            dbf.setValidating(false);
+            dbf.setXIncludeAware(false);
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             DocumentBuilder db = dbf.newDocumentBuilder();
+            db.setEntityResolver(new EntityResolver() {
+                // noop entity resolver, does not fetch remote content
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId) {
+                    return new InputSource(new StringReader(""));
+                }
+            });
             db.setErrorHandler(new ErrorHandler() {
                 public void warning(SAXParseException e) throws SAXException {
                     LOG.warn("Warning parsing XML: {}", e.toString());
