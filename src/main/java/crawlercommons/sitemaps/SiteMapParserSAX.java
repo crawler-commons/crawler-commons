@@ -211,13 +211,30 @@ public class SiteMapParserSAX extends SiteMapParser {
             if (XML_MEDIA_TYPES.contains(mediaType)) {
                 return processXml(url, content);
             } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
-                return processText(url.toString(), content);
+                return processText(url, content);
             } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
-                return processGzip(url, content);
-            } else {
-                mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
-                return parseSiteMap(mediaType.toString(), content, url);
+                InputStream decompressed;
+                MediaType embeddedType;
+                try {
+                    decompressed = new GZIPInputStream(new ByteArrayInputStream(content));
+                    embeddedType = MediaType.parse(TIKA.detect(decompressed));
+                } catch (Exception e) {
+                    UnknownFormatException err = new UnknownFormatException("Failed to detect embedded MediaType of gzipped sitemap: " + url + ", caused by " + e);
+                    err.initCause(e);
+                    throw err;
+                }
+                if (XML_MEDIA_TYPES.contains(embeddedType)) {
+                    return processGzippedXML(url, content);
+                } else if (TEXT_MEDIA_TYPES.contains(embeddedType)) {
+                    // re-open decompressed stream and parse as text
+                    decompressed = new GZIPInputStream(new ByteArrayInputStream(content));
+                    return processText(url, decompressed);
+                } else if (GZ_MEDIA_TYPES.contains(embeddedType)) {
+                    throw new UnknownFormatException("Can't parse gzip recursively: " + url);
+                }
+                throw new UnknownFormatException("Can't parse a gzipped sitemap with the embedded MediaType of: " + embeddedType + " (at: " + url + ")");
             }
+            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
         }
 
         throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
@@ -248,22 +265,36 @@ public class SiteMapParserSAX extends SiteMapParser {
      * priorities, last mods, etc.
      * 
      * @param sitemapUrl
-     *            a string sitemap URL
-     * @param sitemapUrl
      *            URL to sitemap file
      * @param content
      *            the byte[] backing the sitemapUrl
      * @return The site map
      * @throws IOException
-     *             if there is an error reading in the site map String
+     *             if there is an error reading in the site map content
      */
-    protected SiteMap processText(String sitemapUrl, byte[] content) throws IOException {
+    protected SiteMap processText(URL sitemapUrl, byte[] content) throws IOException {
+        return processText(sitemapUrl, new ByteArrayInputStream(content));
+    }
+
+    /**
+     * Process a text-based Sitemap. Text sitemaps only list URLs but no
+     * priorities, last mods, etc.
+     *
+     * @param sitemapUrl
+     *            URL to sitemap file
+     * @param stream
+     *            content stream
+     * @return The site map
+     * @throws IOException
+     *             if there is an error reading in the site map content
+     */
+    protected SiteMap processText(URL sitemapUrl, InputStream stream) throws IOException {
         LOG.debug("Processing textual Sitemap");
 
         SiteMap textSiteMap = new SiteMap(sitemapUrl);
         textSiteMap.setType(SitemapType.TEXT);
 
-        BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(content));
+        BOMInputStream bomIs = new BOMInputStream(stream);
         @SuppressWarnings("resource")
         BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, UTF_8));
 
@@ -292,24 +323,20 @@ public class SiteMapParserSAX extends SiteMapParser {
      * @throws IOException
      *             if there is an error reading in the gzip {@link java.net.URL}
      */
-    protected AbstractSiteMap processGzip(URL url, byte[] response) throws IOException, UnknownFormatException {
+    protected AbstractSiteMap processGzippedXML(URL url, byte[] response) throws IOException, UnknownFormatException {
 
-        LOG.debug("Processing gzip");
+        LOG.debug("Processing gzipped XML");
 
-        AbstractSiteMap smi;
         InputStream is = new ByteArrayInputStream(response);
 
         // Remove .gz ending
         String xmlUrl = url.toString().replaceFirst("\\.gz$", "");
-
         LOG.debug("XML url = {}", xmlUrl);
 
         BOMInputStream decompressed = new BOMInputStream(new GZIPInputStream(is));
         InputSource in = new InputSource(decompressed);
         in.setSystemId(xmlUrl);
-        smi = processXml(url, in);
-        decompressed.close();
-        return smi;
+        return processXml(url, in);
     }
 
     /**
@@ -337,6 +364,7 @@ public class SiteMapParserSAX extends SiteMapParser {
             }
             return sitemap;
         } catch (IOException e) {
+            LOG.warn("Error parsing sitemap {}: {}", sitemapUrl, e.getMessage());
             UnknownFormatException ufe = new UnknownFormatException("Failed to parse " + sitemapUrl);
             ufe.initCause(e);
             throw ufe;
