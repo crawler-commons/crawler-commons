@@ -213,6 +213,22 @@ public class SiteMapParserSAXTest {
     }
 
     @Test
+    public void testSitemapTextGZ() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParserSAX();
+        String contentType = "application/gzip";
+        File gzSitemapFile = new File("src/test/resources/sitemaps/sitemap.txt.gz");
+        InputStream is = new FileInputStream(gzSitemapFile);
+        byte[] content = IOUtils.toByteArray(is);
+
+        URL url = new URL("http://www.example.com/sitemap.txt.gz");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(5, sm.getSiteMapUrls().size());
+    }
+
+    @Test
     public void testSitemapGZMediaTypes() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
         File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
