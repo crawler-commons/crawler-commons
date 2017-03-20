@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.8-SNAPSHOT
+- Update forbiddenapis to v2.3 (jnioche) #99
 - [Sitemaps] gzipped text files fail to parse (sebastian-nagel) #143
 - [Sitemaps] Optionally use SAX parser (matt-deboer, jnioche, sebastian-nagel) #116
 - [Sitemaps] Properly log XML parsing errors (sebastian-nagel) #146
