@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -66,6 +67,9 @@ class XMLHandler extends DelegatorHandler {
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.XML);
         loc = new StringBuilder();
+    }
+
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {

@@ -68,6 +68,7 @@ class AtomHandler extends DelegatorHandler {
     private URL loc;
     private String lastMod;
     boolean valid;
+    private String rel;
     private int i = 0;
 
     AtomHandler(URL url, LinkedList<String> elementStack, boolean strict) {
@@ -77,18 +78,29 @@ class AtomHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if ("entry".equals(localName)) {
+        if ("entry".equals(qName)) {
             loc = null;
             lastMod = null;
-        } else if ("link".equals(localName)) {
+            rel = null;
+        } else if ("link".equals(qName)) {
             String href = attributes.getValue("href");
+            if (href == null)
+                return;
             LOG.debug("href = {}", href);
-            try {
-                loc = new URL(href);
-                valid = urlIsValid(sitemap.getBaseUrl(), href);
-            } catch (MalformedURLException e) {
-                LOG.trace("Can't create an entry with a bad URL", e);
-                LOG.debug("Bad url: [{}]", href);
+            boolean v = (!isStrict() || urlIsValid(sitemap.getBaseUrl(), href));
+            String r = attributes.getValue("rel");
+            if (loc == null || (!valid && v) || (rel != null && r == null)) {
+                // - first link, or in case of multiple links:
+                // - (for a strict parser only) this link is valid and the first one is not valid
+                // - has no rel attribute while the first one does (e.g., rel="edit", rel="alternate")
+                try {
+                    loc = new URL(href);
+                    rel = r;
+                    valid = v;
+                } catch (MalformedURLException e) {
+                    LOG.trace("Can't create an entry with a bad URL", e);
+                    LOG.debug("Bad url: [{}]", href);
+                }
             }
         }
     }
@@ -114,7 +126,7 @@ class AtomHandler extends DelegatorHandler {
     }
 
     private void maybeAddSiteMapUrl() {
-        if (valid || !isStrict()) {
+        if (valid) {
             if (loc == null) {
                 LOG.debug("Missing url");
                 LOG.trace("Can't create an entry with a missing URL");
