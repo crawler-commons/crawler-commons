@@ -72,6 +72,9 @@ public class DelegatorHandler extends DefaultHandler {
         } else {
             elementStack.push(qName);
         }
+        if (delegate != null) {
+            delegate.startElement(uri, localName, qName, attributes);
+        }
     }
 
     private void startRootElement(String uri, String localName, String qName, Attributes attributes) {

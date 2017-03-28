@@ -184,9 +184,7 @@ public class SiteMapParserSAXTest {
     @Test
     public void testMissingLocSitemapIndexFile() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
-        File smFile = new File("src/test/resources/sitemaps/sitemap.index.xml");
-        InputStream is = new FileInputStream(smFile);
-        byte[] content = IOUtils.toByteArray(is);
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.index.xml");
 
         URL url = new URL("http://www.example.com/sitemap.index.xml");
         AbstractSiteMap asm = parser.parseSiteMap(content, url);
@@ -200,9 +198,7 @@ public class SiteMapParserSAXTest {
     public void testSitemapGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "application/gzip";
-        File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
-        InputStream is = new FileInputStream(gzSitemapFile);
-        byte[] content = IOUtils.toByteArray(is);
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/xmlSitemap.gz");
 
         URL url = new URL("http://www.example.com/sitemap.xml.gz");
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -216,9 +212,7 @@ public class SiteMapParserSAXTest {
     public void testSitemapTextGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
         String contentType = "application/gzip";
-        File gzSitemapFile = new File("src/test/resources/sitemaps/sitemap.txt.gz");
-        InputStream is = new FileInputStream(gzSitemapFile);
-        byte[] content = IOUtils.toByteArray(is);
+        byte[] content = this.getResourceAsBytes("src/test/resources/sitemaps/sitemap.txt.gz");
 
         URL url = new URL("http://www.example.com/sitemap.txt.gz");
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -231,9 +225,7 @@ public class SiteMapParserSAXTest {
     @Test
     public void testSitemapGZMediaTypes() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
-        File gzSitemapFile = new File("src/test/resources/sitemaps/xmlSitemap.gz");
-        InputStream is = new FileInputStream(gzSitemapFile);
-        byte[] content = IOUtils.toByteArray(is);
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/xmlSitemap.gz");
 
         final String[] GZ_CONTENT_TYPES = new String[] { "application/gzip", "application/x-gzip", "application/x-gunzip", "application/gzipped", "application/gzip-compressed", "gzip/document" };
         for (String contentType : GZ_CONTENT_TYPES) {
@@ -292,6 +284,17 @@ public class SiteMapParserSAXTest {
         sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+
+    @Test
+    public void testAtomFormat() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParserSAX();
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/atom.xml");
+        URL url = new URL("http://example.org/atom.xml");
+
+        SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertEquals(new URL("http://example.org/2003/12/13/atom03"), sm.getSiteMapUrls().iterator().next().getUrl());
     }
 
     /**
@@ -413,6 +416,20 @@ public class SiteMapParserSAXTest {
         scontent.append("</urlset>");
 
         return scontent.toString().getBytes(UTF_8);
+    }
+
+    /**
+     * Read a test resource file and return its content as byte array.
+     *
+     * @param resourceName
+     *            path to the resource file
+     * @return byte content of the file
+     * @throws IOException
+     */
+    private byte[] getResourceAsBytes(String resourceName) throws IOException {
+        File file = new File(resourceName);
+        InputStream is = new FileInputStream(file);
+        return IOUtils.toByteArray(is);
     }
 
     private static String[] sitemapURLs = new String[] { "http://www.example.com/", "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii",
