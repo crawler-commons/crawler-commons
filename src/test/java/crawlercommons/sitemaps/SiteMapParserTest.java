@@ -592,6 +592,21 @@ public class SiteMapParserTest {
         assertEquals(3, sm.getSiteMapUrls().size());
     }
 
+    @Test
+    public void testHebdenbridgetimesArticlesSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/hebdenbridgetimes-articles-sitemap.xml");
+
+        URL url = new URL("http://www.hebdenbridgetimes.co.uk/sitemap-article-2015-18.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(74, sm.getSiteMapUrls().size());
+    }
+
+
 
     /**
      * Returns a good simple default XML sitemap as a byte array

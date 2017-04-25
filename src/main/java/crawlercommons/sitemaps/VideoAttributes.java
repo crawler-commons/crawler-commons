@@ -17,7 +17,6 @@ package crawlercommons.sitemaps;
 
 import java.net.URL;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Locale;
 import java.util.Objects;
 

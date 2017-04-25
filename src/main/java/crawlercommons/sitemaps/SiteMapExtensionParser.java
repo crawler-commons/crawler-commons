@@ -96,7 +96,7 @@ public class SiteMapExtensionParser {
     private static NewsAttributes parseNewsNode(final Node node) {
         Element elem = (Element)node;
 
-        NodeList publicationNodes = ((Element) node).getElementsByTagNameNS(NEWS_NS, "publication");
+        NodeList publicationNodes = elem.getElementsByTagNameNS(NEWS_NS, "publication");
         String name = null;
         String language = null;
 
@@ -152,29 +152,34 @@ public class SiteMapExtensionParser {
         NamedNodeMap attributes = elem.getAttributes();
         URL href = null;
         Map<String, String> params = new HashMap<>(attributes.getLength()-1);
-        for (int i=0; i<attributes.getLength(); i++) {
-            final Node attribute = attributes.item(i);
-            final String name = attribute.getNodeName();
-            final String value = attribute.getNodeValue();
-            if ("href".equalsIgnoreCase(name)) {
-                if (value != null) {
-                    try {
-                        href = new URL(value);
-                    } catch (MalformedURLException e) {
-                        LOGGER.warn("Malformed URL in link href attribute: " + value);
+        if (attributes != null) {
+            for (int i = 0; i < attributes.getLength(); i++) {
+                final Node attribute = attributes.item(i);
+                final String name = attribute.getNodeName();
+                final String value = attribute.getNodeValue();
+                if ("href".equalsIgnoreCase(name)) {
+                    if (value != null) {
+                        try {
+                            href = new URL(value);
+                        } catch (MalformedURLException e) {
+                            LOGGER.warn("Malformed URL in link href attribute: " + value);
+                        }
+                    } else {
+                        LOGGER.warn("Unexpected null value for Link href attribute");
                     }
                 } else {
-                    LOGGER.warn("Unexpected null value for Link href attribute");
-                }
-            } else {
-                if (name != null && value != null) {
-                    params.put(name, value);
+                    if (name != null && value != null) {
+                        params.put(name, value);
+                    }
                 }
             }
+            LinkAttributes linkAttributes = new LinkAttributes(href);
+            linkAttributes.setParams(params);
+            return linkAttributes;
+        } else {
+            return null;
         }
-        LinkAttributes linkAttributes = new LinkAttributes(href);
-        linkAttributes.setParams(params);
-        return linkAttributes;
+
     }
 
     private static final ImageAttributes parseImageNode(final Node node) {
@@ -203,7 +208,7 @@ public class SiteMapExtensionParser {
         URL contentLoc = getElementURLValue(elem, VIDEOS_NS, "content_loc");
         URL playerLoc = getElementURLValue(elem, VIDEOS_NS, "player_loc");
         Integer duration = getElementIntegerValue(elem, VIDEOS_NS, "duration");
-        if (duration < 0 || duration > 28800) {
+        if (duration != null &&  (duration < 0 || duration > 28800)) {
             LOGGER.warn("Invalid value for specified duration: " + duration);
             duration = null;
         }
@@ -266,11 +271,11 @@ public class SiteMapExtensionParser {
         }
 
         Boolean isLive = null;
-        String isLiveStr = getElementValue(elem, VIDEOS_NS, "live").toLowerCase(Locale.ENGLISH);
+        String isLiveStr = getElementValue(elem, VIDEOS_NS, "live");
         if (isLiveStr != null) {
-            if ("yes".equals(isLiveStr)) {
+            if ("yes".equalsIgnoreCase(isLiveStr)) {
                 isLive = true;
-            } else if ("no".equals(isLiveStr)) {
+            } else if ("no".equalsIgnoreCase(isLiveStr)) {
                 isLive = false;
             } else {
                 LOGGER.warn("Unexpected value for live node: " + isLiveStr);
