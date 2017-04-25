@@ -16,17 +16,6 @@
 
 package crawlercommons.sitemaps;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +26,25 @@ import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class SiteMapParserTest {
@@ -403,6 +410,172 @@ public class SiteMapParserTest {
         SiteMapIndex smi = (SiteMapIndex) asm;
         assertEquals(1, smi.getSitemaps().size());
     }
+
+    @Test
+    public void testVideosSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap-videos.xml");
+
+        URL url = new URL("http://www.example.com/sitemap-video.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        VideoAttributes expectedVideoAttributes = new VideoAttributes(
+            new URL("http://www.example.com/thumbs/123.jpg"),
+            "Grilling steaks for summer",
+            "Alkis shows you how to get perfectly done steaks every\n\t\t\t\ttime",
+            new URL("http://www.example.com/video123.flv"),
+            new URL("http://www.example.com/videoplayer.swf?video=123"));
+        expectedVideoAttributes.setDuration(600);
+        Calendar expectedExpirationDate = Calendar.getInstance();
+        expectedExpirationDate.set(2009,10,05,12,20,30);
+        expectedExpirationDate.set(Calendar.MILLISECOND, 0);
+        expectedVideoAttributes.setExpirationDate(expectedExpirationDate.getTime());
+        Calendar expectedPublicationDate = Calendar.getInstance();
+        expectedPublicationDate.set(2007, 10, 05, 12, 20, 30);
+        expectedPublicationDate.set(Calendar.MILLISECOND, 0);
+        expectedVideoAttributes.setPublicationDate(expectedPublicationDate.getTime());
+        expectedVideoAttributes.setRating(4.2f);
+        expectedVideoAttributes.setViewCount(12345);
+        expectedVideoAttributes.setFamilyFriendly(true);
+        expectedVideoAttributes.setTags(new String[] {"sample_tag1", "sample_tag2"});
+        expectedVideoAttributes.setAllowedCountries(new String[]{"IE", "GB", "US", "CA"});
+        expectedVideoAttributes.setGalleryLoc(new URL("http://cooking.example.com"));
+        expectedVideoAttributes.setGalleryTitle("Cooking Videos");
+        expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[]{
+            new VideoAttributes.VideoPrice("EUR", 1.99f, VideoAttributes.VideoPriceType.own)
+        });
+        expectedVideoAttributes.setRequiresSubscription(true);
+        expectedVideoAttributes.setUploader("GrillyMcGrillerson");
+        expectedVideoAttributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
+        expectedVideoAttributes.setLive(false);
+        Collection<SiteMapURL> expected = Collections.singletonList(new SiteMapURL(
+            "http://www.example.com/videos/some_video_landing_page.html",
+            null,
+            null,
+            null,
+            true,
+            null,
+            new VideoAttributes[]{expectedVideoAttributes}, null, null));
+        assertEquals(expected, sm.getSiteMapUrls());
+    }
+
+
+    @Test
+    public void testImageSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap-images.xml");
+
+        URL url = new URL("http://www.example.com/sitemap-images.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        ImageAttributes imageAttributes1 = new ImageAttributes(new URL("http://example.com/image.jpg"));
+        ImageAttributes imageAttributes2 = new ImageAttributes(new URL("http://example.com/photo.jpg"));
+        imageAttributes2.setCaption("This is the caption.");
+        imageAttributes2.setGeoLocation("Limerick, Ireland");
+        imageAttributes2.setTitle("Example photo shot in Limerick, Ireland");
+        imageAttributes2.setLicense(new URL("https://creativecommons.org/licenses/by/4.0/legalcode"));
+        Collection<SiteMapURL> expected = Collections.singletonList(new SiteMapURL(
+            "http://www.example.com/images/some_image_landing_page.html",
+            null,
+            null,
+            null,
+            true,
+            new ImageAttributes[]{imageAttributes1, imageAttributes2},
+            null, null, null));
+        assertEquals(expected, sm.getSiteMapUrls());
+    }
+
+
+    @Test
+    public void testXHTMLLinksSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap-links.xml");
+
+        URL url = new URL("http://www.example.com/sitemap-links.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(3, sm.getSiteMapUrls().size());
+        // all three pages share the same links attributes
+        LinkAttributes[] linkAttributes = new LinkAttributes[] {
+            new LinkAttributes(new URL("http://www.example.com/deutsch/")),
+            new LinkAttributes(new URL("http://www.example.com/schweiz-deutsch/")),
+            new LinkAttributes(new URL("http://www.example.com/english/"))
+        };
+        linkAttributes[0].setParams(new HashMap<String, String>(){{
+            put("rel", "alternate");
+            put("hreflang", "de");
+        }});
+        linkAttributes[1].setParams(new HashMap<String, String>(){{
+            put("rel", "alternate");
+            put("hreflang", "de-ch");
+        }});
+        linkAttributes[2].setParams(new HashMap<String, String>(){{
+            put("rel", "alternate");
+            put("hreflang", "en");
+        }});
+
+        Collection<SiteMapURL> expected = Arrays.asList(
+            new SiteMapURL("http://www.example.com/english/",
+                null, null, null, true, null, null,
+                linkAttributes,
+                null),
+            new SiteMapURL("http://www.example.com/deutsch/",
+                null, null, null, true, null, null,
+                linkAttributes,
+                null),
+            new SiteMapURL("http://www.example.com/schweiz-deutsch/",
+                null, null, null, true, null, null,
+                linkAttributes,
+                null)
+        );
+        assertEquals(expected, sm.getSiteMapUrls());
+    }
+
+
+    @Test
+    public void testNewsSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap-news.xml");
+
+        URL url = new URL("http://www.example.org/sitemap-news.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        Calendar expectedPublicationDate = Calendar.getInstance();
+        expectedPublicationDate.set(2008,11,23);
+        expectedPublicationDate.set(Calendar.HOUR, 0);
+        expectedPublicationDate.set(Calendar.MINUTE, 0);
+        expectedPublicationDate.set(Calendar.SECOND, 0);
+        expectedPublicationDate.set(Calendar.MILLISECOND, 0);
+        NewsAttributes expectedNewsAttributes = new NewsAttributes("The Example Times", "en",
+            expectedPublicationDate.getTime(), "Companies A, B in Merger Talks");
+        expectedNewsAttributes.setKeywords(new String[]{"business", "merger", "acquisition", "A", "B"});
+        expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[]{
+            NewsAttributes.NewsGenre.PressRelease,
+            NewsAttributes.NewsGenre.Blog
+        });
+        expectedNewsAttributes.setStockTickers(new String[] {"NASDAQ:A", "NASDAQ:B"});
+        Collection<SiteMapURL> expected = Collections.singletonList(new SiteMapURL(
+            "http://www.example.org/business/article55.html",
+            null, null, null, true, null, null, null,
+            expectedNewsAttributes));
+        assertEquals(expected, sm.getSiteMapUrls());
+    }
+
 
     /**
      * Returns a good simple default XML sitemap as a byte array
