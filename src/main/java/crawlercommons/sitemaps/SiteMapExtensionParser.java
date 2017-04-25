@@ -130,12 +130,15 @@ public class SiteMapExtensionParser {
             }
         }
         String stockTickersStr = getElementValue(elem, NEWS_NS, "stock_tickers");
-        String stockTickers[] = StringUtils.split(stockTickersStr,",", 5);
-        for (int i=0; i<stockTickers.length; i++) {
-            stockTickers[i] = stockTickers[i].trim();
-        }
-        if (stockTickers.length == 5 && stockTickers[4].indexOf(",") != -1) {
-            stockTickers[4] = stockTickers[4].substring(0, stockTickers[4].indexOf(","));
+        String stockTickers[] = null;
+        if (stockTickersStr != null) {
+            stockTickers = StringUtils.split(stockTickersStr, ",", 5);
+            for (int i = 0; i < stockTickers.length; i++) {
+                stockTickers[i] = stockTickers[i].trim();
+            }
+            if (stockTickers.length == 5 && stockTickers[4].indexOf(",") != -1) {
+                stockTickers[4] = stockTickers[4].substring(0, stockTickers[4].indexOf(","));
+            }
         }
         NewsAttributes newsAttributes = new NewsAttributes(name, language, publicationDate, title);
         newsAttributes.setGenres(genres);
