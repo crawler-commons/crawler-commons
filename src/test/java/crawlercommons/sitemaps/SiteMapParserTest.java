@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -39,6 +40,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
@@ -430,12 +432,12 @@ public class SiteMapParserTest {
             new URL("http://www.example.com/video123.flv"),
             new URL("http://www.example.com/videoplayer.swf?video=123"));
         expectedVideoAttributes.setDuration(600);
-        Calendar expectedExpirationDate = Calendar.getInstance(Locale.ENGLISH);
-        expectedExpirationDate.set(2009,10,05,12,20,30);
+        Calendar expectedExpirationDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"), Locale.ENGLISH);
+        expectedExpirationDate.set(2009,10,05,19,20,30);
         expectedExpirationDate.set(Calendar.MILLISECOND, 0);
         expectedVideoAttributes.setExpirationDate(expectedExpirationDate.getTime());
-        Calendar expectedPublicationDate = Calendar.getInstance(Locale.ENGLISH);
-        expectedPublicationDate.set(2007, 10, 05, 12, 20, 30);
+        Calendar expectedPublicationDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"), Locale.ENGLISH);
+        expectedPublicationDate.set(2007, 10, 05, 19, 20, 30);
         expectedPublicationDate.set(Calendar.MILLISECOND, 0);
         expectedVideoAttributes.setPublicationDate(expectedPublicationDate.getTime());
         expectedVideoAttributes.setRating(4.2f);
@@ -555,7 +557,7 @@ public class SiteMapParserTest {
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
-        Calendar expectedPublicationDate = Calendar.getInstance(Locale.ENGLISH);
+        Calendar expectedPublicationDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
         expectedPublicationDate.set(2008,11,23);
         expectedPublicationDate.set(Calendar.HOUR, 0);
         expectedPublicationDate.set(Calendar.MINUTE, 0);
