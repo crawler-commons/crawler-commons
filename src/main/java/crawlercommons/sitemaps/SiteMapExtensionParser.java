@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -246,7 +247,7 @@ public class SiteMapExtensionParser {
         URL uploaderInfo = getElementURLAttributeValue(elem, VIDEOS_NS, "uploader", "info");
 
         String platformStr = getElementValue(elem, VIDEOS_NS, "platform");
-        String[] platforms = platformStr != null ? StringUtils.split(platformStr.toLowerCase(), " ") : null;
+        String[] platforms = platformStr != null ? StringUtils.split(platformStr.toLowerCase(Locale.ENGLISH), " ") : null;
         // to do filter platforms to fit in web, mobile, tv or use explicit enum.
         String platformRelationship = getElementAttributeValue(elem, VIDEOS_NS, "platform", "relationship");
         String[] restrictedPlatforms = null;
@@ -262,7 +263,7 @@ public class SiteMapExtensionParser {
         }
 
         Boolean isLive = null;
-        String isLiveStr = getElementValue(elem, VIDEOS_NS, "live").toLowerCase();
+        String isLiveStr = getElementValue(elem, VIDEOS_NS, "live").toLowerCase(Locale.ENGLISH);
         if (isLiveStr != null) {
             if ("yes".equals(isLiveStr)) {
                 isLive = true;

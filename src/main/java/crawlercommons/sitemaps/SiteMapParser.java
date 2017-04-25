@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -814,13 +815,13 @@ public class SiteMapParser {
             final List<String> anomalies = new ArrayList();
             boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
             if (!valid) {
-                anomalies.add(String.format("url %s not under the base url %s", url.toExternalForm(), siteMap.getBaseUrl()));
+                anomalies.add("url " + url.toExternalForm() + " not under the base url " + siteMap.getBaseUrl());
             }
             // validation: at most 1000 images per loc
             if (images != null) {
                 if (images.length > 1000) {
                     valid = false;
-                    anomalies.add(String.format("too many image nodes associated to url %s", url.toExternalForm()));
+                    anomalies.add("too many image nodes (max: 1000)");
                 }
             }
             // validation: all video tags must be valid
@@ -828,7 +829,8 @@ public class SiteMapParser {
                 for (VideoAttributes videoAttributes: videos) {
                     if (!videoAttributes.isValid()) {
                         valid = false;
-                        anomalies.add(String.format("at least a video node associated to %s is invalid", url.toExternalForm()));
+                        anomalies.add("at least a video node is invalid");
+                        break;
                     }
                 }
             }
@@ -843,15 +845,14 @@ public class SiteMapParser {
                 }
                 if (!found) {
                     valid = false;
-                    anomalies.add(String.format("alternate links associated to %s don't specify %s within the set of alternates",
-                        url.toExternalForm()));
+                    anomalies.add(url.toExternalForm() + " is missing from the set of alternates");
                 }
             }
             // validation: if news node is present, it must be valid
             if (news != null) {
                 if (!news.isValid()) {
                     valid = false;
-                    anomalies.add(String.format("news node associated to %s is not valid", url.toExternalForm()));
+                    anomalies.add("news node is not valid");
                 }
             }
             if (valid || !strict) {
@@ -859,9 +860,9 @@ public class SiteMapParser {
                 siteMap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", urlIndex + 1, sUrl);
             } else {
-                LOG.warn(String.format("URL: %s is excluded from the sitemap as it is not valid. Anomalies: %s",
+                LOG.warn("URL: {} is excluded from the sitemap as it is not valid. Anomalies: {}",
                     url.toExternalForm(),
-                    StringUtils.join(anomalies, ", ")));
+                    StringUtils.join(anomalies, ", "));
             }
         } catch (MalformedURLException e) {
             LOG.warn("Bad url: [{}]", urlStr);

@@ -17,6 +17,8 @@ package crawlercommons.sitemaps;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.Formatter;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -388,7 +390,8 @@ public class VideoAttributes {
 
         @Override
         public String toString() {
-            return String.format("value: %.2f, currency: %s, type: %s, resolution: %s", price, currency, type, resolution);
+            return String.format(Locale.ENGLISH, "value: %.2f, currency: %s, type: %s, resolution: %s",
+                price, currency, type, resolution);
         }
 
         @Override
@@ -441,8 +444,18 @@ public class VideoAttributes {
 
     @Override
     public String toString() {
-        return String.format("Video title: %s, description: %s, thumbnail: %s, contentLoc: %s, playerLoc:%s, prices: %s",
-            title, description, thumbnailLoc, contentLoc, playerLoc, prices);
+        return new StringBuilder("Video title: ")
+            .append(title)
+            .append(", description: ")
+            .append(description)
+            .append(", thumbnail: ")
+            .append(thumbnailLoc)
+            .append(", contentLoc: ")
+            .append(contentLoc)
+            .append(", playerLoc:")
+            .append(playerLoc)
+            .append(", prices: ")
+            .append(prices).toString();
     }
 
     @Override
