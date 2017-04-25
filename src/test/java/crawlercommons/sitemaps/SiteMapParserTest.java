@@ -430,11 +430,11 @@ public class SiteMapParserTest {
             new URL("http://www.example.com/video123.flv"),
             new URL("http://www.example.com/videoplayer.swf?video=123"));
         expectedVideoAttributes.setDuration(600);
-        Calendar expectedExpirationDate = Calendar.getInstance();
+        Calendar expectedExpirationDate = Calendar.getInstance(Locale.ENGLISH);
         expectedExpirationDate.set(2009,10,05,12,20,30);
         expectedExpirationDate.set(Calendar.MILLISECOND, 0);
         expectedVideoAttributes.setExpirationDate(expectedExpirationDate.getTime());
-        Calendar expectedPublicationDate = Calendar.getInstance();
+        Calendar expectedPublicationDate = Calendar.getInstance(Locale.ENGLISH);
         expectedPublicationDate.set(2007, 10, 05, 12, 20, 30);
         expectedPublicationDate.set(Calendar.MILLISECOND, 0);
         expectedVideoAttributes.setPublicationDate(expectedPublicationDate.getTime());
@@ -555,7 +555,7 @@ public class SiteMapParserTest {
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
-        Calendar expectedPublicationDate = Calendar.getInstance();
+        Calendar expectedPublicationDate = Calendar.getInstance(Locale.ENGLISH);
         expectedPublicationDate.set(2008,11,23);
         expectedPublicationDate.set(Calendar.HOUR, 0);
         expectedPublicationDate.set(Calendar.MINUTE, 0);
