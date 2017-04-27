@@ -15,7 +15,7 @@
  */
 package crawlercommons.sitemaps;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,7 +26,7 @@ public class LinkAttributes {
     /**
      * Link's href attribute
      */
-    private URL href;
+    private URI href;
 
     /**
      * Link's other attributes key and values
@@ -36,15 +36,15 @@ public class LinkAttributes {
 
     private LinkAttributes(){}
 
-    public LinkAttributes(URL href) {
+    public LinkAttributes(URI href) {
         this.href = href;
     }
 
-    public URL getHref() {
+    public URI getHref() {
         return href;
     }
 
-    public void setHref(URL href) {
+    public void setHref(URI href) {
         this.href = href;
     }
 

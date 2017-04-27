@@ -47,6 +47,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -835,9 +836,17 @@ public class SiteMapParser {
             if (links != null) {
                 boolean found = false;
                 for (LinkAttributes linkAttributes: links) {
-                    found = found || linkAttributes.getHref().equals(url);
-                    if (found) {
-                        break;
+                    if (url != null) {
+                        if (linkAttributes.getHref() == null) {
+                            valid = false;
+                            anomalies.add(url.toExternalForm() + " some link associated has no href");
+                            break;
+                        } else {
+                            found = found || Objects.equals(linkAttributes.getHref().toString(), url.toExternalForm());
+                            if (found) {
+                                break;
+                            }
+                        }
                     }
                 }
                 if (!found) {

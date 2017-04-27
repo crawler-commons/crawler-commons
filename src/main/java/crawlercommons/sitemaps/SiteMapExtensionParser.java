@@ -24,6 +24,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -150,7 +152,7 @@ public class SiteMapExtensionParser {
     private static LinkAttributes parseLinkNode(final Node node) {
         final Element elem = (Element)node;
         NamedNodeMap attributes = elem.getAttributes();
-        URL href = null;
+        URI href = null;
         Map<String, String> params = new HashMap<>(attributes.getLength()-1);
         if (attributes != null) {
             for (int i = 0; i < attributes.getLength(); i++) {
@@ -160,9 +162,9 @@ public class SiteMapExtensionParser {
                 if ("href".equalsIgnoreCase(name)) {
                     if (value != null) {
                         try {
-                            href = new URL(value);
-                        } catch (MalformedURLException e) {
-                            LOGGER.warn("Malformed URL in link href attribute: " + value);
+                            href = new URI(value);
+                        } catch (URISyntaxException e) {
+                            LOGGER.warn("Invalid URI in link href attribute: " + value);
                         }
                     } else {
                         LOGGER.warn("Unexpected null value for Link href attribute");

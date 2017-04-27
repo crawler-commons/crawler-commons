@@ -30,9 +30,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -497,7 +498,7 @@ public class SiteMapParserTest {
 
 
     @Test
-    public void testXHTMLLinksSitemap() throws UnknownFormatException, IOException {
+    public void testXHTMLLinksSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap-links.xml");
@@ -510,9 +511,9 @@ public class SiteMapParserTest {
         assertEquals(3, sm.getSiteMapUrls().size());
         // all three pages share the same links attributes
         LinkAttributes[] linkAttributes = new LinkAttributes[] {
-            new LinkAttributes(new URL("http://www.example.com/deutsch/")),
-            new LinkAttributes(new URL("http://www.example.com/schweiz-deutsch/")),
-            new LinkAttributes(new URL("http://www.example.com/english/"))
+            new LinkAttributes(new URI("http://www.example.com/deutsch/")),
+            new LinkAttributes(new URI("http://www.example.com/schweiz-deutsch/")),
+            new LinkAttributes(new URI("http://www.example.com/english/"))
         };
         linkAttributes[0].setParams(new HashMap<String, String>(){{
             put("rel", "alternate");
@@ -605,8 +606,6 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(74, sm.getSiteMapUrls().size());
     }
-
-
 
     /**
      * Returns a good simple default XML sitemap as a byte array
