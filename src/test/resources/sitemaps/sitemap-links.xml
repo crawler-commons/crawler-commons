@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+	<url>
+		<loc>http://www.example.com/english/</loc>
+		<xhtml:link rel="alternate" hreflang="de" href="http://www.example.com/deutsch/" />
+		<xhtml:link rel="alternate" hreflang="de-ch" href="http://www.example.com/schweiz-deutsch/" />
+		<xhtml:link rel="alternate" hreflang="en" href="http://www.example.com/english/" />
+	</url>
+	<url>
+		<loc>http://www.example.com/deutsch/</loc>
+		<xhtml:link rel="alternate" hreflang="de" href="http://www.example.com/deutsch/" />
+		<xhtml:link rel="alternate" hreflang="de-ch" href="http://www.example.com/schweiz-deutsch/" />
+		<xhtml:link rel="alternate" hreflang="en" href="http://www.example.com/english/" />
+	</url>
+	<url>
+		<loc>http://www.example.com/schweiz-deutsch/</loc>
+		<xhtml:link rel="alternate" hreflang="de" href="http://www.example.com/deutsch/" />
+		<xhtml:link rel="alternate" hreflang="de-ch" href="http://www.example.com/schweiz-deutsch/" />
+		<xhtml:link rel="alternate" hreflang="en" href="http://www.example.com/english/" />
+	</url>
+</urlset>

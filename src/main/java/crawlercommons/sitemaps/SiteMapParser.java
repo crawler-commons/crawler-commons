@@ -16,28 +16,11 @@
 
 package crawlercommons.sitemaps;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.tika.mime.MediaType.APPLICATION_XML;
-import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
@@ -52,7 +35,24 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.zip.GZIPInputStream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.tika.mime.MediaType.APPLICATION_XML;
+import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
@@ -355,6 +355,7 @@ public class SiteMapParser {
 
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
             db.setErrorHandler(new ErrorHandler() {
                 public void warning(SAXParseException e) throws SAXException {
@@ -435,8 +436,13 @@ public class SiteMapParser {
                 String changeFreq = getElementValue(elem, "changefreq");
                 String priority = getElementValue(elem, "priority");
                 String loc = getElementValue(elem, "loc");
-
-                addUrlIntoSitemap(loc, sitemap, lastMod, changeFreq, priority, i);
+                // parse sitemap extensions
+                final ImageAttributes[] images = SiteMapExtensionParser.parseImages(elem);
+                final VideoAttributes[] videos = SiteMapExtensionParser.parseVideos(elem);
+                final LinkAttributes[] links = SiteMapExtensionParser.parseLinks(elem);
+                final NewsAttributes news = SiteMapExtensionParser.parseNews(elem);
+                addUrlIntoSitemap(loc, sitemap, lastMod, changeFreq, priority, i,
+                    images, videos, links, news);
             }
         }
 
@@ -766,6 +772,103 @@ public class SiteMapParser {
                 LOG.debug("  {}. {}", urlIndex + 1, sUrl);
             } else {
                 LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), siteMap.getBaseUrl());
+            }
+        } catch (MalformedURLException e) {
+            LOG.warn("Bad url: [{}]", urlStr);
+            LOG.trace("Can't create a sitemap entry with a bad URL", e);
+        }
+    }
+
+    /**
+     * Adds the given URL to the given sitemap while showing the relevant logs
+     *
+     * @param urlStr
+     *            an URL string to add to the
+     *            {@link crawlercommons.sitemaps.SiteMap}
+     * @param siteMap
+     *            the sitemap to add URL(s) to
+     * @param lastMod
+     *            last time the {@link crawlercommons.sitemaps.SiteMapURL} was
+     *            modified
+     * @param changeFreq
+     *            the {@link crawlercommons.sitemaps.SiteMapURL} change frquency
+     * @param priority
+     *            priority of this {@link crawlercommons.sitemaps.SiteMapURL}
+     * @param urlIndex
+     *            index position to which this entry has been added
+     * @param images
+     *            images attributes from Google's image extension to the sitemap protocol
+     * @param videos
+     *            videos attributes from Google's video extension to the sitemap protocol
+     * @param links
+     *            links attributes from Google's links extension to the sitemap protocol
+     * @param news
+     *            news attributes from Google's news extension to the sitemap protocol
+     */
+    protected void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex,
+                                     ImageAttributes[] images, VideoAttributes[] videos, LinkAttributes[] links, NewsAttributes news) {
+        try {
+            URL url = new URL(urlStr); // Checking the URL
+            // validation: loc should be on the same domain
+            final List<String> anomalies = new ArrayList();
+            boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
+            if (!valid) {
+                anomalies.add("url " + url.toExternalForm() + " not under the base url " + siteMap.getBaseUrl());
+            }
+            // validation: at most 1000 images per loc
+            if (images != null) {
+                if (images.length > 1000) {
+                    valid = false;
+                    anomalies.add("too many image nodes (max: 1000)");
+                }
+            }
+            // validation: all video tags must be valid
+            if (videos != null) {
+                for (VideoAttributes videoAttributes: videos) {
+                    if (!videoAttributes.isValid()) {
+                        valid = false;
+                        anomalies.add("at least a video node is invalid");
+                        break;
+                    }
+                }
+            }
+            // validation: if alternate languages are defined, current loc should be present in the set
+            if (links != null) {
+                boolean found = false;
+                for (LinkAttributes linkAttributes: links) {
+                    if (url != null) {
+                        if (linkAttributes.getHref() == null) {
+                            valid = false;
+                            anomalies.add(url.toExternalForm() + " some link associated has no href");
+                            break;
+                        } else {
+                            found = found || Objects.equals(linkAttributes.getHref().toString(), url.toExternalForm());
+                            if (found) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!found) {
+                    valid = false;
+                    anomalies.add(url.toExternalForm() + " is missing from the set of alternates");
+                }
+            }
+            // validation: if news node is present, it must be valid
+            if (news != null) {
+                if (!news.isValid()) {
+                    valid = false;
+                    anomalies.add("news node is not valid");
+                }
+            }
+            if (valid || !strict) {
+                SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid, images, videos, links, news);
+                siteMap.addSiteMapUrl(sUrl);
+                LOG.debug("  {}. {}", urlIndex + 1, sUrl);
+            } else {
+                LOG.warn("URL: {} is excluded from the sitemap as it is not valid. Anomalies: {}",
+                    url.toExternalForm(),
+                    StringUtils.join(anomalies, ", "));
             }
         } catch (MalformedURLException e) {
             LOG.warn("Bad url: [{}]", urlStr);
