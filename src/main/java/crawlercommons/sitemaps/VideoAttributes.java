@@ -351,36 +351,36 @@ public class VideoAttributes {
     public enum VideoPriceType { own, rent }
     public enum VideoPriceResolution { SD, HD }
 
-    static final class VideoPrice {
+    public static final class VideoPrice {
         /**
          * Video price currency found under video/price[@currency] (required)
          */
-        final String currency;
+        private final String currency;
 
         /**
          * Video price type (rent vs own) found under video/price[@type] (optional, defaults to own)
          */
-        final VideoPriceType type;
+        private final VideoPriceType type;
 
         /**
          * Video price resolution found under video/price[@resolution]
          */
-        final VideoPriceResolution resolution;
+        private final VideoPriceResolution resolution;
 
         /**
          * Video price
          */
-        float price;
+        private float price;
 
-        VideoPrice(final String currency, final float price) {
+        public VideoPrice(final String currency, final float price) {
             this(currency, price, VideoPriceType.own);
         }
 
-        VideoPrice(final String currency, final float price, final VideoPriceType type) {
+        public VideoPrice(final String currency, final float price, final VideoPriceType type) {
             this(currency, price, type, null);
         }
 
-        VideoPrice(final String currency, final float price, final VideoPriceType type, final VideoPriceResolution resolution) {
+        public VideoPrice(final String currency, final float price, final VideoPriceType type, final VideoPriceResolution resolution) {
             this.currency = currency;
             this.price = price;
             this.type = type;
@@ -427,6 +427,26 @@ public class VideoAttributes {
             result = 31*result + (resolution == null ? 0 : resolution.hashCode());
 
             return result;
+        }
+
+        public String getCurrency() {
+            return currency;
+        }
+
+        public VideoPriceType getType() {
+            return type;
+        }
+
+        public VideoPriceResolution getResolution() {
+            return resolution;
+        }
+
+        public float getPrice() {
+            return price;
+        }
+
+        public void setPrice(float price) {
+            this.price = price;
         }
 
     }
