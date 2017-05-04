@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -354,9 +356,24 @@ public class SiteMapParserSAX extends SiteMapParser {
     protected AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        // disable validation and avoid that remote DTDs, schemas, etc. are fetched
+        factory.setValidating(false);
+        factory.setXIncludeAware(false);
+        try {
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to configure XML parser: " + e.toString());
+        }
         DelegatorHandler handler = new DelegatorHandler(sitemapUrl, strict);
         try {
             SAXParser saxParser = factory.newSAXParser();
+            saxParser.getXMLReader().setEntityResolver(new EntityResolver() {
+                // noop entity resolver, does not fetch remote content
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId) {
+                    return new InputSource(new StringReader(""));
+                }
+            });
             saxParser.parse(is, handler);
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (sitemap == null) {
