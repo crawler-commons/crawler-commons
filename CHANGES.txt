@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.8-SNAPSHOT
+- Upgraded Tika 1.15 (jnioche) #163
 - [Sitemaps] Disable XML resolvers (sebastian-nagel) #151
 - Update forbiddenapis to v2.3 (jnioche) #99
 - [Sitemaps] gzipped text files fail to parse (sebastian-nagel) #143
