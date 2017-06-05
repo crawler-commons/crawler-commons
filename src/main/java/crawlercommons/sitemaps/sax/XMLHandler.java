@@ -70,6 +70,10 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        // flush any unclosed or missing URL element
+        if (loc.length() > 0 && ("loc".equals(qName) || "url".equals(qName))) {
+            maybeAddSiteMapUrl();
+        }
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
