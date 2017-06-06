@@ -72,7 +72,20 @@ class XMLHandler extends DelegatorHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         // flush any unclosed or missing URL element
         if (loc.length() > 0 && ("loc".equals(qName) || "url".equals(qName))) {
-            maybeAddSiteMapUrl();
+            // check whether loc isn't white space only
+            for (int i = 0; i < loc.length(); i++) {
+                if (!Character.isWhitespace(loc.charAt(i))) {
+                    maybeAddSiteMapUrl();
+                    return;
+                }
+            }
+            loc = new StringBuilder();
+            if ("url".equals(qName)) {
+                // reset also attributes
+                lastMod = null;
+                changeFreq = null;
+                priority = null;
+            }
         }
     }
 
