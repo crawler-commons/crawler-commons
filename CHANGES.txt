@@ -1,6 +1,9 @@
 Crawler-Commons Change Log
 
-Current Development 0.8-SNAPSHOT
+Current Development 0.9-SNAPSHOT
+-
+
+Release 0.8 (2017-06-09)
 - Upgraded Tika 1.15 (jnioche) #163
 - [Sitemaps] Disable XML resolvers (sebastian-nagel) #151
 - Update forbiddenapis to v2.3 (jnioche) #99
