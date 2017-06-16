@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
@@ -36,6 +37,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 import static org.junit.Assert.*;
 
@@ -337,6 +340,42 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
         assertEquals("http://www.example.com/pub/2000/08/09/xslt/xslt.html", sm.getSiteMapUrls().iterator().next().getUrl().toString());
+    }
+
+    @Test
+    public void testRSSPubDate() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getResourceAsBytes("src/test/resources/rss/xmlRss_pubDate.xml");
+        URL url = new URL("http://www.example.com/rss.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertSame("Not an RSS", SitemapType.RSS, asm.getType());
+        assertNotNull("GMT timestamp not parsed", asm.getLastModified());
+        assertEquals("GMT timestamp", 1483619690000L, asm.getLastModified().getTime()); // Thu, 05 Jan 17 12:34:50 GMT
+
+        SiteMap rss = (SiteMap) asm;
+        assertEquals("Incorrect items count", 7, rss.getSiteMapUrls().size());
+        Iterator<SiteMapURL> it = rss.getSiteMapUrls().iterator();
+        assertPubDate("Local differental offset", "article_1", 1483619691000L, it);
+        assertPubDate("Short year", "article_2", 1483619692000L, it);
+        assertPubDate("No weekday", "article_3", 1483619693000L, it);
+        assertPubDate("No weekday and short year", "article_4", 1483619694000L, it);
+        assertPubDate("No time zone(incorrect)", "article_5", null, it);
+        assertPubDate("Empty field", "article_6", null, it);
+        assertPubDate("Missed field", "article_7", null, it);
+    }
+
+    private static void assertPubDate(String message, String path, Long pubDate, Iterator<SiteMapURL> it) {
+        assertTrue(message + " item missed", it.hasNext());
+        SiteMapURL url = it.next();
+        assertEquals(message + " link", "http://www.example.com/" + path, url.getUrl().toString());
+        if (pubDate == null) {
+            assertNull(message + " pubDate not NULL", url.getLastModified());
+        } else {
+            assertNotNull(message + " pubDate is missing", url.getLastModified());
+            assertEquals(message + " pub date", pubDate.longValue(), url.getLastModified().getTime());
+        }
     }
 
     @Ignore("fails for DOM-based parser")

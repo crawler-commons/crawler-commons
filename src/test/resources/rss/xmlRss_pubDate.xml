@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"  xmlns:atom="http://www.w3.org/2005/Atom">
+
+    <channel>
+        <title>Main channel</title>
+        <pubDate>Thu, 05 Jan 2017 12:34:50 GMT</pubDate>
+        <link>http://www.example.com/rss.xml</link>
+        <item>
+            <title><![CDATA[News number 1]]></title>
+            <link>http://www.example.com/article_1</link>
+            <pubDate>Thu, 05 Jan 2017 13:34:51 +0100</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 2]]></title>
+            <link>http://www.example.com/article_2</link>
+            <pubDate>Thu, 05 Jan 17 13:34:52 +0100</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 3]]></title>
+            <link>http://www.example.com/article_3</link>
+            <pubDate>05 Jan 2017 13:34:53 +0100</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 4]]></title>
+            <link>http://www.example.com/article_4</link>
+            <pubDate>05 Jan 17 13:34:54 +0100</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 5 incomplete pub date]]></title>
+            <link>http://www.example.com/article_5</link>
+            <pubDate>05 Jan 17 13:34:55</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 6 empty pub date]]></title>
+            <link>http://www.example.com/article_6</link>
+            <pubDate></pubDate>
+        </item>
+        <item>
+            <title><![CDATA[News number 7 missing pub date]]></title>
+            <link>http://www.example.com/article_7</link>
+        </item>
+    </channel>
+</rss>
