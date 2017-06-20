@@ -53,6 +53,29 @@ public abstract class AbstractSiteMap {
         }
     };
 
+    private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT_WITH_OFFSET = new ThreadLocal<DateFormat>() {
+        protected DateFormat initialValue() {
+            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
+            result.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return result;
+        }
+    };
+
+    /**
+     * The set of date-time formats which could be used as pubDate in RSS.
+     */
+    private static final ThreadLocal<DateFormat[]> RSS_DATE_FORMATS = new ThreadLocal<DateFormat[]>() {
+        @Override
+        protected DateFormat[] initialValue() {
+            return new DateFormat[] {
+                    new SimpleDateFormat("EEE, dd MMM yy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("dd MMM yy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z", Locale.ROOT)
+            };
+        }
+    };
+
     /** W3C date the Sitemap was last modified */
     private Date lastModified;
 
@@ -180,4 +203,33 @@ public abstract class AbstractSiteMap {
             }
         }
     }
+
+    /**
+     * Converts pubDate of RSS to the string representation which could be parsed
+     * in {@link #convertToDate(String)} method.
+     *
+     * @param pubDate
+     *            - date time of pubDate in RFC822
+     * @return converted to &quot;yyyy-MM-dd'T'HH:mm:ssZ&quot; format or original value if it doesn't
+     *         follow the RFC822
+     */
+    public static String normalizeRSSTimestamp(String pubDate) {
+        if (pubDate == null) {
+            return null;
+        }
+        Date date = null;
+        for (DateFormat format : RSS_DATE_FORMATS.get()) {
+            try {
+                date = format.parse(pubDate);
+                break;
+            } catch (ParseException ex) {
+                // try next one
+            }
+        }
+        if (date == null) {
+            return pubDate;
+        }
+        return W3C_FULLDATE_FORMAT_WITH_OFFSET.get().format(date);
+    }
+
 }

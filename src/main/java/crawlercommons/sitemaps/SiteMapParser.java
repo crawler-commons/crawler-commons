@@ -695,8 +695,9 @@ public class SiteMapParser {
         Element elem = (Element) list.item(0);
 
         // Treat publication date as last mod (Tue, 10 Jun 2003 04:00:00 GMT)
-        String lastMod = getElementValue(elem, "pubDate");
-        LOG.debug("lastMod = ", lastMod);
+        String channelLastMod = AbstractSiteMap.normalizeRSSTimestamp(getElementValue(elem, "pubDate"));
+        LOG.debug("channel's lastMod = {}", channelLastMod);
+        sitemap.setLastModified(channelLastMod);
 
         list = doc.getElementsByTagName("item");
         // Loop through the <item>s
@@ -706,8 +707,9 @@ public class SiteMapParser {
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) n;
                 String link = getElementValue(elem, "link");
+                String itemLastMod = AbstractSiteMap.normalizeRSSTimestamp(getElementValue(elem, "pubDate"));
 
-                addUrlIntoSitemap(link, sitemap, lastMod, null, null, i);
+                addUrlIntoSitemap(link, sitemap, itemLastMod, null, null, i);
             }
         }
     }
