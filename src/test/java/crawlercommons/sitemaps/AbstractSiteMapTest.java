@@ -66,11 +66,11 @@ public class AbstractSiteMapTest {
         assertNull(AbstractSiteMap.normalizeRSSTimestamp(null));
         assertEquals("incorrect", AbstractSiteMap.normalizeRSSTimestamp("incorrect"));
 
-        assertEquals("2017-01-05T12:34:50+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 12:34:50 GMT"));
-        assertEquals("2017-01-05T12:34:51+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 13:34:51 +0100"));
-        assertEquals("2017-01-05T12:34:52+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 2017 11:34:52 -0100"));
-        assertEquals("2017-01-05T12:34:53+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 17 12:34:53 GMT"));
-        assertEquals("2017-01-05T12:34:54+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 17 12:34:54 GMT"));
+        assertEquals("Full date-time with named timezone", "2017-01-05T12:34:50+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 12:34:50 GMT"));
+        assertEquals("Full date-time with local differental", "2017-01-05T12:34:51+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 13:34:51 +0100"));
+        assertEquals("Date-time without week day", "2017-01-05T12:34:52+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 2017 11:34:52 -0100"));
+        assertEquals("Date-time without week day and two-digit year", "2017-01-05T12:34:53+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 17 12:34:53 GMT"));
+        assertEquals("Date-time with two-digit year", "2017-01-05T12:34:54+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 17 12:34:54 GMT"));
     }
 
 }

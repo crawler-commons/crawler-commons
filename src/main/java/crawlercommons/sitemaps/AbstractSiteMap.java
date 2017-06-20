@@ -61,27 +61,18 @@ public abstract class AbstractSiteMap {
         }
     };
 
-    protected static final ThreadLocal<DateFormat> RFC822_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ROOT);
-        }
-    };
-
-    protected static final ThreadLocal<DateFormat> RFC822_NO_WEEKDAY_DATE_FORMAT = new ThreadLocal<DateFormat>() {
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z", Locale.ROOT);
-        }
-    };
-
-    protected static final ThreadLocal<DateFormat> RFC822_SHORT_YEAR_DATE_FORMAT = new ThreadLocal<DateFormat>() {
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("EEE, dd MMM yy HH:mm:ss Z", Locale.ROOT);
-        }
-    };
-
-    protected static final ThreadLocal<DateFormat> RFC822_SHORTDATE_FORMAT = new ThreadLocal<DateFormat>() {
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("dd MMM yy HH:mm:ss Z", Locale.ROOT);
+    /**
+     * The set of date-time formats which could be used as pubDate in RSS.
+     */
+    private static final ThreadLocal<DateFormat[]> RSS_DATE_FORMATS = new ThreadLocal<DateFormat[]>() {
+        @Override
+        protected DateFormat[] initialValue() {
+            return new DateFormat[] {
+                    new SimpleDateFormat("EEE, dd MMM yy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("dd MMM yy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ROOT),
+                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z", Locale.ROOT)
+            };
         }
     };
 
@@ -213,11 +204,6 @@ public abstract class AbstractSiteMap {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static ThreadLocal<DateFormat>[] RSS_DATE_FORMATS = new ThreadLocal[] {
-            RFC822_SHORT_YEAR_DATE_FORMAT, RFC822_SHORTDATE_FORMAT, RFC822_FULLDATE_FORMAT, RFC822_NO_WEEKDAY_DATE_FORMAT
-    };
-
     /**
      * Converts pubDate of RSS to the string representation which could be parsed
      * in {@link #convertToDate(String)} method.
@@ -232,9 +218,9 @@ public abstract class AbstractSiteMap {
             return null;
         }
         Date date = null;
-        for (ThreadLocal<DateFormat> format : RSS_DATE_FORMATS) {
+        for (DateFormat format : RSS_DATE_FORMATS.get()) {
             try {
-                date = format.get().parse(pubDate);
+                date = format.parse(pubDate);
                 break;
             } catch (ParseException ex) {
                 // try next one
