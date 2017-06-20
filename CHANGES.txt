@@ -1,7 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.9-SNAPSHOT
--
+- [Sitemaps] RSS parser ignores pubDate of link (MichealKum via kkrugler) #166
 
 Release 0.8 (2017-06-09)
 - Upgraded Tika 1.15 (jnioche) #163
