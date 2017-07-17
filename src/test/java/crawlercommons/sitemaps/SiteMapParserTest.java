@@ -60,9 +60,11 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<sitemap>")
-                        .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>").append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>").append("</sitemap>").append("<sitemap>")
-                        .append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>").append("  <lastmod>2005-01-01</lastmod>").append("</sitemap>").append("</sitemapindex>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n").append(" <sitemap>\n")
+                        .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>\n").append("  <lastmod><![CDATA[2004-10-01T18:23:17+00:00]]></lastmod>\n").append(" </sitemap>\n")
+                        .append("<sitemap>\n").append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>\n").append("  <lastmod>2005-01-01</lastmod>\n").append(" </sitemap>\n")
+                        .append("<sitemap>\n").append("  <loc>http://www.example.com/dynsitemap?date=now&amp;all=true</loc>\n").append(" </sitemap>\n").append("<sitemap>\n")
+                        .append("  <loc>http://www.example.com/dynsitemap<![CDATA[?date=lastyear&all=false]]></loc>\n").append(" </sitemap>\n").append("</sitemapindex>");
         byte[] content = scontent.toString().getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
@@ -71,7 +73,7 @@ public class SiteMapParserTest {
         assertEquals(true, asm instanceof SiteMapIndex);
 
         SiteMapIndex smi = (SiteMapIndex) asm;
-        assertEquals(2, smi.getSitemaps().size());
+        assertEquals(4, smi.getSitemaps().size());
 
         AbstractSiteMap currentSiteMap = smi.getSitemap(new URL("http://www.example.com/sitemap1.xml.gz"));
         assertNotNull(currentSiteMap);
@@ -84,6 +86,14 @@ public class SiteMapParserTest {
         assertNotNull(currentSiteMap);
         assertEquals("http://www.example.com/sitemap2.xml.gz", currentSiteMap.getUrl().toString());
         assertEquals(SiteMap.convertToDate("2005-01-01"), currentSiteMap.getLastModified());
+
+        currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=now&all=true"));
+        assertNotNull("<loc> with entities not found", currentSiteMap);
+        assertEquals("http://www.example.com/dynsitemap?date=now&all=true", currentSiteMap.getUrl().toString());
+
+        currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=lastyear&all=false"));
+        assertNotNull("<loc> with CDATA not found", currentSiteMap);
+        assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
     }
 
     @Test
@@ -196,6 +206,8 @@ public class SiteMapParserTest {
         assertEquals(true, asm instanceof SiteMapIndex);
         SiteMapIndex sm = (SiteMapIndex) asm;
         assertEquals(15, sm.getSitemaps().size());
+        String sitemap = "https://example.com/sitemap.jss?portalCode=10260&lang=en";
+        assertNotNull("Sitemap " + sitemap + " not found in sitemap index", sm.getSitemap(new URL(sitemap)));
     }
 
     @Test

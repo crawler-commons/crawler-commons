@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.9-SNAPSHOT
+- [Sitemaps] Sitemap SAX parsing mangles target URLs (jnioche, sebastian-nagel) #169
 - [Sitemaps] RSS parser ignores pubDate of link (MichealKum via kkrugler) #166
 
 Release 0.8 (2017-06-09)

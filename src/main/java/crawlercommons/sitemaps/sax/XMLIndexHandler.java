@@ -54,7 +54,8 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 class XMLIndexHandler extends DelegatorHandler {
 
     private SiteMapIndex sitemap;
-    private URL loc;
+    private StringBuilder loc;
+    private boolean locClosed;
     private Date lastMod;
     private int i = 0;
 
@@ -62,6 +63,7 @@ class XMLIndexHandler extends DelegatorHandler {
         super(elementStack, strict);
         sitemap = new SiteMapIndex(url);
         sitemap.setType(SitemapType.INDEX);
+        loc = new StringBuilder();
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -72,30 +74,24 @@ class XMLIndexHandler extends DelegatorHandler {
             maybeAddSiteMap();
         } else if ("sitemapindex".equals(currentElement())) {
             sitemap.setProcessed(true);
+        } else if ("loc".equals(currentElement())) {
+            locClosed = true;
         }
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
         String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length).trim();
+        String value = String.valueOf(ch, start, length);
         if ("loc".equals(localName)) {
-            try {
-                loc = new URL(value);
-            } catch (MalformedURLException e) {
-                LOG.trace("Don't create an entry with a bad URL", e);
-                LOG.debug("Bad url: [{}]", loc);
-            }
+            loc.append(value);
         } else if ("lastmod".equals(localName)) {
             lastMod = SiteMap.convertToDate(value);
-        }
-        // try the text content when no loc element
-        // has been specified
-        else if (loc == null) {
-            try {
-                loc = new URL(value);
-            } catch (MalformedURLException e) {
-                LOG.trace("Don't create an entry with a bad URL", e);
-                LOG.debug("Bad url: [{}]", loc);
+        } else {
+            value = value.trim();
+            if (!value.isEmpty() && !locClosed) {
+                // try non-whitespace text content as loc
+                // when no loc element has been specified
+                loc.append(value);
             }
         }
     }
@@ -105,12 +101,19 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     private void maybeAddSiteMap() {
-        if (loc != null) {
-            SiteMap s = new SiteMap(loc, lastMod);
+        String value = loc.toString().trim();
+        try {
+            // check that the value is a valid URL
+            URL locURL = new URL(value);
+            SiteMap s = new SiteMap(locURL, lastMod);
             sitemap.addSitemap(s);
             LOG.debug("  {}. {}", (i + 1), s);
+        } catch (MalformedURLException e) {
+            LOG.trace("Don't create an entry with a bad URL", e);
+            LOG.debug("Bad url: [{}]", value);
         }
-        loc = null;
+        loc = new StringBuilder();
+        locClosed = false;
         lastMod = null;
     }
 
