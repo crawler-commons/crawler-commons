@@ -25,29 +25,47 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Locale;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Given a URL's hostname, there are determining the actual domain requires
- * knowledge of the various domain registrars and their assignment policies. The
- * best publicly available knowledge of this is maintained by the Mozilla
- * developers; this class uses their data file format. For more information, see
+ * To determine the actual domain name of a host name or URL requires knowledge
+ * of the various domain registrars and their assignment policies. The best
+ * publicly available knowledge base is the public suffix list maintained and
+ * available at <a href="https://publicsuffix.org/">publicsuffix.org</a>. This
+ * class implements the
+ * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
+ * uses a copy of the public suffix list. data file format.
+ *
+ * For more information, see
  * <ul>
- * <li><a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective
- * TLD Service</a></li>
- * <li><a href="http://www.publicsuffix.org">Public Suffix</a></li>
- * <li><a href=
- * "http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1"
- * >effective_tld_names</a></li>
+ * <li><a href="http://www.publicsuffix.org">publicsuffix.org</a></li>
+ * <li><a href="https://en.wikipedia.org/wiki/Public_Suffix_List">Wikipedia
+ * article about the public suffix list</a></li>
+ * <li>Mozilla's
+ * <a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
+ * Service</a>: for historic reasons the class name stems from the term
+ * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
  * 
  * This class just needs "effective_tld_names.dat" in the classpath. If you want
  * to configure it with other data, call
- * EffectiveTldFinder.getInstance.initialize(is) and have at it.
+ * {@link EffectiveTldFinder#getInstance()#initialize(InputStream)}. Updates to
+ * the public suffix list can be found here:
+ * <ul>
+ * <li><a href=
+ * "https://publicsuffix.org/list/public_suffix_list.dat"
+ * >https://publicsuffix.org/list/public_suffix_list.dat</a></li>
+ * <li><a href= "https://publicsuffix.org/list/effective_tld_names.dat"
+ * >https://publicsuffix.org/list/effective_tld_names.dat</a> (same as
+ * public_suffix_list.dat)</li>
+ * <li><a href=
+ * "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat"
+ * >https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat</a></li>
+ * </ul>
+ *
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
@@ -120,9 +138,6 @@ public class EffectiveTldFinder {
             return getInstance().domains.get(hostname);
         }
         String[] parts = hostname.split(DOT_REGEX);
-        if (!getInstance().domains.containsKey(parts[parts.length - 1])) {
-            return null;
-        }
         for (int i = 1; i < parts.length; i++) {
             String[] slice = Arrays.copyOfRange(parts, i, parts.length);
             String tryTld = join(slice);
@@ -154,8 +169,11 @@ public class EffectiveTldFinder {
      */
     public static String getAssignedDomain(String hostname) {
         EffectiveTLD etld = getEffectiveTLD(hostname);
-        if (null == etld || etld.getDomain() == hostname.toLowerCase(Locale.ROOT)) {
+        if (null == etld || etld.getDomain().equalsIgnoreCase(hostname)) {
             return hostname.toLowerCase(Locale.ROOT);
+        }
+        if (etld.isException()) {
+            return etld.domain;
         }
         return hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
     }
@@ -194,9 +212,6 @@ public class EffectiveTldFinder {
 
         private String normalizeName(String name) {
             String[] parts = name.split(DOT_REGEX);
-            if (parts.length < 2) {
-                return name;
-            }
             String[] ary = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 ary[i] = asciiConvert(parts[i]);
