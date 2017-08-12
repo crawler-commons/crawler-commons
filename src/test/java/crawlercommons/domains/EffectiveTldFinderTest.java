@@ -164,18 +164,18 @@ public class EffectiveTldFinderTest {
     public final void testMixedCaseHostNames() throws Exception {
         String ad = null;
         ad = EffectiveTldFinder.getAssignedDomain("www.PayPal.COM");
-//        assertEquals("paypal.com", ad);
+        // assertEquals("paypal.com", ad);
     }
 
     @Test
     public final void testIDNDomain() throws Exception {
         String ad = null;
         ad = EffectiveTldFinder.getAssignedDomain("спб.бесплатныеобъявления.рф");
-//        assertEquals("бесплатныеобъявления.рф", ad);
+        // assertEquals("бесплатныеобъявления.рф", ad);
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai");
         assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
         // rare but possible mixed use of UTF-8 and Punycode
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф");
-//        assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
+        // assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
     }
 }

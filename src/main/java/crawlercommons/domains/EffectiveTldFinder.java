@@ -35,37 +35,50 @@ import org.slf4j.LoggerFactory;
  * of the various domain registrars and their assignment policies. The best
  * publicly available knowledge base is the public suffix list maintained and
  * available at <a href="https://publicsuffix.org/">publicsuffix.org</a>. This
- * class implements the
- * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
- * uses a copy of the public suffix list. data file format.
- *
+ * class implements the <a
+ * href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and uses a
+ * copy of the public suffix list. data file format.
+ * 
  * For more information, see
  * <ul>
  * <li><a href="http://www.publicsuffix.org">publicsuffix.org</a></li>
  * <li><a href="https://en.wikipedia.org/wiki/Public_Suffix_List">Wikipedia
  * article about the public suffix list</a></li>
- * <li>Mozilla's
- * <a href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
+ * <li>Mozilla's <a
+ * href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
  * Service</a>: for historic reasons the class name stems from the term
  * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
  * 
  * This class just needs "effective_tld_names.dat" in the classpath. If you want
  * to configure it with other data, call
- * {@link EffectiveTldFinder#getInstance()#initialize(InputStream)}. Updates to
- * the public suffix list can be found here:
+ * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
+ * {@link EffectiveTldFinder#initialize(InputStream) .initialize(InputStream)}.
+ * Updates to the public suffix list can be found here:
  * <ul>
- * <li><a href=
- * "https://publicsuffix.org/list/public_suffix_list.dat"
+ * <li><a href= "https://publicsuffix.org/list/public_suffix_list.dat"
  * >https://publicsuffix.org/list/public_suffix_list.dat</a></li>
  * <li><a href= "https://publicsuffix.org/list/effective_tld_names.dat"
  * >https://publicsuffix.org/list/effective_tld_names.dat</a> (same as
  * public_suffix_list.dat)</li>
  * <li><a href=
  * "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat"
- * >https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat</a></li>
+ * >https://raw.githubusercontent.com/publicsuffix/list/master/
+ * public_suffix_list.dat</a></li>
  * </ul>
- *
+ * 
+ * <h2>ICANN vs. Private Domains</h2>
+ * 
+ * The <a href="https://publicsuffix.org/list/">public suffix list (see section
+ * &quot;divisions&quot;)</a> is subdivided into &quot;ICANN&quot; and
+ * &quot;PRIVATE&quot; domains. To restrict the EffectiveTldFinder to
+ * &quot;ICANN&quot; domains only, (re)initialize it by
+ * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
+ * {@link EffectiveTldFinder#initialize(boolean) .initialize(true)} or
+ * {@link EffectiveTldFinder#initialize(InputStream,boolean)
+ * .initialize(InputStream, true)}. This will exclude the PRIVATE domain section
+ * from the public suffix list.
+ * 
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
@@ -83,9 +96,14 @@ public class EffectiveTldFinder {
      * A singleton
      */
     private EffectiveTldFinder() {
-        initialize(null);
+        initialize(this.getClass().getResourceAsStream(ETLD_DATA));
     }
 
+    /**
+     * Get singleton instance of EffectiveTldFinder with default configuration.
+     * 
+     * @return singleton instance of EffectiveTldFinder
+     */
     public static EffectiveTldFinder getInstance() {
         if (null == instance) {
             instance = new EffectiveTldFinder();
@@ -93,16 +111,58 @@ public class EffectiveTldFinder {
         return instance;
     }
 
+    /**
+     * (Re)initialize EffectiveTldFinder with built-in public suffix list.
+     * 
+     * @param excludePrivateDomains
+     *            whether to exclude the public suffixes listed in the PRIVATE
+     *            domain section (opposed to &quot;ICANN&quot; domains)
+     * @return true if (re)initialization was successful
+     */
+    public boolean initialize(boolean excludePrivateDomains) {
+        return initialize(this.getClass().getResourceAsStream(ETLD_DATA), false);
+    }
+
+    /**
+     * (Re)initialize EffectiveTldFinder with custom public suffix list.
+     * 
+     * @param effectiveTldDataStream
+     *            content of public suffix list as input stream
+     * @return true if (re)initialization was successful
+     */
     public boolean initialize(InputStream effectiveTldDataStream) {
+        return initialize(effectiveTldDataStream, false);
+    }
+
+    /**
+     * (Re)initialize EffectiveTldFinder with custom public suffix list.
+     * 
+     * @param effectiveTldDataStream
+     *            content of public suffix list as input stream
+     * @param excludePrivateDomains
+     *            whether to exclude the public suffixes listed in the PRIVATE
+     *            domain section (opposed to &quot;ICANN&quot; domains)
+     * @return true if (re)initialization was successful
+     */
+    public boolean initialize(InputStream effectiveTldDataStream, boolean excludePrivateDomains) {
         domains = new HashMap<>();
+        boolean inPrivateDomainSection = false;
         try {
-            if (null == effectiveTldDataStream && null != this.getClass().getResource(ETLD_DATA)) {
-                effectiveTldDataStream = this.getClass().getResourceAsStream(ETLD_DATA);
-            }
             BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, StandardCharsets.UTF_8));
             String line = null;
             while (null != (line = input.readLine())) {
-                if (line.length() == 0 || (line.length() > 1 && line.startsWith(COMMENT))) {
+                if (line.length() == 0) {
+                    continue;
+                } else if (line.startsWith(COMMENT)) {
+                    if (excludePrivateDomains) {
+                        if (line.contains("===BEGIN PRIVATE DOMAINS===")) {
+                            inPrivateDomainSection = true;
+                        } else if (line.contains("===END PRIVATE DOMAINS===")) {
+                            inPrivateDomainSection = false;
+                        }
+                    }
+                    continue;
+                } else if (excludePrivateDomains && inPrivateDomainSection) {
                     continue;
                 } else {
                     EffectiveTLD entry = new EffectiveTLD(line);
@@ -127,11 +187,12 @@ public class EffectiveTldFinder {
     }
 
     /**
+     * Get EffectiveTLD for host name using the singleton instance of
+     * EffectiveTldFinder.
+     * 
      * @param hostname
-     *            the hostname for which to find the
-     *            {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
-     * @return the
-     *         {@link crawlercommons.domains.EffectiveTldFinder.EffectiveTLD}
+     *            the hostname for which to find the {@link EffectiveTLD}
+     * @return the {@link EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname) {
         if (getInstance().domains.containsKey(hostname)) {
