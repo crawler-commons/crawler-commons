@@ -153,7 +153,7 @@ public class SiteMapExtensionParser {
         final Element elem = (Element)node;
         NamedNodeMap attributes = elem.getAttributes();
         URI href = null;
-        Map<String, String> params = new HashMap<>(attributes.getLength()-1);
+        Map<String, String> params = new HashMap<>(attributes.getLength());
         if (attributes != null) {
             for (int i = 0; i < attributes.getLength(); i++) {
                 final Node attribute = attributes.item(i);
