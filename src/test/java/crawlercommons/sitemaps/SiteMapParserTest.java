@@ -95,6 +95,22 @@ public class SiteMapParserTest {
         assertNotNull("<loc> with CDATA not found", currentSiteMap);
         assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
     }
+    
+    @Test
+    public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.ns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.ns.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
+        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());    
+    }
 
     @Test
     public void testFullDateFormat() {

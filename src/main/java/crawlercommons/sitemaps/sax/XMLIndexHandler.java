@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapIndex;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
@@ -70,12 +71,14 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("sitemap".equals(currentElement())) {
-            maybeAddSiteMap();
-        } else if ("sitemapindex".equals(currentElement())) {
-            sitemap.setProcessed(true);
-        } else if ("loc".equals(currentElement())) {
-            locClosed = true;
+        if ( Namespace.SITEMAP.equals(uri) ) {
+	        if ("sitemap".equals(currentElement())) {
+	            maybeAddSiteMap();
+	        } else if ("sitemapindex".equals(currentElement())) {
+	            sitemap.setProcessed(true);
+	        } else if ("loc".equals(currentElement())) {
+	            locClosed = true;
+	        }
         }
     }
 

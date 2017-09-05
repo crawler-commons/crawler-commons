@@ -25,6 +25,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.UnknownFormatException;
 
 /**
@@ -38,6 +39,7 @@ public class DelegatorHandler extends DefaultHandler {
     private URL url;
     private boolean strict;
     private UnknownFormatException exception;
+    
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -70,7 +72,7 @@ public class DelegatorHandler extends DefaultHandler {
         if (elementStack.isEmpty() || delegate == null) {
             startRootElement(uri, localName, qName, attributes);
         } else {
-            elementStack.push(qName);
+            elementStack.push(localName);
         }
         if (delegate != null) {
             delegate.startElement(uri, localName, qName, attributes);
@@ -78,22 +80,25 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     private void startRootElement(String uri, String localName, String qName, Attributes attributes) {
-        elementStack.push(qName);
-        if ("sitemapindex".equals(qName)) {
-            delegate = new XMLIndexHandler(url, elementStack, strict);
-        } else if ("urlset".equals(qName)) {
-            delegate = new XMLHandler(url, elementStack, strict);
-        } else if ("feed".equals(qName)) {
+        elementStack.push(localName);
+        
+        if ( Namespace.SITEMAP.equals(uri) ) {
+	        if ("sitemapindex".equals(localName)) {
+	            delegate = new XMLIndexHandler(url, elementStack, strict);
+	        } else if ("urlset".equals(localName)) {
+	            delegate = new XMLHandler(url, elementStack, strict);
+	        }
+        } else if ("feed".equals(localName)) {
             delegate = new AtomHandler(url, elementStack, strict);
         }
-        // See if it is a RSS feed by looking for a "channel" element. This
-        // avoids the issue
+        // See if it is a RSS feed by looking for the localName "channel" element . 
+        // This avoids the issue
         // of having the outer tag named <rdf:RDF> that was causing this code to
         // fail. Inside of
         // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
         // See https://github.com/crawler-commons/crawler-commons/issues/87
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
-        else if ("channel".equals(qName)) {
+        else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
         }
     }
