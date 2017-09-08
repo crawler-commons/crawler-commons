@@ -74,7 +74,7 @@ public class SiteMapParserSAX extends SiteMapParser {
     private static final List<MediaType> XML_MEDIA_TYPES = new ArrayList<>();
     private static final List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<>();
     private static final List<MediaType> GZ_MEDIA_TYPES = new ArrayList<>();
-
+    
     static {
         initMediaTypes();
     }
@@ -356,9 +356,14 @@ public class SiteMapParserSAX extends SiteMapParser {
     protected AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        
         // disable validation and avoid that remote DTDs, schemas, etc. are fetched
         factory.setValidating(false);
         factory.setXIncludeAware(false);
+        
+        // support the use of an explicit namespace. 
+        factory.setNamespaceAware(true);
+        
         try {
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (Exception e) {
