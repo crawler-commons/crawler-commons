@@ -36,6 +36,8 @@ import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+
 import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
@@ -92,6 +94,22 @@ public class SiteMapParserSAXTest {
         assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
     }
 
+    @Test
+    public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParserSAX();
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.ns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.ns.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
+        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());    
+    }
+    
     @Test
     public void testFullDateFormat() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00", Locale.ROOT);

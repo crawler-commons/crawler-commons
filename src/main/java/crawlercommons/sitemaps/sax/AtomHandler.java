@@ -78,11 +78,11 @@ class AtomHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if ("entry".equals(qName)) {
+        if ("entry".equals(localName)) {
             loc = null;
             lastMod = null;
             rel = null;
-        } else if ("link".equals(qName)) {
+        } else if ("link".equals(localName)) {
             String href = attributes.getValue("href");
             if (href == null)
                 return;
@@ -114,9 +114,9 @@ class AtomHandler extends DelegatorHandler {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String qName = super.currentElement();
+        String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
-        if ("updated".equals(qName)) {
+        if ("updated".equals(localName)) {
             lastMod = value;
         }
     }
