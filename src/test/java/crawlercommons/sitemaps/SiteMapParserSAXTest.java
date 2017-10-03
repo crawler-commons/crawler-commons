@@ -107,9 +107,9 @@ public class SiteMapParserSAXTest {
         SiteMap sm = (SiteMap) asm;
 
         assertEquals(2, sm.getSiteMapUrls().size());
-        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());    
+        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());
     }
-    
+
     @Test
     public void testFullDateFormat() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00", Locale.ROOT);

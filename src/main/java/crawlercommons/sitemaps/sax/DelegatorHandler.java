@@ -39,7 +39,6 @@ public class DelegatorHandler extends DefaultHandler {
     private URL url;
     private boolean strict;
     private UnknownFormatException exception;
-    
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -81,17 +80,12 @@ public class DelegatorHandler extends DefaultHandler {
 
     private void startRootElement(String uri, String localName, String qName, Attributes attributes) {
         elementStack.push(localName);
-        
-        if ( Namespace.SITEMAP.equals(uri) ) {
-	        if ("sitemapindex".equals(localName)) {
-	            delegate = new XMLIndexHandler(url, elementStack, strict);
-	        } else if ("urlset".equals(localName)) {
-	            delegate = new XMLHandler(url, elementStack, strict);
-	        }
-        } else if ("feed".equals(localName)) {
+
+        if ("feed".equals(localName)) {
             delegate = new AtomHandler(url, elementStack, strict);
         }
-        // See if it is a RSS feed by looking for the localName "channel" element . 
+        // See if it is a RSS feed by looking for the localName "channel"
+        // element .
         // This avoids the issue
         // of having the outer tag named <rdf:RDF> that was causing this code to
         // fail. Inside of
@@ -100,6 +94,12 @@ public class DelegatorHandler extends DefaultHandler {
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
         else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
+        } else if (strict && !Namespace.SITEMAP.equals(uri)) {
+            return;
+        } else if ("sitemapindex".equals(localName)) {
+            delegate = new XMLIndexHandler(url, elementStack, strict);
+        } else if ("urlset".equals(localName)) {
+            delegate = new XMLHandler(url, elementStack, strict);
         }
     }
 

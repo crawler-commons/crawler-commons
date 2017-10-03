@@ -72,7 +72,6 @@ public class SiteMapParser {
      */
     public static final int MAX_BYTES_ALLOWED = 52428800;
 
-    
     /* Tika's MediaType components */
     private static final Tika TIKA = new Tika();
     private static final MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
@@ -80,8 +79,7 @@ public class SiteMapParser {
     private static final List<MediaType> XML_MEDIA_TYPES = new ArrayList<>();
     private static final List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<>();
     private static final List<MediaType> GZ_MEDIA_TYPES = new ArrayList<>();
-    
-    
+
     static {
         initMediaTypes();
     }
@@ -89,12 +87,13 @@ public class SiteMapParser {
     /**
      * True (by default) meaning that invalid URLs should be rejected, as the
      * official docs allow the siteMapURLs to be only under the base url:
-     * http://www.sitemaps.org/protocol.html#location
+     * http://www.sitemaps.org/protocol.html#location Also checks that the
+     * correct namespace is used.
      */
     protected boolean strict = true;
 
     public SiteMapParser() {
-      //default constructor
+        // default constructor
     }
 
     public SiteMapParser(boolean strict) {
@@ -162,7 +161,6 @@ public class SiteMapParser {
         asmCopy.setLastModified(sitemap.getLastModified());
         return asmCopy;
     }
-
 
     /**
      * Parse a sitemap, given the content bytes and the URL.
@@ -237,7 +235,8 @@ public class SiteMapParser {
                 }
                 throw new UnknownFormatException("Can't parse a gzipped sitemap with the embedded MediaType of: " + embeddedType + " (at: " + url + ")");
             }
-            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
+            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
+                                                                     // parent
         }
 
         throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
@@ -359,17 +358,18 @@ public class SiteMapParser {
 
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            
-            // disable validation and avoid that remote DTDs, schemas, etc. are fetched
+
+            // disable validation and avoid that remote DTDs, schemas, etc. are
+            // fetched
             dbf.setValidating(false);
-            
-            // support an explicitly named namespace. 
+
+            // support an explicitly named namespace.
             dbf.setNamespaceAware(true);
 
             dbf.setXIncludeAware(false);
             dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             DocumentBuilder db = dbf.newDocumentBuilder();
-            
+
             db.setEntityResolver(new EntityResolver() {
                 // noop entity resolver, does not fetch remote content
                 @Override
@@ -382,10 +382,12 @@ public class SiteMapParser {
                 public void warning(SAXParseException e) throws SAXException {
                     LOG.warn("Warning parsing XML: {}", e.toString());
                 }
+
                 public void fatalError(SAXParseException e) throws SAXException {
                     LOG.error("Fatal error parsing XML: {}", e.toString());
                     throw e;
                 }
+
                 public void error(SAXParseException e) throws SAXException {
                     LOG.error("Error parsing XML: {}", e.toString());
                     throw e;
@@ -445,7 +447,12 @@ public class SiteMapParser {
         SiteMap sitemap = new SiteMap(sitemapUrl);
         sitemap.setType(SitemapType.XML);
 
-        NodeList list = doc.getElementsByTagNameNS(Namespace.SITEMAP, "url");
+        String namespace = Namespace.SITEMAP;
+        if (!strict) {
+            namespace = "*";
+        }
+
+        NodeList list = doc.getElementsByTagNameNS(namespace, "url");
 
         // Loop through the <url>s
         for (int i = 0; i < list.getLength(); i++) {
@@ -453,10 +460,10 @@ public class SiteMapParser {
             Node n = list.item(i);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) n;
-                String lastMod = getElementValue(Namespace.SITEMAP, elem, "lastmod");
-                String changeFreq = getElementValue(Namespace.SITEMAP, elem, "changefreq");
-                String priority = getElementValue(Namespace.SITEMAP, elem, "priority");
-                String loc = getElementValue(Namespace.SITEMAP, elem, "loc");
+                String lastMod = getElementValue(namespace, elem, "lastmod");
+                String changeFreq = getElementValue(namespace, elem, "changefreq");
+                String priority = getElementValue(namespace, elem, "priority");
+                String loc = getElementValue(namespace, elem, "loc");
 
                 addUrlIntoSitemap(loc, sitemap, lastMod, changeFreq, priority, i);
             }
@@ -505,7 +512,12 @@ public class SiteMapParser {
 
             if (firstNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) firstNode;
-                String loc = getElementValue(Namespace.SITEMAP, elem, "loc");
+                String loc = null;
+                String namespace = Namespace.SITEMAP;
+                if (!strict) {
+                    namespace = "*";
+                }
+                loc = getElementValue(namespace, elem, "loc");
 
                 // try the text content when no loc element
                 // has been specified
@@ -515,7 +527,7 @@ public class SiteMapParser {
 
                 try {
                     URL sitemapUrl = new URL(loc);
-                    String lastmod = getElementValue(Namespace.SITEMAP, elem, "lastmod");
+                    String lastmod = getElementValue(namespace, elem, "lastmod");
                     Date lastModified = SiteMap.convertToDate(lastmod);
 
                     // Right now we are not worried about sitemapUrls that point
@@ -724,8 +736,8 @@ public class SiteMapParser {
     }
 
     /**
-     * Get the element's textual content.
-     * Find element under parent element, with namespaceURI and element local-name "elementName".
+     * Get the element's textual content. Find element under parent element,
+     * with namespaceURI and element local-name "elementName".
      * 
      * @param namespaceURI
      * @param elem
@@ -744,21 +756,21 @@ public class SiteMapParser {
         return null;
     }
 
-    
     /**
-     * Get the element's textual content.
-     * This will match any namespace (elementName is the localName). 
+     * Get the element's textual content. This will match any namespace
+     * (elementName is the localName).
      * 
-     * @param elem  The element is a child of "elem"
-     * @param elementName  The element name is "elementName".
+     * @param elem
+     *            The element is a child of "elem"
+     * @param elementName
+     *            The element name is "elementName".
      * @return The element value
      */
     protected String getElementValue(Element elem, String elementName) {
-    	
-    	return getElementValue("*", elem, elementName);
+
+        return getElementValue("*", elem, elementName);
     }
 
-    
     /**
      * Get the element's attribute value.
      * 

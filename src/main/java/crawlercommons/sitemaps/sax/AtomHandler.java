@@ -91,8 +91,10 @@ class AtomHandler extends DelegatorHandler {
             String r = attributes.getValue("rel");
             if (loc == null || (!valid && v) || (rel != null && r == null)) {
                 // - first link, or in case of multiple links:
-                // - (for a strict parser only) this link is valid and the first one is not valid
-                // - has no rel attribute while the first one does (e.g., rel="edit", rel="alternate")
+                // - (for a strict parser only) this link is valid and the first
+                // one is not valid
+                // - has no rel attribute while the first one does (e.g.,
+                // rel="edit", rel="alternate")
                 try {
                     loc = new URL(href);
                     rel = r;

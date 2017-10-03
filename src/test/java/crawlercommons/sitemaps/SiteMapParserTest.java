@@ -95,7 +95,7 @@ public class SiteMapParserTest {
         assertNotNull("<loc> with CDATA not found", currentSiteMap);
         assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
     }
-    
+
     @Test
     public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
@@ -109,7 +109,32 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
 
         assertEquals(2, sm.getSiteMapUrls().size());
-        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());    
+        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());
+    }
+
+    @Test
+    public void testSitemapWithWrongNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.badns.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(0, sm.getSiteMapUrls().size());
+
+        // try again in lenient mode
+        parser = new SiteMapParser(false);
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
     }
 
     @Test
@@ -380,7 +405,12 @@ public class SiteMapParserTest {
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
         assertSame("Not an RSS", SitemapType.RSS, asm.getType());
         assertNotNull("GMT timestamp not parsed", asm.getLastModified());
-        assertEquals("GMT timestamp", 1483619690000L, asm.getLastModified().getTime()); // Thu, 05 Jan 17 12:34:50 GMT
+        assertEquals("GMT timestamp", 1483619690000L, asm.getLastModified().getTime()); // Thu,
+                                                                                        // 05
+                                                                                        // Jan
+                                                                                        // 17
+                                                                                        // 12:34:50
+                                                                                        // GMT
 
         SiteMap rss = (SiteMap) asm;
         assertEquals("Incorrect items count", 7, rss.getSiteMapUrls().size());
@@ -490,7 +520,7 @@ public class SiteMapParserTest {
 
     /**
      * Read a test resource file and return its content as byte array.
-     *
+     * 
      * @param resourceName
      *            path to the resource file
      * @return byte content of the file

@@ -21,19 +21,18 @@ package crawlercommons.sitemaps;
  * https://www.sitemaps.org/protocol.html#otherformats
  */
 public class Namespace {
-    
-	public static final String SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9";
-    
-    /** 
-     * RSS and Atom sitemap formats do not have strict definition.
-     * But if we do not parse as namespace aware, then RSS/Atom files that choose to 
-     * use namespaces will break.
-     * The relaxed compromise for RSS/Atom is to always parse as "namespace aware", 
-     * but we will only match elements by the localName, accepting any element namespace.  
-    */
+
+    public static final String SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9";
+
+    /**
+     * RSS and Atom sitemap formats do not have strict definition. But if we do
+     * not parse as namespace aware, then RSS/Atom files that choose to use
+     * namespaces will break. The relaxed compromise for RSS/Atom is to always
+     * parse as "namespace aware", but we will only match elements by the
+     * localName, accepting any element namespace.
+     */
     public static final String RSS_2_0 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     public static final String ATOM_0_3 = "http://purl.org/atom/ns#";
     public static final String ATOM_1_0 = "http://www.w3.org/2005/Atom";
 
 }
-

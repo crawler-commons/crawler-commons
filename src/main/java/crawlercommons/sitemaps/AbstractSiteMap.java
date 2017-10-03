@@ -67,12 +67,8 @@ public abstract class AbstractSiteMap {
     private static final ThreadLocal<DateFormat[]> RSS_DATE_FORMATS = new ThreadLocal<DateFormat[]>() {
         @Override
         protected DateFormat[] initialValue() {
-            return new DateFormat[] {
-                    new SimpleDateFormat("EEE, dd MMM yy HH:mm:ss Z", Locale.ROOT),
-                    new SimpleDateFormat("dd MMM yy HH:mm:ss Z", Locale.ROOT),
-                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ROOT),
-                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z", Locale.ROOT)
-            };
+            return new DateFormat[] { new SimpleDateFormat("EEE, dd MMM yy HH:mm:ss Z", Locale.ROOT), new SimpleDateFormat("dd MMM yy HH:mm:ss Z", Locale.ROOT),
+                            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ROOT), new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z", Locale.ROOT) };
         }
     };
 
@@ -205,13 +201,13 @@ public abstract class AbstractSiteMap {
     }
 
     /**
-     * Converts pubDate of RSS to the string representation which could be parsed
-     * in {@link #convertToDate(String)} method.
-     *
+     * Converts pubDate of RSS to the string representation which could be
+     * parsed in {@link #convertToDate(String)} method.
+     * 
      * @param pubDate
      *            - date time of pubDate in RFC822
-     * @return converted to &quot;yyyy-MM-dd'T'HH:mm:ssZ&quot; format or original value if it doesn't
-     *         follow the RFC822
+     * @return converted to &quot;yyyy-MM-dd'T'HH:mm:ssZ&quot; format or
+     *         original value if it doesn't follow the RFC822
      */
     public static String normalizeRSSTimestamp(String pubDate) {
         if (pubDate == null) {

@@ -71,14 +71,15 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ( Namespace.SITEMAP.equals(uri) ) {
-	        if ("sitemap".equals(currentElement())) {
-	            maybeAddSiteMap();
-	        } else if ("sitemapindex".equals(currentElement())) {
-	            sitemap.setProcessed(true);
-	        } else if ("loc".equals(currentElement())) {
-	            locClosed = true;
-	        }
+        if (isStrict() && !Namespace.SITEMAP.equals(uri)) {
+            return;
+        }
+        if ("sitemap".equals(currentElement())) {
+            maybeAddSiteMap();
+        } else if ("sitemapindex".equals(currentElement())) {
+            sitemap.setProcessed(true);
+        } else if ("loc".equals(currentElement())) {
+            locClosed = true;
         }
     }
 
