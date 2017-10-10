@@ -61,7 +61,7 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     /**
-     * @return whether the parser allows any namespace or just the one from the
+     * Sets the parser to allow any namespace or just the one from the
      *         specification
      */
     public boolean isStrictNamespace() {

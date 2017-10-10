@@ -123,7 +123,7 @@ public class SiteMapParser {
     }
 
     /**
-     * @return whether the parser allows any namespace or just the one from the
+     * Sets the parser to allow any namespace or just the one from the
      *         specification
      */
     public void setStrictNamespace(boolean s) {
