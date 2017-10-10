@@ -97,6 +97,7 @@ public class SiteMapParserSAXTest {
     @Test
     public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParserSAX();
+        parser.setStrictNamespace(true);
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.ns.xml");
 
         URL url = new URL("http://www.example.com/sitemap.ns.xml");
@@ -108,6 +109,33 @@ public class SiteMapParserSAXTest {
 
         assertEquals(2, sm.getSiteMapUrls().size());
         assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());
+    }
+
+    @Test
+    public void testSitemapWithWrongNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setStrictNamespace(true);
+
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.badns.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(0, sm.getSiteMapUrls().size());
+
+        // try again in lenient mode
+        parser.setStrictNamespace(false);
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
     }
 
     @Test

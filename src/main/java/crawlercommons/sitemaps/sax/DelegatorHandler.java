@@ -38,6 +38,7 @@ public class DelegatorHandler extends DefaultHandler {
     private DelegatorHandler delegate;
     private URL url;
     private boolean strict;
+    private boolean strictNamespace;
     private UnknownFormatException exception;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
@@ -57,6 +58,22 @@ public class DelegatorHandler extends DefaultHandler {
 
     protected boolean isStrict() {
         return strict;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public boolean isStrictNamespace() {
+        return strictNamespace;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public void setStrictNamespace(boolean s) {
+        strictNamespace = s;
     }
 
     protected void setException(UnknownFormatException exception) {
@@ -94,7 +111,7 @@ public class DelegatorHandler extends DefaultHandler {
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
         else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
-        } else if (strict && !Namespace.SITEMAP.equals(uri)) {
+        } else if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
             return;
         } else if ("sitemapindex".equals(localName)) {
             delegate = new XMLIndexHandler(url, elementStack, strict);

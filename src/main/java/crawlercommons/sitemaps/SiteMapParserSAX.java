@@ -88,6 +88,12 @@ public class SiteMapParserSAX extends SiteMapParser {
 
     private boolean allowPartial = false;
 
+    /**
+     * Indicates whether the parser should work with the namespace from the
+     * specifications or any namespace. Defaults to false.
+     **/
+    protected boolean strictNamespace = false;
+
     public SiteMapParserSAX() {
         this(true, false);
     }
@@ -107,6 +113,22 @@ public class SiteMapParserSAX extends SiteMapParser {
      */
     public boolean isStrict() {
         return strict;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public boolean isStrictNamespace() {
+        return strictNamespace;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public void setStrictNamespace(boolean s) {
+        strictNamespace = s;
     }
 
     /**
@@ -381,6 +403,7 @@ public class SiteMapParserSAX extends SiteMapParser {
                     return new InputSource(new StringReader(""));
                 }
             });
+            handler.setStrictNamespace(isStrictNamespace());
             saxParser.parse(is, handler);
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (sitemap == null) {

@@ -115,6 +115,8 @@ public class SiteMapParserTest {
     @Test
     public void testSitemapWithWrongNamespace() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
+        parser.setStrictNamespace(true);
+
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
 
         URL url = new URL("http://www.example.com/sitemap.badns.xml");
@@ -127,7 +129,7 @@ public class SiteMapParserTest {
         assertEquals(0, sm.getSiteMapUrls().size());
 
         // try again in lenient mode
-        parser = new SiteMapParser(false);
+        parser.setStrictNamespace(false);
         asm = parser.parseSiteMap(content, url);
         assertEquals(SitemapType.XML, asm.getType());
         assertEquals(true, asm instanceof SiteMap);

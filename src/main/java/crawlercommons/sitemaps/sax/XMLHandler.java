@@ -71,7 +71,7 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if (isStrict() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
             return;
         }
 
@@ -95,7 +95,7 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (isStrict() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
             return;
         }
         if ("url".equals(localName) && "urlset".equals(currentElementParent())) {

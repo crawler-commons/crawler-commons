@@ -71,7 +71,7 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (isStrict() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
             return;
         }
         if ("sitemap".equals(currentElement())) {

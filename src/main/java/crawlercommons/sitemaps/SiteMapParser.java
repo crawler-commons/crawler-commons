@@ -92,6 +92,12 @@ public class SiteMapParser {
      */
     protected boolean strict = true;
 
+    /**
+     * Indicates whether the parser should work with the namespace from the
+     * specifications or any namespace. Defaults to false.
+     **/
+    protected boolean strictNamespace = false;
+
     public SiteMapParser() {
         // default constructor
     }
@@ -106,6 +112,22 @@ public class SiteMapParser {
      */
     public boolean isStrict() {
         return strict;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public boolean isStrictNamespace() {
+        return strictNamespace;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public void setStrictNamespace(boolean s) {
+        strictNamespace = s;
     }
 
     /**
@@ -448,7 +470,7 @@ public class SiteMapParser {
         sitemap.setType(SitemapType.XML);
 
         String namespace = Namespace.SITEMAP;
-        if (!strict) {
+        if (!strictNamespace) {
             namespace = "*";
         }
 
@@ -514,7 +536,7 @@ public class SiteMapParser {
                 Element elem = (Element) firstNode;
                 String loc = null;
                 String namespace = Namespace.SITEMAP;
-                if (!strict) {
+                if (!strictNamespace) {
                     namespace = "*";
                 }
                 loc = getElementValue(namespace, elem, "loc");
