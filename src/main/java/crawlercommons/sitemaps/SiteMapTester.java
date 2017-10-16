@@ -44,6 +44,8 @@ public class SiteMapTester {
             LOG.error("               bypass automatic MIME type detection");
             LOG.error("Java properties:");
             LOG.error("  sitemap.useSax  if true use SAX parser to process sitemaps");
+            LOG.error("  sitemap.strictNamespace");
+            LOG.error("                  if true sitemaps are required to use the standard namespace URI");
         } else {
             URL url = new URL(args[0]);
             String mt = (args.length > 1) ? args[1] : null;
@@ -60,6 +62,7 @@ public class SiteMapTester {
         byte[] content = IOUtils.toByteArray(url);
 
         boolean useSaxParser = new Boolean(System.getProperty("sitemap.useSax"));
+        boolean strictNamespace = new Boolean(System.getProperty("sitemap.strictNamespace"));
 
         LOG.info("Parsing {} {} using {} parser", url, ((mt != null && !mt.isEmpty()) ? "as MIME type " + mt : ""), (useSaxParser ? "SAX" : "DOM"));
 
@@ -67,6 +70,7 @@ public class SiteMapTester {
         if (useSaxParser) {
             p = saxParser;
         }
+        p.setStrictNamespace(strictNamespace);
 
         AbstractSiteMap sm = null;
         // guesses the mimetype
