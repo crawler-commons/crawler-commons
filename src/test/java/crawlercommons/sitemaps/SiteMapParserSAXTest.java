@@ -113,19 +113,19 @@ public class SiteMapParserSAXTest {
 
     @Test
     public void testSitemapWithWrongNamespace() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParserSAX();
         parser.setStrictNamespace(true);
 
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
 
         URL url = new URL("http://www.example.com/sitemap.badns.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(content, url);
-        assertEquals(SitemapType.XML, asm.getType());
-        assertEquals(true, asm instanceof SiteMap);
-        assertEquals(true, asm.isProcessed());
-        SiteMap sm = (SiteMap) asm;
-
-        assertEquals(0, sm.getSiteMapUrls().size());
+        AbstractSiteMap asm;
+        try {
+            asm = parser.parseSiteMap(content, url);
+            fail("Expected an UnknownFormatException because of wrong namespace");
+        } catch (UnknownFormatException e) {
+            assertTrue(e.getMessage().contains("does not match standard namespace"));
+        }
 
         // try again in lenient mode
         parser.setStrictNamespace(false);
@@ -133,7 +133,7 @@ public class SiteMapParserSAXTest {
         assertEquals(SitemapType.XML, asm.getType());
         assertEquals(true, asm instanceof SiteMap);
         assertEquals(true, asm.isProcessed());
-        sm = (SiteMap) asm;
+        SiteMap sm = (SiteMap) asm;
 
         assertEquals(2, sm.getSiteMapUrls().size());
     }

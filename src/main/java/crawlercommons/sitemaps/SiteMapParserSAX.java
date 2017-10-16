@@ -407,6 +407,10 @@ public class SiteMapParserSAX extends SiteMapParser {
             saxParser.parse(is, handler);
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (sitemap == null) {
+                UnknownFormatException ex = handler.getException();
+                if (ex != null) {
+                    throw ex;
+                }
                 throw new UnknownFormatException("Unknown XML format for: " + sitemapUrl);
             }
             return sitemap;

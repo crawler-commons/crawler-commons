@@ -80,7 +80,7 @@ public class DelegatorHandler extends DefaultHandler {
         this.exception = exception;
     }
 
-    protected UnknownFormatException getException() {
+    public UnknownFormatException getException() {
         return exception;
     }
 
@@ -112,6 +112,7 @@ public class DelegatorHandler extends DefaultHandler {
         else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
         } else if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+            setException(new UnknownFormatException("Namespace " + uri + " does not match standard namespace " + Namespace.SITEMAP));
             return;
         } else if ("sitemapindex".equals(localName)) {
             delegate = new XMLIndexHandler(url, elementStack, strict);
