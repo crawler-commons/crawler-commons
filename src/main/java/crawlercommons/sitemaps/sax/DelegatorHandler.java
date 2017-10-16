@@ -118,6 +118,10 @@ public class DelegatorHandler extends DefaultHandler {
         } else if ("urlset".equals(localName)) {
             delegate = new XMLHandler(url, elementStack, strict);
         }
+        if (delegate != null) {
+            // configure delegate
+            delegate.setStrictNamespace(isStrictNamespace());
+        }
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {

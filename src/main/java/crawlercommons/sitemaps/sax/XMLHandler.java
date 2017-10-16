@@ -62,6 +62,7 @@ class XMLHandler extends DelegatorHandler {
     private String changeFreq;
     private String priority;
     private int i = 0;
+    private boolean currentElementNamespaceIsValid;
 
     XMLHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
@@ -72,8 +73,10 @@ class XMLHandler extends DelegatorHandler {
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+            currentElementNamespaceIsValid = false;
             return;
         }
+        currentElementNamespaceIsValid = true;
 
         // flush any unclosed or missing URL element
         if (loc.length() > 0 && ("loc".equals(localName) || "url".equals(localName))) {
@@ -106,6 +109,9 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
+        if (isStrictNamespace() && !currentElementNamespaceIsValid) {
+            return;
+        }
         String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
         if ("loc".equals(localName) || "url".equals(localName)) {
