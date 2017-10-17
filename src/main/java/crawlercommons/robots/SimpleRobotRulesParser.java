@@ -16,7 +16,11 @@
 
 package crawlercommons.robots;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +31,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,10 +167,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         private boolean _finishedAgentFields;
 
         // True if we're done adding rules for a matched (not wildcard) agent
-        // name.
-        // When this is true, we only consider sitemap directives, so we skip
-        // all
-        // remaining user agent blocks.
+        // name. When this is true, we only consider sitemap directives, so we
+        // skip all remaining user agent blocks.
         private boolean _skipAgents;
 
         private String _url;
@@ -369,16 +373,13 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             throw new IllegalStateException("Can't use status code constructor with 2xx response");
         } else if ((httpStatusCode >= 300) && (httpStatusCode < 400)) {
             // Should only happen if we're getting endless redirects (more than
-            // our follow limit), so
-            // treat it as a temporary failure.
+            // our follow limit), so treat it as a temporary failure.
             result = new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
             result.setDeferVisits(true);
         } else if ((httpStatusCode >= 400) && (httpStatusCode < 500)) {
             // Some sites return 410 (gone) instead of 404 (not found), so treat
-            // as the same.
-            // Actually treat all (including forbidden) as "no robots.txt", as
-            // that's what Google
-            // and other search engines do.
+            // as the same. Actually treat all (including forbidden) as "no
+            // robots.txt", as that's what Google and other search engines do.
             result = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
         } else {
             // Treat all other status codes as a temporary failure.
@@ -785,6 +786,61 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
     public void setMaxCrawlDelay(long maxCrawlDelay) {
         _maxCrawlDelay = maxCrawlDelay;
+    }
+
+    public static void main(String[] args) throws MalformedURLException, IOException {
+        if (args.length < 1) {
+            System.err.println("SimpleRobotRulesParser <robots.txt> [[<agentname>] <URL>...]");
+            System.err.println();
+            System.err.println("Parse a robots.txt file");
+            System.err.println("  <robots.txt>\tURL pointing to robots.txt file.");
+            System.err.println("              \tTo read a local file use a file:// URL");
+            System.err.println("              \t(parsed as http://example.com/robots.txt)");
+            System.err.println("  <agentname> \tuser agent name to check for exclusion rules.");
+            System.err.println("              \tIf not defined check with '*'");
+            System.err.println("  <URL>       \tcheck URL whether allowed or forbidden.");
+            System.err.println("              \tIf no URL is given show robots.txt rules");
+            System.exit(1);
+        }
+
+        String url = args[0];
+        String agentName = "*";
+        if (args.length >= 2) {
+            agentName = args[1];
+        }
+
+        SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
+        BaseRobotRules rules;
+        URLConnection connection = new URL(url).openConnection();
+        try {
+            byte[] content = IOUtils.toByteArray(connection);
+            if (!url.matches("^https?://")) {
+                // use artificial URL to avoid problems resolving relative
+                // sitemap paths for file:/ URLs
+                url = "http://example.com/robots.txt";
+            }
+            String contentType = new Tika().detect(content, url);
+            rules = parser.parseContent(url, content, contentType, agentName);
+        } catch (IOException e) {
+            if (connection instanceof HttpURLConnection) {
+                int code = ((HttpURLConnection) connection).getResponseCode();
+                rules = parser.failedFetch(code);
+                System.out.println("Fetch of " + url + " failed with HTTP status code " + code);
+            } else {
+                throw e;
+            }
+        }
+
+        if (args.length < 3) {
+            // no URL(s) given, print rules and exit
+            System.out.println("Robot rules for user agentname '" + agentName + "':");
+            System.out.println(rules.toString());
+        } else {
+            System.out.println("Checking URLs:");
+            for (int i = 2; i < args.length; i++) {
+                System.out.println((rules.isAllowed(args[i]) ? "allowed  " : "forbidden") + "\t" + args[i]);
+            }
+        }
     }
 
 }
