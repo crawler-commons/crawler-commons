@@ -120,7 +120,7 @@ public class EffectiveTldFinder {
      * @return true if (re)initialization was successful
      */
     public boolean initialize(boolean excludePrivateDomains) {
-        return initialize(this.getClass().getResourceAsStream(ETLD_DATA), false);
+        return initialize(this.getClass().getResourceAsStream(ETLD_DATA), excludePrivateDomains);
     }
 
     /**
@@ -151,7 +151,7 @@ public class EffectiveTldFinder {
             BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, StandardCharsets.UTF_8));
             String line = null;
             while (null != (line = input.readLine())) {
-                if (line.length() == 0) {
+                if (line.trim().isEmpty()) {
                     continue;
                 } else if (line.startsWith(COMMENT)) {
                     if (excludePrivateDomains) {
@@ -226,17 +226,64 @@ public class EffectiveTldFinder {
      * 
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
-     * @return the NIC-assigned domain name
+     * @return the NIC-assigned domain name or as fall-back the hostname if no
+     *         FQDN with valid TLD is found
      */
     public static String getAssignedDomain(String hostname) {
+        return getAssignedDomain(hostname, false);
+    }
+
+    /**
+     * This method uses the effective TLD to determine which component of a FQDN
+     * is the NIC-assigned domain name.
+     * 
+     * @param hostname
+     *            a string for which to obtain a NIC-assigned domain name
+     * @param strict
+     *            do not return the hostname as fall-back if a FQDN with valid
+     *            TLD cannot be determined
+     * @return the NIC-assigned domain name, null if strict and no FQDN with
+     *         valid TLD is found
+     */
+    public static String getAssignedDomain(String hostname, boolean strict) {
+        hostname = hostname.toLowerCase(Locale.ROOT);
         EffectiveTLD etld = getEffectiveTLD(hostname);
-        if (null == etld || etld.getDomain().equalsIgnoreCase(hostname)) {
-            return hostname.toLowerCase(Locale.ROOT);
+        if (null == etld) {
+            return (strict ? null : hostname);
         }
         if (etld.isException()) {
             return etld.domain;
         }
-        return hostname.replaceFirst(".*?([^.]+\\.)" + etld.getDomain() + "$", "$1" + etld.getDomain());
+        if (etld.getDomain().equals(hostname)) {
+            // if strict: hostname cannot be an eTLD (except if it's an
+            // exception
+            // which is already checked)
+            return (strict ? null : hostname);
+        }
+        // clip hostname one dot-separated element before eTLD
+        if (hostname.endsWith(etld.getDomain())) {
+            int etldStartPos = hostname.length() - etld.getDomain().length() - 1;
+            if (hostname.charAt(etldStartPos) != DOT) {
+                // should not happen: no dot before TLD
+                return (strict ? null : hostname);
+            }
+            int start = 0;
+            int pos;
+            while ((pos = hostname.indexOf(DOT, start)) != -1) {
+                if (pos == start) {
+                    // there must be at least one character between two dots
+                    return (strict ? null : hostname);
+                }
+                if (pos >= etldStartPos)
+                    break;
+                start = pos + 1;
+            }
+            return hostname.substring(start);
+        } else {
+            // should not happen: found an eTLD which is not a suffix of
+            // hostname
+            return (strict ? null : hostname);
+        }
     }
 
     public boolean isConfigured() {

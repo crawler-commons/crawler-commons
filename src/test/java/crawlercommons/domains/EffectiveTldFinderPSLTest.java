@@ -56,9 +56,9 @@ public class EffectiveTldFinderPSLTest {
         checkPublicSuffix(".example.example", null);
         // Unlisted TLD.
         checkPublicSuffix("example", null);
-        checkPublicSuffix("example.example", "example.example");
-        checkPublicSuffix("b.example.example", "example.example");
-        checkPublicSuffix("a.b.example.example", "example.example");
+        // checkPublicSuffix("example.example", "example.example");
+        // checkPublicSuffix("b.example.example", "example.example");
+        // checkPublicSuffix("a.b.example.example", "example.example");
         // Listed, but non-Internet, TLD.
         // checkPublicSuffix("local", null);
         // checkPublicSuffix("example.local", null);
@@ -119,14 +119,15 @@ public class EffectiveTldFinderPSLTest {
         checkPublicSuffix("test.k12.ak.us", "test.k12.ak.us");
         checkPublicSuffix("www.test.k12.ak.us", "test.k12.ak.us");
         // IDN labels.
-        checkPublicSuffix("食狮.com.cn", "食狮.com.cn");
-        checkPublicSuffix("食狮.公司.cn", "食狮.公司.cn");
-        checkPublicSuffix("www.食狮.公司.cn", "食狮.公司.cn");
-        checkPublicSuffix("shishi.公司.cn", "shishi.公司.cn");
-        checkPublicSuffix("公司.cn", null);
-        checkPublicSuffix("食狮.中国", "食狮.中国");
-        checkPublicSuffix("www.食狮.中国", "食狮.中国");
-        checkPublicSuffix("shishi.中国", "shishi.中国");
+        // TODO #179
+        // checkPublicSuffix("食狮.com.cn", "食狮.com.cn");
+        // checkPublicSuffix("食狮.公司.cn", "食狮.公司.cn");
+        // checkPublicSuffix("www.食狮.公司.cn", "食狮.公司.cn");
+        // checkPublicSuffix("shishi.公司.cn", "shishi.公司.cn");
+        // checkPublicSuffix("公司.cn", null);
+        // checkPublicSuffix("食狮.中国", "食狮.中国");
+        // checkPublicSuffix("www.食狮.中国", "食狮.中国");
+        // checkPublicSuffix("shishi.中国", "shishi.中国");
         checkPublicSuffix("中国", null);
         // Same as above, but punycoded.
         checkPublicSuffix("xn--85x722f.com.cn", "xn--85x722f.com.cn");
@@ -145,17 +146,8 @@ public class EffectiveTldFinderPSLTest {
         if (hostname == null) {
             return;
         }
-        String domain = EffectiveTldFinder.getAssignedDomain(hostname);
-        // assertEquals(expectedDomain, domain); // TODO: too many tests failing
-        if (domain == null && expectedDomain == null) {
-            // ok
-        } else if (domain == null) {
-            System.out.println("! failed to get valid domain " + expectedDomain + " for " + hostname);
-        } else if (expectedDomain == null) {
-            System.out.println("! failed to detect invalid domain for " + hostname + " got " + domain);
-        } else if (!domain.equals(expectedDomain)) {
-            System.out.println("! " + domain + " != " + expectedDomain + " for " + hostname);
-        }
+        String domain = EffectiveTldFinder.getAssignedDomain(hostname, true);
+        assertEquals(expectedDomain, domain);
     }
 
 }
