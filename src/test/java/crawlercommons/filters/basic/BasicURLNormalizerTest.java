@@ -111,8 +111,7 @@ public class BasicURLNormalizerTest {
         normalizeTest("http://foo.com:81/", "http://foo.com:81/");
         // check that empty port is removed
         normalizeTest("http://example.com:/", "http://example.com/");
-        normalizeTest("https://example.com:/foobar.html",
-                "https://example.com/foobar.html");
+        normalizeTest("https://example.com:/foobar.html", "https://example.com/foobar.html");
 
         // check that null path is normalized
         normalizeTest("http://foo.com", "http://foo.com/");

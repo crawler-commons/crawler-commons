@@ -29,6 +29,7 @@ import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapURL;
 
@@ -61,6 +62,7 @@ class XMLHandler extends DelegatorHandler {
     private String changeFreq;
     private String priority;
     private int i = 0;
+    private boolean currentElementNamespaceIsValid;
 
     XMLHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
@@ -70,8 +72,14 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+            currentElementNamespaceIsValid = false;
+            return;
+        }
+        currentElementNamespaceIsValid = true;
+
         // flush any unclosed or missing URL element
-        if (loc.length() > 0 && ("loc".equals(qName) || "url".equals(qName))) {
+        if (loc.length() > 0 && ("loc".equals(localName) || "url".equals(localName))) {
             // check whether loc isn't white space only
             for (int i = 0; i < loc.length(); i++) {
                 if (!Character.isWhitespace(loc.charAt(i))) {
@@ -80,7 +88,7 @@ class XMLHandler extends DelegatorHandler {
                 }
             }
             loc = new StringBuilder();
-            if ("url".equals(qName)) {
+            if ("url".equals(localName)) {
                 // reset also attributes
                 lastMod = null;
                 changeFreq = null;
@@ -90,23 +98,29 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("url".equals(qName) && "urlset".equals(currentElementParent())) {
+        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+            return;
+        }
+        if ("url".equals(localName) && "urlset".equals(currentElementParent())) {
             maybeAddSiteMapUrl();
-        } else if ("urlset".equals(qName)) {
+        } else if ("urlset".equals(localName)) {
             sitemap.setProcessed(true);
         }
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String qName = super.currentElement();
+        if (isStrictNamespace() && !currentElementNamespaceIsValid) {
+            return;
+        }
+        String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
-        if ("loc".equals(qName) || "url".equals(qName)) {
+        if ("loc".equals(localName) || "url".equals(localName)) {
             loc.append(value);
-        } else if ("changefreq".equals(qName)) {
+        } else if ("changefreq".equals(localName)) {
             changeFreq = value;
-        } else if ("lastmod".equals(qName)) {
+        } else if ("lastmod".equals(localName)) {
             lastMod = value;
-        } else if ("priority".equals(qName)) {
+        } else if ("priority".equals(localName)) {
             priority = value;
         }
     }

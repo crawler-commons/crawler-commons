@@ -78,11 +78,11 @@ class AtomHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if ("entry".equals(qName)) {
+        if ("entry".equals(localName)) {
             loc = null;
             lastMod = null;
             rel = null;
-        } else if ("link".equals(qName)) {
+        } else if ("link".equals(localName)) {
             String href = attributes.getValue("href");
             if (href == null)
                 return;
@@ -91,8 +91,10 @@ class AtomHandler extends DelegatorHandler {
             String r = attributes.getValue("rel");
             if (loc == null || (!valid && v) || (rel != null && r == null)) {
                 // - first link, or in case of multiple links:
-                // - (for a strict parser only) this link is valid and the first one is not valid
-                // - has no rel attribute while the first one does (e.g., rel="edit", rel="alternate")
+                // - (for a strict parser only) this link is valid and the first
+                // one is not valid
+                // - has no rel attribute while the first one does (e.g.,
+                // rel="edit", rel="alternate")
                 try {
                     loc = new URL(href);
                     rel = r;
@@ -114,9 +116,9 @@ class AtomHandler extends DelegatorHandler {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String qName = super.currentElement();
+        String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
-        if ("updated".equals(qName)) {
+        if ("updated".equals(localName)) {
             lastMod = value;
         }
     }

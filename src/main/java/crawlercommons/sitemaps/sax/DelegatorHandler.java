@@ -25,6 +25,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
+import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.UnknownFormatException;
 
 /**
@@ -37,6 +38,7 @@ public class DelegatorHandler extends DefaultHandler {
     private DelegatorHandler delegate;
     private URL url;
     private boolean strict;
+    private boolean strictNamespace;
     private UnknownFormatException exception;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
@@ -58,11 +60,27 @@ public class DelegatorHandler extends DefaultHandler {
         return strict;
     }
 
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public boolean isStrictNamespace() {
+        return strictNamespace;
+    }
+
+    /**
+     * Sets the parser to allow any namespace or just the one from the
+     * specification
+     */
+    public void setStrictNamespace(boolean s) {
+        strictNamespace = s;
+    }
+
     protected void setException(UnknownFormatException exception) {
         this.exception = exception;
     }
 
-    protected UnknownFormatException getException() {
+    public UnknownFormatException getException() {
         return exception;
     }
 
@@ -70,7 +88,7 @@ public class DelegatorHandler extends DefaultHandler {
         if (elementStack.isEmpty() || delegate == null) {
             startRootElement(uri, localName, qName, attributes);
         } else {
-            elementStack.push(qName);
+            elementStack.push(localName);
         }
         if (delegate != null) {
             delegate.startElement(uri, localName, qName, attributes);
@@ -78,23 +96,32 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     private void startRootElement(String uri, String localName, String qName, Attributes attributes) {
-        elementStack.push(qName);
-        if ("sitemapindex".equals(qName)) {
-            delegate = new XMLIndexHandler(url, elementStack, strict);
-        } else if ("urlset".equals(qName)) {
-            delegate = new XMLHandler(url, elementStack, strict);
-        } else if ("feed".equals(qName)) {
+        elementStack.push(localName);
+
+        if ("feed".equals(localName)) {
             delegate = new AtomHandler(url, elementStack, strict);
         }
-        // See if it is a RSS feed by looking for a "channel" element. This
-        // avoids the issue
+        // See if it is a RSS feed by looking for the localName "channel"
+        // element .
+        // This avoids the issue
         // of having the outer tag named <rdf:RDF> that was causing this code to
         // fail. Inside of
         // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
         // See https://github.com/crawler-commons/crawler-commons/issues/87
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
-        else if ("channel".equals(qName)) {
+        else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
+        } else if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+            setException(new UnknownFormatException("Namespace " + uri + " does not match standard namespace " + Namespace.SITEMAP));
+            return;
+        } else if ("sitemapindex".equals(localName)) {
+            delegate = new XMLIndexHandler(url, elementStack, strict);
+        } else if ("urlset".equals(localName)) {
+            delegate = new XMLHandler(url, elementStack, strict);
+        }
+        if (delegate != null) {
+            // configure delegate
+            delegate.setStrictNamespace(isStrictNamespace());
         }
     }
 

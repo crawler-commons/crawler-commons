@@ -88,6 +88,12 @@ public class SiteMapParserSAX extends SiteMapParser {
 
     private boolean allowPartial = false;
 
+    /**
+     * Indicates whether the parser should work with the namespace from the
+     * specifications or any namespace. Defaults to false.
+     **/
+    protected boolean strictNamespace = false;
+
     public SiteMapParserSAX() {
         this(true, false);
     }
@@ -107,6 +113,22 @@ public class SiteMapParserSAX extends SiteMapParser {
      */
     public boolean isStrict() {
         return strict;
+    }
+
+    /**
+     * @return whether the parser allows any namespace or just the one from the
+     *         specification
+     */
+    public boolean isStrictNamespace() {
+        return strictNamespace;
+    }
+
+    /**
+     * Sets the parser to allow any namespace or just the one from the
+     * specification
+     */
+    public void setStrictNamespace(boolean s) {
+        strictNamespace = s;
     }
 
     /**
@@ -236,7 +258,8 @@ public class SiteMapParserSAX extends SiteMapParser {
                 }
                 throw new UnknownFormatException("Can't parse a gzipped sitemap with the embedded MediaType of: " + embeddedType + " (at: " + url + ")");
             }
-            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check parent
+            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
+                                                                     // parent
         }
 
         throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
@@ -356,9 +379,15 @@ public class SiteMapParserSAX extends SiteMapParser {
     protected AbstractSiteMap processXml(URL sitemapUrl, InputSource is) throws UnknownFormatException {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        // disable validation and avoid that remote DTDs, schemas, etc. are fetched
+
+        // disable validation and avoid that remote DTDs, schemas, etc. are
+        // fetched
         factory.setValidating(false);
         factory.setXIncludeAware(false);
+
+        // support the use of an explicit namespace.
+        factory.setNamespaceAware(true);
+
         try {
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (Exception e) {
@@ -374,9 +403,14 @@ public class SiteMapParserSAX extends SiteMapParser {
                     return new InputSource(new StringReader(""));
                 }
             });
+            handler.setStrictNamespace(isStrictNamespace());
             saxParser.parse(is, handler);
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (sitemap == null) {
+                UnknownFormatException ex = handler.getException();
+                if (ex != null) {
+                    throw ex;
+                }
                 throw new UnknownFormatException("Unknown XML format for: " + sitemapUrl);
             }
             return sitemap;

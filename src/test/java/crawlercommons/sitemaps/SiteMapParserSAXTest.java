@@ -36,6 +36,8 @@ import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+
 import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
@@ -90,6 +92,50 @@ public class SiteMapParserSAXTest {
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=lastyear&all=false"));
         assertNotNull("<loc> with CDATA not found", currentSiteMap);
         assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
+    }
+
+    @Test
+    public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParserSAX();
+        parser.setStrictNamespace(true);
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.ns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.ns.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
+        assertEquals(SiteMapURL.ChangeFrequency.DAILY, sm.getSiteMapUrls().iterator().next().getChangeFrequency());
+    }
+
+    @Test
+    public void testSitemapWithWrongNamespace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParserSAX();
+        parser.setStrictNamespace(true);
+
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
+
+        URL url = new URL("http://www.example.com/sitemap.badns.xml");
+        AbstractSiteMap asm;
+        try {
+            asm = parser.parseSiteMap(content, url);
+            fail("Expected an UnknownFormatException because of wrong namespace");
+        } catch (UnknownFormatException e) {
+            assertTrue(e.getMessage().contains("does not match standard namespace"));
+        }
+
+        // try again in lenient mode
+        parser.setStrictNamespace(false);
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        assertEquals(2, sm.getSiteMapUrls().size());
     }
 
     @Test

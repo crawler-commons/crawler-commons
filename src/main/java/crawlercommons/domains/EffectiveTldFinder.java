@@ -79,10 +79,9 @@ public class EffectiveTldFinder {
         domains = new HashMap<>();
         try {
             if (null == effectiveTldDataStream && null != this.getClass().getResource(ETLD_DATA)) {
-              effectiveTldDataStream = this.getClass().getResourceAsStream(ETLD_DATA);
+                effectiveTldDataStream = this.getClass().getResourceAsStream(ETLD_DATA);
             }
-            BufferedReader input = new BufferedReader(new InputStreamReader(
-                    effectiveTldDataStream, StandardCharsets.UTF_8));
+            BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, StandardCharsets.UTF_8));
             String line = null;
             while (null != (line = input.readLine())) {
                 if (line.length() == 0 || (line.length() > 1 && line.startsWith(COMMENT))) {
