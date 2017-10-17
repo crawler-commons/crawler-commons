@@ -19,6 +19,8 @@ package crawlercommons.domains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -100,6 +102,8 @@ public class EffectiveTldFinderTest {
         assertTrue(etld.isException());
         assertFalse(etld.isWild());
         assertEquals("city.kawasaki.jp", etld.getDomain());
+        assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("www.city.kawasaki.jp"));
+        assertEquals(".kawasaki.jp", EffectiveTldFinder.getAssignedDomain(".kawasaki.jp"));
     }
 
     @Test
@@ -136,6 +140,19 @@ public class EffectiveTldFinderTest {
     }
 
     @Test
+    public final void testAcZaDomain() throws Exception {
+        // .za isn't a TLD while .ac.za, .alt.za, .co.za, etc. are TLDs
+        // according to (as of 2017-08-03)
+        // https://www.zadna.org.za/content/page/domain-information/
+        EffectiveTLD etld = EffectiveTldFinder.getEffectiveTLD("blogs.uct.ac.za");
+        assertNotNull(etld);
+        assertEquals("ac.za", etld.getDomain());
+        String ad = null;
+        ad = EffectiveTldFinder.getAssignedDomain("blogs.uct.ac.za");
+        assertEquals("uct.ac.za", ad);
+    }
+
+    @Test
     public final void testUkDomain() throws Exception {
         String ad = null;
         ad = EffectiveTldFinder.getAssignedDomain("bbc.co.uk");
@@ -143,4 +160,33 @@ public class EffectiveTldFinderTest {
         ad = EffectiveTldFinder.getAssignedDomain("www.bbc.co.uk");
         assertEquals("bbc.co.uk", ad);
     }
+
+    @Test
+    public final void testMixedCaseHostNames() throws Exception {
+        String ad = null;
+        ad = EffectiveTldFinder.getAssignedDomain("www.PayPal.COM");
+        assertEquals("paypal.com", ad);
+    }
+
+    @Test
+    public final void testIDNDomain() throws Exception {
+        String ad = null;
+        ad = EffectiveTldFinder.getAssignedDomain("спб.бесплатныеобъявления.рф");
+        // assertEquals("бесплатныеобъявления.рф", ad); // TODO #179
+        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai");
+        assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
+        // rare but possible mixed use of UTF-8 and Punycode
+        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф");
+        // assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad); // TODO #179
+    }
+
+    @Test
+    public final void testStrictDomain() throws Exception {
+        String ad = null;
+        ad = EffectiveTldFinder.getAssignedDomain("com", false);
+        assertNotNull(ad);
+        ad = EffectiveTldFinder.getAssignedDomain("com", true);
+        assertNull(ad);
+    }
+
 }
