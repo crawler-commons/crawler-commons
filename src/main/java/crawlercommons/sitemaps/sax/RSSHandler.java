@@ -125,7 +125,10 @@ class RSSHandler extends DelegatorHandler {
         String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
         if ("pubDate".equals(localName)) {
-            lastMod = value;
+            lastMod = AbstractSiteMap.normalizeRSSTimestamp(value);
+            if ("channel".equals(super.currentElementParent())) {
+                sitemap.setLastModified(lastMod);
+            }
         } else if ("link".equals(localName)) {
             String href = value;
             LOG.debug("href = {}", href);
