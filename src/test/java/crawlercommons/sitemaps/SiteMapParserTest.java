@@ -17,6 +17,13 @@
 package crawlercommons.sitemaps;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +38,6 @@ import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -39,8 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
-
-import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class SiteMapParserTest {
@@ -99,6 +103,7 @@ public class SiteMapParserTest {
     @Test
     public void testSitemapWithNamespace() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
+        parser.setStrictNamespace(true);
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.ns.xml");
 
         URL url = new URL("http://www.example.com/sitemap.ns.xml");
@@ -120,13 +125,13 @@ public class SiteMapParserTest {
         byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.badns.xml");
 
         URL url = new URL("http://www.example.com/sitemap.badns.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(content, url);
-        assertEquals(SitemapType.XML, asm.getType());
-        assertEquals(true, asm instanceof SiteMap);
-        assertEquals(true, asm.isProcessed());
-        SiteMap sm = (SiteMap) asm;
-
-        assertEquals(0, sm.getSiteMapUrls().size());
+        AbstractSiteMap asm;
+        try {
+            asm = parser.parseSiteMap(content, url);
+            fail("Expected an UnknownFormatException because of wrong namespace");
+        } catch (UnknownFormatException e) {
+            assertTrue(e.getMessage().contains("does not match standard namespace"));
+        }
 
         // try again in lenient mode
         parser.setStrictNamespace(false);
@@ -134,7 +139,7 @@ public class SiteMapParserTest {
         assertEquals(SitemapType.XML, asm.getType());
         assertEquals(true, asm instanceof SiteMap);
         assertEquals(true, asm.isProcessed());
-        sm = (SiteMap) asm;
+        SiteMap sm = (SiteMap) asm;
 
         assertEquals(2, sm.getSiteMapUrls().size());
     }
@@ -407,20 +412,15 @@ public class SiteMapParserTest {
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
         assertSame("Not an RSS", SitemapType.RSS, asm.getType());
         assertNotNull("GMT timestamp not parsed", asm.getLastModified());
-        assertEquals("GMT timestamp", 1483619690000L, asm.getLastModified().getTime()); // Thu,
-                                                                                        // 05
-                                                                                        // Jan
-                                                                                        // 17
-                                                                                        // 12:34:50
-                                                                                        // GMT
-
+        long pubDate = 1483619690000L; // Thu, 05 Jan 17 12:34:50 GMT
+        assertEquals("GMT timestamp", pubDate, asm.getLastModified().getTime());
         SiteMap rss = (SiteMap) asm;
         assertEquals("Incorrect items count", 7, rss.getSiteMapUrls().size());
         Iterator<SiteMapURL> it = rss.getSiteMapUrls().iterator();
-        assertPubDate("Local differental offset", "article_1", 1483619691000L, it);
-        assertPubDate("Short year", "article_2", 1483619692000L, it);
-        assertPubDate("No weekday", "article_3", 1483619693000L, it);
-        assertPubDate("No weekday and short year", "article_4", 1483619694000L, it);
+        assertPubDate("Local differental offset", "article_1", pubDate + 1000, it);
+        assertPubDate("Short year", "article_2", pubDate + 2000, it);
+        assertPubDate("No weekday", "article_3", pubDate + 3000, it);
+        assertPubDate("No weekday and short year", "article_4", pubDate + 4000, it);
         assertPubDate("No time zone(incorrect)", "article_5", null, it);
         assertPubDate("Empty field", "article_6", null, it);
         assertPubDate("Missed field", "article_7", null, it);
@@ -438,11 +438,10 @@ public class SiteMapParserTest {
         }
     }
 
-    @Ignore("fails for DOM-based parser")
     @Test
     public void testPartialSitemapsAllowed() throws UnknownFormatException, IOException {
 
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParser(false, true);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
@@ -482,11 +481,10 @@ public class SiteMapParserTest {
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
     }
 
-    @Ignore("fails for DOM-based parser")
     @Test
     public void testPartialSitemapIndicesAllowed() throws UnknownFormatException, IOException {
 
-        SiteMapParser parser = new SiteMapParser();
+        SiteMapParser parser = new SiteMapParser(false, true);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")

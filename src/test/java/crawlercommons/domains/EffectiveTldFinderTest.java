@@ -177,7 +177,8 @@ public class EffectiveTldFinderTest {
         assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
         // rare but possible mixed use of UTF-8 and Punycode
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф");
-        // assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad); // TODO #179
+        // TODO #179
+        // assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
     }
 
     @Test

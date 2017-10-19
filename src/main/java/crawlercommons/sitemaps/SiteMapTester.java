@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 public class SiteMapTester {
 
     private static final Logger LOG = LoggerFactory.getLogger(SiteMapTester.class);
-    private static SiteMapParser parser = new SiteMapParser(false);
-    private static SiteMapParser saxParser = new SiteMapParserSAX(false, true);
+    private static SiteMapParser saxParser = new SiteMapParser(false, true);
 
     public static void main(String[] args) throws IOException, UnknownFormatException {
         if (args.length < 1) {
@@ -43,7 +42,6 @@ public class SiteMapTester {
             LOG.error("  MIME_TYPE    force processing sitemap as MIME type,");
             LOG.error("               bypass automatic MIME type detection");
             LOG.error("Java properties:");
-            LOG.error("  sitemap.useSax  if true use SAX parser to process sitemaps");
             LOG.error("  sitemap.strictNamespace");
             LOG.error("                  if true sitemaps are required to use the standard namespace URI");
         } else {
@@ -61,23 +59,17 @@ public class SiteMapTester {
     private static void parse(URL url, String mt) throws IOException, UnknownFormatException {
         byte[] content = IOUtils.toByteArray(url);
 
-        boolean useSaxParser = new Boolean(System.getProperty("sitemap.useSax"));
+        LOG.info("Parsing {} {}", url, ((mt != null && !mt.isEmpty()) ? "as MIME type " + mt : ""));
+
         boolean strictNamespace = new Boolean(System.getProperty("sitemap.strictNamespace"));
-
-        LOG.info("Parsing {} {} using {} parser", url, ((mt != null && !mt.isEmpty()) ? "as MIME type " + mt : ""), (useSaxParser ? "SAX" : "DOM"));
-
-        SiteMapParser p = parser;
-        if (useSaxParser) {
-            p = saxParser;
-        }
-        p.setStrictNamespace(strictNamespace);
+        saxParser.setStrictNamespace(strictNamespace);
 
         AbstractSiteMap sm = null;
         // guesses the mimetype
         if (mt == null || mt.equals("")) {
-            sm = p.parseSiteMap(content, url);
+            sm = saxParser.parseSiteMap(content, url);
         } else {
-            sm = p.parseSiteMap(mt, content, url);
+            sm = saxParser.parseSiteMap(mt, content, url);
         }
 
         if (sm.isIndex()) {
