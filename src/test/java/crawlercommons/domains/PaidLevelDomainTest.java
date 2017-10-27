@@ -90,7 +90,7 @@ public class PaidLevelDomainTest {
     }
     
     @Test
-    public final void testFinishDomains() {
+    public final void testFinnishDomains() {
         assertEquals("fi.com", PaidLevelDomain.getPLD("www.fi.com"));
     }
 
