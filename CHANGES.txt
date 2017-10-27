@@ -1,6 +1,10 @@
 Crawler-Commons Change Log
 
-Current Development 0.9-SNAPSHOT
+Release 0.9 (2017-10-27)
+- [Sitemaps] Removed DOM-based sitemap parser (jnioche) #177
+- Incorrect domains returned by EffectiveTldFinder (sebastian-nagel) #172
+- [Sitemaps] Add namespace aware DOM/SAX parsing for XML Sitemaps (Marko Milicevic, jnioche, sebastian-nagel) #176
+- Upgraded Tika 1.16 (jnioche) #175
 - [Sitemaps] Sitemap SAX parsing mangles target URLs (jnioche, sebastian-nagel) #169
 - [Sitemaps] RSS parser ignores pubDate of link (MichealKum via kkrugler) #166
 
