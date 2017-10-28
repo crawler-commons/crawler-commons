@@ -56,7 +56,7 @@ public class PaidLevelDomain {
         // Now use support in EffectiveTldFinder
         String result = EffectiveTldFinder.getAssignedDomain(hostname, true);
         if (result == null) {
-        	LOGGER.debug(String.format("Hostname %s isn't a valid FQDN", hostname));
+        	LOGGER.debug("Hostname {} isn't a valid FQDN", hostname);
         	return hostname;
         } else {
         	return result;
