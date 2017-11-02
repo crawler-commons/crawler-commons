@@ -190,4 +190,13 @@ public class EffectiveTldFinderTest {
         assertNull(ad);
     }
 
+    @Test
+    public final void testPrivateDomain() throws Exception {
+        String ad = null;
+        ad = EffectiveTldFinder.getAssignedDomain("myblog.blogspot.com", true, false);
+        assertEquals("myblog.blogspot.com", ad);
+        ad = EffectiveTldFinder.getAssignedDomain("myblog.blogspot.com", true, true);
+        assertEquals("blogspot.com", ad);
+    }
+
 }
