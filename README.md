@@ -9,6 +9,7 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 
 ## Javadocs
 
+* [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
 * [0.8](http://crawler-commons.github.io/crawler-commons/0.8/)
 * [0.7](http://crawler-commons.github.io/crawler-commons/0.7/)
 * [0.6](http://crawler-commons.github.io/crawler-commons/0.6/apidocs/)
@@ -22,6 +23,14 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
 
 # Crawler-Commons News
+
+## 31st October 2017  - crawler-commons 0.9 released
+
+We are glad to announce the 0.9 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-0.9/CHANGES.txt) file included with the release for a full list of details.
+The main changes are the removal of DOM-based sitemap parser as the SAX equivalent introduced in the previous version has better performance and is also more robust. You might need to change your code to replace `SiteMapParserSAX` with `SiteMapParser`.
+The parser is now aware of namespaces, and by default does not force the namespace to be the one recommended in the specification (`http://www.sitemaps.org/schemas/sitemap/0.9`) as variants can be found in the wild. You can set the behaviour using the method _setStrictNamespace(boolean)_.
+
+As usual, the version 0.9 contains numerous improvements and bugfixes and all users are invited to upgrade to this version.
 
 ## 9th June 2017  - crawler-commons 0.8 released
 
