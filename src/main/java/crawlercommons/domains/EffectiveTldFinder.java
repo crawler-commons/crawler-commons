@@ -82,12 +82,14 @@ import org.slf4j.LoggerFactory;
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
+    
     public static final String ETLD_DATA = "/effective_tld_names.dat";
     public static final String COMMENT = "//";
     public static final String DOT_REGEX = "\\.";
     public static final String EXCEPTION = "!";
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
+    
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private boolean configured = false;
@@ -222,7 +224,7 @@ public class EffectiveTldFinder {
 
     /**
      * This method uses the effective TLD to determine which component of a FQDN
-     * is the NIC-assigned domain name.
+     * is the NIC-assigned domain name (aka "Paid Level Domain").
      * 
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
@@ -235,7 +237,7 @@ public class EffectiveTldFinder {
 
     /**
      * This method uses the effective TLD to determine which component of a FQDN
-     * is the NIC-assigned domain name.
+     * is the NIC-assigned domain name (aka "Paid Level Domain").
      * 
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
@@ -308,13 +310,14 @@ public class EffectiveTldFinder {
         public EffectiveTLD(String line) {
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
-                domain = line.substring(1, line.length());
+                domain = line.substring(EXCEPTION.length(), line.length());
             } else if (line.startsWith(WILD_CARD)) {
                 wild = true;
-                domain = line.substring(2, line.length());
+                domain = line.substring(WILD_CARD.length(), line.length());
             } else {
                 domain = line;
             }
+            
             domain = normalizeName(domain);
         }
 

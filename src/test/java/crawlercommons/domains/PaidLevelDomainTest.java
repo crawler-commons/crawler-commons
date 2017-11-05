@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import crawlercommons.domains.PaidLevelDomain;
@@ -37,25 +38,36 @@ public class PaidLevelDomainTest {
         assertEquals("1.2.3.4", PaidLevelDomain.getPLD(url));
     }
 
+    @Test
+    public void testInvalidFQDN() {
+    	assertEquals("blah", PaidLevelDomain.getPLD("blah"));
+    	assertEquals("1.2.3", PaidLevelDomain.getPLD("1.2.3"));
+    	assertEquals("me.i", PaidLevelDomain.getPLD("me.i"));
+    }
+    
+    @Test
     public final void testIPv6() throws MalformedURLException, UnknownHostException {
         InetAddress inet = InetAddress.getByName("1080:0:0:0:8:800:200c:417a");
         URL url = new URL("http", inet.getHostAddress(), 8080, "a/b/c");
         assertEquals("[1080:0:0:0:8:800:200c:417a]", PaidLevelDomain.getPLD(url));
     }
 
+    @Test
     public final void testStandardDomains() throws MalformedURLException {
-        assertEquals("xxx.com", PaidLevelDomain.getPLD("xxx.com"));
-        assertEquals("xxx.com", PaidLevelDomain.getPLD("www.xxx.com"));
-        assertEquals("xxx.com", PaidLevelDomain.getPLD("www.zzz.xxx.com"));
-        assertEquals("xxx.com", PaidLevelDomain.getPLD(new URL("https://www.zzz.xxx.com:9000/a/b?c=d")));
+        assertEquals("domain.com", PaidLevelDomain.getPLD("domain.com"));
+        assertEquals("domain.com", PaidLevelDomain.getPLD("www.domain.com"));
+        assertEquals("domain.com", PaidLevelDomain.getPLD("www.zzz.domain.com"));
+        assertEquals("domain.com", PaidLevelDomain.getPLD(new URL("https://www.zzz.domain.com:9000/a/b?c=d")));
     }
 
+    @Test
     public final void testBizDomains() {
         assertEquals("xxx.biz", PaidLevelDomain.getPLD("xxx.biz"));
         assertEquals("xxx.biz", PaidLevelDomain.getPLD("www.xxx.biz"));
     }
 
     // Japan (and uk) have shortened gTLDs before the country code.
+    @Test
     public final void testJapaneseDomains() {
         assertEquals("xxx.co.jp", PaidLevelDomain.getPLD("xxx.co.jp"));
         assertEquals("xxx.co.jp", PaidLevelDomain.getPLD("www.xxx.co.jp"));
@@ -63,15 +75,32 @@ public class PaidLevelDomainTest {
     }
 
     // In Germany you can have xxx.de.com
+    @Test
     public final void testGermanDomains() {
         assertEquals("xxx.de.com", PaidLevelDomain.getPLD("xxx.de.com"));
         assertEquals("xxx.de.com", PaidLevelDomain.getPLD("www.xxx.de.com"));
     }
 
-    // Typical international domains look like xxx.com.it
+    // Typical international domains look like xxx.it. So xxx.com.it is
+    // actually the xxx subdomain for com.it
+    @Test
     public final void testItalianDomains() {
-        assertEquals("xxx.com.it", PaidLevelDomain.getPLD("xxx.com.it"));
-        assertEquals("xxx.com.it", PaidLevelDomain.getPLD("www.xxx.com.it"));
+        assertEquals("xxx.it", PaidLevelDomain.getPLD("xxx.it"));
+        assertEquals("xxx.it", PaidLevelDomain.getPLD("www.xxx.it"));
+        assertEquals("com.it", PaidLevelDomain.getPLD("xxx.com.it"));
+    }
+    
+    @Test
+    public final void testFinnishDomains() {
+        assertEquals("fi.com", PaidLevelDomain.getPLD("www.fi.com"));
+    }
+    
+    // TODO enable this test when getPLD uses new TLD support to exclude
+    // private domains (See https://github.com/crawler-commons/crawler-commons/pull/186) 
+    @Ignore
+    @Test
+    public final void testPrivateDomains() {
+    	assertEquals("blogspot.com", PaidLevelDomain.getPLD("myblog.blogspot.com"));
     }
 
 }
