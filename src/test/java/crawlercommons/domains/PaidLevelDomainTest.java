@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import crawlercommons.domains.PaidLevelDomain;
@@ -92,6 +93,14 @@ public class PaidLevelDomainTest {
     @Test
     public final void testFinnishDomains() {
         assertEquals("fi.com", PaidLevelDomain.getPLD("www.fi.com"));
+    }
+    
+    // TODO enable this test when getPLD uses new TLD support to exclude
+    // private domains (See https://github.com/crawler-commons/crawler-commons/pull/186) 
+    @Ignore
+    @Test
+    public final void testPrivateDomains() {
+    	assertEquals("blogspot.com", PaidLevelDomain.getPLD("myblog.blogspot.com"));
     }
 
 }
