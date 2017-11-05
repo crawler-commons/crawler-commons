@@ -1,5 +1,8 @@
 Crawler-Commons Change Log
 
+Release 0.10 (????-??-??)
+- Handle new suffixes in PaidLevelDomain (kkrugler) #183
+
 Release 0.9 (2017-10-27)
 - [Sitemaps] Removed DOM-based sitemap parser (jnioche) #177
 - Incorrect domains returned by EffectiveTldFinder (sebastian-nagel) #172
