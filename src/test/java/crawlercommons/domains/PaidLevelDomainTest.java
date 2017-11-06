@@ -40,11 +40,11 @@ public class PaidLevelDomainTest {
 
     @Test
     public void testInvalidFQDN() {
-    	assertEquals("blah", PaidLevelDomain.getPLD("blah"));
-    	assertEquals("1.2.3", PaidLevelDomain.getPLD("1.2.3"));
-    	assertEquals("me.i", PaidLevelDomain.getPLD("me.i"));
+        assertEquals("blah", PaidLevelDomain.getPLD("blah"));
+        assertEquals("1.2.3", PaidLevelDomain.getPLD("1.2.3"));
+        assertEquals("me.i", PaidLevelDomain.getPLD("me.i"));
     }
-    
+
     @Test
     public final void testIPv6() throws MalformedURLException, UnknownHostException {
         InetAddress inet = InetAddress.getByName("1080:0:0:0:8:800:200c:417a");
@@ -74,11 +74,12 @@ public class PaidLevelDomainTest {
         assertEquals("xxx.ne.jp", PaidLevelDomain.getPLD("www.xxx.ne.jp"));
     }
 
-    // In Germany you can have xxx.de.com
+    // de.com (and com.de) are domains registered by CentralNic,
+    // xxx.de.com and xxx.com.de are private domains
     @Test
     public final void testGermanDomains() {
-        assertEquals("xxx.de.com", PaidLevelDomain.getPLD("xxx.de.com"));
-        assertEquals("xxx.de.com", PaidLevelDomain.getPLD("www.xxx.de.com"));
+        assertEquals("de.com", PaidLevelDomain.getPLD("xxx.de.com"));
+        assertEquals("de.com", PaidLevelDomain.getPLD("www.xxx.de.com"));
     }
 
     // Typical international domains look like xxx.it. So xxx.com.it is
@@ -89,18 +90,19 @@ public class PaidLevelDomainTest {
         assertEquals("xxx.it", PaidLevelDomain.getPLD("www.xxx.it"));
         assertEquals("com.it", PaidLevelDomain.getPLD("xxx.com.it"));
     }
-    
+
     @Test
     public final void testFinnishDomains() {
         assertEquals("fi.com", PaidLevelDomain.getPLD("www.fi.com"));
     }
-    
-    // TODO enable this test when getPLD uses new TLD support to exclude
-    // private domains (See https://github.com/crawler-commons/crawler-commons/pull/186) 
-    @Ignore
+
     @Test
     public final void testPrivateDomains() {
-    	assertEquals("blogspot.com", PaidLevelDomain.getPLD("myblog.blogspot.com"));
+        /*
+         * do not match "private" domains (based on public suffixes from the
+         * private section of the public suffix list)
+         */
+        assertEquals("blogspot.com", PaidLevelDomain.getPLD("myblog.blogspot.com"));
     }
 
 }

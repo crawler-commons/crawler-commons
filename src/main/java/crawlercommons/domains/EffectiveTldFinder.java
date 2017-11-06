@@ -82,14 +82,14 @@ import org.slf4j.LoggerFactory;
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
-    
+
     public static final String ETLD_DATA = "/effective_tld_names.dat";
     public static final String COMMENT = "//";
     public static final String DOT_REGEX = "\\.";
     public static final String EXCEPTION = "!";
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
-    
+
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private boolean configured = false;
@@ -184,7 +184,7 @@ public class EffectiveTldFinder {
     public static EffectiveTLD getEffectiveTLD(String hostname, boolean excludePrivate) {
         if (getInstance().domains.containsKey(hostname)) {
             EffectiveTLD foundTld = getInstance().domains.get(hostname);
-            if (!excludePrivate || !foundTld.isPrivate) {
+            if (!(excludePrivate && foundTld.isPrivate)) {
                 return foundTld;
             }
         }
@@ -329,7 +329,7 @@ public class EffectiveTldFinder {
             } else {
                 domain = line;
             }
-            
+
             domain = normalizeName(domain);
             isPrivate = isPrivateDomain;
         }
