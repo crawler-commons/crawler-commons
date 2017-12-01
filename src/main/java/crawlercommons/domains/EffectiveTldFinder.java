@@ -72,24 +72,24 @@ import org.slf4j.LoggerFactory;
  * The <a href="https://publicsuffix.org/list/">public suffix list (see section
  * &quot;divisions&quot;)</a> is subdivided into &quot;ICANN&quot; and
  * &quot;PRIVATE&quot; domains. To restrict the EffectiveTldFinder to
- * &quot;ICANN&quot; domains only, (re)initialize it by
- * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
- * {@link EffectiveTldFinder#initialize(boolean) .initialize(true)} or
- * {@link EffectiveTldFinder#initialize(InputStream,boolean)
- * .initialize(InputStream, true)}. This will exclude the PRIVATE domain section
- * from the public suffix list.
+ * &quot;ICANN&quot; domains only, pass &quot;true&quot; as flag
+ * <code>excludePrivate</code> to
+ * {@link EffectiveTldFinder#getAssignedDomain(String, boolean, boolean)} resp.
+ * {@link EffectiveTldFinder#getEffectiveTLD(String, boolean)}. This will
+ * exclude the eTLDs from the PRIVATE domain section of the public suffix list
+ * while a domain or eTLD is matched.
  * 
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
-    
+
     public static final String ETLD_DATA = "/effective_tld_names.dat";
     public static final String COMMENT = "//";
     public static final String DOT_REGEX = "\\.";
     public static final String EXCEPTION = "!";
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
-    
+
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private boolean configured = false;
@@ -114,18 +114,6 @@ public class EffectiveTldFinder {
     }
 
     /**
-     * (Re)initialize EffectiveTldFinder with built-in public suffix list.
-     * 
-     * @param excludePrivateDomains
-     *            whether to exclude the public suffixes listed in the PRIVATE
-     *            domain section (opposed to &quot;ICANN&quot; domains)
-     * @return true if (re)initialization was successful
-     */
-    public boolean initialize(boolean excludePrivateDomains) {
-        return initialize(this.getClass().getResourceAsStream(ETLD_DATA), excludePrivateDomains);
-    }
-
-    /**
      * (Re)initialize EffectiveTldFinder with custom public suffix list.
      * 
      * @param effectiveTldDataStream
@@ -133,20 +121,6 @@ public class EffectiveTldFinder {
      * @return true if (re)initialization was successful
      */
     public boolean initialize(InputStream effectiveTldDataStream) {
-        return initialize(effectiveTldDataStream, false);
-    }
-
-    /**
-     * (Re)initialize EffectiveTldFinder with custom public suffix list.
-     * 
-     * @param effectiveTldDataStream
-     *            content of public suffix list as input stream
-     * @param excludePrivateDomains
-     *            whether to exclude the public suffixes listed in the PRIVATE
-     *            domain section (opposed to &quot;ICANN&quot; domains)
-     * @return true if (re)initialization was successful
-     */
-    public boolean initialize(InputStream effectiveTldDataStream, boolean excludePrivateDomains) {
         domains = new HashMap<>();
         boolean inPrivateDomainSection = false;
         try {
@@ -156,18 +130,14 @@ public class EffectiveTldFinder {
                 if (line.trim().isEmpty()) {
                     continue;
                 } else if (line.startsWith(COMMENT)) {
-                    if (excludePrivateDomains) {
-                        if (line.contains("===BEGIN PRIVATE DOMAINS===")) {
-                            inPrivateDomainSection = true;
-                        } else if (line.contains("===END PRIVATE DOMAINS===")) {
-                            inPrivateDomainSection = false;
-                        }
+                    if (line.contains("===BEGIN PRIVATE DOMAINS===")) {
+                        inPrivateDomainSection = true;
+                    } else if (line.contains("===END PRIVATE DOMAINS===")) {
+                        inPrivateDomainSection = false;
                     }
                     continue;
-                } else if (excludePrivateDomains && inPrivateDomainSection) {
-                    continue;
                 } else {
-                    EffectiveTLD entry = new EffectiveTLD(line);
+                    EffectiveTLD entry = new EffectiveTLD(line, inPrivateDomainSection);
                     domains.put(entry.getDomain(), entry);
                 }
             }
@@ -197,8 +167,26 @@ public class EffectiveTldFinder {
      * @return the {@link EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname) {
+        return getEffectiveTLD(hostname, false);
+    }
+
+    /**
+     * Get EffectiveTLD for host name using the singleton instance of
+     * EffectiveTldFinder.
+     * 
+     * @param hostname
+     *            the hostname for which to find the {@link EffectiveTLD}
+     * @param excludePrivate
+     *            do not return an effective TLD from the PRIVATE section,
+     *            instead return the shorter eTLD not in the PRIVATE section
+     * @return the {@link EffectiveTLD}
+     */
+    public static EffectiveTLD getEffectiveTLD(String hostname, boolean excludePrivate) {
         if (getInstance().domains.containsKey(hostname)) {
-            return getInstance().domains.get(hostname);
+            EffectiveTLD foundTld = getInstance().domains.get(hostname);
+            if (!(excludePrivate && foundTld.isPrivate)) {
+                return foundTld;
+            }
         }
         String[] parts = hostname.split(DOT_REGEX);
         for (int i = 1; i < parts.length; i++) {
@@ -209,13 +197,16 @@ public class EffectiveTldFinder {
             }
             if (getInstance().domains.containsKey(tryTld)) {
                 EffectiveTLD foundTld = getInstance().domains.get(tryTld);
+                if (excludePrivate && foundTld.isPrivate) {
+                    continue;
+                }
                 if (foundTld.isException() || !foundTld.isWild()) {
                     return foundTld;
                 }
                 // wildcards create an open ETLD namespace
                 slice = Arrays.copyOfRange(parts, i - 1, parts.length);
                 String retryTld = join(slice);
-                foundTld = new EffectiveTLD(retryTld);
+                foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
                 return foundTld;
             }
         }
@@ -232,7 +223,7 @@ public class EffectiveTldFinder {
      *         FQDN with valid TLD is found
      */
     public static String getAssignedDomain(String hostname) {
-        return getAssignedDomain(hostname, false);
+        return getAssignedDomain(hostname, false, false);
     }
 
     /**
@@ -248,8 +239,28 @@ public class EffectiveTldFinder {
      *         valid TLD is found
      */
     public static String getAssignedDomain(String hostname, boolean strict) {
+        return getAssignedDomain(hostname, strict, false);
+    }
+
+    /**
+     * This method uses the effective TLD to determine which component of a FQDN
+     * is the NIC-assigned domain name.
+     * 
+     * @param hostname
+     *            a string for which to obtain a NIC-assigned domain name
+     * @param strict
+     *            do not return the hostname as fall-back if a FQDN with valid
+     *            TLD cannot be determined
+     * @param excludePrivate
+     *            do not return a domain which is below an eTLD from the PRIVATE
+     *            section, return the shorter domain which is below the
+     *            &quot;ICANN&quot; registry suffix
+     * @return the NIC-assigned domain name, null if strict and no FQDN with
+     *         valid TLD is found
+     */
+    public static String getAssignedDomain(String hostname, boolean strict, boolean excludePrivate) {
         hostname = hostname.toLowerCase(Locale.ROOT);
-        EffectiveTLD etld = getEffectiveTLD(hostname);
+        EffectiveTLD etld = getEffectiveTLD(hostname, excludePrivate);
         if (null == etld) {
             return (strict ? null : hostname);
         }
@@ -305,9 +316,10 @@ public class EffectiveTldFinder {
 
         private boolean exception = false;
         private boolean wild = false;
+        private boolean isPrivate = false;
         private String domain = null;
 
-        public EffectiveTLD(String line) {
+        public EffectiveTLD(String line, boolean isPrivateDomain) {
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
                 domain = line.substring(EXCEPTION.length(), line.length());
@@ -317,8 +329,9 @@ public class EffectiveTldFinder {
             } else {
                 domain = line;
             }
-            
+
             domain = normalizeName(domain);
+            isPrivate = isPrivateDomain;
         }
 
         private String normalizeName(String name) {
@@ -364,7 +377,8 @@ public class EffectiveTldFinder {
             StringBuffer sb = new StringBuffer("[");
             sb.append("domain=").append(domain).append(",");
             sb.append("wild=").append(wild).append(",");
-            sb.append("exception=").append(exception).append("]");
+            sb.append("exception=").append(exception).append(",");
+            sb.append("private=").append(isPrivate).append("]");
             return sb.toString();
         }
     }
