@@ -78,6 +78,12 @@ public class EffectiveTldFinderTest {
         assertEquals("co.uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("anything.uk");
         assertEquals("uk", etld.getDomain());
+        etld = EffectiveTldFinder.getEffectiveTLD("northleamingtonschool.warwickshire.sch.uk");
+        assertEquals("warwickshire.sch.uk", etld.getDomain());
+        assertFalse(etld.isWild());
+        etld = EffectiveTldFinder.getEffectiveTLD("sch.uk");
+        assertEquals("sch.uk", etld.getDomain());
+        assertTrue(etld.isWild());
     }
 
     @Test
@@ -104,6 +110,14 @@ public class EffectiveTldFinderTest {
         assertEquals("city.kawasaki.jp", etld.getDomain());
         assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("www.city.kawasaki.jp"));
         assertEquals(".kawasaki.jp", EffectiveTldFinder.getAssignedDomain(".kawasaki.jp"));
+        assertNull(EffectiveTldFinder.getAssignedDomain(".kawasaki.jp", true));
+        assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("city.kawasaki.jp", true));
+        // an wildcard eTLD itself is not a valid domain
+        assertNull(EffectiveTldFinder.getAssignedDomain("kawasaki.jp", true));
+        // and also items below (matching *.kawasaki.jp) are not valid domains
+        assertNull(EffectiveTldFinder.getAssignedDomain("nakahara.kawasaki.jp", true));
+        // valid domains are two levels below a wildcard eTLD
+        assertEquals("lions.nakahara.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("lions.nakahara.kawasaki.jp", true));
     }
 
     @Test
@@ -171,14 +185,15 @@ public class EffectiveTldFinderTest {
     @Test
     public final void testIDNDomain() throws Exception {
         String ad = null;
-        ad = EffectiveTldFinder.getAssignedDomain("спб.бесплатныеобъявления.рф");
-        // assertEquals("бесплатныеобъявления.рф", ad); // TODO #179
-        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai");
+        ad = EffectiveTldFinder.getAssignedDomain("спб.бесплатныеобъявления.рф", true);
+        assertEquals("бесплатныеобъявления.рф", ad);
+        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", true);
         assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
         // rare but possible mixed use of UTF-8 and Punycode
-        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф");
-        // TODO #179
-        // assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
+        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф", true);
+        assertEquals("бесплатныеобъявления.рф", ad);
+        ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.рф", true);
+        assertEquals("xn--80abbembcyvesfij3at4loa4ff.рф", ad);
     }
 
     @Test

@@ -119,15 +119,14 @@ public class EffectiveTldFinderPSLTest {
         checkPublicSuffix("test.k12.ak.us", "test.k12.ak.us");
         checkPublicSuffix("www.test.k12.ak.us", "test.k12.ak.us");
         // IDN labels.
-        // TODO #179
-        // checkPublicSuffix("食狮.com.cn", "食狮.com.cn");
-        // checkPublicSuffix("食狮.公司.cn", "食狮.公司.cn");
-        // checkPublicSuffix("www.食狮.公司.cn", "食狮.公司.cn");
-        // checkPublicSuffix("shishi.公司.cn", "shishi.公司.cn");
-        // checkPublicSuffix("公司.cn", null);
-        // checkPublicSuffix("食狮.中国", "食狮.中国");
-        // checkPublicSuffix("www.食狮.中国", "食狮.中国");
-        // checkPublicSuffix("shishi.中国", "shishi.中国");
+        checkPublicSuffix("食狮.com.cn", "食狮.com.cn");
+        checkPublicSuffix("食狮.公司.cn", "食狮.公司.cn");
+        checkPublicSuffix("www.食狮.公司.cn", "食狮.公司.cn");
+        checkPublicSuffix("shishi.公司.cn", "shishi.公司.cn");
+        checkPublicSuffix("公司.cn", null);
+        checkPublicSuffix("食狮.中国", "食狮.中国");
+        checkPublicSuffix("www.食狮.中国", "食狮.中国");
+        checkPublicSuffix("shishi.中国", "shishi.中国");
         checkPublicSuffix("中国", null);
         // Same as above, but punycoded.
         checkPublicSuffix("xn--85x722f.com.cn", "xn--85x722f.com.cn");

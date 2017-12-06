@@ -23,9 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Locale;
 import java.nio.charset.StandardCharsets;
 
@@ -94,6 +96,7 @@ public class EffectiveTldFinder {
 
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
+    private SuffixTrie<EffectiveTLD> domainTrie = new SuffixTrie<>();
     private boolean configured = false;
 
     /**
@@ -124,6 +127,7 @@ public class EffectiveTldFinder {
      */
     public boolean initialize(InputStream effectiveTldDataStream) {
         domains = new HashMap<>();
+        domainTrie = new SuffixTrie<>();
         boolean inPrivateDomainSection = false;
         try {
             BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, StandardCharsets.UTF_8));
@@ -140,7 +144,10 @@ public class EffectiveTldFinder {
                     continue;
                 } else {
                     EffectiveTLD entry = new EffectiveTLD(line, inPrivateDomainSection);
-                    domains.put(entry.getDomain(), entry);
+                    for (String var : entry.getNameVariants()) {
+                        domains.put(var, entry);
+                        domainTrie.put(var, entry);
+                    }
                 }
             }
             configured = true;
@@ -184,32 +191,49 @@ public class EffectiveTldFinder {
      * @return the {@link EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname, boolean excludePrivate) {
-        if (getInstance().domains.containsKey(hostname)) {
-            EffectiveTLD foundTld = getInstance().domains.get(hostname);
-            if (!(excludePrivate && foundTld.isPrivate)) {
-                return foundTld;
-            }
+        SuffixTrie.LookupResult<EffectiveTLD> res = findEffectiveTLD(hostname, excludePrivate);
+        if (res == null) {
+            return null;
         }
-        String[] parts = hostname.split(DOT_REGEX);
-        for (int i = 1; i < parts.length; i++) {
-            String[] slice = Arrays.copyOfRange(parts, i, parts.length);
-            String tryTld = join(slice);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(hostname + " [" + i + ".." + parts.length + "]: " + Arrays.toString(slice) + " => " + tryTld);
-            }
-            if (getInstance().domains.containsKey(tryTld)) {
-                EffectiveTLD foundTld = getInstance().domains.get(tryTld);
+        return res.value;
+    }
+
+    /**
+     * Find EffectiveTLD and offset in host name using the singleton instance of
+     * EffectiveTldFinder.
+     * 
+     * @param hostname
+     *            the hostname for which to find the {@link EffectiveTLD}
+     * @param excludePrivate
+     *            do not return an effective TLD from the PRIVATE section,
+     *            instead return the shorter eTLD not in the PRIVATE section
+     * @return the {@link EffectiveTLD} or null if none is found
+     */
+    private static SuffixTrie.LookupResult<EffectiveTLD> findEffectiveTLD(String hostname, boolean excludePrivate) {
+        List<SuffixTrie.LookupResult<EffectiveTLD>> suffixes = getInstance().domainTrie.getSuffixes(hostname);
+        for (int i = suffixes.size() - 1; i >= 0; i--) {
+            SuffixTrie.LookupResult<EffectiveTLD> res = suffixes.get(i);
+            int offset = res.offset;
+            if (offset == 0 || DOT == hostname.charAt(offset - 1)) {
+                EffectiveTLD foundTld = res.value;
                 if (excludePrivate && foundTld.isPrivate) {
                     continue;
                 }
-                if (foundTld.isException() || !foundTld.isWild()) {
-                    return foundTld;
+                if (offset == 0 || foundTld.isException() || !foundTld.isWild()) {
+                    return res;
                 }
                 // wildcards create an open ETLD namespace
-                slice = Arrays.copyOfRange(parts, i - 1, parts.length);
-                String retryTld = join(slice);
+                int wildcardOffset = hostname.lastIndexOf(DOT, offset - 2);
+                String retryTld;
+                if (wildcardOffset == -1) {
+                    // no further dot-separated element found, take full host
+                    // name
+                    retryTld = hostname;
+                } else {
+                    retryTld = hostname.substring(wildcardOffset + 1);
+                }
                 foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
-                return foundTld;
+                return new SuffixTrie.LookupResult<EffectiveTLD>(wildcardOffset + 1, foundTld);
             }
         }
         return null;
@@ -262,43 +286,38 @@ public class EffectiveTldFinder {
      */
     public static String getAssignedDomain(String hostname, boolean strict, boolean excludePrivate) {
         hostname = hostname.toLowerCase(Locale.ROOT);
-        EffectiveTLD etld = getEffectiveTLD(hostname, excludePrivate);
-        if (null == etld) {
+        SuffixTrie.LookupResult<EffectiveTLD> res = findEffectiveTLD(hostname, excludePrivate);
+        if (res == null) {
             return (strict ? null : hostname);
         }
+        EffectiveTLD etld = res.value;
         if (etld.isException()) {
             return etld.domain;
         }
-        if (etld.getDomain().equals(hostname)) {
+        if (res.offset == 0) {
+            // found eTLD covering entire hostname:
             // if strict: hostname cannot be an eTLD (except if it's an
-            // exception
-            // which is already checked)
+            // exception which is already checked)
             return (strict ? null : hostname);
         }
         // clip hostname one dot-separated element before eTLD
-        if (hostname.endsWith(etld.getDomain())) {
-            int etldStartPos = hostname.length() - etld.getDomain().length() - 1;
-            if (hostname.charAt(etldStartPos) != DOT) {
-                // should not happen: no dot before TLD
-                return (strict ? null : hostname);
-            }
-            int start = 0;
-            int pos;
-            while ((pos = hostname.indexOf(DOT, start)) != -1) {
-                if (pos == start) {
-                    // there must be at least one character between two dots
-                    return (strict ? null : hostname);
-                }
-                if (pos >= etldStartPos)
-                    break;
-                start = pos + 1;
-            }
-            return hostname.substring(start);
-        } else {
-            // should not happen: found an eTLD which is not a suffix of
-            // hostname
+        int etldStartPos = res.offset - 1;
+        if (hostname.charAt(etldStartPos) != DOT) {
+            // should not happen: no dot before TLD
             return (strict ? null : hostname);
         }
+        int start = 0;
+        int pos;
+        while ((pos = hostname.indexOf(DOT, start)) != -1) {
+            if (pos == start) {
+                // there must be at least one character between two dots
+                return (strict ? null : hostname);
+            }
+            if (pos >= etldStartPos)
+                break;
+            start = pos + 1;
+        }
+        return hostname.substring(start);
     }
 
     public boolean isConfigured() {
@@ -379,6 +398,7 @@ public class EffectiveTldFinder {
         private boolean wild = false;
         private boolean isPrivate = false;
         private String domain = null;
+        private String idn = null;
 
         public EffectiveTLD(String line, boolean isPrivateDomain) {
             if (line.startsWith(EXCEPTION)) {
@@ -391,7 +411,11 @@ public class EffectiveTldFinder {
                 domain = line;
             }
 
-            domain = normalizeName(domain);
+            String norm = normalizeName(domain);
+            if (!norm.equals(domain)) {
+                idn = domain;
+                domain = norm;
+            }
             isPrivate = isPrivateDomain;
         }
 
@@ -402,6 +426,49 @@ public class EffectiveTldFinder {
                 ary[i] = asciiConvert(parts[i]);
             }
             return join(ary);
+        }
+
+        /**
+         * Generate name variants caused by Internationalized Domain Names:
+         * every IDN part of a eTLD can be replaced by its punycoded ASCII
+         * variant. For two-part IDN eTLDs this will generate 4 variants.
+         * 
+         * @return set of variant names
+         */
+        public Set<String> getNameVariants() {
+            Set<String> res = new HashSet<>();
+            if (idn == null) {
+                res.add(domain);
+                return res;
+            }
+            String[] parts = idn.split(DOT_REGEX);
+            String[] var = new String[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                if (!isAscii(parts[i])) {
+                    var[i] = IDN.toASCII(parts[i]);
+                }
+            }
+            for (int i = 0; i < parts.length; i++) {
+                Set<String> r = new HashSet<>();
+                if (res.size() > 0) {
+                    for (String p : res) {
+                        r.add(p + DOT + parts[i]);
+                    }
+                } else {
+                    r.add(parts[i]);
+                }
+                if (var[i] != null && !var[i].equals(parts[i])) {
+                    if (res.size() > 0) {
+                        for (String p : res) {
+                            r.add(p + DOT + var[i]);
+                        }
+                    } else {
+                        r.add(var[i]);
+                    }
+                }
+                res = r;
+            }
+            return res;
         }
 
         private String asciiConvert(String str) {
