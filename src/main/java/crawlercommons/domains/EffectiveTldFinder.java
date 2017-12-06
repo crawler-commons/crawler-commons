@@ -16,6 +16,8 @@
 
 package crawlercommons.domains;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -310,6 +312,65 @@ public class EffectiveTldFinder {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    public static void help() {
+        LOGGER.error("EffectiveTldFinder [-etld] [-strict] [-excludePrivate]");
+        LOGGER.error("  get domains or public suffixes for host names");
+        LOGGER.error("Options:");
+        LOGGER.error("  -etld");
+        LOGGER.error("       change mode: return public suffix (eTLD)");
+        LOGGER.error("  -strict");
+        LOGGER.error("       return null if no valid suffix/TLD is found");
+        LOGGER.error("  -excludePrivate");
+        LOGGER.error("       do not match suffixes from the private section of the public suffix list");
+        LOGGER.error("Input is read from stdin, output on stdout: host \\t domain/eTLD");
+    }
+
+    public static void main(String[] args) throws IOException {
+        boolean modeEtld = false;
+        boolean strict = false;
+        boolean excludePrivate = false;
+        for (String arg : args) {
+            switch (arg) {
+                case "-etld":
+                modeEtld = true;
+                    break;
+
+                case "-strict":
+                strict = true;
+                    break;
+
+                case "-excludePrivate":
+                excludePrivate = true;
+                    break;
+
+                case "-h":
+                case "-?":
+                case "-help":
+                case "--help":
+                help();
+                System.exit(0);
+
+                default:
+                LOGGER.error("Unknown argument: {}", arg);
+                help();
+                System.exit(1);
+            }
+        }
+
+        String line, domain;
+        EffectiveTLD etld;
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, UTF_8));
+        while ((line = in.readLine()) != null) {
+            if (modeEtld) {
+                etld = EffectiveTldFinder.getEffectiveTLD(line, excludePrivate);
+                System.out.println(line + '\t' + etld);
+            } else {
+                domain = EffectiveTldFinder.getAssignedDomain(line, strict, excludePrivate);
+                System.out.println(line + '\t' + domain);
+            }
+        }
     }
 
     public static class EffectiveTLD {
