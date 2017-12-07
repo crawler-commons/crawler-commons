@@ -112,7 +112,7 @@ public class EffectiveTldFinderTest {
         assertEquals(".kawasaki.jp", EffectiveTldFinder.getAssignedDomain(".kawasaki.jp"));
         assertNull(EffectiveTldFinder.getAssignedDomain(".kawasaki.jp", true));
         assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("city.kawasaki.jp", true));
-        // an wildcard eTLD itself is not a valid domain
+        // a wildcard eTLD itself is not a valid domain
         assertNull(EffectiveTldFinder.getAssignedDomain("kawasaki.jp", true));
         // and also items below (matching *.kawasaki.jp) are not valid domains
         assertNull(EffectiveTldFinder.getAssignedDomain("nakahara.kawasaki.jp", true));
@@ -212,6 +212,13 @@ public class EffectiveTldFinderTest {
         assertEquals("myblog.blogspot.com", ad);
         ad = EffectiveTldFinder.getAssignedDomain("myblog.blogspot.com", true, true);
         assertEquals("blogspot.com", ad);
+    }
+
+    @Test
+    public final void testInvalidHostname() throws Exception {
+        // in strict mode: there should nothing be returned for invalid
+        // hostnames
+        assertNull(EffectiveTldFinder.getAssignedDomain("www..example..com", true, false));
     }
 
 }

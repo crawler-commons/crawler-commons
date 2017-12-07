@@ -304,6 +304,7 @@ public class EffectiveTldFinder {
         int etldStartPos = res.offset - 1;
         if (hostname.charAt(etldStartPos) != DOT) {
             // should not happen: no dot before TLD
+            LOGGER.debug("No dot before eTLD {} in {}", hostname.substring(res.offset), hostname);
             return (strict ? null : hostname);
         }
         int start = 0;
@@ -311,6 +312,7 @@ public class EffectiveTldFinder {
         while ((pos = hostname.indexOf(DOT, start)) != -1) {
             if (pos == start) {
                 // there must be at least one character between two dots
+                LOGGER.debug("Two immediately consecutive dots in hostname: {}", hostname);
                 return (strict ? null : hostname);
             }
             if (pos >= etldStartPos)
