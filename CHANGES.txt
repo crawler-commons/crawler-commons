@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
+- EffectiveTldFinder to parse Internationalized Domain Names (sebastian-nagel) #179
+- Add main() to EffectiveTldFinder (sebastian-nagel) #187
 - Handle new suffixes in PaidLevelDomain (kkrugler) #183
 
 Release 0.9 (2017-10-27)
