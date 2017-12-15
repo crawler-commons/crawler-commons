@@ -306,7 +306,6 @@ public class SiteMapParser {
             }
         } else {
             final Collection<SiteMapURL> links = ((SiteMap) sitemap).getSiteMapUrls();
-            links.forEach(action);
             for (final SiteMapURL url : links) {
                 if (url == null) {
                     continue;
