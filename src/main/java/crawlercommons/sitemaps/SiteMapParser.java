@@ -268,14 +268,14 @@ public class SiteMapParser {
     }
 
     /**
-     * Fetch a sitemap from the specified URL, recursively traverse any
-     * enclosed sitemap index, and perform the specified action for each
-     * sitemap URL until all URLs have been processed or the action throws an
-     * exception.
-     *
+     * Fetch a sitemap from the specified URL, recursively fetching and
+     * traversing the content of any enclosed sitemap index, and performing the
+     * specified action for each sitemap URL until all URLs have been processed
+     * or the action throws an exception.
+     * <p>
      * This method is a convenience method for a user who has a sitemap URL and
-     * wants a "Keep it simple" way to traverse it.
-     *
+     * wants a simple way to traverse it.
+     * <p>
      * Exceptions thrown by the action are relayed to the caller.
      *
      * @param onlineSitemapUrl
@@ -292,8 +292,32 @@ public class SiteMapParser {
         if (action == null) {
             return;
         }
-        AbstractSiteMap sitemap = parseSiteMap(onlineSitemapUrl);
-        if (sitemap == null) {
+        walkSiteMap(parseSiteMap(onlineSitemapUrl), action);
+    }
+
+    /**
+     * Traverse a sitemap, recursively fetching and traversing the content of
+     * any enclosed sitemap index, and performing the specified action for each
+     * sitemap URL until all URLs have been processed or the action throws an
+     * exception.
+     * <p>
+     * This method is a convenience method for a user who has a sitemap and
+     * wants a simple way to traverse it.
+     * <p>
+     * Exceptions thrown by the action are relayed to the caller.
+     *
+     * @param sitemap
+     *            The sitemap to traverse
+     * @param action
+     *            The action to be performed for each element
+     * @throws UnknownFormatException
+     *             if there is an error parsing the sitemap
+     * @throws IOException
+     *             if there is an error fetching the content of any
+     *             {@link java.net.URL}
+     */
+    public void walkSiteMap(AbstractSiteMap sitemap, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
+        if (sitemap == null || action == null) {
             return;
         }
         if (sitemap.isIndex()) {

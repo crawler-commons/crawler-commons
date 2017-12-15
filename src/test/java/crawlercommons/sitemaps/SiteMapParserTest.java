@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
@@ -499,6 +501,20 @@ public class SiteMapParserTest {
 
         SiteMapIndex smi = (SiteMapIndex) asm;
         assertEquals(1, smi.getSitemaps().size());
+    }
+
+    @Test
+    public void testWalkSiteMap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getXMLSitemapAsBytes();
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        final List<SiteMapURL> urls = new ArrayList<>();
+
+        parser.walkSiteMap(asm, urls::add);
+        assertEquals(sitemapURLs.length, urls.size());
     }
 
     /**
