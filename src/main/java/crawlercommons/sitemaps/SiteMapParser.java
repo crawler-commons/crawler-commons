@@ -29,7 +29,9 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -263,6 +265,80 @@ public class SiteMapParser {
         }
 
         throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
+    }
+
+    /**
+     * Fetch a sitemap from the specified URL, recursively fetching and
+     * traversing the content of any enclosed sitemap index, and performing the
+     * specified action for each sitemap URL until all URLs have been processed
+     * or the action throws an exception.
+     * <p>
+     * This method is a convenience method for a user who has a sitemap URL and
+     * wants a simple way to traverse it.
+     * <p>
+     * Exceptions thrown by the action are relayed to the caller.
+     *
+     * @param onlineSitemapUrl
+     *            URL of the online sitemap
+     * @param action
+     *            The action to be performed for each element
+     * @throws UnknownFormatException
+     *             if there is an error parsing the sitemap
+     * @throws IOException
+     *             if there is an error fetching the content of any
+     *             {@link java.net.URL}
+     */
+    public void walkSiteMap(URL onlineSitemapUrl, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
+        if (onlineSitemapUrl == null || action == null) {
+            LOG.debug("Got null sitemap URL and/or action, stopping traversal");
+            return;
+        }
+        walkSiteMap(parseSiteMap(onlineSitemapUrl), action);
+    }
+
+    /**
+     * Traverse a sitemap, recursively fetching and traversing the content of
+     * any enclosed sitemap index, and performing the specified action for each
+     * sitemap URL until all URLs have been processed or the action throws an
+     * exception.
+     * <p>
+     * This method is a convenience method for a user who has a sitemap and
+     * wants a simple way to traverse it.
+     * <p>
+     * Exceptions thrown by the action are relayed to the caller.
+     *
+     * @param sitemap
+     *            The sitemap to traverse
+     * @param action
+     *            The action to be performed for each element
+     * @throws UnknownFormatException
+     *             if there is an error parsing the sitemap
+     * @throws IOException
+     *             if there is an error fetching the content of any
+     *             {@link java.net.URL}
+     */
+    public void walkSiteMap(AbstractSiteMap sitemap, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
+        if (sitemap == null || action == null) {
+            LOG.debug("Got null sitemap and/or action, stopping traversal");
+            return;
+        }
+        if (sitemap.isIndex()) {
+            final Collection<AbstractSiteMap> links = ((SiteMapIndex) sitemap).getSitemaps();
+            for (final AbstractSiteMap asm : links) {
+                if (asm == null) {
+                    continue;
+                }
+                walkSiteMap(asm.getUrl(), action);
+            }
+        } else {
+            final Collection<SiteMapURL> links = ((SiteMap) sitemap).getSiteMapUrls();
+            for (final SiteMapURL url : links) {
+                if (url == null) {
+                    continue;
+                }
+                action.accept(url);
+            }
+        }
     }
 
     /**
