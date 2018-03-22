@@ -289,7 +289,8 @@ public class SiteMapParser {
      *             {@link java.net.URL}
      */
     public void walkSiteMap(URL onlineSitemapUrl, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
-        if (action == null) {
+        if (onlineSitemapUrl == null || action == null) {
+            LOG.debug("Got null sitemap URL and/or action, stopping traversal");
             return;
         }
         walkSiteMap(parseSiteMap(onlineSitemapUrl), action);
@@ -318,6 +319,7 @@ public class SiteMapParser {
      */
     public void walkSiteMap(AbstractSiteMap sitemap, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
         if (sitemap == null || action == null) {
+            LOG.debug("Got null sitemap and/or action, stopping traversal");
             return;
         }
         if (sitemap.isIndex()) {
