@@ -1,0 +1,2 @@
+http://www.domain.com/page1.html
+http://www.domain.com/page2.html

@@ -316,7 +316,6 @@
 		<!-- Dependencies -->
 
 		<commons-io.version>2.4</commons-io.version>
-		<tika-core.version>1.17</tika-core.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>4.7</junit.version>
 		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
@@ -356,12 +355,6 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika-core.version}</version>
 		</dependency>
 
 		<dependency>

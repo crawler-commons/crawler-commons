@@ -17,9 +17,8 @@
 package crawlercommons.sitemaps;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.tika.mime.MediaType.APPLICATION_XML;
-import static org.apache.tika.mime.MediaType.TEXT_PLAIN;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,26 +27,21 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.tika.Tika;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.mime.MediaTypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import crawlercommons.mimetypes.MimeTypeDetector;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import crawlercommons.sitemaps.sax.DelegatorHandler;
 
@@ -67,18 +61,6 @@ public class SiteMapParser {
      */
     public static final int MAX_BYTES_ALLOWED = 52428800;
 
-    /* Tika's MediaType components */
-    private static final Tika TIKA = new Tika();
-    private static final MediaTypeRegistry MEDIA_TYPE_REGISTRY = MediaTypeRegistry.getDefaultRegistry();
-
-    private static final List<MediaType> XML_MEDIA_TYPES = new ArrayList<>();
-    private static final List<MediaType> TEXT_MEDIA_TYPES = new ArrayList<>();
-    private static final List<MediaType> GZ_MEDIA_TYPES = new ArrayList<>();
-
-    static {
-        initMediaTypes();
-    }
-
     /**
      * True (by default) meaning that invalid URLs should be rejected, as the
      * official docs allow the siteMapURLs to be only under the base url:
@@ -94,6 +76,8 @@ public class SiteMapParser {
      **/
     protected boolean strictNamespace = false;
 
+    private MimeTypeDetector mimeTypeDetector;
+
     public SiteMapParser() {
         this(true, false);
     }
@@ -105,6 +89,8 @@ public class SiteMapParser {
     public SiteMapParser(boolean strict, boolean allowPartial) {
         this.strict = strict;
         this.allowPartial = allowPartial;
+
+        this.mimeTypeDetector = new MimeTypeDetector();
     }
 
     /**
@@ -203,8 +189,8 @@ public class SiteMapParser {
         if (url == null) {
             return null;
         }
-        String filename = FilenameUtils.getName(url.getPath());
-        String contentType = TIKA.detect(content, filename);
+
+        String contentType = mimeTypeDetector.detect(content);
         return parseSiteMap(contentType, content, url);
     }
 
@@ -228,41 +214,28 @@ public class SiteMapParser {
      *             {@link java.net.URL}
      */
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
-        MediaType mediaType = MediaType.parse(contentType);
+        String mimeType = mimeTypeDetector.normalize(contentType, content);
 
-        // Octet-stream is the father of all binary types
-        while (mediaType != null && !mediaType.equals(MediaType.OCTET_STREAM)) {
-            if (XML_MEDIA_TYPES.contains(mediaType)) {
-                return processXml(url, content);
-            } else if (TEXT_MEDIA_TYPES.contains(mediaType)) {
-                return processText(url, content);
-            } else if (GZ_MEDIA_TYPES.contains(mediaType)) {
-                InputStream decompressed;
-                MediaType embeddedType;
-                try {
-                    decompressed = new GZIPInputStream(new ByteArrayInputStream(content));
-                    embeddedType = MediaType.parse(TIKA.detect(decompressed));
-                } catch (Exception e) {
-                    UnknownFormatException err = new UnknownFormatException("Failed to detect embedded MediaType of gzipped sitemap: " + url + ", caused by " + e);
-                    err.initCause(e);
-                    throw err;
-                }
-                if (XML_MEDIA_TYPES.contains(embeddedType)) {
+        if (mimeTypeDetector.isXml(mimeType)) {
+            return processXml(url, content);
+        } else if (mimeTypeDetector.isText(mimeType)) {
+            return processText(url, content);
+        } else if (mimeTypeDetector.isGzip(mimeType)) {
+            try (InputStream decompressed = new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(content)))) {
+                String compressedType = mimeTypeDetector.detect(decompressed);
+                if (mimeTypeDetector.isXml(compressedType)) {
                     return processGzippedXML(url, content);
-                } else if (TEXT_MEDIA_TYPES.contains(embeddedType)) {
-                    // re-open decompressed stream and parse as text
-                    decompressed = new GZIPInputStream(new ByteArrayInputStream(content));
+                } else if (mimeTypeDetector.isText(compressedType)) {
                     return processText(url, decompressed);
-                } else if (GZ_MEDIA_TYPES.contains(embeddedType)) {
-                    throw new UnknownFormatException("Can't parse gzip recursively: " + url);
                 }
-                throw new UnknownFormatException("Can't parse a gzipped sitemap with the embedded MediaType of: " + embeddedType + " (at: " + url + ")");
+            } catch (Exception e) {
+                String msg = String.format("Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
+                throw new UnknownFormatException(msg, e);
             }
-            mediaType = MEDIA_TYPE_REGISTRY.getSupertype(mediaType); // Check
-                                                                     // parent
         }
 
-        throw new UnknownFormatException("Can't parse a sitemap with the MediaType of: " + contentType + " (at: " + url + ")");
+        String msg = String.format("Can't parse a sitemap with MediaType '%s' from '%s'", contentType, url);
+        throw new UnknownFormatException(msg);
     }
 
     /**
@@ -490,26 +463,5 @@ public class SiteMapParser {
         }
 
         return ret;
-    }
-
-    /**
-     * Performs a one time intialization of Tika's Media-Type components and
-     * media type collection constants <br/>
-     * Please note that this is a private static method which is called once per
-     * CLASS (not per instance / object)
-     */
-    private static void initMediaTypes() {
-        /* XML media types (and all aliases) */
-        XML_MEDIA_TYPES.add(APPLICATION_XML);
-        XML_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(APPLICATION_XML));
-
-        /* TEXT media types (and all aliases) */
-        TEXT_MEDIA_TYPES.add(TEXT_PLAIN);
-        TEXT_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(TEXT_PLAIN));
-
-        /* GZIP media types (and all aliases) */
-        MediaType gzipMediaType = MediaType.parse("application/gzip");
-        GZ_MEDIA_TYPES.add(gzipMediaType);
-        GZ_MEDIA_TYPES.addAll(MEDIA_TYPE_REGISTRY.getAliases(gzipMediaType));
     }
 }
