@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -229,12 +230,12 @@ public class SiteMapParser {
                     return processText(url, decompressed);
                 }
             } catch (Exception e) {
-                String msg = String.format("Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
+                String msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
                 throw new UnknownFormatException(msg, e);
             }
         }
 
-        String msg = String.format("Can't parse a sitemap with MediaType '%s' from '%s'", contentType, url);
+        String msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' from '%s'", contentType, url);
         throw new UnknownFormatException(msg);
     }
 
