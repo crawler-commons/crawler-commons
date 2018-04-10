@@ -19,6 +19,11 @@ package crawlercommons.sitemaps;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -34,8 +39,8 @@ public class AbstractSiteMapTest {
         SimpleDateFormat isoFormatNoTimezone = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
 
         // For formats where there's no time zone information, the time zone is
-        // undefined, so we can
-        // only check on the year/month/day portion of the result.
+        // undefined, so we can only check on the year/month/day portion of the
+        // result.
         assertEquals("20140101", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014")));
         assertEquals("20140601", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06")));
         assertEquals("20140603", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06-03")));
@@ -59,6 +64,41 @@ public class AbstractSiteMapTest {
         isoFormatWithFractionSeconds.setTimeZone(TimeZone.getTimeZone("UTC"));
         assertEquals("20140603T103045.820", isoFormatWithFractionSeconds.format(AbstractSiteMap.convertToDate("2014-06-03T10:30:45.82+00:00")));
 
+        // Date examples given in https://www.w3.org/TR/NOTE-datetime
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), AbstractSiteMap.TIME_ZONE_UTC);
+        // YYYY (eg 1997) -- no time zone, see comment above
+        zdt = zdt.withYear(1997);
+        parseCompareDate(zdt, "1997", "yyyyMMdd");
+        // YYYY-MM (eg 1997-07) -- no time zone, see comment above
+        zdt = zdt.withMonth(7);
+        parseCompareDate(zdt, "1997-07", "yyyyMMdd");
+        // YYYY-MM-DD (eg 1997-07-16) -- no time zone, see comment above
+        zdt = zdt.withDayOfMonth(16);
+        parseCompareDate(zdt, "1997-07-16", "yyyyMMdd");
+        // YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+        // one hour less in UTC because of time zone +01:00
+        zdt = zdt.withHour(19).withMinute(20).minusHours(1);
+        parseCompareDate(zdt, "1997-07-16T19:20+01:00");
+        // YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+        zdt = zdt.withSecond(30);
+        parseCompareDate(zdt, "1997-07-16T19:20:30+01:00");
+        // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+        zdt = zdt.withNano(450000000);
+        parseCompareDate(zdt, "1997-07-16T19:20:30.45+01:00");
+    }
+
+    private void parseCompareDate(ZonedDateTime expected, String date) {
+        parseCompareDate(expected, date, null);
+    }
+
+    private void parseCompareDate(ZonedDateTime expected, String date, String dateFormat) {
+        ZonedDateTime parsed = AbstractSiteMap.convertToZonedDateTime(date);
+        if (dateFormat != null) {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateFormat, Locale.ROOT).withZone(ZoneId.systemDefault());
+            assertEquals("Failed to parse W3C date format:", fmt.format(expected), fmt.format(parsed));
+        } else {
+            assertTrue("Failed to parse W3C date format: " + expected + " <> " + parsed, expected.isEqual(parsed));
+        }
     }
 
     @Test
@@ -66,11 +106,24 @@ public class AbstractSiteMapTest {
         assertNull(AbstractSiteMap.normalizeRSSTimestamp(null));
         assertEquals("incorrect", AbstractSiteMap.normalizeRSSTimestamp("incorrect"));
 
-        assertEquals("Full date-time with named timezone", "2017-01-05T12:34:50+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 12:34:50 GMT"));
-        assertEquals("Full date-time with local differental", "2017-01-05T12:34:51+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 13:34:51 +0100"));
-        assertEquals("Date-time without week day", "2017-01-05T12:34:52+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 2017 11:34:52 -0100"));
-        assertEquals("Date-time without week day and two-digit year", "2017-01-05T12:34:53+0000", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 17 12:34:53 GMT"));
-        assertEquals("Date-time with two-digit year", "2017-01-05T12:34:54+0000", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 17 12:34:54 GMT"));
+        assertEquals("Full date-time with named timezone", "2017-01-05T12:34:50Z", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 12:34:50 GMT"));
+        assertEquals("Full date-time with time zone offset", "2017-01-05T12:34:51Z", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 2017 13:34:51 +0100"));
+        assertEquals("Date-time without week day", "2017-01-05T12:34:52Z", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 2017 11:34:52 -0100"));
+        assertEquals("Date-time without week day and two-digit year", "2017-01-05T12:34:53Z", AbstractSiteMap.normalizeRSSTimestamp("05 Jan 17 12:34:53 GMT"));
+        assertEquals("Date-time with two-digit year", "2017-01-05T12:34:54Z", AbstractSiteMap.normalizeRSSTimestamp("Thu, 05 Jan 17 12:34:54 GMT"));
+    }
+
+    @Test
+    public void testFullDateFormat() {
+        // test example date with time zone offset
+        // from https://www.w3.org/TR/NOTE-datetime
+        // the (re)formatted date should be identical
+        ZonedDateTime date1 = SiteMap.convertToZonedDateTime("1994-11-05T13:15:30Z");
+        ZonedDateTime date2 = SiteMap.convertToZonedDateTime("1994-11-05T08:15:30-05:00");
+        assertTrue("Failed to parse date with time zone", date1.isEqual(date2));
+        String datestr1 = SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(date1);
+        String datestr2 = SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(date2);
+        assertEquals("Failed to format date", datestr1, datestr2);
     }
 
 }

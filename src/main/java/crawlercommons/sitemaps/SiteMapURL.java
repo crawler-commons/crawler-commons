@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 
@@ -92,6 +93,10 @@ public class SiteMapURL {
         setPriority(priority);
     }
 
+    public SiteMapURL(URL url, ZonedDateTime lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
+        this(url, Date.from(lastModified.toInstant()), changeFreq, priority, valid);
+    }
+
     /**
      * Return the URL.
      * 
@@ -140,7 +145,7 @@ public class SiteMapURL {
      * Set when this URL was last modified.
      * 
      * @param lastModified
-     *            the last time the sitemap was modified
+     *            lastmod specified for the URL
      */
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
@@ -150,10 +155,22 @@ public class SiteMapURL {
      * Set when this URL was last modified.
      * 
      * @param lastModified
-     *            the last time the sitemap was modified
+     *            lastmod specified for the URL
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
+    }
+
+    /**
+     * Set when this URL was last modified.
+     * 
+     * @param lastModified
+     *            lastmod specified for the URL
+     */
+    public void setLastModified(ZonedDateTime lastModified) {
+        if (lastModified != null) {
+            this.lastModified = Date.from(lastModified.toInstant());
+        }
     }
 
     /**
@@ -302,7 +319,7 @@ public class SiteMapURL {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("url = \"").append(url).append("\"");
-        sb.append(", lastMod = ").append((lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified));
+        sb.append(", lastMod = ").append((lastModified == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(lastModified.toInstant()));
         sb.append(", changeFreq = ").append(changeFreq);
         sb.append(", priority = ").append(priority);
 
