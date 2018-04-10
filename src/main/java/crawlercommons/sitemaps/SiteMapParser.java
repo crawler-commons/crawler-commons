@@ -192,6 +192,10 @@ public class SiteMapParser {
         }
 
         String contentType = mimeTypeDetector.detect(content);
+        if (contentType == null) {
+            String msg = String.format(Locale.ROOT, "Failed to detect MediaType of sitemap '%s'", url);
+            throw new UnknownFormatException(msg);
+        }
         return parseSiteMap(contentType, content, url);
     }
 
