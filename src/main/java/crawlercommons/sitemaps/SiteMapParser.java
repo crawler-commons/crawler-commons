@@ -443,14 +443,6 @@ public class SiteMapParser {
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
     public static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
-        boolean ret = false;
-
-        // Don't try a comparison if the URL is too short to match
-        if (sitemapBaseUrl != null && sitemapBaseUrl.length() <= testUrl.length()) {
-            String u = testUrl.substring(0, sitemapBaseUrl.length());
-            ret = sitemapBaseUrl.equals(u);
-        }
-
-        return ret;
+        return testUrl.startsWith(sitemapBaseUrl);
     }
 }

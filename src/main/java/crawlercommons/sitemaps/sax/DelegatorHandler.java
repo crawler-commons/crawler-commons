@@ -102,10 +102,8 @@ public class DelegatorHandler extends DefaultHandler {
             delegate = new AtomHandler(url, elementStack, strict);
         }
         // See if it is a RSS feed by looking for the localName "channel"
-        // element .
-        // This avoids the issue
-        // of having the outer tag named <rdf:RDF> that was causing this code to
-        // fail. Inside of
+        // element. This avoids the issue of having the outer tag named
+        // <rdf:RDF> that was causing this code to fail. Inside of
         // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
         // See https://github.com/crawler-commons/crawler-commons/issues/87
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec

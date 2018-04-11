@@ -1,6 +1,10 @@
 Crawler-Commons Change Log
 
 Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
+- Sitemap file location to ignore query part of URL (sebastian-nagel) #202
+- [RSS sitemaps] Link extraction from RSS feeds fails on XML entities (sebastian-nagel) #204
+- [RSS sitemaps] Resolve relative links in RSS feeds (sebastian-nagel) #203
+- [RSS sitemaps] Extract links from <guid> elements (sebastian-nagel) #201
 - [Sitemaps] Limit on "bad url" log messages (sebastian-nagel) #145
 - EffectiveTldFinder to parse Internationalized Domain Names (sebastian-nagel) #179
 - Add main() to EffectiveTldFinder (sebastian-nagel) #187

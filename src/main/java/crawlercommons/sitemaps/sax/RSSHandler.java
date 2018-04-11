@@ -78,15 +78,16 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 class RSSHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
-    private URL loc;
+    private StringBuilder loc;
+    private URL locURL;
     private String lastMod;
     boolean valid;
-    private int i = 0;
 
     RSSHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.RSS);
+        loc = new StringBuilder();
     }
 
     /*
@@ -107,7 +108,9 @@ class RSSHandler extends DelegatorHandler {
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("item".equals(currentElement())) {
+        if ("link".equals(currentElement()) || "guid".equals(currentElement())) {
+            setLocURL();
+        } else if ("item".equals(currentElement())) {
             maybeAddSiteMapUrl();
         } else if ("rss".equals(currentElement())) {
             sitemap.setProcessed(true);
@@ -130,14 +133,13 @@ class RSSHandler extends DelegatorHandler {
                 sitemap.setLastModified(lastMod);
             }
         } else if ("link".equals(localName)) {
-            String href = value;
-            LOG.debug("href = {}", href);
-            try {
-                loc = new URL(href);
-                valid = urlIsValid(sitemap.getBaseUrl(), href);
-            } catch (MalformedURLException e) {
-                LOG.trace("Can't create an entry with a bad URL", e);
-                LOG.debug("Bad url: [{}]", href);
+            loc.append(value);
+        } else if ("guid".equals(localName)) {
+            // accept as link if
+            // - a valid absolute URL (not a URN, UUID or similar)
+            // - and no <link> found yet
+            if (locURL == null) {
+                loc.append(value);
             }
         }
     }
@@ -146,18 +148,32 @@ class RSSHandler extends DelegatorHandler {
         return sitemap;
     }
 
+    private void setLocURL() {
+        String value = loc.toString().trim();
+        if (value.isEmpty()) {
+            return;
+        }
+        try {
+            // check that the value is a valid URL
+            locURL = new URL(sitemap.getUrl(), value);
+        } catch (MalformedURLException e) {
+            LOG.debug("Bad url: [{}]", value);
+            LOG.trace("Can't create an entry with a bad URL", e);
+        } finally {
+            loc = new StringBuilder();
+        }
+    }
+
     private void maybeAddSiteMapUrl() {
-        if (valid || !isStrict()) {
-            if (loc == null) {
-                LOG.debug("Missing url");
-                LOG.trace("Can't create an entry with a missing URL");
-            } else {
-                SiteMapURL sUrl = new SiteMapURL(loc.toString(), lastMod, null, null, valid);
+        if (locURL != null) {
+            boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
+            if (!isStrict() || valid) {
+                SiteMapURL sUrl = new SiteMapURL(locURL, valid);
+                sUrl.setLastModified(lastMod);
                 sitemap.addSiteMapUrl(sUrl);
-                LOG.debug("  {}. {}", (++i), sUrl);
             }
         }
-        loc = null;
+        locURL = null;
         lastMod = null;
     }
 
