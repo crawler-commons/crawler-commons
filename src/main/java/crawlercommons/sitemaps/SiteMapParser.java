@@ -298,10 +298,23 @@ public class SiteMapParser {
         BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, UTF_8));
 
         String line;
-        int i = 1;
-        while ((line = reader.readLine()) != null) {
-            if (line.length() > 0 && i <= MAX_URLS) {
-                addUrlIntoSitemap(line, textSiteMap, null, null, null, i++);
+        int i = 0;
+        while ((line = reader.readLine()) != null && ++i <= MAX_URLS) {
+            line = line.trim();
+            if (line.isEmpty())
+                continue;
+            try {
+                URL url = new URL(line);
+                boolean valid = urlIsValid(textSiteMap.getBaseUrl(), url.toString());
+                if (valid || !strict) {
+                    SiteMapURL sUrl = new SiteMapURL(url, valid);
+                    textSiteMap.addSiteMapUrl(sUrl);
+                    LOG.debug("  {}. {}", i, sUrl);
+                } else {
+                    LOG.debug("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
+                }
+            } catch (MalformedURLException e) {
+                LOG.debug("Bad url: [{}]", line.substring(0, Math.min(1024, line.length())));
             }
         }
         textSiteMap.setProcessed(true);
@@ -407,42 +420,6 @@ public class SiteMapParser {
             }
         } catch (ParserConfigurationException e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Adds the given URL to the given sitemap while showing the relevant logs
-     * 
-     * @param urlStr
-     *            an URL string to add to the
-     *            {@link crawlercommons.sitemaps.SiteMap}
-     * @param siteMap
-     *            the sitemap to add URL(s) to
-     * @param lastMod
-     *            last time the {@link crawlercommons.sitemaps.SiteMapURL} was
-     *            modified
-     * @param changeFreq
-     *            the {@link crawlercommons.sitemaps.SiteMapURL} change frquency
-     * @param priority
-     *            priority of this {@link crawlercommons.sitemaps.SiteMapURL}
-     * @param urlIndex
-     *            index position to which this entry has been added
-     */
-    protected void addUrlIntoSitemap(String urlStr, SiteMap siteMap, String lastMod, String changeFreq, String priority, int urlIndex) {
-        try {
-            URL url = new URL(urlStr); // Checking the URL
-            boolean valid = urlIsValid(siteMap.getBaseUrl(), url.toString());
-
-            if (valid || !strict) {
-                SiteMapURL sUrl = new SiteMapURL(url.toString(), lastMod, changeFreq, priority, valid);
-                siteMap.addSiteMapUrl(sUrl);
-                LOG.debug("  {}. {}", urlIndex + 1, sUrl);
-            } else {
-                LOG.warn("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), siteMap.getBaseUrl());
-            }
-        } catch (MalformedURLException e) {
-            LOG.warn("Bad url: [{}]", urlStr);
-            LOG.trace("Can't create a sitemap entry with a bad URL", e);
         }
     }
 
