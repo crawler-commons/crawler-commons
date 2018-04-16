@@ -301,8 +301,9 @@ public class SiteMapParser {
         int i = 0;
         while ((line = reader.readLine()) != null && ++i <= MAX_URLS) {
             line = line.trim();
-            if (line.isEmpty())
+            if (line.isEmpty()) {
                 continue;
+            }
             try {
                 URL url = new URL(line);
                 boolean valid = urlIsValid(textSiteMap.getBaseUrl(), url.toString());
