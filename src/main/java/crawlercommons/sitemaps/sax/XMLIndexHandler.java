@@ -28,7 +28,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
-import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapIndex;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
@@ -71,7 +70,7 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
         if ("sitemap".equals(currentElement())) {

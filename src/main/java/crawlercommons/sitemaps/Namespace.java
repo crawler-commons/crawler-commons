@@ -16,6 +16,10 @@
 
 package crawlercommons.sitemaps;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * supported sitemap formats:
  * https://www.sitemaps.org/protocol.html#otherformats
@@ -23,6 +27,50 @@ package crawlercommons.sitemaps;
 public class Namespace {
 
     public static final String SITEMAP = "http://www.sitemaps.org/schemas/sitemap/0.9";
+
+    /**
+     * Legacy schema URIs from prior sitemap protocol versions and frequent
+     * variants.
+     */
+    public static final String[] SITEMAP_LEGACY = { //
+                    "https://www.sitemaps.org/schemas/sitemap/0.9", //
+                    "http://www.sitemaps.org/schemas/sitemap/0.9/", //
+                    "https://www.sitemaps.org/schemas/sitemap/0.9/", //
+                    "http://www.google.com/schemas/sitemap/0.9", //
+                    "https://www.google.com/schemas/sitemap/0.9", //
+                    "http://www.google.com/schemas/sitemap/0.84", //
+                    "https://www.google.com/schemas/sitemap/0.84", //
+                    "http://www.google.com/schemas/sitemap/0.90", //
+                    "https://sitemaps.org/schemas/sitemap/0.9",
+                    };
+
+    public static final String[] IMAGE = { //
+                    "http://www.google.com/schemas/sitemap-image/1.1", //
+                    "https://www.google.com/schemas/sitemap-image/1.1" //
+                    };
+
+    public static final String[] VIDEO = { //
+                    "http://www.google.com/schemas/sitemap-video/1.1", //
+                    "https://www.google.com/schemas/sitemap-video/1.1" //
+    };
+
+    public static final String[] NEWS = { //
+                    "http://www.google.com/schemas/sitemap-news/0.9", //
+                    "https://www.google.com/schemas/sitemap-news/0.9", //
+                    "http://www.google.com/schemas/sitemap-news/0.84" //
+    };
+
+    public static final String LINKS = "http://www.w3.org/1999/xhtml";
+
+    /**
+     * In contradiction to the protocol specification ("The Sitemap must ...
+     * [s]pecify the namespace (protocol standard) within the &lt;urlset&gt;
+     * tag."), some sitemaps do not define a (default) namespace.
+     * 
+     * By accepting the "empty" namespace, you'll get URLs even from those
+     * sitemaps.
+     */
+    public static final String EMPTY = "";
 
     /**
      * RSS and Atom sitemap formats do not have strict definition. But if we do
@@ -34,5 +82,25 @@ public class Namespace {
     public static final String RSS_2_0 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     public static final String ATOM_0_3 = "http://purl.org/atom/ns#";
     public static final String ATOM_1_0 = "http://www.w3.org/2005/Atom";
+
+    public static final Set<String> SITEMAP_SUPPORTED_NAMESPACES = new HashSet<>();
+    static {
+        SITEMAP_SUPPORTED_NAMESPACES.add(SITEMAP);
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(SITEMAP_LEGACY));
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(IMAGE));
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(VIDEO));
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(NEWS));
+        SITEMAP_SUPPORTED_NAMESPACES.add(LINKS);
+    }
+
+    /**
+     * @param uri
+     *            URI string identifying the namespace
+     * @return true if namespace (identified by URI) is supported, false if the
+     *         namespace is not supported or unknown
+     */
+    public static boolean isSupported(String uri) {
+        return SITEMAP_SUPPORTED_NAMESPACES.contains(uri);
+    }
 
 }

@@ -145,7 +145,7 @@ public class SiteMapParserTest {
             asm = parser.parseSiteMap(content, url);
             fail("Expected an UnknownFormatException because of wrong namespace");
         } catch (UnknownFormatException e) {
-            assertTrue(e.getMessage().contains("does not match standard namespace"));
+            assertTrue(e.getMessage().matches("Namespace .* not accepted"));
         }
 
         // try again in lenient mode

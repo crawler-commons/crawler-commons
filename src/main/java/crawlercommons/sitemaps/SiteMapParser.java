@@ -28,7 +28,9 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 
@@ -79,6 +81,9 @@ public class SiteMapParser {
      **/
     protected boolean strictNamespace = false;
 
+    /** Set of namespaces (if {@link #strictNamespace}) accepted by the parser. URLs from other namespaces are ignored. */
+    protected Set<String> acceptedNamespaces = new HashSet<>();
+
     private MimeTypeDetector mimeTypeDetector;
 
     public SiteMapParser() {
@@ -106,7 +111,8 @@ public class SiteMapParser {
 
     /**
      * @return whether the parser allows any namespace or just the one from the
-     *         specification
+     *         specification (or any namespace accepted,
+     *         {@link #addAcceptedNamespace(String)})
      */
     public boolean isStrictNamespace() {
         return strictNamespace;
@@ -114,10 +120,34 @@ public class SiteMapParser {
 
     /**
      * Sets the parser to allow any namespace or just the one from the
-     * specification
+     * specification (or any namespace accepted,
+     * {@link #addAcceptedNamespace(String)})
      */
     public void setStrictNamespace(boolean s) {
         strictNamespace = s;
+        if (strictNamespace) {
+            addAcceptedNamespace(Namespace.SITEMAP);
+        }
+    }
+
+    /**
+     * Add namespace URI to set of accepted namespaces.
+     * 
+     * @param namespaceUri
+     */
+    public void addAcceptedNamespace(String namespaceUri) {
+        acceptedNamespaces.add(namespaceUri);
+    }
+
+    /**
+     * Add namespace URIs to set of accepted namespaces.
+     * 
+     * @param namespaceUris
+     */
+    public void addAcceptedNamespace(String[] namespaceUris) {
+        for (String namespaceUri : namespaceUris) {
+            acceptedNamespaces.add(namespaceUri);
+        }
     }
 
     /**
@@ -467,7 +497,13 @@ public class SiteMapParser {
         } catch (Exception e) {
             throw new RuntimeException("Failed to configure XML parser: " + e.toString());
         }
+
         DelegatorHandler handler = new DelegatorHandler(sitemapUrl, strict);
+        handler.setStrictNamespace(isStrictNamespace());
+        if (isStrictNamespace()) {
+            handler.setAcceptedNamespaces(acceptedNamespaces);
+        }
+
         try {
             SAXParser saxParser = factory.newSAXParser();
             saxParser.getXMLReader().setEntityResolver(new EntityResolver() {
@@ -477,7 +513,6 @@ public class SiteMapParser {
                     return new InputSource(new StringReader(""));
                 }
             });
-            handler.setStrictNamespace(isStrictNamespace());
             saxParser.parse(is, handler);
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (sitemap == null) {

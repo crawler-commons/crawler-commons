@@ -29,7 +29,6 @@ import org.xml.sax.SAXParseException;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
-import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapURL;
 
@@ -72,7 +71,8 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
+            LOG.debug("Skip element <{}>, namespace <{}> not accepted", localName, uri);
             currentElementNamespaceIsValid = false;
             return;
         }
@@ -98,7 +98,7 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
+        if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
         if ("url".equals(localName) && "urlset".equals(currentElementParent())) {
