@@ -221,6 +221,7 @@ public class SiteMapParser {
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         String mimeType = mimeTypeDetector.normalize(contentType, content);
 
+        String msg;
         if (mimeTypeDetector.isXml(mimeType)) {
             return processXml(url, content);
         } else if (mimeTypeDetector.isText(mimeType)) {
@@ -232,14 +233,19 @@ public class SiteMapParser {
                     return processGzippedXML(url, content);
                 } else if (mimeTypeDetector.isText(compressedType)) {
                     return processText(url, decompressed);
+                } else if (compressedType == null) {
+                    msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s') of sitemap '%s'", url);
+                } else {
+                    msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' (embedded in %s) from '%s'", compressedType, contentType, url);
                 }
             } catch (Exception e) {
-                String msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
+                msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
                 throw new UnknownFormatException(msg, e);
             }
+        } else {
+            msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' from '%s'", contentType, url);
         }
 
-        String msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' from '%s'", contentType, url);
         throw new UnknownFormatException(msg);
     }
 
