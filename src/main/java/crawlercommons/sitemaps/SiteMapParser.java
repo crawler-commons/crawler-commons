@@ -234,7 +234,7 @@ public class SiteMapParser {
                 } else if (mimeTypeDetector.isText(compressedType)) {
                     return processText(url, decompressed);
                 } else if (compressedType == null) {
-                    msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s') of sitemap '%s'", url);
+                    msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
                 } else {
                     msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' (embedded in %s) from '%s'", compressedType, contentType, url);
                 }
