@@ -15,7 +15,8 @@ public class MimeTypeDetector {
                     "text/xml",
                     "application/atom+xml",
                     "application/rss+xml",
-                    "text/rss"
+                    "text/rss",
+                    "application/rdf+xml"
                     };
 
     private static String[] TEXT_MIMETYPES = new String[] {
@@ -110,6 +111,7 @@ public class MimeTypeDetector {
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<sitemapindex", true, true));
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rss", true, true));
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<feed", true, true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rdf", true, true));
 
         mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "http://", true, true));
         mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "https://", true, true));
