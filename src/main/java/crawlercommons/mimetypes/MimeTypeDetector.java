@@ -45,7 +45,7 @@ public class MimeTypeDetector {
                     (byte) 0xBF
                     };
 
-    private static final int LEADING_WHITESPACE_MAX_SKIP = 16;
+    private static final int LEADING_WHITESPACE_MAX_SKIP = 32;
 
     private final static boolean[] spaceCharacters = new boolean[256];
     static {
@@ -60,17 +60,15 @@ public class MimeTypeDetector {
     private static class MimeTypeEntry {
         private String mimeType;
         private byte[] pattern;
-        private boolean allowBOM;
-        private boolean allowLeadingSpace;
+        private boolean isTextPattern;
 
         public MimeTypeEntry(String mimeType, String pattern) {
-            this(mimeType, pattern, false, false);
+            this(mimeType, pattern, false);
         }
 
-        public MimeTypeEntry(String mimeType, String pattern, boolean allowBOM, boolean allowLeadingSpace) {
+        public MimeTypeEntry(String mimeType, String pattern, boolean isTextPattern) {
             this.mimeType = mimeType;
-            this.allowBOM = allowBOM;
-            this.allowLeadingSpace = allowLeadingSpace;
+            this.isTextPattern = isTextPattern;
             this.pattern = pattern.getBytes(StandardCharsets.UTF_8);
         }
 
@@ -104,17 +102,17 @@ public class MimeTypeDetector {
         mimeTypes = new ArrayList<>();
 
         // Add all text patterns without and with a BOM.
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?xml", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?XML", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<!--", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<urlset", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<sitemapindex", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rss", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<feed", true, true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rdf", true, true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?xml", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?XML", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<!--", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<urlset", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<sitemapindex", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rss", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<feed", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rdf", true));
 
-        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "http://", true, true));
-        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "https://", true, true));
+        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "http://", true));
+        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "https://", true));
 
         mimeTypes.add(new MimeTypeEntry(GZIP_MIMETYPES[0], "\037\213"));
         mimeTypes.add(new MimeTypeEntry(GZIP_MIMETYPES[0], 0x1F, 0x8B));
@@ -122,44 +120,35 @@ public class MimeTypeDetector {
         maxPatternLength = 0;
         for (MimeTypeEntry entry : mimeTypes) {
             int length = entry.getPattern().length;
-            if (entry.allowBOM)
-                length += UTF8_BOM.length;
-            if (entry.allowLeadingSpace)
+            if (entry.isTextPattern)
                 length += LEADING_WHITESPACE_MAX_SKIP;
             maxPatternLength = Math.max(maxPatternLength, length);
         }
     }
 
     public String detect(byte[] content) {
-        return detect(content, 0, content.length);
+        return detect(content, content.length);
     }
 
-    public String detect(byte[] content, int offset, int length) {
-        int offsetBOM = -1;
-        int offsetSpace = -1;
+    public String detect(byte[] content, int length) {
+        int offsetText = -1;
+
         for (MimeTypeEntry entry : mimeTypes) {
-            if (patternMatches(entry.getPattern(), content, offset, length)) {
-                return entry.getMimeType();
-            }
-            if (entry.allowBOM) {
-                if (offsetBOM == -1) {
-                    offsetBOM = offset;
-                    while (patternMatches(UTF8_BOM, content, offsetBOM, length) && offsetBOM < content.length) {
-                        offsetBOM += UTF8_BOM.length;
+            if (entry.isTextPattern) {
+                if (offsetText == -1) {
+                    offsetText = 0;
+                    while (patternMatches(UTF8_BOM, content, offsetText, length) && offsetText < content.length) {
+                        offsetText += UTF8_BOM.length;
+                    }
+                    while (offsetText < content.length && spaceCharacters[content[offsetText] & 0xFF]) {
+                        offsetText++;
                     }
                 }
-                if (patternMatches(entry.getPattern(), content, offsetBOM, length)) {
+                if (patternMatches(entry.getPattern(), content, offsetText, (length-offsetText))) {
                     return entry.getMimeType();
                 }
-            }
-            if (entry.allowLeadingSpace) {
-                if (offsetSpace == -1) {
-                    offsetSpace = (offsetBOM > 0 ? offsetBOM : 0);
-                    while (offsetSpace < content.length && spaceCharacters[content[offsetSpace] & 0xFF]) {
-                        offsetSpace++;
-                    }
-                }
-                if (patternMatches(entry.getPattern(), content, offsetSpace, length)) {
+            } else {
+                if (patternMatches(entry.getPattern(), content, 0, length)) {
                     return entry.getMimeType();
                 }
             }
@@ -193,7 +182,7 @@ public class MimeTypeDetector {
 
         try {
             int contentLength = is.read(content);
-            return detect(content, 0, contentLength);
+            return detect(content, contentLength);
         } finally {
             is.reset();
         }
