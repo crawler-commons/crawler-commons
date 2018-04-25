@@ -372,6 +372,21 @@ public class SiteMapParserTest {
         assertEquals(new URL("http://example.org/2003/12/13/atom03"), sm.getSiteMapUrls().iterator().next().getUrl());
     }
 
+    @Test
+    public void testRSSFormat() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser(true, false);
+        byte[] content = getResourceAsBytes("src/test/resources/rss/feed.rss");
+        URL url = new URL("https://www.example.com/index.php?feed/rss");
+
+        SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
+        assertEquals(4, sm.getSiteMapUrls().size());
+        Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
+        assertEquals(new URL("https://www.example.com/blog/post/1"), it.next().getUrl());
+        assertEquals(new URL("https://www.example.com/guid.html"), it.next().getUrl());
+        assertEquals(new URL("https://www.example.com/foo?q=a&l=en"), it.next().getUrl());
+        assertEquals(new URL("https://www.example.com/foo?q=a&l=fr"), it.next().getUrl());
+    }
+
     /**
      * Test processing RSS 1.0 sitemaps, which don't have an <rss> tag. E.g.
      * http://rss.slashdot.org/slashdot/slashdotMain?format=xml
@@ -478,6 +493,26 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
         assertFalse(sm.getSiteMapUrls().iterator().next().isValid());
+    }
+
+    @Test
+    public void testFileLocationValidation() {
+        // examples from https://www.sitemaps.org/protocol.html#location
+        String baseUrl = "http://example.com/catalog/sitemap.xml";
+        String testUrl = "http://example.com/catalog/show?item=233&user=3453";
+        SiteMap sitemap = new SiteMap(baseUrl);
+        assertTrue(SiteMapParser.urlIsValid(sitemap.getBaseUrl(), testUrl));
+
+        testUrl = "http://example.com/image/show?item=233&user=3453";
+        assertFalse(SiteMapParser.urlIsValid(sitemap.getBaseUrl(), testUrl));
+
+        testUrl = "https://example.com/catalog/page1.php";
+        assertFalse(SiteMapParser.urlIsValid(sitemap.getBaseUrl(), testUrl));
+
+        // do not use / in query part to determine base location
+        baseUrl = "https://example.com/index.php?route=path/sitemap";
+        sitemap = new SiteMap(baseUrl);
+        assertTrue(SiteMapParser.urlIsValid(sitemap.getBaseUrl(), testUrl));
     }
 
     @Test

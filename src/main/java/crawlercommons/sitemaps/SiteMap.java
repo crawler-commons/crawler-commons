@@ -108,9 +108,26 @@ public class SiteMap extends AbstractSiteMap {
      * @param sitemapUrl
      */
     private void setBaseUrl(URL sitemapUrl) {
-        // Remove everything back to last slash.
-        // So http://foo.org/abc/sitemap.xml becomes http://foo.org/abc/
-        baseUrl = sitemapUrl.toString().replaceFirst("/[^/]*$", "/");
+        // Remove everything back to last slash on the file path:
+        // - http://example.com/abc/sitemap.xml
+        // becomes
+        // - http://example.com/abc/
+        // But ignore slashes in the query part:
+        // - http://example.com/index.php?route=feed/imagemap
+        // becomes
+        // - http://example.com/
+        String path = sitemapUrl.getPath();
+        int lastPathDelimPos = path.lastIndexOf('/');
+        if (lastPathDelimPos < 0) {
+            path = "/";
+        } else {
+            path = path.substring(0, lastPathDelimPos + 1);
+        }
+        try {
+            baseUrl = new URL(sitemapUrl.getProtocol(), sitemapUrl.getHost(), sitemapUrl.getPort(), path).toString();
+        } catch (MalformedURLException e) {
+            baseUrl = sitemapUrl.toString();
+        }
     }
 
     /**
