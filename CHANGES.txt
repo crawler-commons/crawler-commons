@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
+- Add method to parse and iterate sitemap SiteMapParser#walkSiteMap(URL,Consumer) (Luc Boruta) #190
 - Sitemap file location to ignore query part of URL (sebastian-nagel) #202
 - [RSS sitemaps] Link extraction from RSS feeds fails on XML entities (sebastian-nagel) #204
 - [RSS sitemaps] Resolve relative links in RSS feeds (sebastian-nagel) #203

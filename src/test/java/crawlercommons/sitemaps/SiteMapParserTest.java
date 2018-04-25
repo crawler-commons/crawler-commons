@@ -32,8 +32,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
@@ -65,11 +67,23 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n").append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n").append(" <sitemap>\n")
-                        .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>\n").append("  <lastmod><![CDATA[2004-10-01T18:23:17+00:00]]></lastmod>\n").append(" </sitemap>\n")
-                        .append("<sitemap>\n").append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>\n").append("  <lastmod>2005-01-01</lastmod>\n").append(" </sitemap>\n")
-                        .append("<sitemap>\n").append("  <loc>http://www.example.com/dynsitemap?date=now&amp;all=true</loc>\n").append(" </sitemap>\n").append("<sitemap>\n")
-                        .append("  <loc>http://www.example.com/dynsitemap<![CDATA[?date=lastyear&all=false]]></loc>\n").append(" </sitemap>\n").append("</sitemapindex>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>http://www.example.com/sitemap1.xml.gz</loc>\n") //
+                        .append("  <lastmod><![CDATA[2004-10-01T18:23:17+00:00]]></lastmod>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("<sitemap>\n") //
+                        .append("  <loc>http://www.example.com/sitemap2.xml.gz</loc>\n") //
+                        .append("  <lastmod>2005-01-01</lastmod>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("<sitemap>\n") //
+                        .append("  <loc>http://www.example.com/dynsitemap?date=now&amp;all=true</loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("<sitemap>\n") //
+                        .append("  <loc>http://www.example.com/dynsitemap<![CDATA[?date=lastyear&all=false]]></loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("</sitemapindex>");
         byte[] content = scontent.toString().getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
@@ -334,12 +348,8 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        	.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-        	.append("<url>")
-            .append("<loc>http://www.example.com/</loc>")
-            .append("</url>")
-            .append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>")
+                        .append("<loc>http://www.example.com/</loc>").append("</url>").append("</urlset>");
         byte[] content = scontent.toString().getBytes(UTF_8);
 
         URL url = new URL("http://www.example.com/subsection/sitemap.xml");
@@ -556,6 +566,20 @@ public class SiteMapParserTest {
         assertEquals(1, smi.getSitemaps().size());
     }
 
+    @Test
+    public void testWalkSiteMap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        byte[] content = getXMLSitemapAsBytes();
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        final List<SiteMapURL> urls = new ArrayList<>();
+
+        parser.walkSiteMap(asm, urls::add);
+        assertEquals(((SiteMap) asm).getSiteMapUrls().size(), urls.size());
+    }
+
     /**
      * Returns a good simple default XML sitemap as a byte array
      */
@@ -587,12 +611,10 @@ public class SiteMapParserTest {
         return IOUtils.toByteArray(is);
     }
 
-    private static String[] SITEMAP_URLS = new String[] {
-    		"http://www.example.com/",
-    		"http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii",
-            "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand",
-            "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland",
-             "http://www.example.com/catalog?item=83&desc=vacation_usa"
-    };
+    private static String[] SITEMAP_URLS = { "http://www.example.com/", //
+                    "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", //
+                    "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", //
+                    "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", //
+                    "http://www.example.com/catalog?item=83&desc=vacation_usa" };
 
 }
