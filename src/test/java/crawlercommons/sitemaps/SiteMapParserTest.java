@@ -411,6 +411,15 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
         assertEquals("http://www.example.com/pub/2000/08/09/xslt/xslt.html", sm.getSiteMapUrls().iterator().next().getUrl().toString());
+
+        // Test RDF content type
+        contentType = "application/rdf+xml";
+        asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(1, ((SiteMap) asm).getSiteMapUrls().size());
+
+        // Test without content type
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(1, ((SiteMap) asm).getSiteMapUrls().size());
     }
 
     @Test

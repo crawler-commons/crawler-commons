@@ -15,7 +15,8 @@ public class MimeTypeDetector {
                     "text/xml",
                     "application/atom+xml",
                     "application/rss+xml",
-                    "text/rss"
+                    "text/rss",
+                    "application/rdf+xml"
                     };
 
     private static String[] TEXT_MIMETYPES = new String[] {
@@ -44,25 +45,31 @@ public class MimeTypeDetector {
                     (byte) 0xBF
                     };
 
+    private static final int LEADING_WHITESPACE_MAX_SKIP = 32;
+
+    private final static boolean[] spaceCharacters = new boolean[256];
+    static {
+        spaceCharacters[0x09] = true; // \t - character tabulation (ht)
+        spaceCharacters[0x0a] = true; // \n - line feed (lf)
+        spaceCharacters[0x0b] = true; // line tabulation (vt)
+        spaceCharacters[0x0c] = true; // form feed (ff)
+        spaceCharacters[0x0d] = true; // \r - carriage return (cr)
+        spaceCharacters[0x20] = true; // space
+    }
+
     private static class MimeTypeEntry {
         private String mimeType;
         private byte[] pattern;
+        private boolean isTextPattern;
 
         public MimeTypeEntry(String mimeType, String pattern) {
             this(mimeType, pattern, false);
         }
 
-        public MimeTypeEntry(String mimeType, String pattern, boolean addBOM) {
+        public MimeTypeEntry(String mimeType, String pattern, boolean isTextPattern) {
             this.mimeType = mimeType;
-
-            byte[] patternBytes = pattern.getBytes(StandardCharsets.UTF_8);
-            if (addBOM) {
-                this.pattern = new byte[UTF8_BOM.length + patternBytes.length];
-                System.arraycopy(UTF8_BOM, 0, this.pattern, 0, UTF8_BOM.length);
-                System.arraycopy(patternBytes, 0, this.pattern, UTF8_BOM.length, patternBytes.length);
-            } else {
-                this.pattern = patternBytes;
-            }
+            this.isTextPattern = isTextPattern;
+            this.pattern = pattern.getBytes(StandardCharsets.UTF_8);
         }
 
         public MimeTypeEntry(String mimeType, int... pattern) {
@@ -95,16 +102,16 @@ public class MimeTypeDetector {
         mimeTypes = new ArrayList<>();
 
         // Add all text patterns without and with a BOM.
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?xml"));
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?xml", true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?XML"));
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<?XML", true));
-        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<!--"));
         mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<!--", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<urlset", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<sitemapindex", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rss", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<feed", true));
+        mimeTypes.add(new MimeTypeEntry(XML_MIMETYPES[0], "<rdf", true));
 
-        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "http://"));
         mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "http://", true));
-        mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "https://"));
         mimeTypes.add(new MimeTypeEntry(TEXT_MIMETYPES[0], "https://", true));
 
         mimeTypes.add(new MimeTypeEntry(GZIP_MIMETYPES[0], "\037\213"));
@@ -112,25 +119,38 @@ public class MimeTypeDetector {
 
         maxPatternLength = 0;
         for (MimeTypeEntry entry : mimeTypes) {
-            maxPatternLength = Math.max(maxPatternLength, entry.getPattern().length);
+            int length = entry.getPattern().length;
+            if (entry.isTextPattern)
+                length += LEADING_WHITESPACE_MAX_SKIP;
+            maxPatternLength = Math.max(maxPatternLength, length);
         }
     }
 
     public String detect(byte[] content) {
-        for (MimeTypeEntry entry : mimeTypes) {
-            if (patternMatches(entry.getPattern(), content, 0, content.length)) {
-                return entry.getMimeType();
-            }
-        }
-
-        // No mime-type detected.
-        return null;
+        return detect(content, content.length);
     }
 
-    public String detect(byte[] content, int offset, int length) {
+    public String detect(byte[] content, int length) {
+        int offsetText = -1;
+
         for (MimeTypeEntry entry : mimeTypes) {
-            if (patternMatches(entry.getPattern(), content, offset, length)) {
-                return entry.getMimeType();
+            if (entry.isTextPattern) {
+                if (offsetText == -1) {
+                    offsetText = 0;
+                    while (patternMatches(UTF8_BOM, content, offsetText, length) && offsetText < content.length) {
+                        offsetText += UTF8_BOM.length;
+                    }
+                    while (offsetText < content.length && spaceCharacters[content[offsetText] & 0xFF]) {
+                        offsetText++;
+                    }
+                }
+                if (patternMatches(entry.getPattern(), content, offsetText, (length-offsetText))) {
+                    return entry.getMimeType();
+                }
+            } else {
+                if (patternMatches(entry.getPattern(), content, 0, length)) {
+                    return entry.getMimeType();
+                }
             }
         }
 
@@ -143,7 +163,7 @@ public class MimeTypeDetector {
             return false;
         }
 
-        for (int i = 0; i < pattern.length; i++) {
+        for (int i = 0; i < pattern.length && (offset + i) < content.length; i++) {
             if (pattern[i] != content[offset + i]) {
                 return false;
             }
@@ -162,7 +182,7 @@ public class MimeTypeDetector {
 
         try {
             int contentLength = is.read(content);
-            return detect(content, 0, contentLength);
+            return detect(content, contentLength);
         } finally {
             is.reset();
         }
