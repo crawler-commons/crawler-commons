@@ -32,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -819,8 +818,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 // sitemap paths for file:/ URLs
                 url = "http://example.com/robots.txt";
             }
-            String contentType = new Tika().detect(content, url);
-            rules = parser.parseContent(url, content, contentType, agentName);
+            rules = parser.parseContent(url, content, "text/plain", agentName);
         } catch (IOException e) {
             if (connection instanceof HttpURLConnection) {
                 int code = ((HttpURLConnection) connection).getResponseCode();
