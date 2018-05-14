@@ -351,7 +351,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private int _numWarnings;
 
     @Override
-    public BaseRobotRules failedFetch(int httpStatusCode) {
+    public SimpleRobotRules failedFetch(int httpStatusCode) {
         SimpleRobotRules result;
 
         if ((httpStatusCode >= 200) && (httpStatusCode < 300)) {
@@ -386,7 +386,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * byte[], java.lang.String, java.lang.String)
      */
     @Override
-    public BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
+    public SimpleRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
         _numWarnings = 0;
 
         // If there's nothing there, treat it like we have no restrictions.

@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
@@ -38,12 +39,21 @@ public class SimpleRobotRules extends BaseRobotRules {
      * Single rule that maps from a path prefix to an allow flag.
      */
     public static class RobotRule implements Comparable<RobotRule>, Serializable {
+
         String _prefix;
         boolean _allow;
 
         public RobotRule(String prefix, boolean allow) {
             _prefix = prefix;
             _allow = allow;
+        }
+
+        public boolean isAllow() {
+            return this._allow;
+        }
+
+        public String getPrefix() {
+            return this._prefix;
         }
 
         // Sort from longest to shortest rules.
@@ -103,8 +113,8 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     }
 
-    private ArrayList<RobotRule> _rules;
-    private RobotRulesMode _mode;
+    protected ArrayList<RobotRule> _rules;
+    protected RobotRulesMode _mode;
 
     public SimpleRobotRules() {
         this(RobotRulesMode.ALLOW_SOME);
@@ -129,6 +139,10 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
 
         _rules.add(new RobotRule(prefix, allow));
+    }
+
+    public List<RobotRule> getRobotRules() {
+        return this._rules;
     }
 
     public boolean isAllowed(String url) {
