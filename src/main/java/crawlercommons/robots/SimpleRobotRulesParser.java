@@ -771,4 +771,20 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return _numWarnings;
     }
 
+    public int getMaxWarnings() {
+        return _maxWarnings;
+    }
+
+    public void setMaxWarnings(int maxWarnings) {
+        _maxWarnings = maxWarnings;
+    }
+
+    public long getMaxCrawlDelay() {
+        return _maxCrawlDelay;
+    }
+
+    public void setMaxCrawlDelay(long maxCrawlDelay) {
+        _maxCrawlDelay = maxCrawlDelay;
+    }
+
 }
