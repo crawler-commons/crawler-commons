@@ -69,8 +69,9 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * <p>
  * The crawl delay is parsed and added to the rules. Note that if the crawl
  * delay inside the file exceeds a maximum value, the crawling of all resources
- * is prohibited. The maximum value is defined with {@link #MAX_CRAWL_DELAY}=
- * {@value #MAX_CRAWL_DELAY}.
+ * is prohibited. The default maximum value is defined with
+ * {@link #DEFAULT_MAX_CRAWL_DELAY}={@value #DEFAULT_MAX_CRAWL_DELAY}. The
+ * default value can be changed using the constructor.
  * </p>
  * 
  * <p>
@@ -341,14 +342,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile("(?i)user-agent:");
 
     // Max # of warnings during parse of any one robots.txt file.
-    private static final int MAX_WARNINGS = 5;
+    private static final int DEFAULT_MAX_WARNINGS = 5;
 
     // Max value for crawl delay we'll use from robots.txt file. If the value is
-    // greater
-    // than this, we'll skip all pages.
-    private static final long MAX_CRAWL_DELAY = 300000;
+    // greater than this, we'll skip all pages.
+    private static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
 
     private int _numWarnings;
+    private int _maxWarnings;
+    private long _maxCrawlDelay;
+
+    public SimpleRobotRulesParser() {
+        this(DEFAULT_MAX_CRAWL_DELAY, DEFAULT_MAX_WARNINGS);
+    }
+
+    public SimpleRobotRulesParser(long maxCrawlDelay, int maxWarnings) {
+        this._maxCrawlDelay = maxCrawlDelay;
+        this._maxWarnings = maxWarnings;
+    }
 
     @Override
     public BaseRobotRules failedFetch(int httpStatusCode) {
@@ -522,7 +533,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         SimpleRobotRules result = parseState.getRobotRules();
-        if (result.getCrawlDelay() > MAX_CRAWL_DELAY) {
+        if (result.getCrawlDelay() > _maxCrawlDelay) {
             // Some evil sites use a value like 3600 (seconds) for the crawl
             // delay, which would
             // cause lots of problems for us.
@@ -541,7 +552,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             LOGGER.warn("Problem processing robots.txt for {}", url);
         }
 
-        if (_numWarnings < MAX_WARNINGS) {
+        if (_numWarnings < _maxWarnings) {
             LOGGER.warn("\t {}", msg);
         }
     }
@@ -758,6 +769,22 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     // For testing
     public int getNumWarnings() {
         return _numWarnings;
+    }
+
+    public int getMaxWarnings() {
+        return _maxWarnings;
+    }
+
+    public void setMaxWarnings(int maxWarnings) {
+        _maxWarnings = maxWarnings;
+    }
+
+    public long getMaxCrawlDelay() {
+        return _maxCrawlDelay;
+    }
+
+    public void setMaxCrawlDelay(long maxCrawlDelay) {
+        _maxCrawlDelay = maxCrawlDelay;
     }
 
 }
