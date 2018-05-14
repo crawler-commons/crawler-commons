@@ -13,6 +13,7 @@ Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
 - Handle new suffixes in PaidLevelDomain (kkrugler) #183
 - Remove Tika dependency (kkrugler) #199
 - Improve MIME detection for sitemaps (sebastian-nagel) #200
+- SimpleRobotRulesParser: Expose MAX_CRAWL_DELAY #194
 
 Release 0.9 (2017-10-27)
 - [Sitemaps] Removed DOM-based sitemap parser (jnioche) #177
