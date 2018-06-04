@@ -109,4 +109,29 @@ public abstract class BaseRobotRules implements Serializable {
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass()).append(":\n");
+        long delay = getCrawlDelay();
+        if (delay == UNSET_CRAWL_DELAY) {
+            sb.append(" - no crawl delay\n");
+        } else {
+            sb.append(" - crawl delay: ").append(delay).append('\n');
+        }
+        int nSitemaps = getSitemaps().size();
+        if (nSitemaps == 0) {
+            sb.append(" - no sitemap URLs\n");
+        } else {
+            sb.append(" - number of sitemap URLs: ").append(nSitemaps).append('\n');
+            sb.append("   sitemaps[0]: ").append(getSitemaps().get(0)).append('\n');
+        }
+        return sb.toString();
+    }
+
 }

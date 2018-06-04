@@ -254,8 +254,7 @@ public class SimpleRobotRules extends BaseRobotRules {
                 }
             } else {
                 // See if the pattern from patternPos to wildcardPos matches the
-                // text
-                // starting at textPos
+                // text starting at textPos
                 while ((patternPos < wildcardPos) && (textPos < textEnd)) {
                     if (text.charAt(textPos++) != pattern.charAt(patternPos++)) {
                         return false;
@@ -265,17 +264,14 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
 
         // If we didn't reach the end of the pattern, make sure we're not at a
-        // wildcard, sa
-        // that's a 0 or more match, so then we're still OK.
+        // wildcard, that's a 0 or more match, so then we're still OK.
         while ((patternPos < patternEnd) && (pattern.charAt(patternPos) == '*')) {
             patternPos += 1;
         }
 
         // We're at the end, so we have a match if the pattern was completely
-        // consumed,
-        // and either we consumed all the text or we didn't have to match it all
-        // (no '$' at end
-        // of the pattern)
+        // consumed, and either we consumed all the text or we didn't have to
+        // match it all (no '$' at end of the pattern)
         return (patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar);
     }
 
@@ -343,6 +339,36 @@ public class SimpleRobotRules extends BaseRobotRules {
         } else if (!_rules.equals(other._rules))
             return false;
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        int nRules = _rules.size();
+        if (nRules == 0) {
+            sb.append(" - no rules");
+            if (isAllowNone()) {
+                sb.append(" (allow none)");
+            } else if (isAllowAll()) {
+                sb.append(" (allow all)");
+            }
+            sb.append('\n');
+        } else {
+            sb.append(" - number of rules: ").append(nRules).append('\n');
+            if (nRules <= 10) {
+                for (int i = 0; i < nRules; i++) {
+                    RobotRule r = _rules.get(i);
+                    sb.append(r._allow ? "   A" : "   Disa").append("llow: ").append(r._prefix).append('\n');
+                }
+            }
+        }
+        return sb.toString();
     }
 
 }
