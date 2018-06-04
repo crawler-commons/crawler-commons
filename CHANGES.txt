@@ -15,6 +15,7 @@ Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
 - Improve MIME detection for sitemaps (sebastian-nagel) #200
 - Make RobotRules accessible (aecio via kkrugler) #134
 - SimpleRobotRulesParser: Expose MAX_WARNINGS and MAX_CRAWL_DELAY (aecio via kkrugler) #194
+- Added main to SimpleRobotRulesParser for testing (sebastian-nagel) #193
 
 Release 0.9 (2017-10-27)
 - [Sitemaps] Removed DOM-based sitemap parser (jnioche) #177
