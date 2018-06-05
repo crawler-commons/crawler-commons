@@ -112,9 +112,7 @@ public class DelegatorHandler extends DefaultHandler {
         // the <rss> or <rdf> tag is a <channel> tag, so we can use that.
         // See https://github.com/crawler-commons/crawler-commons/issues/87
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
-        else if ("rss".equals(localName)) {
-            return; // ignore
-        } else if ("channel".equals(localName)) {
+        else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
         } else if ("sitemapindex".equals(localName)) {
             delegate = new XMLIndexHandler(url, elementStack, strict);

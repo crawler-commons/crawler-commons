@@ -120,8 +120,11 @@ public class SiteMapParser {
 
     /**
      * Sets the parser to allow any namespace or just the one from the
-     * specification (or any namespace accepted,
-     * {@link #addAcceptedNamespace(String)})
+     * specification, or any accepted namespace (see
+     * {@link #addAcceptedNamespace(String)}). Note enabling strict namespace
+     * checking always adds the namespace defined by the current sitemap
+     * specificiation ({@link Namespace#SITEMAP}) to the list of accepted
+     * namespaces.
      */
     public void setStrictNamespace(boolean s) {
         strictNamespace = s;
