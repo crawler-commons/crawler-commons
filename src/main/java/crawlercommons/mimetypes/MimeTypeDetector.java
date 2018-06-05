@@ -9,41 +9,16 @@ import java.util.Locale;
 
 public class MimeTypeDetector {
 
-    private static String[] XML_MIMETYPES = new String[] {
-                    "application/xml",
-                    "application/x-xml",
-                    "text/xml",
-                    "application/atom+xml",
-                    "application/rss+xml",
-                    "text/rss",
-                    "application/rdf+xml"
-                    };
+    private static String[] XML_MIMETYPES = new String[] { "application/xml", "application/x-xml", "text/xml", "application/atom+xml", "application/rss+xml", "text/rss", "application/rdf+xml" };
 
-    private static String[] TEXT_MIMETYPES = new String[] {
-                    "text/plain"
-                    };
+    private static String[] TEXT_MIMETYPES = new String[] { "text/plain" };
 
-    private static String[] GZIP_MIMETYPES = new String[] {
-                    "application/gzip",
-                    "application/gzip-compressed",
-                    "application/gzipped",
-                    "application/x-gzip",
-                    "application/x-gzip-compressed",
-                    "application/x-gunzip",
-                    "gzip/document"
-                    };
+    private static String[] GZIP_MIMETYPES = new String[] { "application/gzip", "application/gzip-compressed", "application/gzipped", "application/x-gzip", "application/x-gzip-compressed",
+                    "application/x-gunzip", "gzip/document" };
 
-    private static String[][] MIMETYPES = {
-                    XML_MIMETYPES,
-                    TEXT_MIMETYPES,
-                    GZIP_MIMETYPES
-                    };
+    private static String[][] MIMETYPES = { XML_MIMETYPES, TEXT_MIMETYPES, GZIP_MIMETYPES };
 
-    private static byte[] UTF8_BOM = {
-                    (byte) 0xEF,
-                    (byte) 0xBB,
-                    (byte) 0xBF
-                    };
+    private static byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
 
     private static final int LEADING_WHITESPACE_MAX_SKIP = 32;
 
@@ -144,7 +119,7 @@ public class MimeTypeDetector {
                         offsetText++;
                     }
                 }
-                if (patternMatches(entry.getPattern(), content, offsetText, (length-offsetText))) {
+                if (patternMatches(entry.getPattern(), content, offsetText, (length - offsetText))) {
                     return entry.getMimeType();
                 }
             } else {

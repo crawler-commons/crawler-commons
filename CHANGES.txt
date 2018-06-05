@@ -1,9 +1,11 @@
 Crawler-Commons Change Log
 
 Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
+
+Release 0.10 (2018-06-05)
 - Add JAX-B dependencies to POM (jnioche) #207
-- Add method to parse and iterate sitemap SiteMapParser#walkSiteMap(URL,Consumer) (Luc Boruta) #190
-- Sitemap file location to ignore query part of URL (sebastian-nagel) #202
+- [Sitemaps] Add method to parse and iterate sitemap SiteMapParser#walkSiteMap(URL,Consumer) (Luc Boruta) #190
+- [Sitemaps] Sitemap file location to ignore query part of URL (sebastian-nagel) #202
 - [RSS sitemaps] Link extraction from RSS feeds fails on XML entities (sebastian-nagel) #204
 - [RSS sitemaps] Resolve relative links in RSS feeds (sebastian-nagel) #203
 - [RSS sitemaps] Extract links from <guid> elements (sebastian-nagel) #201
