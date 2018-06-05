@@ -16,8 +16,12 @@
 
 package crawlercommons.sitemaps.sax;
 
+import static crawlercommons.sitemaps.SiteMapParser.LOG;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -40,6 +44,7 @@ public class DelegatorHandler extends DefaultHandler {
     private boolean strict;
     private boolean strictNamespace;
     private UnknownFormatException exception;
+    private Set<String> acceptedNamespaces;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -60,20 +65,20 @@ public class DelegatorHandler extends DefaultHandler {
         return strict;
     }
 
-    /**
-     * @return whether the parser allows any namespace or just the one from the
-     *         specification
-     */
-    public boolean isStrictNamespace() {
+    protected boolean isStrictNamespace() {
         return strictNamespace;
     }
 
-    /**
-     * Sets the parser to allow any namespace or just the one from the
-     * specification
-     */
     public void setStrictNamespace(boolean s) {
         strictNamespace = s;
+    }
+
+    public void setAcceptedNamespaces(Set<String> acceptedSet) {
+        acceptedNamespaces = acceptedSet;
+    }
+
+    protected boolean isAcceptedNamespace(String uri) {
+        return acceptedNamespaces.contains(uri);
     }
 
     protected void setException(UnknownFormatException exception) {
@@ -109,17 +114,44 @@ public class DelegatorHandler extends DefaultHandler {
         // and also RSS 1.0 specification http://web.resource.org/rss/1.0/spec
         else if ("channel".equals(localName)) {
             delegate = new RSSHandler(url, elementStack, strict);
-        } else if (isStrictNamespace() && !Namespace.SITEMAP.equals(uri)) {
-            setException(new UnknownFormatException("Namespace " + uri + " does not match standard namespace " + Namespace.SITEMAP));
-            return;
         } else if ("sitemapindex".equals(localName)) {
             delegate = new XMLIndexHandler(url, elementStack, strict);
         } else if ("urlset".equals(localName)) {
             delegate = new XMLHandler(url, elementStack, strict);
+        } else {
+            LOG.debug("Skipped unknown root element <{}> in {}", localName, url);
+            return;
         }
-        if (delegate != null) {
-            // configure delegate
-            delegate.setStrictNamespace(isStrictNamespace());
+        // configure delegate
+        delegate.setStrictNamespace(isStrictNamespace());
+        delegate.setAcceptedNamespaces(acceptedNamespaces);
+        // validate XML namespace
+        if (isStrictNamespace()) {
+            if (delegate instanceof AtomHandler || delegate instanceof RSSHandler) {
+                // no namespace checking for feeds
+                return;
+            }
+            if (!isAcceptedNamespace(uri) && uri.startsWith("/")) {
+                // first, try to resolve relative namespace URI (deprecated but
+                // not forbidden), e.g., //www.sitemaps.org/schemas/sitemap/0.9
+                try {
+                    URL u = new URL(url, uri);
+                    uri = u.toString();
+                } catch (MalformedURLException e) {
+                    LOG.warn("Failed to resolve relative namespace URI {} in sitemap {}", uri, url);
+                }
+            }
+            if (!isAcceptedNamespace(uri)) {
+                String msg;
+                if (!Namespace.isSupported(uri)) {
+                    msg = "Unsupported namespace <" + uri + ">";
+                } else {
+                    msg = "Namespace <" + uri + "> not accepted";
+                }
+                setException(new UnknownFormatException(msg));
+                delegate = null;
+                return;
+            }
         }
     }
 
