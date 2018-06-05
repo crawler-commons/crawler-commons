@@ -12,7 +12,7 @@
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
-	<version>0.10</version>
+	<version>0.11-SNAPSHOT</version>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -32,7 +32,7 @@
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
-	  <tag>crawler-commons-0.10</tag>
+	  <tag>HEAD</tag>
     </scm>
 
 	<distributionManagement>
