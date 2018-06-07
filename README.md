@@ -8,7 +8,7 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 # User Documentation
 
 ## Javadocs
-
+* [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
 * [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
 * [0.8](http://crawler-commons.github.io/crawler-commons/0.8/)
 * [0.7](http://crawler-commons.github.io/crawler-commons/0.7/)
@@ -23,6 +23,11 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
 
 # Crawler-Commons News
+
+## 7th June 2018  - crawler-commons 0.10 released
+
+We are glad to announce the 0.10 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-0.10/CHANGES.txt) file included with the release for a full list of details.
+This version contains among other things improvements to the Sitemap parsing and the removal of the Tika dependency. 
 
 ## 31st October 2017  - crawler-commons 0.9 released
 

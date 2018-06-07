@@ -1,6 +1,6 @@
 Crawler-Commons Change Log
 
-Current Development 0.10-SNAPSHOT (yyyy-mm-dd)
+Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
 
 Release 0.10 (2018-06-05)
 - Add JAX-B dependencies to POM (jnioche) #207
