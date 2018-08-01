@@ -23,7 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crawlercommons.domains.PaidLevelDomain;
