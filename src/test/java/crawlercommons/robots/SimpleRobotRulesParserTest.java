@@ -191,6 +191,17 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
+    // https://github.com/crawler-commons/crawler-commons/issues/215
+
+    @Test
+    public void testDisallowWithQueryOnly() {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /";
+
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        assertFalse(rules.isAllowed("http://www.example.com"));
+        assertFalse(rules.isAllowed("http://www.example.com?q=a"));
+    }
+
     @Test
     public void testMixedEndings() {
         final String mixedEndingsRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CR + LF + "User-agent: unhipbot" + LF + "Disallow: /" + CR + ""
