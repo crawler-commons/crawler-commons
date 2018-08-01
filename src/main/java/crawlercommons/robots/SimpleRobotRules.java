@@ -25,12 +25,12 @@ import java.util.List;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
- * rules, and an optional crawl-delay, and an optional sitemap URL. Note that
- * we support Google's extensions (Allow directive and '$'/'*' special chars)
- * plus the more widely used Sitemap directive.
+ * rules, and an optional crawl-delay, and an optional sitemap URL. Note that we
+ * support Google's extensions (Allow directive and '$'/'*' special chars) plus
+ * the more widely used Sitemap directive.
  * 
- * See https://en.wikipedia.org/wiki/Robots_exclusion_standard
- * See https://developers.google.com/search/reference/robots_txt
+ * See https://en.wikipedia.org/wiki/Robots_exclusion_standard See
+ * https://developers.google.com/search/reference/robots_txt
  */
 
 @SuppressWarnings("serial")
@@ -175,26 +175,26 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     private String getPath(String url, boolean getWithQuery) {
 
-    	try {
-    		URL urlObj = new URL(url);
-    		String path = urlObj.getPath();
-    		if ((path == null) || (path.equals(""))) {
-    			path = "/";
-    		}
+        try {
+            URL urlObj = new URL(url);
+            String path = urlObj.getPath();
+            if ((path == null) || (path.equals(""))) {
+                path = "/";
+            }
 
-    		String query = urlObj.getQuery();
-    		if (getWithQuery && query != null) {
-    			path += "?" + query;
-    		}
+            String query = urlObj.getQuery();
+            if (getWithQuery && query != null) {
+                path += "?" + query;
+            }
 
-    		// We used to lower-case the path, but Google says we need to do
-    		// case-sensitive matching.
-    		return URLDecoder.decode(path, "UTF-8");
-    	} catch (Exception e) {
-    		// If the URL is invalid, we don't really care since the fetch
-    		// will fail, so return the root.
-    		return "/";
-    	}
+            // We used to lower-case the path, but Google says we need to do
+            // case-sensitive matching.
+            return URLDecoder.decode(path, "UTF-8");
+        } catch (Exception e) {
+            // If the URL is invalid, we don't really care since the fetch
+            // will fail, so return the root.
+            return "/";
+        }
     }
 
     private boolean ruleMatches(String text, String pattern) {
