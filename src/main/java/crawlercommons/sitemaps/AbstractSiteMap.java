@@ -115,6 +115,7 @@ public abstract class AbstractSiteMap {
 
     /**
      * @param lastModified
+     *            the last-modified date
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
@@ -122,6 +123,7 @@ public abstract class AbstractSiteMap {
 
     /**
      * @param lastModified
+     *            the last-modified date and time
      */
     public void setLastModified(ZonedDateTime lastModified) {
         this.lastModified = Date.from(lastModified.toInstant());
@@ -129,6 +131,8 @@ public abstract class AbstractSiteMap {
 
     /**
      * @param lastModified
+     *            the last-modified date time. If parsing of the given date time
+     *            fails, the last-modified field is set to null.
      */
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
@@ -149,7 +153,7 @@ public abstract class AbstractSiteMap {
      * Dates must follow the <a href="https://www.w3.org/TR/NOTE-datetime">W3C
      * Datetime format</a> which is similar to <a
      * href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
-     * dates with different precisions:
+     * dates with different precisions:</p>
      * 
      * <pre>
      *   Year:
@@ -165,8 +169,6 @@ public abstract class AbstractSiteMap {
      *   Complete date plus hours, minutes, seconds and a decimal fraction of a second
      *      YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
      * </pre>
-     * 
-     * </p>
      * 
      * @param date
      *            - the date to be parsed
@@ -206,7 +208,13 @@ public abstract class AbstractSiteMap {
         return null;
     }
 
-    /** See {@link #convertToZonedDateTime(String)} */
+    /**
+     * See {@link #convertToZonedDateTime(String)}.
+     * 
+     * @param date
+     *            the date string to convert
+     * @return returns the date or null if parsing of the date string fails
+     */
     public static Date convertToDate(String date) {
         ZonedDateTime zdt = convertToZonedDateTime(date);
         if (zdt == null) {
