@@ -21,6 +21,7 @@ import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 
 import org.xml.sax.Attributes;
@@ -80,7 +81,7 @@ class RSSHandler extends DelegatorHandler {
     private SiteMap sitemap;
     private StringBuilder loc;
     private URL locURL;
-    private String lastMod;
+    private ZonedDateTime lastMod;
     boolean valid;
 
     RSSHandler(URL url, LinkedList<String> elementStack, boolean strict) {
@@ -128,8 +129,8 @@ class RSSHandler extends DelegatorHandler {
         String localName = super.currentElement();
         String value = String.valueOf(ch, start, length);
         if ("pubDate".equals(localName)) {
-            lastMod = AbstractSiteMap.normalizeRSSTimestamp(value);
-            if ("channel".equals(super.currentElementParent())) {
+            lastMod = AbstractSiteMap.parseRSSTimestamp(value);
+            if (lastMod != null && "channel".equals(super.currentElementParent())) {
                 sitemap.setLastModified(lastMod);
             }
         } else if ("link".equals(localName)) {

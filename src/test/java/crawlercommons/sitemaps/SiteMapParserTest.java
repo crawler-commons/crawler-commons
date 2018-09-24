@@ -31,12 +31,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -44,15 +41,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 
 @RunWith(JUnit4.class)
 public class SiteMapParserTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SiteMapParserTest.class);
 
     @Before
     public void setUp() throws Exception {
@@ -157,14 +150,6 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) asm;
 
         assertEquals(2, sm.getSiteMapUrls().size());
-    }
-
-    @Test
-    public void testFullDateFormat() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm+hh:00", Locale.ROOT);
-        Date date = new Date();
-        LOG.info(format.format(date));
-        LOG.info(SiteMap.getFullDateFormat().format(date));
     }
 
     @Test
@@ -462,7 +447,7 @@ public class SiteMapParserTest {
         SiteMap rss = (SiteMap) asm;
         assertEquals("Incorrect items count", 7, rss.getSiteMapUrls().size());
         Iterator<SiteMapURL> it = rss.getSiteMapUrls().iterator();
-        assertPubDate("Local differental offset", "article_1", pubDate + 1000, it);
+        assertPubDate("Local differential offset", "article_1", pubDate + 1000, it);
         assertPubDate("Short year", "article_2", pubDate + 2000, it);
         assertPubDate("No weekday", "article_3", pubDate + 3000, it);
         assertPubDate("No weekday and short year", "article_4", pubDate + 4000, it);

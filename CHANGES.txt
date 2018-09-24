@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Use the Java 8 date and time API (java.time.*) to parse dates in sitemaps (sebastian-nagel) #217
 - [Robots] Fix for handling URLs with query parameters but no path (kkrugler) #215
 
 Release 0.10 (2018-06-05)

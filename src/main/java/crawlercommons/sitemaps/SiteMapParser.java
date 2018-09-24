@@ -119,12 +119,15 @@ public class SiteMapParser {
     }
 
     /**
-     * Sets the parser to allow any namespace or just the one from the
+     * Sets the parser to allow any XML namespace or just the one from the
      * specification, or any accepted namespace (see
      * {@link #addAcceptedNamespace(String)}). Note enabling strict namespace
      * checking always adds the namespace defined by the current sitemap
      * specificiation ({@link Namespace#SITEMAP}) to the list of accepted
      * namespaces.
+     * 
+     * @param s
+     *            if true enable strict namespace-checking, disable if false
      */
     public void setStrictNamespace(boolean s) {
         strictNamespace = s;
@@ -137,6 +140,7 @@ public class SiteMapParser {
      * Add namespace URI to set of accepted namespaces.
      * 
      * @param namespaceUri
+     *            URI of the accepted XML namespace
      */
     public void addAcceptedNamespace(String namespaceUri) {
         acceptedNamespaces.add(namespaceUri);
@@ -146,6 +150,7 @@ public class SiteMapParser {
      * Add namespace URIs to set of accepted namespaces.
      * 
      * @param namespaceUris
+     *            array of accepted XML namespace URIs
      */
     public void addAcceptedNamespace(String[] namespaceUris) {
         for (String namespaceUri : namespaceUris) {
@@ -553,7 +558,9 @@ public class SiteMapParser {
      * are valid.
      * 
      * @param sitemapBaseUrl
+     *            the base URL of the sitemap
      * @param testUrl
+     *            the URL to be tested
      * @return true if testUrl is under sitemapBaseUrl, false otherwise
      */
     public static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {

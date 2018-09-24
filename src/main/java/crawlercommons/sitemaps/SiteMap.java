@@ -95,8 +95,8 @@ public class SiteMap extends AbstractSiteMap {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("url = \"").append(url).append("\", lastMod = ").append((getLastModified() == null) ? "null" : SiteMap.getFullDateFormat().format(getLastModified())).append(", type = ")
-                        .append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ").append(urlList.size());
+        sb.append("url = \"").append(url).append("\", lastMod = ").append((getLastModified() == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(getLastModified().toInstant()))
+                        .append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ").append(urlList.size());
 
         return sb.toString();
     }
