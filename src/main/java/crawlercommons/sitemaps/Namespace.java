@@ -65,6 +65,11 @@ public class Namespace {
                     "http://www.google.com/schemas/sitemap-news/0.84" //
     };
 
+    public static final String[] MOBILE = { //
+                    "http://www.google.com/schemas/sitemap-mobile/1.0", //
+                    "https://www.google.com/schemas/sitemap-mobile/1.0" //
+    };
+
     public static final String LINKS = "http://www.w3.org/1999/xhtml";
 
     /**
@@ -113,6 +118,7 @@ public class Namespace {
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.NEWS, Arrays.asList(NEWS));
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.IMAGE, Arrays.asList(IMAGE));
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.VIDEO, Arrays.asList(VIDEO));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.MOBILE, Arrays.asList(MOBILE));
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.LINKS, Arrays.asList(LINKS));
     }
 }

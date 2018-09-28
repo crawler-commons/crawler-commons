@@ -18,6 +18,7 @@ package crawlercommons.sitemaps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,6 +34,7 @@ import crawlercommons.sitemaps.extension.Extension;
 import crawlercommons.sitemaps.extension.ExtensionMetadata;
 import crawlercommons.sitemaps.extension.ImageAttributes;
 import crawlercommons.sitemaps.extension.LinkAttributes;
+import crawlercommons.sitemaps.extension.MobileAttributes;
 import crawlercommons.sitemaps.extension.NewsAttributes;
 import crawlercommons.sitemaps.extension.VideoAttributes;
 
@@ -186,6 +188,32 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
+    public void testMobileSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.enableExtension(Extension.MOBILE);
+
+        String contentType = "text/xml";
+        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-mobile.xml");
+
+        URL url = new URL("http://www.example.org/sitemap-mobile.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        for (SiteMapURL su : sm.getSiteMapUrls()) {
+            URL u = su.getUrl();
+            ExtensionMetadata[] attrs = su.getAttributesForExtension(Extension.MOBILE);
+            if (u.getPath().contains("mobile-friendly")) {
+                assertNotNull(attrs);
+                MobileAttributes attr = (MobileAttributes) attrs[0];
+                assertNotNull(attr);
+            } else {
+                assertTrue(attrs == null || attrs.length == 0);
+            }
+        }
+    }
+
+    @Test
     public void testShinpaideshuNewsSitemap() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         parser.setStrictNamespace(true);
@@ -216,6 +244,7 @@ public class SiteMapParserExtensionTest {
         parser.enableExtension(Extension.NEWS);
         parser.enableExtension(Extension.IMAGE);
         parser.enableExtension(Extension.VIDEO);
+        parser.enableExtension(Extension.MOBILE);
 
         String contentType = "text/xml";
         byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/hebdenbridgetimes-articles-sitemap.xml");

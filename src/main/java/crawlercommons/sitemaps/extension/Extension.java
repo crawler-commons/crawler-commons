@@ -38,5 +38,11 @@ public enum Extension {
      * localized page versions/variants, see
      * https://support.google.com/webmasters/answer/189077
      */
-    LINKS
+    LINKS,
+    /**
+     * <cite>Mobile sitemaps just contain an empty "mobile" tag to identify a
+     * URL as having mobile content</cite>, cf.
+     * http://www.google.com/schemas/sitemap-mobile/1.0
+     */
+    MOBILE
 }

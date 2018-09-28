@@ -54,7 +54,7 @@ public abstract class ExtensionHandler extends DefaultHandler {
             case LINKS:
                 return new LinksHandler();
             case MOBILE:
-                return null;
+                return new MobileHandler();
             default:
                 return null;
         }
