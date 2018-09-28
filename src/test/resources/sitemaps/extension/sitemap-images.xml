@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>http://www.example.com/images/some_image_landing_page.html</loc>
+    <image:image>
+      <image:loc>http://example.com/image.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>http://example.com/photo.jpg</image:loc>
+      <image:caption>This is the caption.</image:caption>
+      <image:geo_location>Limerick, Ireland</image:geo_location>
+      <image:title>Example photo shot in Limerick, Ireland</image:title>
+      <image:license>https://creativecommons.org/licenses/by/4.0/legalcode</image:license>
+    </image:image>
+  </url>
+</urlset>

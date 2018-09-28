@@ -28,8 +28,10 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
@@ -48,6 +50,7 @@ import org.xml.sax.SAXException;
 
 import crawlercommons.mimetypes.MimeTypeDetector;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+import crawlercommons.sitemaps.extension.Extension;
 import crawlercommons.sitemaps.sax.DelegatorHandler;
 
 public class SiteMapParser {
@@ -83,6 +86,12 @@ public class SiteMapParser {
 
     /** Set of namespaces (if {@link #strictNamespace}) accepted by the parser. URLs from other namespaces are ignored. */
     protected Set<String> acceptedNamespaces = new HashSet<>();
+
+    /**
+     * Map of sitemap extension namespaces required to find the right extension
+     * handler.
+     */
+    protected Map<String, Extension> extensionNamespaces = new HashMap<>();
 
     private MimeTypeDetector mimeTypeDetector;
 
@@ -155,6 +164,29 @@ public class SiteMapParser {
     public void addAcceptedNamespace(String[] namespaceUris) {
         for (String namespaceUri : namespaceUris) {
             acceptedNamespaces.add(namespaceUri);
+        }
+    }
+
+    /**
+     * Enable a support for a sitemap extension in the parser.
+     * 
+     * @param extension
+     *            sitemap extension (news, images, videos, etc.)
+     */
+    public void enableExtension(Extension extension) {
+        for (String namespaceUri : Namespace.SITEMAP_EXTENSION_NAMESPACES.get(extension)) {
+            extensionNamespaces.put(namespaceUri, extension);
+        }
+    }
+
+    /**
+     * Enable all supported sitemap extensions in the parser.
+     */
+    public void enableExtensions() {
+        for (Extension extension : Extension.values()) {
+            for (String namespaceUri : Namespace.SITEMAP_EXTENSION_NAMESPACES.get(extension)) {
+                extensionNamespaces.put(namespaceUri, extension);
+            }
         }
     }
 
@@ -511,6 +543,7 @@ public class SiteMapParser {
         if (isStrictNamespace()) {
             handler.setAcceptedNamespaces(acceptedNamespaces);
         }
+        handler.setExtensionNamespaces(extensionNamespaces);
 
         try {
             SAXParser saxParser = factory.newSAXParser();

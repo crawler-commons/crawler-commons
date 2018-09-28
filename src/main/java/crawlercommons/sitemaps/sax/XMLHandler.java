@@ -21,7 +21,12 @@ import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -31,6 +36,8 @@ import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.SiteMapURL;
+import crawlercommons.sitemaps.extension.Extension;
+import crawlercommons.sitemaps.sax.extension.ExtensionHandler;
 
 /**
  * Parse XML that contains a valid Sitemap. Example of a Sitemap:
@@ -62,6 +69,8 @@ class XMLHandler extends DelegatorHandler {
     private String priority;
     private int i = 0;
     private boolean currentElementNamespaceIsValid;
+    private String currentElementNamespace;
+    protected Map<Extension, ExtensionHandler> extensionHandlers;
 
     XMLHandler(URL url, LinkedList<String> elementStack, boolean strict) {
         super(elementStack, strict);
@@ -71,7 +80,12 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
+        currentElementNamespace = uri;
+        if (isExtensionNamespace(uri)) {
+            ExtensionHandler eh = getExtensionHandler(uri);
+            eh.startElement(uri, localName, qName, attributes);
+            return;
+        } else if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             LOG.debug("Skip element <{}>, namespace <{}> not accepted", localName, uri);
             currentElementNamespaceIsValid = false;
             return;
@@ -98,7 +112,11 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
+        if (isExtensionNamespace(uri)) {
+            ExtensionHandler eh = getExtensionHandler(uri);
+            eh.endElement(uri, localName, qName);
+            return;
+        } else if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
         if ("url".equals(localName) && "urlset".equals(currentElementParent())) {
@@ -109,7 +127,11 @@ class XMLHandler extends DelegatorHandler {
     }
 
     public void characters(char[] ch, int start, int length) throws SAXException {
-        if (isStrictNamespace() && !currentElementNamespaceIsValid) {
+        if (isExtensionNamespace(currentElementNamespace)) {
+            ExtensionHandler eh = getExtensionHandler(currentElementNamespace);
+            eh.characters(ch, start, length);
+            return;
+        } else if (isStrictNamespace() && !currentElementNamespaceIsValid) {
             return;
         }
         String localName = super.currentElement();
@@ -142,6 +164,11 @@ class XMLHandler extends DelegatorHandler {
                 sUrl.setPriority(priority);
                 sitemap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", (++i), sUrl);
+                if (extensionHandlers != null) {
+                    for (Entry<Extension, ExtensionHandler> e : extensionHandlers.entrySet()) {
+                        sUrl.addAttributesForExtension(e.getKey(), e.getValue().getAttributes());
+                    }
+                }
             }
         } catch (MalformedURLException e) {
             LOG.debug("Bad url: [{}]", value);
@@ -151,6 +178,48 @@ class XMLHandler extends DelegatorHandler {
             lastMod = null;
             changeFreq = null;
             priority = null;
+            resetExtensionHandlers();
+        }
+    }
+
+    /**
+     * Registers and returns an ExtensionHandler instance bound to this handler
+     * 
+     * @param uri
+     *            URI of sitemap extension namespace
+     * @return handler for the sitemap extension defined by XML namespace
+     */
+    protected ExtensionHandler getExtensionHandler(String uri) {
+        if (extensionNamespaces.containsKey(uri)) {
+            Extension ext = extensionNamespaces.get(uri);
+            if (extensionHandlers == null) {
+                extensionHandlers = new TreeMap<>();
+            }
+            if (!extensionHandlers.containsKey(ext)) {
+                extensionHandlers.put(ext, ExtensionHandler.create(ext));
+            }
+            return extensionHandlers.get(ext);
+        }
+        return null;
+    }
+
+    protected Collection<ExtensionHandler> getExtensionHandlers() {
+        if (extensionHandlers == null) {
+            return new ArrayList<ExtensionHandler>();
+        }
+        return extensionHandlers.values();
+    }
+
+    /**
+     * Reset all extension handlers. Attributes of sitemap extensions are bound
+     * to a single {@link SiteMapURL}, handlers should be reset if a sitemap URL
+     * is closed.
+     */
+    public void resetExtensionHandlers() {
+        if (extensionHandlers != null) {
+            for (Entry<Extension, ExtensionHandler> e : extensionHandlers.entrySet()) {
+                e.getValue().reset();
+            }
         }
     }
 
