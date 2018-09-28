@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import crawlercommons.sitemaps.extension.Extension;
@@ -371,6 +372,13 @@ public class SiteMapURL {
         sb.append(", lastMod = ").append((lastModified == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(lastModified.toInstant()));
         sb.append(", changeFreq = ").append(changeFreq);
         sb.append(", priority = ").append(priority);
+        if (attributes != null) {
+            for (Entry<Extension, ExtensionMetadata[]> e : attributes.entrySet()) {
+                for (ExtensionMetadata m : e.getValue()) {
+                    sb.append(", ").append(m.toString());
+                }
+            }
+        }
 
         return sb.toString();
     }
