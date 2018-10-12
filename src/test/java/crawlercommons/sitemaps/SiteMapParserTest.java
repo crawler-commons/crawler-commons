@@ -292,7 +292,7 @@ public class SiteMapParserTest {
     public void testSitemapTextGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/gzip";
-        byte[] content = this.getResourceAsBytes("src/test/resources/sitemaps/sitemap.txt.gz");
+        byte[] content = getResourceAsBytes("src/test/resources/sitemaps/sitemap.txt.gz");
 
         URL url = new URL("http://www.example.com/sitemap.txt.gz");
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
@@ -590,7 +590,7 @@ public class SiteMapParserTest {
      * @return byte content of the file
      * @throws IOException
      */
-    private byte[] getResourceAsBytes(String resourceName) throws IOException {
+    protected static byte[] getResourceAsBytes(String resourceName) throws IOException {
         File file = new File(resourceName);
         InputStream is = new FileInputStream(file);
         return IOUtils.toByteArray(is);

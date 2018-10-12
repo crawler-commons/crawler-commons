@@ -24,6 +24,12 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import crawlercommons.sitemaps.extension.Extension;
+import crawlercommons.sitemaps.extension.ExtensionMetadata;
 
 /**
  * The SitemapUrl class represents a URL found in a Sitemap.
@@ -68,6 +74,11 @@ public class SiteMapURL {
      * http://www.sitemaps.org/protocol.html#location *
      */
     private boolean valid;
+
+    /**
+     * attributes from sitemap extensions (news, image, video sitemaps, etc.)
+     */
+    private Map<Extension, ExtensionMetadata[]> attributes;
 
     public SiteMapURL(String url, boolean valid) {
         setUrl(url);
@@ -295,6 +306,45 @@ public class SiteMapURL {
         return valid;
     }
 
+    /**
+     * Add attributes of a specific sitemap extension
+     * 
+     * @param extension
+     *            sitemap extension (news, images, videos, etc.)
+     * @param attributes
+     *            array of attributes
+     */
+    public void addAttributesForExtension(Extension extension, ExtensionMetadata[] attributes) {
+        if (this.attributes == null) {
+            this.attributes = new TreeMap<>();
+        }
+        this.attributes.put(extension, attributes);
+    }
+
+    /**
+     * Get attributes of sitemap extensions (news, images, videos, etc.)
+     * 
+     * @return attribute map or null if no extensions are used
+     */
+    public Map<Extension, ExtensionMetadata[]> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Get attributes of a specific sitemap extension
+     * 
+     * @param extension
+     *            sitemap extension (news, images, videos, etc.)
+     * @return array of attributes or null if there are no attributes for the
+     *         given extension
+     */
+    public ExtensionMetadata[] getAttributesForExtension(Extension extension) {
+        if (attributes == null) {
+            return null;
+        }
+        return attributes.get(extension);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -322,6 +372,13 @@ public class SiteMapURL {
         sb.append(", lastMod = ").append((lastModified == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(lastModified.toInstant()));
         sb.append(", changeFreq = ").append(changeFreq);
         sb.append(", priority = ").append(priority);
+        if (attributes != null) {
+            for (Entry<Extension, ExtensionMetadata[]> e : attributes.entrySet()) {
+                for (ExtensionMetadata m : e.getValue()) {
+                    sb.append(", ").append(m.toString());
+                }
+            }
+        }
 
         return sb.toString();
     }

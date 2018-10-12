@@ -18,7 +18,12 @@ package crawlercommons.sitemaps;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+
+import crawlercommons.sitemaps.extension.Extension;
 
 /**
  * supported sitemap formats:
@@ -58,6 +63,11 @@ public class Namespace {
                     "http://www.google.com/schemas/sitemap-news/0.9", //
                     "https://www.google.com/schemas/sitemap-news/0.9", //
                     "http://www.google.com/schemas/sitemap-news/0.84" //
+    };
+
+    public static final String[] MOBILE = { //
+                    "http://www.google.com/schemas/sitemap-mobile/1.0", //
+                    "https://www.google.com/schemas/sitemap-mobile/1.0" //
     };
 
     public static final String LINKS = "http://www.w3.org/1999/xhtml";
@@ -103,4 +113,12 @@ public class Namespace {
         return SITEMAP_SUPPORTED_NAMESPACES.contains(uri);
     }
 
+    public static final Map<Extension, List<String>> SITEMAP_EXTENSION_NAMESPACES = new TreeMap<>();
+    static {
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.NEWS, Arrays.asList(NEWS));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.IMAGE, Arrays.asList(IMAGE));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.VIDEO, Arrays.asList(VIDEO));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.MOBILE, Arrays.asList(MOBILE));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.LINKS, Arrays.asList(LINKS));
+    }
 }

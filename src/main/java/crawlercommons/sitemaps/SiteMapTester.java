@@ -44,6 +44,8 @@ public class SiteMapTester {
             LOG.error("Java properties:");
             LOG.error("  sitemap.strictNamespace");
             LOG.error("                  if true sitemaps are required to use the standard namespace URI");
+            LOG.error("  sitemap.extensions");
+            LOG.error("                  if true enable sitemap extension parsing");
         } else {
             URL url = new URL(args[0]);
             String mt = (args.length > 1) ? args[1] : null;
@@ -64,6 +66,11 @@ public class SiteMapTester {
         boolean strictNamespace = new Boolean(System.getProperty("sitemap.strictNamespace"));
         saxParser.setStrictNamespace(strictNamespace);
 
+        boolean enableExtensions = new Boolean(System.getProperty("sitemap.extensions"));
+        if (enableExtensions) {
+            saxParser.enableExtensions();
+        }
+
         AbstractSiteMap sm = null;
         // guesses the mimetype
         if (mt == null || mt.equals("")) {
@@ -80,7 +87,11 @@ public class SiteMapTester {
         } else {
             Collection<SiteMapURL> links = ((SiteMap) sm).getSiteMapUrls();
             for (SiteMapURL smu : links) {
-                LOG.info(smu.getUrl().toString());
+                if (enableExtensions) {
+                    LOG.info(smu.toString());
+                } else {
+                    LOG.info(smu.getUrl().toString());
+                }
             }
         }
     }

@@ -21,6 +21,7 @@ import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 import org.xml.sax.Attributes;
@@ -31,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.Namespace;
 import crawlercommons.sitemaps.UnknownFormatException;
+import crawlercommons.sitemaps.extension.Extension;
 
 /**
  * Provides a base SAX handler for parsing of XML documents representing
@@ -45,6 +47,7 @@ public class DelegatorHandler extends DefaultHandler {
     private boolean strictNamespace;
     private UnknownFormatException exception;
     private Set<String> acceptedNamespaces;
+    protected Map<String, Extension> extensionNamespaces;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -79,6 +82,17 @@ public class DelegatorHandler extends DefaultHandler {
 
     protected boolean isAcceptedNamespace(String uri) {
         return acceptedNamespaces.contains(uri);
+    }
+
+    public void setExtensionNamespaces(Map<String, Extension> extensionMap) {
+        extensionNamespaces = extensionMap;
+    }
+
+    protected boolean isExtensionNamespace(String uri) {
+        if (extensionNamespaces == null) {
+            return false;
+        }
+        return extensionNamespaces.containsKey(uri);
     }
 
     protected void setException(UnknownFormatException exception) {
@@ -153,6 +167,7 @@ public class DelegatorHandler extends DefaultHandler {
                 return;
             }
         }
+        delegate.setExtensionNamespaces(extensionNamespaces);
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
