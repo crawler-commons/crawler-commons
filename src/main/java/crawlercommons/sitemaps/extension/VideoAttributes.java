@@ -456,7 +456,7 @@ public class VideoAttributes extends ExtensionMetadata {
             }
             VideoPrice that = (VideoPrice) other;
             return Objects.equals(currency, that.currency) //
-                            && price == that.price //
+                            && Objects.equals(price, that.price) //
                             && type == that.type //
                             && Objects.equals(resolution, that.resolution);
         }
@@ -477,7 +477,7 @@ public class VideoAttributes extends ExtensionMetadata {
             return price;
         }
 
-        public void setPrice(float price) {
+        public void setPrice(Float price) {
             this.price = price;
         }
 
