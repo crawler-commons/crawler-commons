@@ -101,7 +101,36 @@ public class VideoHandler extends ExtensionHandler {
         if (currAttr == null) {
             currAttr = new VideoAttributes();
         }
-        if (value.isEmpty()) {
+        if ("price".equals(localName)) {
+            Float fvalue = getFloatValue(value);
+            String currency = null;
+            VideoPriceType type = VideoPriceType.own;
+            VideoPriceResolution resolution = null;
+            if (priceAttr != null) {
+                if (priceAttr.containsKey("currency")) {
+                    currency = priceAttr.get("currency").trim();
+                }
+                String t = priceAttr.get("type");
+                if (t != null && !t.trim().isEmpty()) {
+                    try {
+                        type = VideoPriceType.valueOf(t.trim());
+                    } catch (IllegalArgumentException e) {
+                        LOG.debug("Illegal value for price type: {}", type);
+                    }
+                }
+                String r = priceAttr.get("resolution");
+                if (r != null && !r.trim().isEmpty()) {
+                    try {
+                        resolution = VideoPriceResolution.valueOf(r.trim());
+                    } catch (IllegalArgumentException e) {
+                        LOG.debug("Illegal value for price resolution: {}", resolution);
+                    }
+                }
+            }
+            VideoPrice price = new VideoPrice(currency, fvalue, type, resolution);
+            currAttr.addPrice(price);
+            priceAttr = null;
+        } else if (value.isEmpty()) {
             // skip value but reset StringBuilder
         } else if ("thumbnail_loc".equals(localName)) {
             currAttr.setThumbnailLoc(getURLValue(value));
@@ -147,33 +176,6 @@ public class VideoHandler extends ExtensionHandler {
             relationAttr = null;
         } else if ("gallery_loc".equals(localName)) {
             currAttr.setGalleryLoc(getURLValue(value));
-        } else if ("price".equals(localName)) {
-            Float fvalue = getFloatValue(value);
-            String currency = null;
-            VideoPriceType type = VideoPriceType.own;
-            VideoPriceResolution resolution = null;
-            if (priceAttr != null) {
-                currency = priceAttr.get("currency").trim();
-                String t = priceAttr.get("type");
-                if (t != null && !t.trim().isEmpty()) {
-                    try {
-                        type = VideoPriceType.valueOf(t.trim());
-                    } catch (IllegalArgumentException e) {
-                        LOG.debug("Illegal value for price type: {}", type);
-                    }
-                }
-                String r = priceAttr.get("resolution");
-                if (r != null && !r.trim().isEmpty()) {
-                    try {
-                        resolution = VideoPriceResolution.valueOf(r.trim());
-                    } catch (IllegalArgumentException e) {
-                        LOG.debug("Illegal value for price resolution: {}", resolution);
-                    }
-                }
-            }
-            VideoPrice price = new VideoPrice(currency, fvalue, type, resolution);
-            currAttr.addPrice(price);
-            priceAttr = null;
         } else if ("requires_subscription".equals(localName)) {
             currAttr.setRequiresSubscription(getYesNoBooleanValue(value, localName));
         } else if ("uploader".equals(localName)) {
