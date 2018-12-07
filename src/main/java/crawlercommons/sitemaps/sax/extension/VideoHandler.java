@@ -148,7 +148,7 @@ public class VideoHandler extends ExtensionHandler {
         } else if ("gallery_loc".equals(localName)) {
             currAttr.setGalleryLoc(getURLValue(value));
         } else if ("price".equals(localName)) {
-            float fvalue = getFloatValue(value);
+            Float fvalue = getFloatValue(value);
             String currency = null;
             VideoPriceType type = VideoPriceType.own;
             VideoPriceResolution resolution = null;

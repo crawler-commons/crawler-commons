@@ -424,17 +424,17 @@ public class VideoAttributes extends ExtensionMetadata {
         /**
          * Video price
          */
-        private float price;
+        private Float price;
 
-        public VideoPrice(final String currency, final float price) {
+        public VideoPrice(final String currency, final Float price) {
             this(currency, price, VideoPriceType.own);
         }
 
-        public VideoPrice(final String currency, final float price, final VideoPriceType type) {
+        public VideoPrice(final String currency, final Float price, final VideoPriceType type) {
             this(currency, price, type, null);
         }
 
-        public VideoPrice(final String currency, final float price, final VideoPriceType type, final VideoPriceResolution resolution) {
+        public VideoPrice(final String currency, final Float price, final VideoPriceType type, final VideoPriceResolution resolution) {
             this.currency = currency;
             this.price = price;
             this.type = type;
@@ -456,7 +456,7 @@ public class VideoAttributes extends ExtensionMetadata {
             }
             VideoPrice that = (VideoPrice) other;
             return Objects.equals(currency, that.currency) //
-                            && price == that.price //
+                            && Objects.equals(price, that.price) //
                             && type == that.type //
                             && Objects.equals(resolution, that.resolution);
         }
@@ -473,11 +473,11 @@ public class VideoAttributes extends ExtensionMetadata {
             return resolution;
         }
 
-        public float getPrice() {
+        public Float getPrice() {
             return price;
         }
 
-        public void setPrice(float price) {
+        public void setPrice(Float price) {
             this.price = price;
         }
 
