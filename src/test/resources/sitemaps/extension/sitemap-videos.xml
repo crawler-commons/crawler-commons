@@ -17,9 +17,9 @@
       <video:rating>4.2</video:rating>
       <video:view_count>12345</video:view_count>
       <video:publication_date>2007-11-05T19:20:30+08:00</video:publication_date>
-      <video:family_friendly>yes</video:family_friendly>
       <video:tag>sample_tag1</video:tag>
       <video:tag>sample_tag2</video:tag>
+      <video:family_friendly>yes</video:family_friendly>
       <video:restriction relationship="allow">IE GB US CA</video:restriction>
       <video:gallery_loc title="Cooking Videos">http://cooking.example.com</video:gallery_loc>
       <video:price currency="EUR">1.99</video:price>
@@ -28,6 +28,18 @@
           info="http://www.example.com/users/grillymcgrillerson">GrillyMcGrillerson
       </video:uploader>
       <video:live>no</video:live>
+    </video:video>
+  </url>
+  <url>
+    <loc>http://www.example.com/videos/some_video_landing_page-2.html</loc>
+    <video:video>
+      <video:thumbnail_loc>http://www.example.com/thumbs/123-2.jpg</video:thumbnail_loc>
+      <video:title>Grilling steaks for summer, episode 2</video:title>
+      <video:description>Alkis shows you how to get perfectly done steaks every
+        time</video:description>
+      <video:content_loc>http://www.example.com/video123-2.flv</video:content_loc>
+      <!-- locale-specific number format, test #220 -->
+      <video:price currency="EUR">1,99</video:price>
     </video:video>
   </url>
 </urlset>

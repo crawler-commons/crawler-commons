@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +55,10 @@ public class SiteMapParserExtensionTest {
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
-        assertEquals(1, sm.getSiteMapUrls().size());
+        assertEquals(2, sm.getSiteMapUrls().size());
+        Iterator<SiteMapURL> siter = sm.getSiteMapUrls().iterator();
+
+        // first <loc> element: nearly all video attributes
         VideoAttributes expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123.jpg"), "Grilling steaks for summer",
                         "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123.flv"), new URL("http://www.example.com/videoplayer.swf?video=123"));
         expectedVideoAttributes.setDuration(600);
@@ -74,12 +78,17 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes.setUploader("GrillyMcGrillerson");
         expectedVideoAttributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
         expectedVideoAttributes.setLive(false);
+        VideoAttributes attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
+        assertNotNull(attr);
+        assertEquals(expectedVideoAttributes, attr);
 
-        for (SiteMapURL su : sm.getSiteMapUrls()) {
-            assertNotNull(su.getAttributesForExtension(Extension.VIDEO));
-            VideoAttributes attr = (VideoAttributes) su.getAttributesForExtension(Extension.VIDEO)[0];
-            assertEquals(expectedVideoAttributes, attr);
-        }
+        // locale-specific number format in <video:price>, test #220
+        expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123-2.jpg"), "Grilling steaks for summer, episode 2",
+                        "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123-2.flv"), null);
+        expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", null, VideoAttributes.VideoPriceType.own) });
+        attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
+        assertNotNull(attr);
+        assertEquals(expectedVideoAttributes, attr);
     }
 
     @Test
@@ -255,48 +264,6 @@ public class SiteMapParserExtensionTest {
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(74, sm.getSiteMapUrls().size());
-    }
-
-
-    @Test
-    public void testVideosSitemapWithError() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
-        parser.enableExtension(Extension.VIDEO);
-
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-videos-error.xml");
-
-        URL url = new URL("http://www.example.com/sitemap-video.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
-        assertEquals(false, asm.isIndex());
-        assertEquals(true, asm instanceof SiteMap);
-        SiteMap sm = (SiteMap) asm;
-        assertEquals(1, sm.getSiteMapUrls().size());
-        VideoAttributes expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123.jpg"), "Grilling steaks for summer",
-                "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123.flv"), new URL("http://www.example.com/videoplayer.swf?video=123"));
-        expectedVideoAttributes.setDuration(600);
-        ZonedDateTime dt = ZonedDateTime.parse("2009-11-05T19:20:30+08:00");
-        expectedVideoAttributes.setExpirationDate(dt);
-        dt = ZonedDateTime.parse("2007-11-05T19:20:30+08:00");
-        expectedVideoAttributes.setPublicationDate(dt);
-        expectedVideoAttributes.setRating(4.2f);
-        expectedVideoAttributes.setViewCount(12345);
-        expectedVideoAttributes.setFamilyFriendly(true);
-        expectedVideoAttributes.setTags(new String[] { "sample_tag1", "sample_tag2" });
-        expectedVideoAttributes.setAllowedCountries(new String[] { "IE", "GB", "US", "CA" });
-        expectedVideoAttributes.setGalleryLoc(new URL("http://cooking.example.com"));
-        expectedVideoAttributes.setGalleryTitle("Cooking Videos");
-        expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", null, VideoAttributes.VideoPriceType.own) });
-        expectedVideoAttributes.setRequiresSubscription(true);
-        expectedVideoAttributes.setUploader("GrillyMcGrillerson");
-        expectedVideoAttributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
-        expectedVideoAttributes.setLive(false);
-
-        for (SiteMapURL su : sm.getSiteMapUrls()) {
-            assertNotNull(su.getAttributesForExtension(Extension.VIDEO));
-            VideoAttributes attr = (VideoAttributes) su.getAttributesForExtension(Extension.VIDEO)[0];
-            assertEquals(expectedVideoAttributes, attr);
-        }
     }
 
 }
