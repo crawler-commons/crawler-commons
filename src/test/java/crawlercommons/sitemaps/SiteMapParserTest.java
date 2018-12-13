@@ -275,6 +275,29 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testUnclosedSitemapIndexFile() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<sitemapindex>") //
+                        .append(" <sitemap>") //
+                        .append("  <loc>https://www.example.org/sitemap1.xml</loc>") //
+                        .append("  <loc>https://www.example.org/sitemap2.xml</loc>") //
+                        .append(" </sitemap>") //
+                        .append("</sitemapindex>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        URL url = new URL("http://www.example.com/sitemapindex.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        SiteMapIndex sm = (SiteMapIndex) asm;
+        assertEquals(2, sm.getSitemaps().size());
+        String sitemap = "https://www.example.org/sitemap2.xml";
+        assertNotNull("Sitemap " + sitemap + " not found in sitemap index", sm.getSitemap(new URL(sitemap)));
+    }
+
+    @Test
     public void testSitemapGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/gzip";

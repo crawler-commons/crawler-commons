@@ -94,12 +94,9 @@ class XMLHandler extends DelegatorHandler {
 
         // flush any unclosed or missing URL element
         if (loc.length() > 0 && ("loc".equals(localName) || "url".equals(localName))) {
-            // check whether loc isn't white space only
-            for (int i = 0; i < loc.length(); i++) {
-                if (!Character.isWhitespace(loc.charAt(i))) {
-                    maybeAddSiteMapUrl();
-                    return;
-                }
+            if (!isAllBlank(loc)) {
+                maybeAddSiteMapUrl();
+                return;
             }
             loc = new StringBuilder();
             if ("url".equals(localName)) {
