@@ -83,6 +83,9 @@ public class SiteMapParserExtensionTest {
         assertEquals(expectedVideoAttributes, attr);
 
         // locale-specific number format in <video:price>, test #220
+        // The current expected behavior is to not handle non-US locale price
+        // values and set the price value to null if parsing as float value
+        // fails.
         expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123-2.jpg"), "Grilling steaks for summer, episode 2",
                         "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123-2.flv"), null);
         expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", null, VideoAttributes.VideoPriceType.own) });

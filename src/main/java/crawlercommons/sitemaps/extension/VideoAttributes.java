@@ -426,15 +426,15 @@ public class VideoAttributes extends ExtensionMetadata {
          */
         private Float price;
 
-        public VideoPrice(final String currency, final Float price) {
+        public VideoPrice(String currency, Float price) {
             this(currency, price, VideoPriceType.own);
         }
 
-        public VideoPrice(final String currency, final Float price, final VideoPriceType type) {
+        public VideoPrice(String currency, Float price, VideoPriceType type) {
             this(currency, price, type, null);
         }
 
-        public VideoPrice(final String currency, final Float price, final VideoPriceType type, final VideoPriceResolution resolution) {
+        public VideoPrice(String currency, Float price, VideoPriceType type, VideoPriceResolution resolution) {
             this.currency = currency;
             this.price = price;
             this.type = type;
@@ -486,7 +486,7 @@ public class VideoAttributes extends ExtensionMetadata {
     public VideoAttributes() {
     }
 
-    public VideoAttributes(final URL thumbnailLoc, final String title, final String description, final URL contentLoc, final URL playerLoc) {
+    public VideoAttributes(URL thumbnailLoc, String title, String description, URL contentLoc, URL playerLoc) {
         this.thumbnailLoc = thumbnailLoc;
         this.title = title;
         this.description = description;
