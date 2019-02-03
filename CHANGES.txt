@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Allow empty price in video sitemaps (sebastian-nagel) #221
+- [Sitemaps] In case of the use of a different locale, price tag can be formatted with ',' instead of '.' leading to a NPE (goldenlink) #220
 - [Sitemaps] Add support for sitemap extensions (tuxnco, sebastian-nagel) #35, #36, #149, #162
 - [Sitemaps] Use the Java 8 date and time API (java.time.*) to parse dates in sitemaps (sebastian-nagel) #217
 - [Robots] Fix for handling URLs with query parameters but no path (kkrugler) #215
