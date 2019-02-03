@@ -74,7 +74,7 @@ class XMLIndexHandler extends DelegatorHandler {
                 return;
             }
             loc = new StringBuilder();
-            if ("url".equals(localName)) {
+            if ("sitemap".equals(localName)) {
                 // reset also attributes
                 locClosed = false;
                 lastMod = null;

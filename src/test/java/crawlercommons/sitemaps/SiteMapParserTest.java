@@ -293,8 +293,32 @@ public class SiteMapParserTest {
         assertEquals(true, asm instanceof SiteMapIndex);
         SiteMapIndex sm = (SiteMapIndex) asm;
         assertEquals(2, sm.getSitemaps().size());
-        String sitemap = "https://www.example.org/sitemap2.xml";
-        assertNotNull("Sitemap " + sitemap + " not found in sitemap index", sm.getSitemap(new URL(sitemap)));
+        String urlSecondSitemap = "https://www.example.org/sitemap2.xml";
+        AbstractSiteMap secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
+        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
+
+        // check reset of attributes (lastmod) when "autoclosing" <sitemap>
+        // elements
+        scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<sitemapindex>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>https://www.example.org/sitemap1.xml</loc>\n") //
+                        .append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>\n") //
+                        .append("  <loc>https://www.example.org/sitemap2.xml</loc>\n") //
+                        .append("  <loc>https://www.example.org/sitemap3.xml</loc>\n") //
+                        .append("  <lastmod>2005-11-02T19:24:18+00:00</lastmod>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("</sitemapindex>");
+        content = scontent.toString().getBytes(UTF_8);
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        sm = (SiteMapIndex) asm;
+        assertEquals(3, sm.getSitemaps().size());
+        secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
+        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
+        assertNull("Sitemap " + urlSecondSitemap + " without modification date", secondSitemap.getLastModified());
     }
 
     @Test
