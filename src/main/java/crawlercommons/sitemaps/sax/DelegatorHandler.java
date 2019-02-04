@@ -208,4 +208,14 @@ public class DelegatorHandler extends DefaultHandler {
             delegate.fatalError(e);
         }
     }
+
+    public static boolean isAllBlank(CharSequence charSeq) {
+        for (int i = 0; i < charSeq.length(); i++) {
+            if (!Character.isWhitespace(charSeq.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

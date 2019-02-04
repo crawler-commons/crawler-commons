@@ -67,6 +67,19 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        // flush any unclosed or missing <sitemap> element
+        if (loc.length() > 0 && ("loc".equals(localName) || "sitemap".equals(localName))) {
+            if (!isAllBlank(loc)) {
+                maybeAddSiteMap();
+                return;
+            }
+            loc = new StringBuilder();
+            if ("sitemap".equals(localName)) {
+                // reset also attributes
+                locClosed = false;
+                lastMod = null;
+            }
+        }
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {

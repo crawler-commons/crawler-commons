@@ -275,6 +275,53 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testUnclosedSitemapIndexFile() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<sitemapindex>") //
+                        .append(" <sitemap>") //
+                        .append("  <loc>https://www.example.org/sitemap1.xml</loc>") //
+                        .append("  <loc>https://www.example.org/sitemap2.xml</loc>") //
+                        .append(" </sitemap>") //
+                        .append("</sitemapindex>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        URL url = new URL("http://www.example.com/sitemapindex.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        SiteMapIndex sm = (SiteMapIndex) asm;
+        assertEquals(2, sm.getSitemaps().size());
+        String urlSecondSitemap = "https://www.example.org/sitemap2.xml";
+        AbstractSiteMap secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
+        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
+
+        // check reset of attributes (lastmod) when "autoclosing" <sitemap>
+        // elements
+        scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<sitemapindex>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>https://www.example.org/sitemap1.xml</loc>\n") //
+                        .append("  <lastmod>2004-10-01T18:23:17+00:00</lastmod>\n") //
+                        .append("  <loc>https://www.example.org/sitemap2.xml</loc>\n") //
+                        .append("  <loc>https://www.example.org/sitemap3.xml</loc>\n") //
+                        .append("  <lastmod>2005-11-02T19:24:18+00:00</lastmod>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("</sitemapindex>");
+        content = scontent.toString().getBytes(UTF_8);
+        asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        sm = (SiteMapIndex) asm;
+        assertEquals(3, sm.getSitemaps().size());
+        secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
+        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
+        assertNull("Sitemap " + urlSecondSitemap + " without modification date", secondSitemap.getLastModified());
+    }
+
+    @Test
     public void testSitemapGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/gzip";
