@@ -209,13 +209,42 @@ public class DelegatorHandler extends DefaultHandler {
         }
     }
 
+    /**
+     * Return true if character sequence contains only white space including
+     * Unicode whitespace, cf. {@link #isWhitespace(char)}
+     */
     public static boolean isAllBlank(CharSequence charSeq) {
         for (int i = 0; i < charSeq.length(); i++) {
-            if (!Character.isWhitespace(charSeq.charAt(i))) {
+            if (!isWhitespace(charSeq.charAt(i))) {
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Check whether character is any Unicode whitespace, including the space
+     * characters not covered by {@link Character#isWhitespace(char)}
+     */
+    public static boolean isWhitespace(char c) {
+        return Character.isWhitespace(c) || c == '\u00a0' || c == '\u2007' || c == '\u202f';
+    }
+
+    /** Trim all whitespace including Unicode whitespace */
+    public static String stripAllBlank(CharSequence charSeq) {
+        if (charSeq.length() == 0) {
+            return charSeq.toString();
+        }
+        int start = 0;
+        int end = charSeq.length() - 1;
+        while (isWhitespace(charSeq.charAt(start)) && start < end) {
+            start++;
+        }
+        if (start < end) {
+            while (isWhitespace(charSeq.charAt(end))) {
+                end--;
+            }
+        }
+        return charSeq.subSequence(start, end + 1).toString();
+    }
 }

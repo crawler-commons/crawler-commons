@@ -149,7 +149,7 @@ class XMLHandler extends DelegatorHandler {
     }
 
     private void maybeAddSiteMapUrl() {
-        String value = loc.toString().trim();
+        String value = stripAllBlank(loc);
         try {
             // check that the value is a valid URL
             URL locURL = new URL(value);

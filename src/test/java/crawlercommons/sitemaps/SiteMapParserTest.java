@@ -322,6 +322,34 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testStripUnicodeWhiteSpace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<sitemapindex>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>\n") //
+                        .append("   <![CDATA[ https://www.example.com/sitemap1.xml ]]>\n") //
+                        .append("  </loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>\n") //
+                        .append("   <![CDATA[\u00a0https://www.example.com/sitemap2.xml ]]> \u2000\n") //
+                        .append("  </loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("</sitemapindex>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        URL url = new URL("https://www.example.com/sitemapindex.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        SiteMapIndex sm = (SiteMapIndex) asm;
+        assertEquals(2, sm.getSitemaps().size());
+        String sitemap = "https://www.example.com/sitemap2.xml";
+        assertNotNull("Sitemap " + sitemap + " not found in sitemap index", sm.getSitemap(new URL(sitemap)));
+    }
+
+    @Test
     public void testSitemapGZ() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "application/gzip";
