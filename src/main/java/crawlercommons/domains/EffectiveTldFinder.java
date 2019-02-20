@@ -222,6 +222,7 @@ public class EffectiveTldFinder {
                 if (offset == 0 || foundTld.isException() || !foundTld.isWild()) {
                     return res;
                 }
+
                 // wildcards create an open ETLD namespace
                 int wildcardOffset = hostname.lastIndexOf(DOT, offset - 2);
                 String retryTld;
@@ -232,7 +233,14 @@ public class EffectiveTldFinder {
                 } else {
                     retryTld = hostname.substring(wildcardOffset + 1);
                 }
-                foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
+
+                try {
+                    foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
+                } catch (IllegalArgumentException e) {
+                    // retryTld contains forbidden characters
+                    return null;
+                }
+
                 return new SuffixTrie.LookupResult<EffectiveTLD>(wildcardOffset + 1, foundTld);
             }
         }
@@ -319,6 +327,15 @@ public class EffectiveTldFinder {
                 break;
             start = pos + 1;
         }
+        String domainSegment = hostname.substring(start, etldStartPos);
+        if (!EffectiveTLD.isAscii(domainSegment)) {
+            try {
+                IDN.toASCII(domainSegment);
+            } catch (IllegalArgumentException e) {
+                // not a valid IDN segment
+                return (strict ? null : hostname);
+            }
+        }
         return hostname.substring(start);
     }
 
@@ -394,6 +411,17 @@ public class EffectiveTldFinder {
         }
     }
 
+    /**
+     * EffectiveTLD objects hold one line of the public suffix list:
+     * <ul>
+     * <li>the suffix (<code>com</code>, <code>co.uk</code>, etc.)</li>
+     * <li>for IDN suffixes: both the ASCII and IDN variant
+     * (<code>xn--p1ai</code> and <code>рф</code>)</li>
+     * <li>and the properties required to parse host/domain names given in the
+     * public suffix list (wildcard suffix, exception, in private domain
+     * section)</li>
+     * </ul>
+     */
     public static class EffectiveTLD {
 
         private boolean exception = false;
@@ -402,7 +430,20 @@ public class EffectiveTldFinder {
         private String domain = null;
         private String idn = null;
 
-        public EffectiveTLD(String line, boolean isPrivateDomain) {
+        /**
+         * Parse one non-empty, non-comment line in the public suffix list and
+         * hold the public suffix and its properties in the created object.
+         * 
+         * @param line
+         *            non-empty, non-comment line in the public suffix list
+         * @param isPrivateDomain
+         *            whether line is in the section of &quot;PRIVATE
+         *            DOMAINS&quot; of the public suffix list
+         * @throws IllegalArgumentException
+         *             if the input line contains non-ASCII Unicode characters
+         *             prohibited in IDNs, cf. {@link IDN#toASCII(String)}
+         */
+        public EffectiveTLD(String line, boolean isPrivateDomain) throws IllegalArgumentException {
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
                 domain = line.substring(EXCEPTION.length(), line.length());
@@ -421,7 +462,18 @@ public class EffectiveTldFinder {
             isPrivate = isPrivateDomain;
         }
 
-        private String normalizeName(String name) {
+        /**
+         * Normalize a domain name: convert characters into to lowercase and
+         * encode dot-separated segments containing non-ASCII characters. Cf.
+         * {@link #asciiConvert(String)} and {@link IDN#toASCII(String)}
+         * 
+         * @param str
+         *            domain name segment
+         * @return normalized domain name containing only ASCII characters
+         * @throws IllegalArgumentException
+         *             if the input contains prohibited characters
+         */
+        private String normalizeName(String name) throws IllegalArgumentException {
             String[] parts = name.split(DOT_REGEX);
             String[] ary = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
@@ -473,14 +525,24 @@ public class EffectiveTldFinder {
             return res;
         }
 
-        private String asciiConvert(String str) {
+        /**
+         * Converts a single domain name segment (separated by dots) to ASCII if
+         * it contains non-ASCII character, cf. {@link IDN#toASCII(String)}.
+         * 
+         * @param str
+         *            domain name segment
+         * @return ASCII "Punycode" representation of the domain name segment
+         * @throws IllegalArgumentException
+         *             if the input contains prohibited characters
+         */
+        private static String asciiConvert(String str) throws IllegalArgumentException {
             if (isAscii(str)) {
                 return str.toLowerCase(Locale.ROOT);
             }
             return IDN.toASCII(str);
         }
 
-        private boolean isAscii(String str) {
+        private static boolean isAscii(String str) {
             char[] chars = str.toCharArray();
             for (char c : chars) {
                 if (c > 127) {
