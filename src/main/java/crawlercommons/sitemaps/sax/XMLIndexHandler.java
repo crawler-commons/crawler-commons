@@ -103,7 +103,7 @@ class XMLIndexHandler extends DelegatorHandler {
         } else if ("lastmod".equals(localName)) {
             lastMod = SiteMap.convertToDate(value);
         } else {
-            value = value.trim();
+            value = stripAllBlank(value);
             if (!value.isEmpty() && !locClosed) {
                 // try non-whitespace text content as loc
                 // when no loc element has been specified
@@ -117,7 +117,7 @@ class XMLIndexHandler extends DelegatorHandler {
     }
 
     private void maybeAddSiteMap() {
-        String value = loc.toString().trim();
+        String value = stripAllBlank(loc);
         try {
             // check that the value is a valid URL
             URL locURL = new URL(value);

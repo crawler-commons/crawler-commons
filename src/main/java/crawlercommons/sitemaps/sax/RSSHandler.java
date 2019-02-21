@@ -150,7 +150,7 @@ class RSSHandler extends DelegatorHandler {
     }
 
     private void setLocURL() {
-        String value = loc.toString().trim();
+        String value = stripAllBlank(loc);
         if (value.isEmpty()) {
             return;
         }
