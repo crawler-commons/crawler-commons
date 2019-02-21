@@ -48,6 +48,7 @@ public class DelegatorHandler extends DefaultHandler {
     private UnknownFormatException exception;
     private Set<String> acceptedNamespaces;
     protected Map<String, Extension> extensionNamespaces;
+    protected StringBuilder characterBuffer = new StringBuilder();
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -103,6 +104,7 @@ public class DelegatorHandler extends DefaultHandler {
         return exception;
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (elementStack.isEmpty() || delegate == null) {
             startRootElement(uri, localName, qName, attributes);
@@ -170,6 +172,7 @@ public class DelegatorHandler extends DefaultHandler {
         delegate.setExtensionNamespaces(extensionNamespaces);
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (delegate != null) {
             delegate.endElement(uri, localName, qName);
@@ -177,10 +180,36 @@ public class DelegatorHandler extends DefaultHandler {
         elementStack.pop();
     }
 
+    @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         if (delegate != null) {
             delegate.characters(ch, start, length);
         }
+    }
+
+    protected void appendCharacterBuffer(char ch[], int start, int length) {
+        if (characterBuffer != null) {
+            for (int i = start; i < start + length; i++) {
+                characterBuffer.append(ch[i]);
+            }
+        }
+    }
+
+    protected void appendCharacterBuffer(String str) {
+        characterBuffer.append(str);
+    }
+
+    protected String getAndResetCharacterBuffer() {
+        if (characterBuffer == null) {
+            return null;
+        }
+        String value = characterBuffer.toString();
+        resetCharacterBuffer();
+        return value;
+    }
+
+    protected void resetCharacterBuffer() {
+        characterBuffer = new StringBuilder();
     }
 
     protected String currentElement() {
@@ -197,12 +226,14 @@ public class DelegatorHandler extends DefaultHandler {
         return delegate.getSiteMap();
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         if (delegate != null) {
             delegate.error(e);
         }
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         if (delegate != null) {
             delegate.fatalError(e);

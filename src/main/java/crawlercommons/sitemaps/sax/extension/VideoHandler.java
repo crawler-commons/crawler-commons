@@ -18,14 +18,12 @@ package crawlercommons.sitemaps.sax.extension;
 
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import crawlercommons.sitemaps.SiteMap;
 import crawlercommons.sitemaps.extension.ExtensionMetadata;
 import crawlercommons.sitemaps.extension.VideoAttributes;
 import crawlercommons.sitemaps.extension.VideoAttributes.VideoPrice;
@@ -150,8 +148,7 @@ public class VideoHandler extends ExtensionHandler {
             }
             currAttr.setDuration(duration);
         } else if ("expiration_date".equals(localName)) {
-            ZonedDateTime dateTime = SiteMap.convertToZonedDateTime(value);
-            currAttr.setExpirationDate(dateTime);
+            currAttr.setExpirationDate(getDateValue(value));
         } else if ("rating".equals(localName)) {
             currAttr.setRating(getFloatValue(value));
         } else if ("view_count".equals(localName)) {
