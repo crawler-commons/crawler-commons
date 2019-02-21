@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] XMLHandler needs to append text in characters() vs. immediately processing (kkrugler, sebastian-nagel) #226
+- [Sitemaps] XMLIndexHandler needs to accumulate the lastmod date string before parsing (kkrugler, sebastian-nagel) #225
 - EffectiveTldFinder throws IllegalArgumentException on IDN domain names containing prohibited characters (sebastian-nagel) #231
 - [Sitemaps] Trim Unicode whitespace around URLs (sebastian-nagel, kkrugler) #224
 - [Sitemaps] Sitemap index: stop URL at closing </loc> (sebastian-nagel, kkrugler) #213
