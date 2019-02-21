@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+- EffectiveTldFinder throws IllegalArgumentException on IDN domain names containing prohibited characters (sebastian-nagel) #231
 - [Sitemaps] Trim Unicode whitespace around URLs (sebastian-nagel, kkrugler) #224
 - [Sitemaps] Sitemap index: stop URL at closing </loc> (sebastian-nagel, kkrugler) #213
 - [Sitemaps] Allow empty price in video sitemaps (sebastian-nagel) #221

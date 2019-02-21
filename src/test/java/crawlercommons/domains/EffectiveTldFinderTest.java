@@ -219,6 +219,20 @@ public class EffectiveTldFinderTest {
         // in strict mode: there should nothing be returned for invalid
         // hostnames
         assertNull(EffectiveTldFinder.getAssignedDomain("www..example..com", true, false));
+        // prohibited Unicode characters in internationalized domain name (IDN),
+        // test for #231): � (U+FFFD REPLACEMENT CHARACTER) is prohibited by
+        // RFC3490
+        // (1) in public suffix
+        assertNull(EffectiveTldFinder.getAssignedDomain("www.example.c\ufffdm", true, false));
+        // (1a) in wildcard part of a public suffix
+        assertNull(EffectiveTldFinder.getAssignedDomain("\ufffd.kawasaki.jp", true, false));
+        // (2) in dot-separated segment immediately before public suffix
+        // => fail / null : there is no valid domain name
+        assertNull(EffectiveTldFinder.getAssignedDomain("www.ex\ufffdmple.com", true, false));
+        // (3) in dot-separated segment not part of the domain name
+        // => "example.com" is a valid domain name, no check whether the input
+        // host name is valid
+        assertEquals("example.com", EffectiveTldFinder.getAssignedDomain("\ufffd.example.com", true, false));
     }
 
 }
