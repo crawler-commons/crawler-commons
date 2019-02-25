@@ -123,11 +123,9 @@ class RSSHandler extends DelegatorHandler {
             sitemap.setProcessed(true);
         } else if ("pubDate".equals(localName)) {
             String value = getAndResetCharacterBuffer();
-            if (value != null) {
-                lastMod = AbstractSiteMap.parseRSSTimestamp(value);
-                if (lastMod != null && "channel".equals(super.currentElementParent())) {
-                    sitemap.setLastModified(lastMod);
-                }
+            lastMod = AbstractSiteMap.parseRSSTimestamp(value);
+            if (lastMod != null && "channel".equals(super.currentElementParent())) {
+                sitemap.setLastModified(lastMod);
             }
         }
     }

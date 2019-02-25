@@ -87,21 +87,21 @@ class XMLIndexHandler extends DelegatorHandler {
         if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
-        if ("sitemap".equals(currentElement())) {
+        if ("sitemap".equals(localName)) {
             if (!locClosed) {
                 // closing </sitemap> without closed </loc>
                 // try text in <sitemap> as <loc>
                 loc = getAndResetCharacterBuffer();
             }
             maybeAddSiteMap();
-        } else if ("sitemapindex".equals(currentElement())) {
+        } else if ("sitemapindex".equals(localName)) {
             sitemap.setProcessed(true);
         } else if ("lastmod".equals(localName)) {
             String value = getAndResetCharacterBuffer();
             if (value != null) {
                 lastMod = SiteMap.convertToDate(value);
             }
-        } else if ("loc".equals(currentElement())) {
+        } else if ("loc".equals(localName)) {
             loc = getAndResetCharacterBuffer();
             locClosed = true;
         }

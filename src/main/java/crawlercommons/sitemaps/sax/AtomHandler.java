@@ -110,9 +110,9 @@ class AtomHandler extends DelegatorHandler {
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("entry".equals(currentElement())) {
+        if ("entry".equals(localName)) {
             maybeAddSiteMapUrl();
-        } else if ("feed".equals(currentElement())) {
+        } else if ("feed".equals(localName)) {
             sitemap.setProcessed(true);
         } else if ("updated".equals(localName)) {
             lastMod = getAndResetCharacterBuffer();

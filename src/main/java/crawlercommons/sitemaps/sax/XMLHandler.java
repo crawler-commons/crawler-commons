@@ -147,7 +147,7 @@ class XMLHandler extends DelegatorHandler {
         } else if (isStrictNamespace() && !currentElementNamespaceIsValid) {
             return;
         }
-        String localName = super.currentElement();
+        String localName = currentElement();
         if ("loc".equals(localName) || "url".equals(localName) || "changefreq".equals(localName) || "lastmod".equals(localName) || "priority".equals(localName)) {
             appendCharacterBuffer(ch, start, length);
         }
@@ -162,7 +162,7 @@ class XMLHandler extends DelegatorHandler {
         String value = null;
         if (loc != null) {
             value = stripAllBlank(loc);
-        } else if ("loc".equals(super.currentElement())) {
+        } else if ("loc".equals(currentElement())) {
             value = getAndResetCharacterBuffer();
         }
         if (value == null || isAllBlank(value)) {

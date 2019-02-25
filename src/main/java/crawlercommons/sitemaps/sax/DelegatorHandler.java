@@ -48,7 +48,7 @@ public class DelegatorHandler extends DefaultHandler {
     private UnknownFormatException exception;
     private Set<String> acceptedNamespaces;
     protected Map<String, Extension> extensionNamespaces;
-    protected StringBuilder characterBuffer = new StringBuilder();
+    private StringBuilder characterBuffer = new StringBuilder();
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -188,10 +188,8 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     protected void appendCharacterBuffer(char ch[], int start, int length) {
-        if (characterBuffer != null) {
-            for (int i = start; i < start + length; i++) {
-                characterBuffer.append(ch[i]);
-            }
+        for (int i = start; i < start + length; i++) {
+            characterBuffer.append(ch[i]);
         }
     }
 
@@ -200,9 +198,6 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     protected String getAndResetCharacterBuffer() {
-        if (characterBuffer == null) {
-            return null;
-        }
         String value = characterBuffer.toString();
         resetCharacterBuffer();
         return value;
