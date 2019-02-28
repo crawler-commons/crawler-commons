@@ -44,13 +44,6 @@ public class MobileHandler extends ExtensionHandler {
     }
 
     @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-    }
-
-    @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
-    }
-
     public ExtensionMetadata[] getAttributes() {
         if (mobileElementFound) {
             return mobileAttributes;
@@ -58,6 +51,7 @@ public class MobileHandler extends ExtensionHandler {
         return noMobileAttributes;
     }
 
+    @Override
     public void reset() {
         super.reset();
         mobileElementFound = false;

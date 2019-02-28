@@ -31,9 +31,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -72,6 +75,7 @@ public class SiteMapParserTest {
                         .append(" </sitemap>\n") //
                         .append("<sitemap>\n") //
                         .append("  <loc>http://www.example.com/dynsitemap?date=now&amp;all=true</loc>\n") //
+                        .append("  <lastmod>2004-10-01T18:23:17&#43;00:00</lastmod>\n") //
                         .append(" </sitemap>\n") //
                         .append("<sitemap>\n") //
                         .append("  <loc>http://www.example.com/dynsitemap<![CDATA[?date=lastyear&all=false]]></loc>\n") //
@@ -102,6 +106,10 @@ public class SiteMapParserTest {
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=now&all=true"));
         assertNotNull("<loc> with entities not found", currentSiteMap);
         assertEquals("http://www.example.com/dynsitemap?date=now&all=true", currentSiteMap.getUrl().toString());
+        // test <lastmodified> containing a character entity - the input is
+        // passed in chunks to the characters(...) method in the XMLIndexHandler
+        assertNotNull("<lastmod> containing entities", currentSiteMap.getLastModified());
+        assertEquals("<lastmod> containing entities", SiteMap.convertToDate("2004-10-01T18:23:17+00:00"), currentSiteMap.getLastModified());
 
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=lastyear&all=false"));
         assertNotNull("<loc> with CDATA not found", currentSiteMap);
@@ -216,7 +224,7 @@ public class SiteMapParserTest {
 
         SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
         for (int i = 0; i < found.length; i++) {
-            assertEquals(SITEMAP_URLS[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+            validateSiteMapUrl(i, found[i]);
         }
     }
 
@@ -235,7 +243,7 @@ public class SiteMapParserTest {
             assertEquals(5, sm.getSiteMapUrls().size());
             SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
             for (int i = 0; i < found.length; i++) {
-                assertEquals(SITEMAP_URLS[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+                validateSiteMapUrl(i, found[i]);
             }
         }
     }
@@ -439,7 +447,11 @@ public class SiteMapParserTest {
 
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
         assertEquals(1, sm.getSiteMapUrls().size());
-        assertEquals(new URL("http://example.org/2003/12/13/atom03"), sm.getSiteMapUrls().iterator().next().getUrl());
+        SiteMapURL smu = sm.getSiteMapUrls().iterator().next();
+        assertEquals(new URL("http://example.org/2003/12/13/atom03"), smu.getUrl());
+        // test for <updated>2003-12-13T18:30:02Z</updated>
+        assertNotNull(smu.getLastModified());
+        assertEquals(12, ZonedDateTime.ofInstant(smu.getLastModified().toInstant(), AbstractSiteMap.TIME_ZONE_UTC).get(ChronoField.MONTH_OF_YEAR));
     }
 
     @Test
@@ -451,7 +463,12 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
         assertEquals(4, sm.getSiteMapUrls().size());
         Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
-        assertEquals(new URL("https://www.example.com/blog/post/1"), it.next().getUrl());
+        SiteMapURL smu = it.next();
+        assertEquals(new URL("https://www.example.com/blog/post/1"), smu.getUrl());
+        // test for <pubDate>Sun, 06 Sep 2009 16:20:00 +0000</pubDate>
+        assertNotNull(smu.getLastModified());
+        assertEquals(9, ZonedDateTime.ofInstant(smu.getLastModified().toInstant(), AbstractSiteMap.TIME_ZONE_UTC).get(ChronoField.MONTH_OF_YEAR));
+
         assertEquals(new URL("https://www.example.com/guid.html"), it.next().getUrl());
         assertEquals(new URL("https://www.example.com/foo?q=a&l=en"), it.next().getUrl());
         assertEquals(new URL("https://www.example.com/foo?q=a&l=fr"), it.next().getUrl());
@@ -590,9 +607,14 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser(false);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>").append("<loc>").append("<url>")
-                        .append("<![CDATA[").append("http://jobs.optistaffing.com/EXPERIENCED-DISPATCHER-NEEDED-NOW----Jobs-in-Vancouver-WA/2333221").append("]]>").append("</url>").append("</loc>")
-                        .append("<lastmod>2015-04-28</lastmod>").append("<changefreq>daily</changefreq>").append("</url>").append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">") //
+                        .append("<url><loc><url>") //
+                        .append("<![CDATA[http://jobs.optistaffing.com/EXPERIENCED-DISPATCHER-NEEDED-NOW----Jobs-in-Vancouver-WA/2333221]]>") //
+                        .append("</url>").append("</loc>") //
+                        .append("<lastmod>2015-04-28</lastmod>") //
+                        .append("<changefreq>daily</changefreq>") //
+                        .append("</url></urlset>");
 
         byte[] content = scontent.toString().getBytes(UTF_8);
 
@@ -645,13 +667,21 @@ public class SiteMapParserTest {
      */
     private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[0]).append("</loc>  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
-                        .append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[1]).append("</loc>  <changefreq>weekly</changefreq>").append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[2]).append("</loc>  <lastmod>2004-12-23</lastmod>").append("  <changefreq>weekly</changefreq>").append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[3]).append("</loc>  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>");
-        scontent.append("<url>  <loc><url><![CDATA[").append(SITEMAP_URLS[4]).append("]]></url></loc>  <lastmod>2004-11-23</lastmod>").append("</url>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+        for (String[] surl : SITEMAP_URLS) {
+            scontent.append(" <url>\n  <loc>").append(surl[0]).append("</loc>\n");
+            if (surl[1] != null) {
+                scontent.append("  <lastmod>").append(surl[1]).append("</lastmod>\n");
+            }
+            if (surl[2] != null) {
+                scontent.append("  <changefreq>").append(surl[2]).append("</changefreq>\n");
+            }
+            if (surl[3] != null) {
+                scontent.append("  <priority>").append(surl[3]).append("</priority>\n");
+            }
+            scontent.append(" </url>\n");
+        }
         scontent.append("</urlset>");
 
         return scontent.toString().getBytes(UTF_8);
@@ -671,10 +701,23 @@ public class SiteMapParserTest {
         return IOUtils.toByteArray(is);
     }
 
-    private static String[] SITEMAP_URLS = { "http://www.example.com/", //
-                    "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", //
-                    "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", //
-                    "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", //
-                    "http://www.example.com/catalog?item=83&desc=vacation_usa" };
+    private static String[][] SITEMAP_URLS = { { "http://www.example.com/", "2005-01-01", "monthly", "0.8" },
+                    { "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", null, "weekly", null }, //
+                    { "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", "2004-12-23", "weekly", null }, //
+                    { "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", "2004-12-23T18:00:15&#43;00:00", null, "0.3" }, //
+                    { "http://www.example.com/catalog?item=83&amp;desc=vacation_usa", "2004-11-23", null, null } };
+
+    private static void validateSiteMapUrl(int i, SiteMapURL u) {
+        assertEquals(SITEMAP_URLS[i][0].replaceAll("&amp;", "&"), u.getUrl().toExternalForm());
+        if (SITEMAP_URLS[i][1] != null) {
+            assertNotNull("No <lastmod>" + SITEMAP_URLS[i][1] + "</lastmod>", u.getLastModified());
+        }
+        if (SITEMAP_URLS[i][2] != null) {
+            assertEquals("Wrong <changefreq>" + SITEMAP_URLS[i][2] + "</changefreq>", SITEMAP_URLS[i][2], u.getChangeFrequency().toString().toLowerCase(Locale.ROOT));
+        }
+        if (SITEMAP_URLS[i][3] != null) {
+            assertEquals("Wrong <priority>" + SITEMAP_URLS[i][3] + "</priority>", Double.parseDouble(SITEMAP_URLS[i][3]), u.getPriority(), .0001);
+        }
+    }
 
 }

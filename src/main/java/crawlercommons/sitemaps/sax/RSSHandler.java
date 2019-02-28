@@ -79,7 +79,6 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 class RSSHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
-    private StringBuilder loc;
     private URL locURL;
     private ZonedDateTime lastMod;
     boolean valid;
@@ -88,7 +87,6 @@ class RSSHandler extends DelegatorHandler {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.RSS);
-        loc = new StringBuilder();
     }
 
     /*
@@ -109,47 +107,53 @@ class RSSHandler extends DelegatorHandler {
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("link".equals(currentElement()) || "guid".equals(currentElement())) {
+        if ("link".equals(localName)) {
             setLocURL();
-        } else if ("item".equals(currentElement())) {
+        } else if ("guid".equals(localName)) {
+            // accept as link if
+            // - a valid absolute URL (not a URN, UUID or similar)
+            // - and no <link> found yet
+            if (locURL == null) {
+                setLocURL();
+            }
+            resetCharacterBuffer();
+        } else if ("item".equals(localName)) {
             maybeAddSiteMapUrl();
-        } else if ("rss".equals(currentElement())) {
+        } else if ("rss".equals(localName)) {
             sitemap.setProcessed(true);
+        } else if ("pubDate".equals(localName)) {
+            String value = getAndResetCharacterBuffer();
+            lastMod = AbstractSiteMap.parseRSSTimestamp(value);
+            if (lastMod != null && "channel".equals(super.currentElementParent())) {
+                sitemap.setLastModified(lastMod);
+            }
         }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see crawlercommons.sitemaps.AbstractSiteMapSAXHandler#characters(char[],
-     * int, int)
+     * @see crawlercommons.sitemaps.sax.DelegatorHandler#characters(char[], int,
+     * int)
      */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length);
-        if ("pubDate".equals(localName)) {
-            lastMod = AbstractSiteMap.parseRSSTimestamp(value);
-            if (lastMod != null && "channel".equals(super.currentElementParent())) {
-                sitemap.setLastModified(lastMod);
-            }
-        } else if ("link".equals(localName)) {
-            loc.append(value);
-        } else if ("guid".equals(localName)) {
-            // accept as link if
-            // - a valid absolute URL (not a URN, UUID or similar)
-            // - and no <link> found yet
-            if (locURL == null) {
-                loc.append(value);
-            }
+        if ("pubDate".equals(localName) || "link".equals(localName) || "guid".equals(localName)) {
+            appendCharacterBuffer(ch, start, length);
         }
     }
 
+    @Override
     public AbstractSiteMap getSiteMap() {
         return sitemap;
     }
 
     private void setLocURL() {
+        String loc = getAndResetCharacterBuffer();
+        if (loc == null) {
+            return;
+        }
         String value = stripAllBlank(loc);
         if (value.isEmpty()) {
             return;
@@ -160,8 +164,6 @@ class RSSHandler extends DelegatorHandler {
         } catch (MalformedURLException e) {
             LOG.debug("Bad url: [{}]", value);
             LOG.trace("Can't create an entry with a bad URL", e);
-        } finally {
-            loc = new StringBuilder();
         }
     }
 
@@ -178,10 +180,12 @@ class RSSHandler extends DelegatorHandler {
         lastMod = null;
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }

@@ -63,7 +63,7 @@ import crawlercommons.sitemaps.sax.extension.ExtensionHandler;
 class XMLHandler extends DelegatorHandler {
 
     private SiteMap sitemap;
-    private StringBuilder loc;
+    private String loc;
     private String lastMod;
     private String changeFreq;
     private String priority;
@@ -76,9 +76,9 @@ class XMLHandler extends DelegatorHandler {
         super(elementStack, strict);
         sitemap = new SiteMap(url);
         sitemap.setType(SitemapType.XML);
-        loc = new StringBuilder();
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         currentElementNamespace = uri;
         if (isExtensionNamespace(uri)) {
@@ -93,12 +93,15 @@ class XMLHandler extends DelegatorHandler {
         currentElementNamespaceIsValid = true;
 
         // flush any unclosed or missing URL element
-        if (loc.length() > 0 && ("loc".equals(localName) || "url".equals(localName))) {
-            if (!isAllBlank(loc)) {
+        if ("loc".equals(localName) || "url".equals(localName)) {
+            if (loc == null) {
+                loc = getAndResetCharacterBuffer();
+            }
+            if (loc != null && !isAllBlank(loc)) {
                 maybeAddSiteMapUrl();
                 return;
             }
-            loc = new StringBuilder();
+            loc = null;
             if ("url".equals(localName)) {
                 // reset also attributes
                 lastMod = null;
@@ -106,8 +109,10 @@ class XMLHandler extends DelegatorHandler {
                 priority = null;
             }
         }
+        resetCharacterBuffer();
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (isExtensionNamespace(uri)) {
             ExtensionHandler eh = getExtensionHandler(uri);
@@ -116,13 +121,24 @@ class XMLHandler extends DelegatorHandler {
         } else if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
-        if ("url".equals(localName) && "urlset".equals(currentElementParent())) {
-            maybeAddSiteMapUrl();
+        if ("url".equals(localName)) {
+            if ("urlset".equals(currentElementParent())) {
+                maybeAddSiteMapUrl();
+            }
         } else if ("urlset".equals(localName)) {
             sitemap.setProcessed(true);
+        } else if ("loc".equals(localName)) {
+            loc = getAndResetCharacterBuffer();
+        } else if ("changefreq".equals(localName)) {
+            changeFreq = getAndResetCharacterBuffer();
+        } else if ("lastmod".equals(localName)) {
+            lastMod = getAndResetCharacterBuffer();
+        } else if ("priority".equals(localName)) {
+            priority = getAndResetCharacterBuffer();
         }
     }
 
+    @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         if (isExtensionNamespace(currentElementNamespace)) {
             ExtensionHandler eh = getExtensionHandler(currentElementNamespace);
@@ -131,25 +147,27 @@ class XMLHandler extends DelegatorHandler {
         } else if (isStrictNamespace() && !currentElementNamespaceIsValid) {
             return;
         }
-        String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length);
-        if ("loc".equals(localName) || "url".equals(localName)) {
-            loc.append(value);
-        } else if ("changefreq".equals(localName)) {
-            changeFreq = value;
-        } else if ("lastmod".equals(localName)) {
-            lastMod = value;
-        } else if ("priority".equals(localName)) {
-            priority = value;
+        String localName = currentElement();
+        if ("loc".equals(localName) || "url".equals(localName) || "changefreq".equals(localName) || "lastmod".equals(localName) || "priority".equals(localName)) {
+            appendCharacterBuffer(ch, start, length);
         }
     }
 
+    @Override
     public AbstractSiteMap getSiteMap() {
         return sitemap;
     }
 
     private void maybeAddSiteMapUrl() {
-        String value = stripAllBlank(loc);
+        String value = null;
+        if (loc != null) {
+            value = stripAllBlank(loc);
+        } else if ("loc".equals(currentElement())) {
+            value = getAndResetCharacterBuffer();
+        }
+        if (value == null || isAllBlank(value)) {
+            return;
+        }
         try {
             // check that the value is a valid URL
             URL locURL = new URL(value);
@@ -171,7 +189,7 @@ class XMLHandler extends DelegatorHandler {
             LOG.debug("Bad url: [{}]", value);
             LOG.trace("Can't create an entry with a bad URL", e);
         } finally {
-            loc = new StringBuilder();
+            loc = null;
             lastMod = null;
             changeFreq = null;
             priority = null;
@@ -220,10 +238,12 @@ class XMLHandler extends DelegatorHandler {
         }
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }

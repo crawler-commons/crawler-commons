@@ -54,7 +54,7 @@ import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 class XMLIndexHandler extends DelegatorHandler {
 
     private SiteMapIndex sitemap;
-    private StringBuilder loc;
+    private String loc;
     private boolean locClosed;
     private Date lastMod;
     private int i = 0;
@@ -63,17 +63,17 @@ class XMLIndexHandler extends DelegatorHandler {
         super(elementStack, strict);
         sitemap = new SiteMapIndex(url);
         sitemap.setType(SitemapType.INDEX);
-        loc = new StringBuilder();
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         // flush any unclosed or missing <sitemap> element
-        if (loc.length() > 0 && ("loc".equals(localName) || "sitemap".equals(localName))) {
+        if (loc != null && loc.length() > 0 && ("loc".equals(localName) || "sitemap".equals(localName))) {
             if (!isAllBlank(loc)) {
                 maybeAddSiteMap();
                 return;
             }
-            loc = new StringBuilder();
+            loc = null;
             if ("sitemap".equals(localName)) {
                 // reset also attributes
                 locClosed = false;
@@ -82,41 +82,55 @@ class XMLIndexHandler extends DelegatorHandler {
         }
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (isStrictNamespace() && !isAcceptedNamespace(uri)) {
             return;
         }
-        if ("sitemap".equals(currentElement())) {
+        if ("sitemap".equals(localName)) {
+            if (!locClosed) {
+                // closing </sitemap> without closed </loc>
+                // try text in <sitemap> as <loc>
+                loc = getAndResetCharacterBuffer();
+            }
             maybeAddSiteMap();
-        } else if ("sitemapindex".equals(currentElement())) {
+        } else if ("sitemapindex".equals(localName)) {
             sitemap.setProcessed(true);
-        } else if ("loc".equals(currentElement())) {
+        } else if ("lastmod".equals(localName)) {
+            String value = getAndResetCharacterBuffer();
+            if (value != null) {
+                lastMod = SiteMap.convertToDate(value);
+            }
+        } else if ("loc".equals(localName)) {
+            loc = getAndResetCharacterBuffer();
             locClosed = true;
         }
     }
 
+    @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length);
-        if ("loc".equals(localName)) {
-            loc.append(value);
-        } else if ("lastmod".equals(localName)) {
-            lastMod = SiteMap.convertToDate(value);
-        } else {
-            value = stripAllBlank(value);
-            if (!value.isEmpty() && !locClosed) {
-                // try non-whitespace text content as loc
-                // when no loc element has been specified
-                loc.append(value);
+        if ("loc".equals(localName) || "lastmod".equals(localName)) {
+            appendCharacterBuffer(ch, start, length);
+        } else if (!locClosed) {
+            // try non-whitespace text content as loc
+            // when no loc element has been specified
+            String value = stripAllBlank(String.valueOf(ch, start, length));
+            if (!value.isEmpty()) {
+                appendCharacterBuffer(value);
             }
         }
     }
 
+    @Override
     public AbstractSiteMap getSiteMap() {
         return sitemap;
     }
 
     private void maybeAddSiteMap() {
+        if (loc == null) {
+            return;
+        }
         String value = stripAllBlank(loc);
         try {
             // check that the value is a valid URL
@@ -128,15 +142,17 @@ class XMLIndexHandler extends DelegatorHandler {
             LOG.trace("Don't create an entry with a bad URL", e);
             LOG.debug("Bad url: [{}]", value);
         }
-        loc = new StringBuilder();
+        loc = null;
         locClosed = false;
         lastMod = null;
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         maybeAddSiteMap();
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         maybeAddSiteMap();
     }
