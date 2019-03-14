@@ -408,9 +408,9 @@ public class SiteMapParser {
      */
     protected AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
 
-        BOMInputStream bomIs = new BOMInputStream(new ByteArrayInputStream(xmlContent));
+        InputStream in = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new ByteArrayInputStream(xmlContent)));
         InputSource is = new InputSource();
-        is.setCharacterStream(new BufferedReader(new InputStreamReader(bomIs, UTF_8)));
+        is.setCharacterStream(new BufferedReader(new InputStreamReader(in, UTF_8)));
 
         return processXml(sitemapUrl, is);
     }
@@ -502,7 +502,7 @@ public class SiteMapParser {
         String xmlUrl = url.toString().replaceFirst("\\.gz$", "");
         LOG.debug("XML url = {}", xmlUrl);
 
-        BOMInputStream decompressed = new BOMInputStream(new GZIPInputStream(is));
+        InputStream decompressed = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new GZIPInputStream(is)));
         InputSource in = new InputSource(decompressed);
         in.setSystemId(xmlUrl);
         return processXml(url, in);

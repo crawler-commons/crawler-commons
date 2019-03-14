@@ -229,6 +229,21 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testSitemapXMLleadingWhiteSpace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("\ufeff"); // leading BOM
+        scontent.append("\n \t\r\n"); // and leading white space
+        byte[] content = getXMLSitemapAsBytes(scontent);
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+    }
+
+    @Test
     public void testSitemapXMLMediaTypes() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         byte[] content = getXMLSitemapAsBytes();
@@ -663,10 +678,25 @@ public class SiteMapParserTest {
     }
 
     /**
-     * Returns a good simple default XML sitemap as a byte array
+     * @return good simple default XML sitemap as UTF-8 encoded byte array
      */
     private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
+        return getXMLSitemapAsBytes(scontent);
+    }
+
+    /**
+     * See {@link #getXMLSitemapAsBytes()}.
+     * 
+     * @param scontent
+     *            The sitemap content is appended to the passed StringBuilder
+     *            which allows to prefix/suffix the sitemap content or get the
+     *            encoding from the StringBuilder in a different encoding (not
+     *            UTF-8).
+     * @return content of passed StringBuilder plus appended sitemap content as
+     *         UTF-8 encoded bytes
+     */
+    private byte[] getXMLSitemapAsBytes(StringBuilder scontent) {
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
                         .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
         for (String[] surl : SITEMAP_URLS) {
