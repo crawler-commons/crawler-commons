@@ -146,13 +146,13 @@ public abstract class AbstractSiteMap {
     }
 
     /**
-     * Convert the given date (given in an acceptable DateFormat), null if the
-     * date is not in the correct format.
+     * Convert the given date (given in an acceptable DateFormat), return null
+     * if the date is not in the correct format.
      * 
      * <p>
      * Dates must follow the <a href="https://www.w3.org/TR/NOTE-datetime">W3C
-     * Datetime format</a> which is similar to <a
-     * href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
+     * Datetime format</a> which is similar to
+     * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
      * dates with different precisions:
      * </p>
      * 
@@ -171,10 +171,13 @@ public abstract class AbstractSiteMap {
      *      YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
      * </pre>
      * 
+     * Note: Greenwich time (UTC) is assumed if the date string does not specify
+     * a time zone.
+     * 
      * @param date
      *            - the date to be parsed
-     * @return the zoned date time equivalent to the date string or NULL parsing
-     *         failed
+     * @return the zoned date time equivalent to the date string or NULL if
+     *         parsing failed
      */
     public static ZonedDateTime convertToZonedDateTime(String date) {
 

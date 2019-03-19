@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
 - EffectiveTldFinder: upgrade public suffix list (sebastian-nagel) #219
 - [Sitemaps] Detection and parsing of XML sitemaps fails with whitespace before XML declaration (sebastian-nagel, jnioche) #144
 - [Sitemaps] XMLHandler needs to append text in characters() vs. immediately processing (kkrugler, sebastian-nagel) #226
