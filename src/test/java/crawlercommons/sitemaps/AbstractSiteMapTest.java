@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -36,14 +35,14 @@ public class AbstractSiteMapTest {
         assertNull(AbstractSiteMap.convertToDate("blah"));
         assertNull(AbstractSiteMap.convertToDate(null));
 
-        SimpleDateFormat isoFormatNoTimezone = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
+        SimpleDateFormat isoFormatShortDate = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
+        isoFormatShortDate.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        // For formats where there's no time zone information, the time zone is
-        // undefined, so we can only check on the year/month/day portion of the
-        // result.
-        assertEquals("20140101", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014")));
-        assertEquals("20140601", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06")));
-        assertEquals("20140603", isoFormatNoTimezone.format(AbstractSiteMap.convertToDate("2014-06-03")));
+        // For short dates we only check on the year/month/day portion of the result.
+        // Time zone UTC is assumed because short dates do not contain a time zone.
+        assertEquals("20140101", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014")));
+        assertEquals("20140601", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014-06")));
+        assertEquals("20140603", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014-06-03")));
 
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.ROOT);
         isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
