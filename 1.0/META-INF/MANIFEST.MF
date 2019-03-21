@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Implementation-Title: Crawler-commons
+Implementation-Version: 1.0
+Archiver-Version: Plexus Archiver
+Built-By: julien
+Specification-Vendor: Crawler-Commons
+Specification-Title: Crawler-commons
+Implementation-Vendor-Id: com.github.crawler-commons
+Implementation-Vendor: Crawler-Commons
+Implementation-Build-Date: 2019-03-19 22:09:26+0000
+X-Compile-Target-JDK: 1.8
+Implementation-Build: ${scmBranch}@r${buildNumber}
+X-Compile-Source-JDK: 1.8
+Created-By: Apache Maven
+Build-Jdk: 1.8.0_201
+Specification-Version: 1.0
+
