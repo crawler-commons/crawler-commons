@@ -1,5 +1,7 @@
 Crawler-Commons Change Log
 
+Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+
 Release 1.0 (2019-03-19)
 - [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
 - EffectiveTldFinder: upgrade public suffix list (sebastian-nagel) #219
