@@ -8,6 +8,7 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 # User Documentation
 
 ## Javadocs
+* [1.0](http://crawler-commons.github.io/crawler-commons/1.0/)
 * [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
 * [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
 * [0.8](http://crawler-commons.github.io/crawler-commons/0.8/)
@@ -23,6 +24,11 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
 
 # Crawler-Commons News
+
+## 21st March 2018  - crawler-commons 1.0 released
+
+We are glad to announce the 1.0 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.0/CHANGES.txt) file included with the release for a full list of details.
+Among other bug fixes and improvements this version adds support for parsing sitemap extensions (image, video, news, alternate links).
 
 ## 7th June 2018  - crawler-commons 0.10 released
 
