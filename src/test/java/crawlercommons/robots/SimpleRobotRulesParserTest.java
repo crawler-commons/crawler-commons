@@ -29,8 +29,6 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 public class SimpleRobotRulesParserTest {
@@ -154,7 +152,7 @@ public class SimpleRobotRulesParserTest {
                         + "#disallow: /test" + LF + LF + "#user-agent: someAgent" + LF + LF + "#disallow: /index.html" + LF + "#disallow: /test" + LF + LF;
 
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
-        Assert.assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
@@ -724,6 +722,21 @@ public class SimpleRobotRulesParserTest {
     @Test
     public void testRelativeSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/relative-sitemap-robots.txt"));
+        assertEquals("Found sitemap", 1, rules.getSitemaps().size());
+    }
+
+    @Test
+    public void testSitemapInvalidBaseUrl() throws Exception {
+        // test https://github.com/crawler-commons/crawler-commons/issues/240
+        // - should handle absolute sitemap URL even if base URL isn't valid
+
+        final String simpleRobotsTxt = "Sitemap: https://www.example.com/sitemap.xml";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        BaseRobotRules rules = robotParser.parseContent("example.com", simpleRobotsTxt.getBytes(UTF_8), "text/plain", "a");
+
+        assertEquals(1, rules.getSitemaps().size());
+        assertEquals("https://www.example.com/sitemap.xml", rules.getSitemaps().get(0));
         assertEquals("Found sitemap", 1, rules.getSitemaps().size());
     }
 

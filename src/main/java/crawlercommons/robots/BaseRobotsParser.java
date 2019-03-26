@@ -38,7 +38,10 @@ public abstract class BaseRobotsParser implements Serializable {
      * lower-casing, and the prefix match rule.
      * 
      * @param url
-     *            URL that content was fetched from (for reporting purposes)
+     *            URL that robots.txt content was fetched from. A complete and
+     *            valid URL (e.g., https://example.com/robots.txt) is expected.
+     *            Used to resolve relative sitemap URLs and for
+     *            logging/reporting purposes.
      * @param content
      *            raw bytes from the site's robots.txt file
      * @param contentType
