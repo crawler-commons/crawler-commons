@@ -25,7 +25,7 @@ If you find an issue, please file a report [here](https://github.com/crawler-com
 
 # Crawler-Commons News
 
-## 21st March 2018  - crawler-commons 1.0 released
+## 21st March 2019  - crawler-commons 1.0 released
 
 We are glad to announce the 1.0 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.0/CHANGES.txt) file included with the release for a full list of details.
 Among other bug fixes and improvements this version adds support for parsing sitemap extensions (image, video, news, alternate links).
