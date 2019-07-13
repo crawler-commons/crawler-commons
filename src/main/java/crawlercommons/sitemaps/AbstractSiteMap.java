@@ -1,13 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,16 +17,18 @@
 package crawlercommons.sitemaps;
 
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.Locale;
 
 /** SiteMap or SiteMapIndex **/
 public abstract class AbstractSiteMap {
@@ -37,23 +38,23 @@ public abstract class AbstractSiteMap {
         INDEX, XML, ATOM, RSS, TEXT
     };
 
-    // 1997-07-16T19:20+01:00
-    private static final Pattern W3C_NO_SECONDS_PATTERN = Pattern.compile("(\\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d)(\\-|\\+)(\\d\\d):(\\d\\d)");
-    private static final ThreadLocal<DateFormat> W3C_NO_SECONDS_FORMAT = new ThreadLocal<DateFormat>() {
+    protected static final ZoneId TIME_ZONE_UTC = ZoneId.of(ZoneOffset.UTC.toString());
 
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        }
-    };
+    /**
+     * DateTimeFormatter for parsing dates in ISO-8601 format
+     */
+    public static final DateTimeFormatter W3C_FULLDATE_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    private static final ThreadLocal<DateFormat> W3C_FULLDATE_FORMAT = new ThreadLocal<DateFormat>() {
+    /**
+     * DateTimeFormatter to format dates in ISO-8601 format (UTC time zone 'Z')
+     */
+    public static final DateTimeFormatter W3C_FULLDATE_FORMATTER_UTC = DateTimeFormatter.ISO_INSTANT;
 
-        protected DateFormat initialValue() {
-            SimpleDateFormat result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            result.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return result;
-        }
-    };
+    /**
+     * DateTimeFormatter for parsing short dates ('1997', '1997-07',
+     * '1997-07-16') without daytime and time zone
+     */
+    public static final DateTimeFormatter W3C_SHORTDATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy[-MM[-dd]]", Locale.ROOT).withZone(TIME_ZONE_UTC);
 
     /** W3C date the Sitemap was last modified */
     private Date lastModified;
@@ -68,10 +69,6 @@ public abstract class AbstractSiteMap {
 
     public AbstractSiteMap() {
         lastModified = null;
-    }
-
-    public static DateFormat getFullDateFormat() {
-        return W3C_FULLDATE_FORMAT.get();
     }
 
     public boolean isIndex() {
@@ -89,7 +86,7 @@ public abstract class AbstractSiteMap {
      * @param type
      *            the Sitemap type to set
      */
-    void setType(SitemapType type) {
+    public void setType(SitemapType type) {
         this.type = type;
     }
 
@@ -118,7 +115,7 @@ public abstract class AbstractSiteMap {
 
     /**
      * @param lastModified
-     *            - the lastModified to set
+     *            the last-modified date
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
@@ -126,7 +123,16 @@ public abstract class AbstractSiteMap {
 
     /**
      * @param lastModified
-     *            - the lastModified to set
+     *            the last-modified date and time
+     */
+    public void setLastModified(ZonedDateTime lastModified) {
+        this.lastModified = Date.from(lastModified.toInstant());
+    }
+
+    /**
+     * @param lastModified
+     *            the last-modified date time. If parsing of the given date time
+     *            fails, the last-modified field is set to null.
      */
     public void setLastModified(String lastModified) {
         this.lastModified = SiteMap.convertToDate(lastModified);
@@ -140,41 +146,132 @@ public abstract class AbstractSiteMap {
     }
 
     /**
-     * Convert the given date (given in an acceptable DateFormat), null if the
-     * date is not in the correct format.
+     * Convert the given date (given in an acceptable DateFormat), return null
+     * if the date is not in the correct format.
+     * 
+     * <p>
+     * Dates must follow the <a href="https://www.w3.org/TR/NOTE-datetime">W3C
+     * Datetime format</a> which is similar to
+     * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
+     * dates with different precisions:
+     * </p>
+     * 
+     * <pre>
+     *   Year:
+     *      YYYY (eg 1997)
+     *   Year and month:
+     *      YYYY-MM (eg 1997-07)
+     *   Complete date:
+     *      YYYY-MM-DD (eg 1997-07-16)
+     *   Complete date plus hours and minutes:
+     *      YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     *   Complete date plus hours, minutes and seconds:
+     *      YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     *   Complete date plus hours, minutes, seconds and a decimal fraction of a second
+     *      YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+     * </pre>
+     * 
+     * Note: Greenwich time (UTC) is assumed if the date string does not specify
+     * a time zone.
      * 
      * @param date
      *            - the date to be parsed
-     * @return the Date equivalent or NULL when encountering an unparsable date
-     *         string argument
+     * @return the zoned date time equivalent to the date string or NULL if
+     *         parsing failed
      */
-    public static Date convertToDate(String date) {
+    public static ZonedDateTime convertToZonedDateTime(String date) {
 
-        if (date != null) {
-            try {
-                return DatatypeConverter.parseDateTime(date).getTime();
-            } catch (IllegalArgumentException e) {
-                // See if it's the one W3C case that the javax.xml.bind
-                // implementation (incorrectly) doesn't handle.
-                Matcher m = W3C_NO_SECONDS_PATTERN.matcher(date);
-                if (m.matches()) {
-                    try {
-                        // Convert to a format that Java can parse, which means
-                        // time zone has to be "-/+HHMM", not "+/-HH:MM"
-                        StringBuffer mungedDate = new StringBuffer(m.group(1));
-                        mungedDate.append(m.group(2));
-                        mungedDate.append(m.group(3));
-                        mungedDate.append(m.group(4));
-                        return W3C_NO_SECONDS_FORMAT.get().parse(mungedDate.toString());
-                    } catch (ParseException e2) {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            }
-        } else {
+        if (date == null) {
             return null;
         }
+
+        // full date including daytime and optional time zone
+        try {
+            return W3C_FULLDATE_FORMATTER.parse(date, ZonedDateTime::from);
+        } catch (DateTimeParseException e) {
+            // fall-through and try date without daytime
+        }
+
+        // dates without daytime
+        try {
+            TemporalAccessor ta = W3C_SHORTDATE_FORMATTER.parse(date);
+            LocalDate ldt = null;
+            if (ta.isSupported(ChronoField.DAY_OF_MONTH)) {
+                ldt = LocalDate.from(ta);
+            } else if (ta.isSupported(ChronoField.MONTH_OF_YEAR)) {
+                ldt =  YearMonth.from(ta).atDay(1);
+            } else if (ta.isSupported(ChronoField.YEAR)) {
+                ldt = Year.from(ta).atDay(1);
+            }
+            if (ldt != null) {
+                return ldt.atStartOfDay(TIME_ZONE_UTC);
+            }
+        } catch (DateTimeParseException e) {
+        }
+
+        return null;
+    }
+
+    /**
+     * See {@link #convertToZonedDateTime(String)}.
+     * 
+     * @param date
+     *            the date string to convert
+     * @return returns the date or null if parsing of the date string fails
+     */
+    public static Date convertToDate(String date) {
+        ZonedDateTime zdt = convertToZonedDateTime(date);
+        if (zdt == null) {
+            return null;
+        }
+        return Date.from(zdt.toInstant());
+    }
+
+    /**
+     * Converts pubDate of RSS to the ISO-8601 instant format, e.g.,
+     * '2017-01-05T12:34:54Z' in UTC / GMT time zone, see
+     * {@link DateTimeFormatter#ISO_INSTANT}.
+     * 
+     * @param pubDate
+     *            - date time of pubDate in RFC822
+     * @return converted to &quot;yyyy-MM-dd'T'HH:mm:ssZ&quot; format or
+     *         original value if it doesn't follow the RFC822
+     */
+    public static String normalizeRSSTimestamp(String pubDate) {
+        if (pubDate == null) {
+            return null;
+        }
+        ZonedDateTime zdt = parseRSSTimestamp(pubDate);
+        if (zdt == null) {
+            return pubDate;
+        }
+        return W3C_FULLDATE_FORMATTER_UTC.format(zdt);
+    }
+
+    /**
+     * Parse pubDate of RSS feeds.
+     * 
+     * @param pubDate
+     *            - date time of pubDate in RFC822
+     * @return date time or null if parsing failed
+     */
+    public static ZonedDateTime parseRSSTimestamp(String pubDate) {
+        ZonedDateTime zdt = null;
+        try {
+            zdt = DateTimeFormatter.RFC_1123_DATE_TIME.parse(pubDate, ZonedDateTime::from);
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
+        if (zdt.getYear() <= 99 && zdt.getYear() >= 0) {
+            // adjust two-digit years: RFC 1123 requires a fully-specified year,
+            // while RFC 822 allows two digits
+            if (zdt.getYear() >= 80) {
+                // assume 19yy - RFC 822 has been publish in 1982
+                zdt = zdt.plusYears(1900);
+            } else {
+                zdt = zdt.plusYears(2000);
+            }
+        }
+        return zdt;
     }
 }

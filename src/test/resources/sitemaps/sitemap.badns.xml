@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.google.com/schemas/sitemap/0.9"
+	xmlns:xhtml="http://www.w3.org/1999/xhtml">
+	<url>
+		<loc>http://www.example.com/1</loc>
+		<changefreq>daily</changefreq>
+	</url>
+	<url>
+		<loc>
+			http://www.example.com/2
+		</loc>
+		<changefreq>
+			daily
+		</changefreq>
+	</url>
+</urlset>

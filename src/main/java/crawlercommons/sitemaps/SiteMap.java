@@ -1,13 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +29,9 @@ public class SiteMap extends AbstractSiteMap {
      */
     private String baseUrl;
 
-    /** URLs found in this Sitemap */
+    /**
+     * URLs found in this Sitemap
+     */
     private List<SiteMapURL> urlList;
 
     public SiteMap() {
@@ -94,11 +95,8 @@ public class SiteMap extends AbstractSiteMap {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        Date lastModified = getLastModified();
-        String lastModStr = (lastModified == null) ? "null" : SiteMap.getFullDateFormat().format(lastModified);
-
-        sb.append("url = \"").append(url).append("\", lastMod = ").append(lastModStr).append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ")
-                        .append(urlList.size());
+        sb.append("url = \"").append(url).append("\", lastMod = ").append((getLastModified() == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(getLastModified().toInstant()))
+                        .append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ").append(urlList.size());
 
         return sb.toString();
     }
@@ -110,9 +108,26 @@ public class SiteMap extends AbstractSiteMap {
      * @param sitemapUrl
      */
     private void setBaseUrl(URL sitemapUrl) {
-        // Remove everything back to last slash.
-        // So http://foo.org/abc/sitemap.xml becomes http://foo.org/abc/
-        baseUrl = sitemapUrl.toString().replaceFirst("/[^/]*$", "/");
+        // Remove everything back to last slash on the file path:
+        // - http://example.com/abc/sitemap.xml
+        // becomes
+        // - http://example.com/abc/
+        // But ignore slashes in the query part:
+        // - http://example.com/index.php?route=feed/imagemap
+        // becomes
+        // - http://example.com/
+        String path = sitemapUrl.getPath();
+        int lastPathDelimPos = path.lastIndexOf('/');
+        if (lastPathDelimPos < 0) {
+            path = "/";
+        } else {
+            path = path.substring(0, lastPathDelimPos + 1);
+        }
+        try {
+            baseUrl = new URL(sitemapUrl.getProtocol(), sitemapUrl.getHost(), sitemapUrl.getPort(), path).toString();
+        } catch (MalformedURLException e) {
+            baseUrl = sitemapUrl.toString();
+        }
     }
 
     /**

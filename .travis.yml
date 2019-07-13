@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+script:
+  - mvn install javadoc:aggregate
+
+notifications:
+  email:
+    - crawler-commons@googlegroups.com

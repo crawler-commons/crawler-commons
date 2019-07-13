@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -17,21 +16,80 @@
 
 package crawlercommons.robots;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
+/**
+ * <p>
+ * This implementation of {@link BaseRobotsParser} retrieves a set of
+ * {@link SimpleRobotRules rules} for an agent with the given name from the
+ * <code>robots.txt</code> file of a given domain.
+ * </p>
+ * 
+ * <p>
+ * The class fulfills two tasks. The first one is the parsing of the
+ * <code>robots.txt</code> file done in
+ * {@link #parseContent(String, byte[], String, String)}. During the parsing
+ * process the parser searches for the provided agent name(s). If the parser
+ * finds a matching name, the set of rules for this name is parsed and returned
+ * as the result. <b>Note</b> that if more than one agent name is given to the
+ * parser, it parses the rules for the first matching agent name inside the file
+ * and skips all following user agent groups. It doesn't matter which of the
+ * other given agent names would match additional rules inside the file. Thus,
+ * if more than one agent name is given to the parser, the result can be
+ * influenced by the order of rule sets inside the <code>robots.txt</code> file.
+ * </p>
+ * 
+ * <p>
+ * Note that the parser always parses the entire file, even if a matching agent
+ * name group has been found, as it needs to collect all of the sitemap
+ * directives.
+ * </p>
+ * 
+ * <p>
+ * If no rule set matches any of the provided agent names, the rule set for the
+ * <code>'*'</code> agent is returned. If there is no such rule set inside the
+ * <code>robots.txt</code> file, a rule set allowing all resource to be crawled
+ * is returned.
+ * </p>
+ * 
+ * <p>
+ * The crawl delay is parsed and added to the rules. Note that if the crawl
+ * delay inside the file exceeds a maximum value, the crawling of all resources
+ * is prohibited. The default maximum value is defined with
+ * {@link #DEFAULT_MAX_CRAWL_DELAY}={@value #DEFAULT_MAX_CRAWL_DELAY}. The
+ * default value can be changed using the constructor.
+ * </p>
+ * 
+ * <p>
+ * The second task of this class is to generate a set of rules if the fetching
+ * of the <code>robots.txt</code> file fails. The {@link #failedFetch(int)}
+ * method returns a predefined set of rules based on the given error code. If
+ * the status code is indicating a client error (status code = 4xx) we can
+ * assume that the <code>robots.txt</code> file is not there and crawling of all
+ * resources is allowed. If the status code equals a different error code (3xx
+ * or 5xx) the parser assumes a temporary error and a set of rules prohibiting
+ * any crawling is returned.
+ * </p>
+ */
 @SuppressWarnings("serial")
 public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleRobotRulesParser.class);
@@ -87,10 +145,30 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     }
 
     private static class ParseState {
+        /**
+         * Flag indicating whether the given name of the agent matched.
+         */
         private boolean _matchedRealName;
+        /**
+         * Flag that is true if not the given agent name but a wildcard matched.
+         */
         private boolean _matchedWildcard;
+        /**
+         * Flag that is true as long as it is allowed to add rules for the given
+         * agent.
+         */
         private boolean _addingRules;
+        /**
+         * Flag indicating whether all consecutive agent fields has been seen.
+         * It is set to false if an agent field is found and back to true if
+         * something else has been found.
+         */
         private boolean _finishedAgentFields;
+
+        // True if we're done adding rules for a matched (not wildcard) agent
+        // name. When this is true, we only consider sitemap directives, so we
+        // skip all remaining user agent blocks.
+        private boolean _skipAgents;
 
         private String _url;
         private String _targetName;
@@ -137,6 +215,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         public void setFinishedAgentFields(boolean finishedAgentFields) {
             _finishedAgentFields = finishedAgentFields;
+        }
+
+        public boolean isSkipAgents() {
+            return _skipAgents;
+        }
+
+        public void setSkipAgents(boolean skipAgents) {
+            _skipAgents = skipAgents;
         }
 
         public void clearRules() {
@@ -188,7 +274,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     static {
         for (RobotDirective directive : RobotDirective.values()) {
             if (!directive.isSpecial()) {
-                String prefix = directive.name().toLowerCase().replaceAll("_", "-");
+                String prefix = directive.name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
                 DIRECTIVE_PREFIX.put(prefix, directive);
             }
         }
@@ -220,7 +306,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * @return robot command found on line
      */
     private static RobotToken tokenize(String line) {
-        String lowerLine = line.toLowerCase();
+        String lowerLine = line.toLowerCase(Locale.ROOT);
         for (String prefix : DIRECTIVE_PREFIX.keySet()) {
             int prefixLength = prefix.length();
             if (lowerLine.startsWith(prefix)) {
@@ -259,33 +345,40 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile("(?i)user-agent:");
 
     // Max # of warnings during parse of any one robots.txt file.
-    private static final int MAX_WARNINGS = 5;
+    private static final int DEFAULT_MAX_WARNINGS = 5;
 
     // Max value for crawl delay we'll use from robots.txt file. If the value is
-    // greater
-    // than this, we'll skip all pages.
-    private static final long MAX_CRAWL_DELAY = 300000;
+    // greater than this, we'll skip all pages.
+    private static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
 
     private int _numWarnings;
+    private int _maxWarnings;
+    private long _maxCrawlDelay;
+
+    public SimpleRobotRulesParser() {
+        this(DEFAULT_MAX_CRAWL_DELAY, DEFAULT_MAX_WARNINGS);
+    }
+
+    public SimpleRobotRulesParser(long maxCrawlDelay, int maxWarnings) {
+        this._maxCrawlDelay = maxCrawlDelay;
+        this._maxWarnings = maxWarnings;
+    }
 
     @Override
-    public BaseRobotRules failedFetch(int httpStatusCode) {
+    public SimpleRobotRules failedFetch(int httpStatusCode) {
         SimpleRobotRules result;
 
         if ((httpStatusCode >= 200) && (httpStatusCode < 300)) {
             throw new IllegalStateException("Can't use status code constructor with 2xx response");
         } else if ((httpStatusCode >= 300) && (httpStatusCode < 400)) {
             // Should only happen if we're getting endless redirects (more than
-            // our follow limit), so
-            // treat it as a temporary failure.
+            // our follow limit), so treat it as a temporary failure.
             result = new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
             result.setDeferVisits(true);
         } else if ((httpStatusCode >= 400) && (httpStatusCode < 500)) {
             // Some sites return 410 (gone) instead of 404 (not found), so treat
-            // as the same.
-            // Actually treat all (including forbidden) as "no robots.txt", as
-            // that's what Google
-            // and other search engines do.
+            // as the same. Actually treat all (including forbidden) as "no
+            // robots.txt", as that's what Google and other search engines do.
             result = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
         } else {
             // Treat all other status codes as a temporary failure.
@@ -296,8 +389,15 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String,
+     * byte[], java.lang.String, java.lang.String)
+     */
     @Override
-    public BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotName) {
+    public SimpleRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
         _numWarnings = 0;
 
         // If there's nothing there, treat it like we have no restrictions.
@@ -307,36 +407,32 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         int bytesLen = content.length;
         int offset = 0;
-        String encoding = "us-ascii";
+        Charset encoding = StandardCharsets.US_ASCII;
 
         // Check for a UTF-8 BOM at the beginning (EF BB BF)
         if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB) && (content[2] == (byte) 0xBF)) {
             offset = 3;
             bytesLen -= 3;
-            encoding = "UTF-8";
+            encoding = StandardCharsets.UTF_8;
         }
         // Check for UTF-16LE BOM at the beginning (FF FE)
         else if ((bytesLen >= 2) && (content[0] == (byte) 0xFF) && (content[1] == (byte) 0xFE)) {
             offset = 2;
             bytesLen -= 2;
-            encoding = "UTF-16LE";
+            encoding = StandardCharsets.UTF_16LE;
         }
         // Check for UTF-16BE BOM at the beginning (FE FF)
         else if ((bytesLen >= 2) && (content[0] == (byte) 0xFE) && (content[1] == (byte) 0xFF)) {
             offset = 2;
             bytesLen -= 2;
-            encoding = "UTF-16BE";
+            encoding = StandardCharsets.UTF_16BE;
         }
 
         String contentAsStr;
-        try {
-            contentAsStr = new String(content, offset, bytesLen, encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Impossible unsupported encoding exception for " + encoding);
-        }
+        contentAsStr = new String(content, offset, bytesLen, encoding);
 
         // Decide if we need to do special HTML processing.
-        boolean isHtmlType = ((contentType != null) && contentType.toLowerCase().startsWith("text/html"));
+        boolean isHtmlType = ((contentType != null) && contentType.toLowerCase(Locale.ROOT).startsWith("text/html"));
 
         // If it looks like it contains HTML, but doesn't have a user agent
         // field, then
@@ -361,15 +457,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         // Break on anything that might be used as a line ending. Since
-        // tokenizer doesn't
-        // return empty tokens, a \r\n sequence still works since it looks like
-        // an empty
-        // string between the \r and \n.
+        // tokenizer doesn't return empty tokens, a \r\n sequence still
+        // works since it looks like an empty string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
-        ParseState parseState = new ParseState(url, robotName.toLowerCase());
-        boolean keepGoing = true;
+        ParseState parseState = new ParseState(url, robotNames.toLowerCase(Locale.ROOT));
 
-        while (keepGoing && lineParser.hasMoreTokens()) {
+        while (lineParser.hasMoreTokens()) {
             String line = lineParser.nextToken();
 
             // Get rid of HTML markup, in case some brain-dead webmaster has
@@ -396,27 +489,27 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             RobotToken token = tokenize(line);
             switch (token.getDirective()) {
                 case USER_AGENT:
-                keepGoing = handleUserAgent(parseState, token);
+                handleUserAgent(parseState, token);
                     break;
 
                 case DISALLOW:
-                keepGoing = handleDisallow(parseState, token);
+                handleDisallow(parseState, token);
                     break;
 
                 case ALLOW:
-                keepGoing = handleAllow(parseState, token);
+                handleAllow(parseState, token);
                     break;
 
                 case CRAWL_DELAY:
-                keepGoing = handleCrawlDelay(parseState, token);
+                handleCrawlDelay(parseState, token);
                     break;
 
                 case SITEMAP:
-                keepGoing = handleSitemap(parseState, token);
+                handleSitemap(parseState, token);
                     break;
 
                 case HTTP:
-                keepGoing = handleHttp(parseState, token);
+                handleHttp(parseState, token);
                     break;
 
                 case UNKNOWN:
@@ -425,7 +518,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case MISSING:
-                reportWarning(String.format("Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+                reportWarning(String.format(Locale.ROOT, "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
                 parseState.setFinishedAgentFields(true);
                     break;
 
@@ -440,11 +533,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         SimpleRobotRules result = parseState.getRobotRules();
-        if (result.getCrawlDelay() > MAX_CRAWL_DELAY) {
+        if (result.getCrawlDelay() > _maxCrawlDelay) {
             // Some evil sites use a value like 3600 (seconds) for the crawl
             // delay, which would
             // cause lots of problems for us.
-            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: " + url);
+            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: {}", url);
             return new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
         } else {
             result.sortRules();
@@ -456,11 +549,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         _numWarnings += 1;
 
         if (_numWarnings == 1) {
-            LOGGER.warn("Problem processing robots.txt for " + url);
+            LOGGER.warn("Problem processing robots.txt for {}", url);
         }
 
-        if (_numWarnings < MAX_WARNINGS) {
-            LOGGER.warn("\t" + msg);
+        if (_numWarnings < _maxWarnings) {
+            LOGGER.warn("\t {}", msg);
         }
     }
 
@@ -471,44 +564,38 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleUserAgent(ParseState state, RobotToken token) {
+    private void handleUserAgent(ParseState state, RobotToken token) {
         if (state.isMatchedRealName()) {
             if (state.isFinishedAgentFields()) {
-                // We're all done.
-                return false;
-            } else {
-                // Skip any more of these, once we have a real name match. We're
-                // waiting for some
-                // allow/disallow/crawl delay fields.
-                return true;
+                state.setSkipAgents(true);
             }
+
+            return;
         }
 
         if (state.isFinishedAgentFields()) {
             // We've got a user agent field, so we haven't yet seen anything
-            // that tells us
-            // we're done with this set of agent names.
+            // that tells us we're done with this set of agent names.
             state.setFinishedAgentFields(false);
             state.setAddingRules(false);
         }
 
         // Handle the case when there are multiple target names are passed
-        // TODO should we do lowercase comparison of target name? Assuming yes.
-        String[] targetNames = state.getTargetName().toLowerCase().split(",");
+        // We assume we should do case-insensitive comparison of target name.
+        String[] targetNames = state.getTargetName().toLowerCase(Locale.ROOT).split(",");
 
         for (int count = 0; count < targetNames.length; count++) {
             // Extract possible match names from our target agent name, since it
-            // appears
-            // to be expected that "Mozilla botname 1.0" matches "botname"
+            // appears to be expected that "Mozilla botname 1.0" matches
+            // "botname"
             String[] targetNameSplits = targetNames[count].trim().split(" ");
 
             // TODO KKr - catch case of multiple names, log as non-standard.
             String[] agentNames = token.getData().split("[ \t,]");
             for (String agentName : agentNames) {
                 // TODO should we do case-insensitive matching? Probably yes.
-                agentName = agentName.trim().toLowerCase();
+                agentName = agentName.trim().toLowerCase(Locale.ROOT);
                 if (agentName.isEmpty()) {
                     // Ignore empty names
                 } else if (agentName.equals("*") && !state.isMatchedWildcard()) {
@@ -520,17 +607,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                         if (targetName.startsWith(agentName)) {
                             state.setMatchedRealName(true);
                             state.setAddingRules(true);
-                            state.clearRules(); // In case we previously hit a
-                                                // wildcard rule match
+                            // In case we previously hit a wildcard rule match
+                            state.clearRules();
                             break;
                         }
                     }
                 }
             }
         }
-
-        // Keep going
-        return true;
     }
 
     /**
@@ -540,13 +624,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleDisallow(ParseState state, RobotToken token) {
+    private void handleDisallow(ParseState state, RobotToken token) {
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String path = token.getData();
@@ -563,8 +650,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } catch (Exception e) {
             reportWarning("Error parsing robots rules - can't decode path: " + path, state.getUrl());
         }
-
-        return true;
     }
 
     /**
@@ -574,13 +659,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleAllow(ParseState state, RobotToken token) {
+    private void handleAllow(ParseState state, RobotToken token) {
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String path = token.getData();
@@ -597,8 +685,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } else {
             state.addRule(path, true);
         }
-
-        return true;
     }
 
     /**
@@ -608,13 +694,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleCrawlDelay(ParseState state, RobotToken token) {
+    private void handleCrawlDelay(ParseState state, RobotToken token) {
+        if (state.isSkipAgents()) {
+            return;
+        }
+
         state.setFinishedAgentFields(true);
 
         if (!state.isAddingRules()) {
-            return true;
+            return;
         }
 
         String delayString = token.getData();
@@ -634,8 +723,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 reportWarning("Error parsing robots rules - can't decode crawl delay: " + delayString, state.getUrl());
             }
         }
-
-        return true;
     }
 
     /**
@@ -645,22 +732,30 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleSitemap(ParseState state, RobotToken token) {
+    private void handleSitemap(ParseState state, RobotToken token) {
 
         String sitemap = token.getData();
         try {
-            URL sitemap_url = new URL(new URL(state.getUrl()), sitemap);
-            String hostname = sitemap_url.getHost();
+            URL sitemapUrl;
+            URL base = null;
+            try {
+                base = new URL(state.getUrl());
+            } catch (MalformedURLException e) {
+                // must try without base URL
+            }
+            if (base != null) {
+                sitemapUrl = new URL(base, sitemap);
+            } else {
+                sitemapUrl = new URL(sitemap);
+            }
+            String hostname = sitemapUrl.getHost();
             if ((hostname != null) && (hostname.length() > 0)) {
-                state.addSitemap(sitemap_url.toExternalForm());
+                state.addSitemap(sitemapUrl.toExternalForm());
             }
         } catch (Exception e) {
             reportWarning("Invalid URL with sitemap directive: " + sitemap, state.getUrl());
         }
-
-        return true;
     }
 
     /**
@@ -671,22 +766,90 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            current parsing state
      * @param token
      *            data for directive
-     * @return true to keep going, false if we're done
      */
-    private boolean handleHttp(ParseState state, RobotToken token) {
+    private void handleHttp(ParseState state, RobotToken token) {
         String urlFragment = token.getData();
         if (urlFragment.contains("sitemap")) {
             RobotToken fixedToken = new RobotToken(RobotDirective.SITEMAP, "http:" + token.getData());
-            return handleSitemap(state, fixedToken);
+            handleSitemap(state, fixedToken);
         } else {
             reportWarning("Found raw non-sitemap URL: http:" + urlFragment, state.getUrl());
-            return true;
         }
     }
 
     // For testing
     public int getNumWarnings() {
         return _numWarnings;
+    }
+
+    public int getMaxWarnings() {
+        return _maxWarnings;
+    }
+
+    public void setMaxWarnings(int maxWarnings) {
+        _maxWarnings = maxWarnings;
+    }
+
+    public long getMaxCrawlDelay() {
+        return _maxCrawlDelay;
+    }
+
+    public void setMaxCrawlDelay(long maxCrawlDelay) {
+        _maxCrawlDelay = maxCrawlDelay;
+    }
+
+    public static void main(String[] args) throws MalformedURLException, IOException {
+        if (args.length < 1) {
+            System.err.println("SimpleRobotRulesParser <robots.txt> [[<agentname>] <URL>...]");
+            System.err.println();
+            System.err.println("Parse a robots.txt file");
+            System.err.println("  <robots.txt>\tURL pointing to robots.txt file.");
+            System.err.println("              \tTo read a local file use a file:// URL");
+            System.err.println("              \t(parsed as http://example.com/robots.txt)");
+            System.err.println("  <agentname> \tuser agent name to check for exclusion rules.");
+            System.err.println("              \tIf not defined check with '*'");
+            System.err.println("  <URL>       \tcheck URL whether allowed or forbidden.");
+            System.err.println("              \tIf no URL is given show robots.txt rules");
+            System.exit(1);
+        }
+
+        String url = args[0];
+        String agentName = "*";
+        if (args.length >= 2) {
+            agentName = args[1];
+        }
+
+        SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
+        BaseRobotRules rules;
+        URLConnection connection = new URL(url).openConnection();
+        try {
+            byte[] content = IOUtils.toByteArray(connection);
+            if (!url.matches("^https?://")) {
+                // use artificial URL to avoid problems resolving relative
+                // sitemap paths for file:/ URLs
+                url = "http://example.com/robots.txt";
+            }
+            rules = parser.parseContent(url, content, "text/plain", agentName);
+        } catch (IOException e) {
+            if (connection instanceof HttpURLConnection) {
+                int code = ((HttpURLConnection) connection).getResponseCode();
+                rules = parser.failedFetch(code);
+                System.out.println("Fetch of " + url + " failed with HTTP status code " + code);
+            } else {
+                throw e;
+            }
+        }
+
+        if (args.length < 3) {
+            // no URL(s) given, print rules and exit
+            System.out.println("Robot rules for user agentname '" + agentName + "':");
+            System.out.println(rules.toString());
+        } else {
+            System.out.println("Checking URLs:");
+            for (int i = 2; i < args.length; i++) {
+                System.out.println((rules.isAllowed(args[i]) ? "allowed  " : "forbidden") + "\t" + args[i]);
+            }
+        }
     }
 
 }

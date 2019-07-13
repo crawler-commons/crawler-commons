@@ -1,13 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +21,16 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
- * rules, and a crawl-delay.
+ * rules, and an optional crawl-delay, and an optional sitemap URL. Note that we
+ * support Google's extensions (Allow directive and '$'/'*' special chars) plus
+ * the more widely used Sitemap directive.
+ * 
+ * See https://en.wikipedia.org/wiki/Robots_exclusion_standard See
+ * https://developers.google.com/search/reference/robots_txt
  */
 
 @SuppressWarnings("serial")
@@ -38,13 +43,22 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Single rule that maps from a path prefix to an allow flag.
      */
-    protected class RobotRule implements Comparable<RobotRule>, Serializable {
+    public static class RobotRule implements Comparable<RobotRule>, Serializable {
+
         String _prefix;
         boolean _allow;
 
         public RobotRule(String prefix, boolean allow) {
             _prefix = prefix;
             _allow = allow;
+        }
+
+        public boolean isAllow() {
+            return this._allow;
+        }
+
+        public String getPrefix() {
+            return this._prefix;
         }
 
         // Sort from longest to shortest rules.
@@ -104,8 +118,8 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     }
 
-    private ArrayList<RobotRule> _rules;
-    private RobotRulesMode _mode;
+    protected ArrayList<RobotRule> _rules;
+    protected RobotRulesMode _mode;
 
     public SimpleRobotRules() {
         this(RobotRulesMode.ALLOW_SOME);
@@ -130,6 +144,10 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
 
         _rules.add(new RobotRule(prefix, allow));
+    }
+
+    public List<RobotRule> getRobotRules() {
+        return this._rules;
     }
 
     public boolean isAllowed(String url) {
@@ -160,18 +178,18 @@ public class SimpleRobotRules extends BaseRobotRules {
         try {
             URL urlObj = new URL(url);
             String path = urlObj.getPath();
+            if ((path == null) || (path.equals(""))) {
+                path = "/";
+            }
+
             String query = urlObj.getQuery();
             if (getWithQuery && query != null) {
                 path += "?" + query;
             }
 
-            if ((path == null) || (path.equals(""))) {
-                return "/";
-            } else {
-                // We used to lower-case the path, but Google says we need to do
-                // case-sensitive matching.
-                return URLDecoder.decode(path, "UTF-8");
-            }
+            // We used to lower-case the path, but Google says we need to do
+            // case-sensitive matching.
+            return URLDecoder.decode(path, "UTF-8");
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
             // will fail, so return the root.
@@ -241,8 +259,7 @@ public class SimpleRobotRules extends BaseRobotRules {
                 }
             } else {
                 // See if the pattern from patternPos to wildcardPos matches the
-                // text
-                // starting at textPos
+                // text starting at textPos
                 while ((patternPos < wildcardPos) && (textPos < textEnd)) {
                     if (text.charAt(textPos++) != pattern.charAt(patternPos++)) {
                         return false;
@@ -252,17 +269,14 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
 
         // If we didn't reach the end of the pattern, make sure we're not at a
-        // wildcard, sa
-        // that's a 0 or more match, so then we're still OK.
+        // wildcard, that's a 0 or more match, so then we're still OK.
         while ((patternPos < patternEnd) && (pattern.charAt(patternPos) == '*')) {
             patternPos += 1;
         }
 
         // We're at the end, so we have a match if the pattern was completely
-        // consumed,
-        // and either we consumed all the text or we didn't have to match it all
-        // (no '$' at end
-        // of the pattern)
+        // consumed, and either we consumed all the text or we didn't have to
+        // match it all (no '$' at end of the pattern)
         return (patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar);
     }
 
@@ -330,6 +344,36 @@ public class SimpleRobotRules extends BaseRobotRules {
         } else if (!_rules.equals(other._rules))
             return false;
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        int nRules = _rules.size();
+        if (nRules == 0) {
+            sb.append(" - no rules");
+            if (isAllowNone()) {
+                sb.append(" (allow none)");
+            } else if (isAllowAll()) {
+                sb.append(" (allow all)");
+            }
+            sb.append('\n');
+        } else {
+            sb.append(" - number of rules: ").append(nRules).append('\n');
+            if (nRules <= 10) {
+                for (int i = 0; i < nRules; i++) {
+                    RobotRule r = _rules.get(i);
+                    sb.append(r._allow ? "   A" : "   Disa").append("llow: ").append(r._prefix).append('\n');
+                }
+            }
+        }
+        return sb.toString();
     }
 
 }

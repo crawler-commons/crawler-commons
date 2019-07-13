@@ -1,6 +1,84 @@
 Crawler-Commons Change Log
 
-Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
+Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
+
+Release 1.0 (2019-03-19)
+- [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
+- EffectiveTldFinder: upgrade public suffix list (sebastian-nagel) #219
+- [Sitemaps] Detection and parsing of XML sitemaps fails with whitespace before XML declaration (sebastian-nagel, jnioche) #144
+- [Sitemaps] XMLHandler needs to append text in characters() vs. immediately processing (kkrugler, sebastian-nagel) #226
+- [Sitemaps] XMLIndexHandler needs to accumulate the lastmod date string before parsing (kkrugler, sebastian-nagel) #225
+- EffectiveTldFinder throws IllegalArgumentException on IDN domain names containing prohibited characters (sebastian-nagel) #231
+- [Sitemaps] Trim Unicode whitespace around URLs (sebastian-nagel, kkrugler) #224
+- [Sitemaps] Sitemap index: stop URL at closing </loc> (sebastian-nagel, kkrugler) #213
+- [Sitemaps] Allow empty price in video sitemaps (sebastian-nagel) #221
+- [Sitemaps] In case of the use of a different locale, price tag can be formatted with ',' instead of '.' leading to a NPE (goldenlink) #220
+- [Sitemaps] Add support for sitemap extensions (tuxnco, sebastian-nagel) #35, #36, #149, #162
+- [Sitemaps] Use the Java 8 date and time API (java.time.*) to parse dates in sitemaps (sebastian-nagel) #217
+- [Robots] Fix for handling URLs with query parameters but no path (kkrugler) #215
+
+Release 0.10 (2018-06-05)
+- Add JAX-B dependencies to POM (jnioche) #207
+- [Sitemaps] Add method to parse and iterate sitemap SiteMapParser#walkSiteMap(URL,Consumer) (Luc Boruta) #190
+- [Sitemaps] Sitemap file location to ignore query part of URL (sebastian-nagel) #202
+- [RSS sitemaps] Link extraction from RSS feeds fails on XML entities (sebastian-nagel) #204
+- [RSS sitemaps] Resolve relative links in RSS feeds (sebastian-nagel) #203
+- [RSS sitemaps] Extract links from <guid> elements (sebastian-nagel) #201
+- [Sitemaps] Limit on "bad url" log messages (sebastian-nagel) #145
+- EffectiveTldFinder to parse Internationalized Domain Names (sebastian-nagel) #179
+- Add main() to EffectiveTldFinder (sebastian-nagel) #187
+- Handle new suffixes in PaidLevelDomain (kkrugler) #183
+- Remove Tika dependency (kkrugler) #199
+- Improve MIME detection for sitemaps (sebastian-nagel) #200
+- Make RobotRules accessible (aecio via kkrugler) #134
+- SimpleRobotRulesParser: Expose MAX_WARNINGS and MAX_CRAWL_DELAY (aecio via kkrugler) #194
+- Added main to SimpleRobotRulesParser for testing (sebastian-nagel) #193
+- Allow for legacy URIs when checking sitemap namespaces (sebastian-nagel) #211
+
+Release 0.9 (2017-10-27)
+- [Sitemaps] Removed DOM-based sitemap parser (jnioche) #177
+- Incorrect domains returned by EffectiveTldFinder (sebastian-nagel) #172
+- [Sitemaps] Add namespace aware DOM/SAX parsing for XML Sitemaps (Marko Milicevic, jnioche, sebastian-nagel) #176
+- Upgraded Tika 1.16 (jnioche) #175
+- [Sitemaps] Sitemap SAX parsing mangles target URLs (jnioche, sebastian-nagel) #169
+- [Sitemaps] RSS parser ignores pubDate of link (MichealKum via kkrugler) #166
+
+Release 0.8 (2017-06-09)
+- Upgraded Tika 1.15 (jnioche) #163
+- [Sitemaps] Disable XML resolvers (sebastian-nagel) #151
+- Update forbiddenapis to v2.3 (jnioche) #99
+- [Sitemaps] gzipped text files fail to parse (sebastian-nagel) #143
+- [Sitemaps] Optionally use SAX parser (matt-deboer, jnioche, sebastian-nagel) #116
+- [Sitemaps] Properly log XML parsing errors (sebastian-nagel) #146
+- Use StandardCharsets where applicable (sebastian-nagel) #141
+- Increase sitemap size limit to 50MB (Chaiavi) #132
+- Remove dependencies to system-specific locale (sebastian-nagel) #137
+- BasicURLNormalizer: NPE for URLs without authority (sebastian-nagel) #136
+- BasicURLNormalizer to strip empty port (sebastian-nagel) #133
+- Remove deprecated HTTP fetcher (kkrugler) #96
+
+Release 0.7 (2016-11-24)
+- Upgrade to JDK 1.8 (lewismc) #126
+- [Sitemaps] SitemapParser methods now protected (michaellavelle) #124
+- [Sitemaps] Faster parsing of dates (jnioche) #117
+- Upgraded Tika 1.13 (jnioche) #113
+- Fix license headers (jnioche) #108
+- Rename package crawlercommons.url (jnioche) #107
+- Sitemap url is not extracted if user agent matches earlier in file (srwilson, kkrugler) #112
+- Deprecate HTTP fetcher support (kkrugler) #92
+- Added URLFilter interface + BasicURLNormalizer (jnioche) #106
+- Updated tld names from publicsuffix.org (jnioche) #100
+- Upgraded http-client to version 4.5.1 (aecio via kkrugler) #84
+- Upgraded Tika 1.10 (jnioche) #89
+- [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun) #82
+- [Sitemaps] Upgrade Valid / Legal / Strict SitemapUrls (Avi Hayun) #60
+- Simplify pom file (jnioche, lewismc) #77
+- Upgrade javac.src.version and javac.target.version to 1.7 or 1.8 (lewismc) #93
+- [Sitemaps] Not able to detect RSS feeds (yogendrasoni via kkrugler) #87
+- [Robots] Added javadoc comments to the SimpleRobotRulesParser class (MichaelRoeder, kkrugler) #95
+
+Release 0.6 (2015-05-27)
 - Issue 75: [Sitemaps] more robust parsing of XML elements (jnioche, kkrugler)
 - Issue 76: maven-java-formatter-plugin (jnioche)
 - Issue 73: Switch groupID in pom from com.google.code.crawler-commons to crawler-commons (jnioche)
@@ -19,7 +97,7 @@ Current Development 0.6-SNAPSHOT (dd/mm/yyyy)
 - Issue 50: Add Fetch Report to FetchedResult (lewismc, avraham2)
 - Issue 55: [Sitemaps] SitemapUrl "setPriority(String str)" should check for proper value (Avi Hayun)
 
-Release 0.5 - 09/10/2014
+Release 0.5 (2014-10-15)
 - Issue 53: Spaces in a comma separated list of names in a User-agent: line cause rules to be applicable to all agents (kkrugler)
 - Issue 45: [Sitemaps] Upgrade code after release of Tika v1.6 (Avi Hayun)
 - Issue 48: Upgraded to Tika 1.6 (jnioche)
@@ -31,7 +109,7 @@ Release 0.5 - 09/10/2014
 - Issue 41: Upgrade to JUnit v4 conventions in SiteMapParser (Avi Hayun via lewismc)
 - Issue 34: Upgrade the Slf4j logging in SiteMaps (Avi Hayun via lewismc)
 
-Release 0.4
+Release 0.4 (2014-04-11)
 - Issue 13: Fix deprecation in Crawler Commons Code (lewismc via kkrugler)
 - Issue 8 : Upgrade of httpclient to v4.2.6 (Fuad Efendi, lewismc via kkrugler)
 - Issue 18: Support matching against query parameters in robots.txt rules (alparslanavci, kkrugler)
@@ -43,7 +121,7 @@ Release 0.4
 - Issue 30: SitemapIndex should allow to skip sitemaps (Sebastian Nagel, kkrugler)
 - cleanup of ANT build remnants [lib and lib-ext] (jnioche)
 
-Release 0.3
+Release 0.3 (2013-10-11)
 - Upgraded to Tika 1.4 (jnioche)
 - [SiteMap] added utility class for testing sitemaps (jnioche)
 - Issue 16: remove ant scripts and configuration (lewismc)
@@ -52,7 +130,7 @@ Release 0.3
 - Issue 25: [Robots] Robots parser should not lowercase sitemap URLs (jnioche)
 - Issue 29: [SiteMap] try urls when <loc> element is missing (jnioche)
 
-Release 0.2
+Release 0.2 (2013-02-02)
 - Move to pure Maven for CC build lifecycle (lewismc)
 - Move Javadoc out of core code (lewismc)
 - Substantiate Javadoc (lewismc)

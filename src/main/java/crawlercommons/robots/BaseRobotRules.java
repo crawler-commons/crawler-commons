@@ -1,11 +1,10 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *  
+ * Copyright 2016 Crawler-Commons
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -108,6 +107,31 @@ public abstract class BaseRobotRules implements Serializable {
         } else if (!_sitemaps.equals(other._sitemaps))
             return false;
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass()).append(":\n");
+        long delay = getCrawlDelay();
+        if (delay == UNSET_CRAWL_DELAY) {
+            sb.append(" - no crawl delay\n");
+        } else {
+            sb.append(" - crawl delay: ").append(delay).append('\n');
+        }
+        int nSitemaps = getSitemaps().size();
+        if (nSitemaps == 0) {
+            sb.append(" - no sitemap URLs\n");
+        } else {
+            sb.append(" - number of sitemap URLs: ").append(nSitemaps).append('\n');
+            sb.append("   sitemaps[0]: ").append(getSitemaps().get(0)).append('\n');
+        }
+        return sb.toString();
     }
 
 }

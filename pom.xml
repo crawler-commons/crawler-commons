@@ -12,7 +12,7 @@
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
-	<version>0.7-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -26,12 +26,14 @@
 	functionality common to any web crawler.
 	</description>
 
+	<inceptionYear>2009</inceptionYear>
+
 	<scm>
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
 	  <tag>HEAD</tag>
-  </scm>
+    </scm>
 
 	<distributionManagement>
 		<repository>
@@ -49,15 +51,22 @@
 	<mailingLists>
 		<mailingList>
 			<name>Project Mailing List</name>
-			<post>crawler-commons [at] googlecode [dot] com</post>
+			<post>crawler-commons [at] googlegroups [dot] com</post>
 		</mailingList>
 	</mailingLists>
+
+	<organization>
+		<name>Crawler-Commons</name>
+		<url>http://github.com/crawler-commons</url>
+	</organization>
 
 	<developers>
 		<developer>
 			<id>KKrugler</id>
 			<name>Ken Krugler</name>
 			<email>kkrugler_lists@transpac.com</email>
+			<organization>Scale Unlimited</organization>
+			<organizationUrl>http://www.scaleunlimited.com</organizationUrl>
 		</developer>
 
 		<developer>
@@ -69,7 +78,9 @@
 		<developer>
 			<id>jnioche</id>
 			<name>Julien Nioche</name>
-			<email>jnioche@apache.org</email>
+			<email>julien@digitalpebble.com</email>
+			<organization>DigitalPebble Ltd</organization>
+			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
 		</developer>
 
 		<developer>
@@ -82,6 +93,12 @@
 			<id>avi_hayun</id>
 			<name>Avi Hayun</name>
 			<email>avraham2@gmail.com</email>
+		</developer>
+
+		<developer>
+			<id>snagel</id>
+			<name>Sebastian Nagel</name>
+			<email>snagel@apache.org</email>
 		</developer>
 	</developers>
 
@@ -172,7 +189,7 @@
 					</systemPropertyVariables>
 					<argLine>-Xmx512m</argLine>
 					<forkMode>always</forkMode>
-					<testFailureIgnore>true</testFailureIgnore>
+					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -183,7 +200,31 @@
 					<configFile>${project.basedir}/doc/eclipse-formatter.xml</configFile>
 				</configuration>
 			</plugin>
-
+            <plugin>
+                <groupId>de.thetaphi</groupId>
+                <artifactId>forbiddenapis</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <!--
+                    if the used Java version is too new,
+                    don't fail, just do nothing:
+                    -->
+                    <failOnUnsupportedJava>false</failOnUnsupportedJava>
+                    <bundledSignatures>
+                        <bundledSignature>jdk-unsafe</bundledSignature>
+                        <bundledSignature>jdk-deprecated</bundledSignature>
+                        <bundledSignature>jdk-non-portable</bundledSignature>
+                    </bundledSignatures>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>testCheck</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
@@ -274,9 +315,7 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<httpclient.version>4.3.5</httpclient.version>
 		<commons-io.version>2.4</commons-io.version>
-		<tika-core.version>1.8</tika-core.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>4.7</junit.version>
 		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
@@ -300,11 +339,12 @@
 
 		<!-- General Properties -->
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
-		<javac.src.version>1.6</javac.src.version>
-		<javac.target.version>1.6</javac.target.version>
+		<javac.src.version>1.8</javac.src.version>
+		<javac.target.version>1.8</javac.target.version>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
 		<skipTests>false</skipTests>
-		<assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
+		<assembly.finalName>${project.build.finalName}</assembly.finalName>
 	</properties>
 
 	<dependencies>
@@ -312,21 +352,9 @@
 		<!-- Compile time dependencies -->
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika-core.version}</version>
 		</dependency>
 
 		<dependency>
