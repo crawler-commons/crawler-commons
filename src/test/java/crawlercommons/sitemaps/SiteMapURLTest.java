@@ -16,25 +16,13 @@
 
 package crawlercommons.sitemaps;
 
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Created on 13/10/2014. */
 public class SiteMapURLTest {
-    SiteMapURL siteMapURL;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        siteMapURL = new SiteMapURL("http://example.com", true);
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-    }
+    private SiteMapURL siteMapURL = new SiteMapURL("http://example.com", true);
 
     @Test
     public void testSetPriority() {
