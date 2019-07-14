@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Crawler-Commons
+ * Copyright 2019 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package crawlercommons.domains;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
-import org.junit.Test;
-
-import crawlercommons.domains.PaidLevelDomain;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PaidLevelDomainTest {
 
@@ -103,5 +101,4 @@ public class PaidLevelDomainTest {
          */
         assertEquals("blogspot.com", PaidLevelDomain.getPLD("myblog.blogspot.com"));
     }
-
 }

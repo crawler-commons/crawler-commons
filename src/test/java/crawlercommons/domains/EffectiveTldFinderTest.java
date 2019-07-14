@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Crawler-Commons
+ * Copyright 2019 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,10 @@
 
 package crawlercommons.domains;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.junit.Test;
-
-import crawlercommons.domains.EffectiveTldFinder;
 import crawlercommons.domains.EffectiveTldFinder.EffectiveTLD;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EffectiveTldFinderTest {
 
@@ -216,12 +210,10 @@ public class EffectiveTldFinderTest {
 
     @Test
     public final void testInvalidHostname() throws Exception {
-        // in strict mode: there should nothing be returned for invalid
-        // hostnames
+        // in strict mode: there should nothing be returned for invalid hostnames
         assertNull(EffectiveTldFinder.getAssignedDomain("www..example..com", true, false));
         // prohibited Unicode characters in internationalized domain name (IDN),
-        // test for #231): � (U+FFFD REPLACEMENT CHARACTER) is prohibited by
-        // RFC3490
+        // test for #231): � (U+FFFD REPLACEMENT CHARACTER) is prohibited by RFC3490
         // (1) in public suffix
         assertNull(EffectiveTldFinder.getAssignedDomain("www.example.c\ufffdm", true, false));
         // (1a) in wildcard part of a public suffix
@@ -234,5 +226,4 @@ public class EffectiveTldFinderTest {
         // host name is valid
         assertEquals("example.com", EffectiveTldFinder.getAssignedDomain("\ufffd.example.com", true, false));
     }
-
 }

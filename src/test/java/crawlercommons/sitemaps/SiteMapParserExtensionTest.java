@@ -16,9 +16,8 @@
 
 package crawlercommons.sitemaps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import crawlercommons.sitemaps.extension.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,19 +26,8 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.junit.jupiter.api.Assertions.*;
 
-import crawlercommons.sitemaps.extension.Extension;
-import crawlercommons.sitemaps.extension.ExtensionMetadata;
-import crawlercommons.sitemaps.extension.ImageAttributes;
-import crawlercommons.sitemaps.extension.LinkAttributes;
-import crawlercommons.sitemaps.extension.MobileAttributes;
-import crawlercommons.sitemaps.extension.NewsAttributes;
-import crawlercommons.sitemaps.extension.VideoAttributes;
-
-@RunWith(JUnit4.class)
 public class SiteMapParserExtensionTest {
 
     @Test
@@ -276,5 +264,4 @@ public class SiteMapParserExtensionTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(74, sm.getSiteMapUrls().size());
     }
-
 }

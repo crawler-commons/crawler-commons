@@ -16,20 +16,17 @@
 
 package crawlercommons.robots;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletResponse;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
 
 public class SimpleRobotRulesParserTest {
     private static final String LF = "\n";
@@ -614,13 +611,13 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules = createRobotRules("bixo", delayRules1RobotsTxt.getBytes(UTF_8));
         long crawlDelay = rules.getCrawlDelay();
-        assertEquals("testing crawl delay for agent bixo - rule 1", 10000, crawlDelay);
+        assertEquals(10000, crawlDelay, "testing crawl delay for agent bixo - rule 1");
 
         final String delayRules2RobotsTxt = "User-agent: foobot" + CR + "Crawl-delay: 20" + CR + "User-agent: *" + CR + "Disallow:/baz" + CR;
 
         rules = createRobotRules("bixo", delayRules2RobotsTxt.getBytes(UTF_8));
         crawlDelay = rules.getCrawlDelay();
-        assertEquals("testing crawl delay for agent bixo - rule 2", BaseRobotRules.UNSET_CRAWL_DELAY, crawlDelay);
+        assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, crawlDelay, "testing crawl delay for agent bixo - rule 2");
     }
 
     @Test
@@ -628,7 +625,7 @@ public class SimpleRobotRulesParserTest {
         final String robotsTxt = "User-agent: *" + CR + "Crawl-delay: 3600" + CR + "Disallow:" + CR;
 
         BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes(UTF_8));
-        assertFalse("disallow all if huge crawl delay", rules.isAllowed("http://www.domain.com/"));
+        assertFalse(rules.isAllowed("http://www.domain.com/"), "disallow all if huge crawl delay");
     }
 
     @Test
@@ -643,19 +640,19 @@ public class SimpleRobotRulesParserTest {
     @Test
     public void testRobotsWithUTF8BOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf8-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
     public void testRobotsWithUTF16LEBOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16le-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
     public void testRobotsWithUTF16BEBOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16be-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
@@ -669,36 +666,36 @@ public class SimpleRobotRulesParserTest {
     @Test
     public void testIgnoringHost() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/www.flot.com-robots.txt"));
-        assertFalse("Disallow img directory", rules.isAllowed("http://www.flot.com/img/"));
+        assertFalse(rules.isAllowed("http://www.flot.com/img/"), "Disallow img directory");
     }
 
     @Test
     public void testDirectiveTypos() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("desallow", rules.isAllowed("http://domain.com/desallow/"));
-        assertFalse("dissalow", rules.isAllowed("http://domain.com/dissalow/"));
+        assertFalse(rules.isAllowed("http://domain.com/desallow/"), "desallow");
+        assertFalse(rules.isAllowed("http://domain.com/dissalow/"), "dissalow");
 
         rules = createRobotRules("bot2", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useragent", rules.isAllowed("http://domain.com/useragent/"));
+        assertFalse(rules.isAllowed("http://domain.com/useragent/"), "useragent");
 
         rules = createRobotRules("bot3", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useg-agent", rules.isAllowed("http://domain.com/useg-agent/"));
+        assertFalse(rules.isAllowed("http://domain.com/useg-agent/"), "useg-agent");
 
         rules = createRobotRules("bot4", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useragent-no-colon", rules.isAllowed("http://domain.com/useragent-no-colon/"));
+        assertFalse(rules.isAllowed("http://domain.com/useragent-no-colon/"), "useragent-no-colon");
     }
 
     @Test
     public void testFormatErrors() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/format-errors-robots.txt"));
-        assertFalse("whitespace-before-colon", rules.isAllowed("http://domain.com/whitespace-before-colon/"));
-        assertFalse("no-colon", rules.isAllowed("http://domain.com/no-colon/"));
+        assertFalse(rules.isAllowed("http://domain.com/whitespace-before-colon/"), "whitespace-before-colon");
+        assertFalse(rules.isAllowed("http://domain.com/no-colon/"), "no-colon");
 
         rules = createRobotRules("bot2", readFile("/robots/format-errors-robots.txt"));
-        assertFalse("no-colon-useragent", rules.isAllowed("http://domain.com/no-colon-useragent/"));
+        assertFalse(rules.isAllowed("http://domain.com/no-colon-useragent/"), "no-colon-useragent");
 
         rules = createRobotRules("bot3", readFile("/robots/format-errors-robots.txt"));
-        assertTrue("whitespace-before-colon", rules.isAllowed("http://domain.com/whitespace-before-colon/"));
+        assertTrue(rules.isAllowed("http://domain.com/whitespace-before-colon/"), "whitespace-before-colon");
     }
 
     // See http://www.conman.org/people/spc/robots2.html
@@ -706,23 +703,23 @@ public class SimpleRobotRulesParserTest {
     public void testExtendedStandard() throws Exception {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
         robotParser.parseContent(FAKE_ROBOTS_URL, readFile("/robots/extended-standard-robots.txt"), "text/plain", "foobot");
-        assertEquals("Zero warnings with expended directives", 0, robotParser.getNumWarnings());
+        assertEquals(0, robotParser.getNumWarnings(), "Zero warnings with expended directives");
     }
 
     @Test
     public void testSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots.txt"));
-        assertEquals("Found sitemap", 3, rules.getSitemaps().size());
+        assertEquals(3, rules.getSitemaps().size(), "Found sitemap");
         // check that the last one is not lowercase only
         String url = rules.getSitemaps().get(2);
         boolean lowercased = url.equals(url.toLowerCase(Locale.ROOT));
-        assertFalse("Sitemap case check", lowercased);
+        assertFalse(lowercased, "Sitemap case check");
     }
 
     @Test
     public void testRelativeSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/relative-sitemap-robots.txt"));
-        assertEquals("Found sitemap", 1, rules.getSitemaps().size());
+        assertEquals(1, rules.getSitemaps().size(), "Found sitemap");
     }
 
     @Test
@@ -737,30 +734,30 @@ public class SimpleRobotRulesParserTest {
 
         assertEquals(1, rules.getSitemaps().size());
         assertEquals("https://www.example.com/sitemap.xml", rules.getSitemaps().get(0));
-        assertEquals("Found sitemap", 1, rules.getSitemaps().size());
+        assertEquals(1, rules.getSitemaps().size(), "Found sitemap");
     }
 
     @Test
     public void testManyUserAgents() throws Exception {
         BaseRobotRules rules = createRobotRules("wget", readFile("/robots/many-user-agents.txt"));
-        assertFalse("many-user-agents", rules.isAllowed("http://domain.com/"));
+        assertFalse(rules.isAllowed("http://domain.com/"), "many-user-agents");
 
         rules = createRobotRules("mysuperlongbotnamethatmatchesnothing", readFile("/robots/many-user-agents.txt"));
-        assertTrue("many-user-agents", rules.isAllowed("http://domain.com/"));
-        assertFalse("many-user-agents", rules.isAllowed("http://domain.com/bot-trap/"));
+        assertTrue(rules.isAllowed("http://domain.com/"), "many-user-agents");
+        assertFalse(rules.isAllowed("http://domain.com/bot-trap/"), "many-user-agents");
     }
 
     @Test
     public void testMalformedPathInRobotsFile() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/malformed-path.txt"));
-        assertFalse("Disallowed URL", rules.isAllowed("http://en.wikipedia.org/wiki/Wikipedia_talk:Mediation_Committee/"));
-        assertTrue("Regular URL", rules.isAllowed("http://en.wikipedia.org/wiki/"));
+        assertFalse(rules.isAllowed("http://en.wikipedia.org/wiki/Wikipedia_talk:Mediation_Committee/"), "Disallowed URL");
+        assertTrue(rules.isAllowed("http://en.wikipedia.org/wiki/"), "Regular URL");
     }
 
     @Test
     public void testDOSlineEndings() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/dos-line-endings.txt"));
-        assertTrue("Allowed URL", rules.isAllowed("http://ford.com/"));
+        assertTrue(rules.isAllowed("http://ford.com/"), "Allowed URL");
         assertEquals(1000L, rules.getCrawlDelay());
     }
 
