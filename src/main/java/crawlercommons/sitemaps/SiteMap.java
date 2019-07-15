@@ -29,9 +29,7 @@ public class SiteMap extends AbstractSiteMap {
      */
     private String baseUrl;
 
-    /**
-     * URLs found in this Sitemap
-     */
+    /** URLs found in this Sitemap */
     private List<SiteMapURL> urlList;
 
     public SiteMap() {
@@ -93,10 +91,16 @@ public class SiteMap extends AbstractSiteMap {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("url = \"").append(url).append("\", lastMod = ").append((getLastModified() == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(getLastModified().toInstant()))
-                        .append(", type = ").append(getType()).append(", processed = ").append(isProcessed()).append(", urlListSize = ").append(urlList.size());
+        // Leaving here blank comments so the formatter won't put these into one
+        // ugly line
+        StringBuilder sb = new StringBuilder().append("url = \"") //
+                        .append(url).append("\", lastMod = ") //
+                        .append((getLastModified() == null) ? "null" : SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(getLastModified().toInstant())) //
+                        .append(", type = ").append(getType()) //
+                        .append(", processed = ") //
+                        .append(isProcessed()) //
+                        .append(", urlListSize = ") //
+                        .append(urlList.size());
 
         return sb.toString();
     }

@@ -16,14 +16,14 @@
 
 package crawlercommons.robots;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SimpleRobotRulesTest {
 
@@ -43,5 +43,4 @@ public class SimpleRobotRulesTest {
 
         assertTrue(expectedRules.equals(actualRules));
     }
-
 }

@@ -1,11 +1,12 @@
 package crawlercommons.mimetypes;
 
-import static org.junit.Assert.*;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MimeTypeDetectorTest {
 
@@ -83,5 +84,4 @@ public class MimeTypeDetectorTest {
     private byte[] getSitemap(String filename) throws IOException {
         return IOUtils.toByteArray(MimeTypeDetectorTest.class.getResourceAsStream("/sitemaps/" + filename));
     }
-
 }
