@@ -25,7 +25,6 @@ import java.io.ObjectOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class SimpleRobotRulesTest {
 
     @Test

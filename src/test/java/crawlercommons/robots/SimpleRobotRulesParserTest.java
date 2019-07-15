@@ -27,7 +27,6 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class SimpleRobotRulesParserTest {
     private static final String LF = "\n";
     private static final String CR = "\r";

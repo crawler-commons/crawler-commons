@@ -151,8 +151,8 @@ public abstract class AbstractSiteMap {
      * 
      * <p>
      * Dates must follow the <a href="https://www.w3.org/TR/NOTE-datetime">W3C
-     * Datetime format</a> which is similar to
-     * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
+     * Datetime format</a> which is similar to <a
+     * href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> but allows
      * dates with different precisions:
      * </p>
      * 

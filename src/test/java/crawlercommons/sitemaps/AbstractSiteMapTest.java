@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Crawler-Commons
+ * Copyright 2016 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,10 @@ public class AbstractSiteMapTest {
         SimpleDateFormat isoFormatShortDate = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
         isoFormatShortDate.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        // For short dates we only check on the year/month/day portion of the result.
-        // Time zone UTC is assumed because short dates do not contain a time zone.
+        // For short dates we only check on the year/month/day portion of the
+        // result.
+        // Time zone UTC is assumed because short dates do not contain a time
+        // zone.
         assertEquals("20140101", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014")));
         assertEquals("20140601", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014-06")));
         assertEquals("20140603", isoFormatShortDate.format(AbstractSiteMap.convertToDate("2014-06-03")));

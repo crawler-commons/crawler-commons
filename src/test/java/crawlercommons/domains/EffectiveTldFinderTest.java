@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Crawler-Commons
+ * Copyright 2016 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,10 +210,12 @@ public class EffectiveTldFinderTest {
 
     @Test
     public final void testInvalidHostname() throws Exception {
-        // in strict mode: there should nothing be returned for invalid hostnames
+        // in strict mode: there should nothing be returned for invalid
+        // hostnames
         assertNull(EffectiveTldFinder.getAssignedDomain("www..example..com", true, false));
         // prohibited Unicode characters in internationalized domain name (IDN),
-        // test for #231): � (U+FFFD REPLACEMENT CHARACTER) is prohibited by RFC3490
+        // test for #231): � (U+FFFD REPLACEMENT CHARACTER) is prohibited by
+        // RFC3490
         // (1) in public suffix
         assertNull(EffectiveTldFinder.getAssignedDomain("www.example.c\ufffdm", true, false));
         // (1a) in wildcard part of a public suffix

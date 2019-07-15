@@ -310,7 +310,8 @@ public class SiteMapParserTest {
         AbstractSiteMap secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
         assertNotNull(secondSitemap, "Sitemap " + urlSecondSitemap + " not found in sitemap index");
 
-        // check reset of attributes (lastmod) when "autoclosing" <sitemap> elements
+        // check reset of attributes (lastmod) when "autoclosing" <sitemap>
+        // elements
         scontent = new StringBuilder();
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
                         .append("<sitemapindex>\n") //
