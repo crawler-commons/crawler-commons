@@ -233,6 +233,28 @@ public class EffectiveTldFinderTest {
         // => "example.com" is a valid domain name, no check whether the input
         // host name is valid
         assertEquals("example.com", EffectiveTldFinder.getAssignedDomain("\ufffd.example.com", true, false));
+        // (4) in strict mode, domain names (or dot-separated segments) should
+        // be checked for length restrictions
+        StringBuilder domain = new StringBuilder();
+        String part63chars = "123456789-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz";
+        domain.append("www.");
+        domain.append(part63chars);
+        domain.append(".com");
+        assertEquals(domain.toString().substring(4), EffectiveTldFinder.getAssignedDomain(domain.toString(), true, false));
+        domain = new StringBuilder();
+        domain.append("www.");
+        domain.append('0');
+        domain.append(part63chars);
+        domain.append(".com");
+        // first part has 64 characters => not a valid domain name
+        assertNull(EffectiveTldFinder.getAssignedDomain(domain.toString(), true, false));
+        // IDNs: length limits apply (also) to the ASCII/Punycode representation
+        domain = new StringBuilder();
+        domain.append("www.");
+        domain.append(part63chars);
+        domain.setCharAt(4, '\u00e0'); // replace `1` by `à`
+        domain.append(".com");
+        assertNull(EffectiveTldFinder.getAssignedDomain(domain.toString(), true, false));
     }
 
 }

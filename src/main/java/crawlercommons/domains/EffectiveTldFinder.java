@@ -94,6 +94,21 @@ public class EffectiveTldFinder {
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
 
+    /**
+     * Max. length in ASCII characters of a dot-separated segment in host names
+     * (applies to domain names as well), cf.
+     * https://tools.ietf.org/html/rfc1034#section-3.1 and
+     * https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames
+     * 
+     * Note: We only have to validate domain names and not the host names passed
+     * as input. For domain names a verification of the segment length also
+     * implies that the entire domain names stays in the limit of 253
+     * characters. Wildcard suffixes only allow two additional segments (2*63+1
+     * = 127 chars) and all wildcard suffixes are far away from reaching the
+     * critical length of 126 characters.
+     */
+    public static final int MAX_DOMAIN_LENGTH_PART = 63;
+
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private SuffixTrie<EffectiveTLD> domainTrie = new SuffixTrie<>();
@@ -332,8 +347,14 @@ public class EffectiveTldFinder {
             try {
                 IDN.toASCII(domainSegment);
             } catch (IllegalArgumentException e) {
-                // not a valid IDN segment
+                // not a valid IDN segment,
+                // includes check for max. length (63 chars)
                 return (strict ? null : hostname);
+            }
+        } else if (strict) {
+            // (strict mode) check for max. length of segment (63 chars)
+            if (domainSegment.length() > MAX_DOMAIN_LENGTH_PART) {
+                return null;
             }
         }
         return hostname.substring(start);
