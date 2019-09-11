@@ -1,6 +1,11 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Robots] Upgrade the toString() method of the BaseRobotRules (Avi Hayun) #264
+- Upgrade GitIgnore (Avi Hayun) #260
+- [Robots] robots rules unit tests should be upgraded using junit5 parameterizedtest (Avi Hayun) #255
+- [Normalizer] Use ParameterizedTest in the normalizer unit tests (Avi Hayun) #253
+- Upgrade Junit to v5.x (Avi Hayun) #249
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
 
 Release 1.0 (2019-03-19)
@@ -52,7 +57,7 @@ Release 0.8 (2017-06-09)
 - [Sitemaps] Optionally use SAX parser (matt-deboer, jnioche, sebastian-nagel) #116
 - [Sitemaps] Properly log XML parsing errors (sebastian-nagel) #146
 - Use StandardCharsets where applicable (sebastian-nagel) #141
-- Increase sitemap size limit to 50MB (Chaiavi) #132
+- Increase sitemap size limit to 50MB (Avi Hayun) #132
 - Remove dependencies to system-specific locale (sebastian-nagel) #137
 - BasicURLNormalizer: NPE for URLs without authority (sebastian-nagel) #136
 - BasicURLNormalizer to strip empty port (sebastian-nagel) #133
