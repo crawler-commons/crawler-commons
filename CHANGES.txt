@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Chaiavi) #251
+- Upgrade unit tests to use JUnit v5.x and parameterized tests (Chaiavi) #249, #253, #255
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
 
 Release 1.0 (2019-03-19)
