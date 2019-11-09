@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- ParameterizedTest not executed by mvn builds (sebastian-nagel) #273
 - [BasicNormalizer] Empty path before query to be normalized to `/` (Chaiavi, sebastian-nagel) #247
 - EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Chaiavi) #251
 - Upgrade unit tests to use JUnit v5.x and parameterized tests (Chaiavi) #249, #253, #255
