@@ -698,6 +698,12 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
+    void testSitemapDedup() throws Exception {
+        BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots-dedup.txt"));
+        assertEquals(1, rules.getSitemaps().size(), "Sitemaps deduped");
+    }
+
+    @Test
     void testManyUserAgents() throws Exception {
         BaseRobotRules rules = createRobotRules("wget", readFile("/robots/many-user-agents.txt"));
         assertFalse(rules.isAllowed("http://domain.com/"), "many-user-agents");

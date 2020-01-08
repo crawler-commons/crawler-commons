@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Robots] Deduplicate sitemap links (sebastian-nagel) #261
 - EffectiveTldFinder to log loading of public suffix list (sebastian-nagel) #284
 - SiteMapParser getPublicationDate in VideoAttributes may throw NPE (panthony, sebastian-nagel) #283
 - SimpleRobotRulesParser: Trim log messages (jnioche, sebastian-nagel) #281
