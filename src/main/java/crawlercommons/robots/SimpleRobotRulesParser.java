@@ -561,6 +561,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         if (state._numWarnings < _maxWarnings) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof String && ((String) args[i]).length() > 1024) {
+                    // clip overlong strings to prevent from overflows in log messages
+                    args[i] = ((String) args[i]).substring(0, 1024) + " ...";
+                }
+            }
             LOGGER.warn("\t " + msg, args);
         }
     }
