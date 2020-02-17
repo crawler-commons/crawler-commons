@@ -215,7 +215,10 @@ public class VideoAttributes extends ExtensionMetadata {
     }
 
     public Date getExpirationDate() {
-        return Date.from(expirationDate.toInstant());
+        if (expirationDate != null) {
+            return Date.from(expirationDate.toInstant());
+        }
+        return null;
     }
 
     public ZonedDateTime getExpirationDateTime() {
@@ -243,7 +246,10 @@ public class VideoAttributes extends ExtensionMetadata {
     }
 
     public Date getPublicationDate() {
-        return Date.from(publicationDate.toInstant());
+        if (publicationDate != null) {
+            return Date.from(publicationDate.toInstant());
+        }
+        return null;
     }
 
     public ZonedDateTime getPublicationDateTime() {

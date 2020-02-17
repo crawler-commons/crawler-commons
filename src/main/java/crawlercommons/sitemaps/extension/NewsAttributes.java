@@ -102,7 +102,10 @@ public class NewsAttributes extends ExtensionMetadata {
     }
 
     public Date getPublicationDate() {
-        return Date.from(publicationDate.toInstant());
+        if (publicationDate != null) {
+            return Date.from(publicationDate.toInstant());
+        }
+        return null;
     }
 
     public ZonedDateTime getPublicationDateTime() {
