@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,26 +40,30 @@ import org.slf4j.LoggerFactory;
  * of the various domain registrars and their assignment policies. The best
  * publicly available knowledge base is the public suffix list maintained and
  * available at <a href="https://publicsuffix.org/">publicsuffix.org</a>. This
- * class implements the <a
- * href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and uses a
- * copy of the public suffix list. data file format.
+ * class implements the
+ * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
+ * uses a copy of the public suffix list.
  * 
  * For more information, see
  * <ul>
- * <li><a href="http://www.publicsuffix.org">publicsuffix.org</a></li>
+ * <li><a href="https://www.publicsuffix.org/">publicsuffix.org</a></li>
  * <li><a href="https://en.wikipedia.org/wiki/Public_Suffix_List">Wikipedia
  * article about the public suffix list</a></li>
- * <li>Mozilla's <a
- * href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
+ * <li>Mozilla's
+ * <a href="https://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
  * Service</a>: for historic reasons the class name stems from the term
  * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
  * 
- * This class just needs "effective_tld_names.dat" in the classpath. If you want
- * to configure it with other data, call
- * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
- * {@link EffectiveTldFinder#initialize(InputStream) .initialize(InputStream)}.
- * Updates to the public suffix list can be found here:
+ * EffectiveTldFinder loads the public suffix list as file
+ * "effective_tld_names.dat" from the Java classpath. Make sure your classpath
+ * does not contain any other file with the same name, eg. an outdated list
+ * shipped with a third party library. To force EffectiveTldFinder to load an
+ * updated or modified public suffix list, call
+ * {@link EffectiveTldFinder#getInstance()
+ * EffectiveTldFinder.getInstance()}{@link EffectiveTldFinder#initialize(InputStream)
+ * .initialize(InputStream)}. Updates to the public suffix list can be found
+ * here:
  * <ul>
  * <li><a href= "https://publicsuffix.org/list/public_suffix_list.dat"
  * >https://publicsuffix.org/list/public_suffix_list.dat</a></li>
@@ -115,10 +120,16 @@ public class EffectiveTldFinder {
     private boolean configured = false;
 
     /**
-     * A singleton
+     * A singleton loading the public suffix list from the Java class path.
      */
     private EffectiveTldFinder() {
-        initialize(this.getClass().getResourceAsStream(ETLD_DATA));
+        URL publicSuffixList = this.getClass().getResource(ETLD_DATA);
+        LOGGER.info("Loading public suffix list from class path: {}", publicSuffixList);
+        try (InputStream is = publicSuffixList.openStream()) {
+            initialize(is);
+        } catch (IOException e) {
+            LOGGER.error("Failed to load public suffix list {} from class path: {}", publicSuffixList, e);
+        }
     }
 
     /**
@@ -167,9 +178,7 @@ public class EffectiveTldFinder {
             }
             configured = true;
         } catch (IOException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("EffectiveTldFinder configuration failed: ", e);
-            }
+            LOGGER.error("EffectiveTldFinder configuration failed: ", e);
             configured = false;
         }
         return configured;
