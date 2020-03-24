@@ -18,6 +18,7 @@ package crawlercommons.robots;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -38,10 +39,10 @@ public abstract class BaseRobotRules implements Serializable {
 
     private long _crawlDelay = UNSET_CRAWL_DELAY;
     private boolean _deferVisits = false;
-    private List<String> _sitemaps;
+    private LinkedHashSet<String> _sitemaps;
 
     public BaseRobotRules() {
-        _sitemaps = new ArrayList<String>();
+        _sitemaps = new LinkedHashSet<String>();
     }
 
     public long getCrawlDelay() {
@@ -60,12 +61,14 @@ public abstract class BaseRobotRules implements Serializable {
         _deferVisits = deferVisits;
     }
 
+    /** Add sitemap URL to rules if not a duplicate */
     public void addSitemap(String sitemap) {
         _sitemaps.add(sitemap);
     }
 
+    /** Get URLs of sitemap links found in robots.txt */
     public List<String> getSitemaps() {
-        return _sitemaps;
+        return new ArrayList<>(_sitemaps);
     }
 
     /*
