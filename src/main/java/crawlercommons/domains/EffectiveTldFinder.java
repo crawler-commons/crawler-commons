@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,26 +40,30 @@ import org.slf4j.LoggerFactory;
  * of the various domain registrars and their assignment policies. The best
  * publicly available knowledge base is the public suffix list maintained and
  * available at <a href="https://publicsuffix.org/">publicsuffix.org</a>. This
- * class implements the <a
- * href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and uses a
- * copy of the public suffix list. data file format.
+ * class implements the
+ * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
+ * uses a copy of the public suffix list.
  * 
  * For more information, see
  * <ul>
- * <li><a href="http://www.publicsuffix.org">publicsuffix.org</a></li>
+ * <li><a href="https://www.publicsuffix.org/">publicsuffix.org</a></li>
  * <li><a href="https://en.wikipedia.org/wiki/Public_Suffix_List">Wikipedia
  * article about the public suffix list</a></li>
- * <li>Mozilla's <a
- * href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
+ * <li>Mozilla's
+ * <a href="https://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
  * Service</a>: for historic reasons the class name stems from the term
  * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
  * 
- * This class just needs "effective_tld_names.dat" in the classpath. If you want
- * to configure it with other data, call
- * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
- * {@link EffectiveTldFinder#initialize(InputStream) .initialize(InputStream)}.
- * Updates to the public suffix list can be found here:
+ * EffectiveTldFinder loads the public suffix list as file
+ * "effective_tld_names.dat" from the Java classpath. Make sure your classpath
+ * does not contain any other file with the same name, eg. an outdated list
+ * shipped with a third party library. To force EffectiveTldFinder to load an
+ * updated or modified public suffix list, call
+ * {@link EffectiveTldFinder#getInstance()
+ * EffectiveTldFinder.getInstance()}{@link EffectiveTldFinder#initialize(InputStream)
+ * .initialize(InputStream)}. Updates to the public suffix list can be found
+ * here:
  * <ul>
  * <li><a href= "https://publicsuffix.org/list/public_suffix_list.dat"
  * >https://publicsuffix.org/list/public_suffix_list.dat</a></li>
@@ -94,16 +99,37 @@ public class EffectiveTldFinder {
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
 
+    /**
+     * Max. length in ASCII characters of a dot-separated segment in host names
+     * (applies to domain names as well), cf.
+     * https://tools.ietf.org/html/rfc1034#section-3.1 and
+     * https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames
+     * 
+     * Note: We only have to validate domain names and not the host names passed
+     * as input. For domain names a verification of the segment length also
+     * implies that the entire domain names stays in the limit of 253
+     * characters. Wildcard suffixes only allow two additional segments (2*63+1
+     * = 127 chars) and all wildcard suffixes are far away from reaching the
+     * critical length of 126 characters.
+     */
+    public static final int MAX_DOMAIN_LENGTH_PART = 63;
+
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private SuffixTrie<EffectiveTLD> domainTrie = new SuffixTrie<>();
     private boolean configured = false;
 
     /**
-     * A singleton
+     * A singleton loading the public suffix list from the Java class path.
      */
     private EffectiveTldFinder() {
-        initialize(this.getClass().getResourceAsStream(ETLD_DATA));
+        URL publicSuffixList = this.getClass().getResource(ETLD_DATA);
+        LOGGER.info("Loading public suffix list from class path: {}", publicSuffixList);
+        try (InputStream is = publicSuffixList.openStream()) {
+            initialize(is);
+        } catch (IOException e) {
+            LOGGER.error("Failed to load public suffix list {} from class path: {}", publicSuffixList, e);
+        }
     }
 
     /**
@@ -152,9 +178,7 @@ public class EffectiveTldFinder {
             }
             configured = true;
         } catch (IOException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("EffectiveTldFinder configuration failed: ", e);
-            }
+            LOGGER.error("EffectiveTldFinder configuration failed: ", e);
             configured = false;
         }
         return configured;
@@ -332,8 +356,14 @@ public class EffectiveTldFinder {
             try {
                 IDN.toASCII(domainSegment);
             } catch (IllegalArgumentException e) {
-                // not a valid IDN segment
+                // not a valid IDN segment,
+                // includes check for max. length (63 chars)
                 return (strict ? null : hostname);
+            }
+        } else if (strict) {
+            // (strict mode) check for max. length of segment (63 chars)
+            if (domainSegment.length() > MAX_DOMAIN_LENGTH_PART) {
+                return null;
             }
         }
         return hostname.substring(start);

@@ -127,3 +127,8 @@ ftp:/, ftp:/
 http:, http:/
 http:////, http:/
 http:///////, http:/
+
+# empty path with trailing question mark (empty query) #247
+http://example.com?,http://example.com/?
+http://example.com?a=1,http://example.com/?a=1
+
