@@ -25,7 +25,6 @@ import java.util.List;
  * Result from parsing a single robots.txt file - which means we get a set of
  * rules, and a crawl-delay.
  */
-
 @SuppressWarnings("serial")
 public abstract class BaseRobotRules implements Serializable {
 
@@ -71,11 +70,6 @@ public abstract class BaseRobotRules implements Serializable {
         return new ArrayList<>(_sitemaps);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -86,11 +80,6 @@ public abstract class BaseRobotRules implements Serializable {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -112,10 +101,9 @@ public abstract class BaseRobotRules implements Serializable {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * Returns a string with the crawl delay as well as a list of sitemaps if
+     * they exist (and aren't more than 10)
      */
     @Override
     public String toString() {
@@ -127,14 +115,17 @@ public abstract class BaseRobotRules implements Serializable {
         } else {
             sb.append(" - crawl delay: ").append(delay).append('\n');
         }
+
         int nSitemaps = getSitemaps().size();
         if (nSitemaps == 0) {
             sb.append(" - no sitemap URLs\n");
         } else {
             sb.append(" - number of sitemap URLs: ").append(nSitemaps).append('\n');
-            sb.append("   sitemaps[0]: ").append(getSitemaps().get(0)).append('\n');
+            if (nSitemaps <= 10) {
+                sb.append(String.join("\n", getSitemaps())).append("\n\n");
+            }
         }
+
         return sb.toString();
     }
-
 }
