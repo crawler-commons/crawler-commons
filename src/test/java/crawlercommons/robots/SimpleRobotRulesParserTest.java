@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SimpleRobotRulesParserTest {
+public class SimpleRobotRulesParserTest {
     private static final String LF = "\n";
     private static final String CR = "\r";
     private static final String CRLF = "\r\n";
@@ -695,6 +695,12 @@ class SimpleRobotRulesParserTest {
         assertEquals(1, rules.getSitemaps().size());
         assertEquals("https://www.example.com/sitemap.xml", rules.getSitemaps().get(0));
         assertEquals(1, rules.getSitemaps().size(), "Found sitemap");
+    }
+
+    @Test
+    void testSitemapDedup() throws Exception {
+        BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots-dedup.txt"));
+        assertEquals(1, rules.getSitemaps().size(), "Sitemaps deduped");
     }
 
     @Test

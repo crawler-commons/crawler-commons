@@ -130,6 +130,9 @@ public class BasicURLNormalizer extends URLFilter {
             if (file == null || "".equals(file)) { // add a slash
                 file = "/";
                 changed = true;
+            } else if (!file.startsWith("/")) {
+              file = "/" + file;
+              changed = true;
             }
 
             if (url.getRef() != null) { // remove the ref
@@ -196,6 +199,8 @@ public class BasicURLNormalizer extends URLFilter {
         // if path is empty return a single slash
         if (file.isEmpty()) {
             file = "/";
+        } else if (!file.startsWith("/")) {
+            file = "/" + file;
         }
 
         return file;
