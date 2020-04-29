@@ -129,7 +129,7 @@ public class SimpleRobotRules extends BaseRobotRules {
         super();
 
         _mode = mode;
-        _rules = new ArrayList<RobotRule>();
+        _rules = new ArrayList<>();
     }
 
     public void clearRules() {
@@ -366,11 +366,10 @@ public class SimpleRobotRules extends BaseRobotRules {
             sb.append('\n');
         } else {
             sb.append(" - number of rules: ").append(nRules).append('\n');
-            if (nRules <= 10) {
-                for (int i = 0; i < nRules; i++) {
-                    RobotRule r = _rules.get(i);
-                    sb.append(r._allow ? "   A" : "   Disa").append("llow: ").append(r._prefix).append('\n');
-                }
+            int numOfRulesToShow = Math.min(nRules, 10);
+            for (int i = 0; i < numOfRulesToShow; i++) {
+                RobotRule r = _rules.get(i);
+                sb.append(r._allow ? "   A" : "   Disa").append("llow: ").append(r._prefix).append('\n');
             }
         }
         return sb.toString();

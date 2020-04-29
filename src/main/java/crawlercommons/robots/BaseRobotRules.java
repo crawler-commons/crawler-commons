@@ -41,7 +41,7 @@ public abstract class BaseRobotRules implements Serializable {
     private LinkedHashSet<String> _sitemaps;
 
     public BaseRobotRules() {
-        _sitemaps = new LinkedHashSet<String>();
+        _sitemaps = new LinkedHashSet<>();
     }
 
     public long getCrawlDelay() {
@@ -116,13 +116,15 @@ public abstract class BaseRobotRules implements Serializable {
             sb.append(" - crawl delay: ").append(delay).append('\n');
         }
 
-        int nSitemaps = getSitemaps().size();
+        List<String> sitemaps = getSitemaps();
+        int nSitemaps = sitemaps.size();
         if (nSitemaps == 0) {
             sb.append(" - no sitemap URLs\n");
         } else {
             sb.append(" - number of sitemap URLs: ").append(nSitemaps).append('\n');
-            if (nSitemaps <= 10) {
-                sb.append(String.join("\n", getSitemaps())).append("\n\n");
+            int numOfSitemapsToShow = Math.min(nSitemaps, 10);
+            for (int i = 0; i < numOfSitemapsToShow; i++) {
+                sb.append(sitemaps.get(i)).append("\n");
             }
         }
 
