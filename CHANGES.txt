@@ -1,15 +1,17 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Robots] Upgrade the toString() method of the Base/Simple RobotRules (Avi Hayun) #264
+- Upgrade GitIgnore (Avi Hayun) #260
 - [Robots] Deduplicate sitemap links (sebastian-nagel) #261
 - EffectiveTldFinder to log loading of public suffix list (sebastian-nagel) #284
 - SiteMapParser getPublicationDate in VideoAttributes may throw NPE (panthony, sebastian-nagel) #283
 - SimpleRobotRulesParser: Trim log messages (jnioche, sebastian-nagel) #281
 - SimpleRobotRulesParser: counter _numWarnings not thread-safe (sebastian-nagel, kkrugler) #278
 - ParameterizedTest not executed by mvn builds (sebastian-nagel) #273
-- [BasicNormalizer] Empty path before query to be normalized to `/` (Chaiavi, sebastian-nagel) #247
-- EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Chaiavi) #251
-- Upgrade unit tests to use JUnit v5.x and parameterized tests (Chaiavi) #249, #253, #255
+- [BasicNormalizer] Empty path before query to be normalized to `/` (Avi Hayun, sebastian-nagel) #247
+- EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Avi Hayun) #251
+- Upgrade unit tests to use JUnit v5.x and parameterized tests (Avi Hayun) #249, #253, #255
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
 
 Release 1.0 (2019-03-19)
