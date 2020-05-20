@@ -18,6 +18,8 @@ package crawlercommons.sitemaps.extension;
 
 import crawlercommons.sitemaps.SiteMapURL;
 
+import java.util.Map;
+
 /**
  * Container for attributes of a {@link SiteMapURL} defined by a sitemap
  * extension.
@@ -25,6 +27,8 @@ import crawlercommons.sitemaps.SiteMapURL;
 public abstract class ExtensionMetadata {
 
     public abstract boolean equals(Object other);
+
+    public abstract Map<String, String[]> asMap();
 
     public boolean isValid() {
         return true;
