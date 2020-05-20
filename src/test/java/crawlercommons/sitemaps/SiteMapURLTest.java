@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Crawler-Commons
+ * Copyright 2019 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,13 @@
 
 package crawlercommons.sitemaps;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Created on 13/10/2014.
- * 
- */
-@RunWith(JUnit4.class)
+/** Created on 13/10/2014. */
 public class SiteMapURLTest {
-    SiteMapURL siteMapURL;
-
-    @Before
-    public void setUp() throws Exception {
-        siteMapURL = new SiteMapURL("http://example.com", true);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
+    private SiteMapURL siteMapURL = new SiteMapURL("http://example.com", true);
 
     @Test
     public void testSetPriority() {

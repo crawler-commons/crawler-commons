@@ -1,6 +1,27 @@
 Crawler-Commons Change Log
 
-Current Development 0.11-SNAPSHOT (yyyy-mm-dd)
+Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Robots] Upgrade the toString() method of the Base/Simple RobotRules (Avi Hayun) #264
+- Upgrade GitIgnore (Avi Hayun) #260
+- [Robots] Deduplicate sitemap links (sebastian-nagel) #261
+- EffectiveTldFinder to log loading of public suffix list (sebastian-nagel) #284
+- SiteMapParser getPublicationDate in VideoAttributes may throw NPE (panthony, sebastian-nagel) #283
+- SimpleRobotRulesParser: Trim log messages (jnioche, sebastian-nagel) #281
+- SimpleRobotRulesParser: counter _numWarnings not thread-safe (sebastian-nagel, kkrugler) #278
+- ParameterizedTest not executed by mvn builds (sebastian-nagel) #273
+- [BasicNormalizer] Empty path before query to be normalized to `/` (Avi Hayun, sebastian-nagel) #247
+- EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Avi Hayun) #251
+- Upgrade unit tests to use JUnit v5.x and parameterized tests (Avi Hayun) #249, #253, #255
+- [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
+
+Release 1.0 (2019-03-19)
+- [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
+- EffectiveTldFinder: upgrade public suffix list (sebastian-nagel) #219
+- [Sitemaps] Detection and parsing of XML sitemaps fails with whitespace before XML declaration (sebastian-nagel, jnioche) #144
+- [Sitemaps] XMLHandler needs to append text in characters() vs. immediately processing (kkrugler, sebastian-nagel) #226
+- [Sitemaps] XMLIndexHandler needs to accumulate the lastmod date string before parsing (kkrugler, sebastian-nagel) #225
+- EffectiveTldFinder throws IllegalArgumentException on IDN domain names containing prohibited characters (sebastian-nagel) #231
+- [Sitemaps] Trim Unicode whitespace around URLs (sebastian-nagel, kkrugler) #224
 - [Sitemaps] Sitemap index: stop URL at closing </loc> (sebastian-nagel, kkrugler) #213
 - [Sitemaps] Allow empty price in video sitemaps (sebastian-nagel) #221
 - [Sitemaps] In case of the use of a different locale, price tag can be formatted with ',' instead of '.' leading to a NPE (goldenlink) #220
@@ -42,7 +63,7 @@ Release 0.8 (2017-06-09)
 - [Sitemaps] Optionally use SAX parser (matt-deboer, jnioche, sebastian-nagel) #116
 - [Sitemaps] Properly log XML parsing errors (sebastian-nagel) #146
 - Use StandardCharsets where applicable (sebastian-nagel) #141
-- Increase sitemap size limit to 50MB (Chaiavi) #132
+- Increase sitemap size limit to 50MB (Avi Hayun) #132
 - Remove dependencies to system-specific locale (sebastian-nagel) #137
 - BasicURLNormalizer: NPE for URLs without authority (sebastian-nagel) #136
 - BasicURLNormalizer to strip empty port (sebastian-nagel) #133

@@ -48,6 +48,7 @@ public class DelegatorHandler extends DefaultHandler {
     private UnknownFormatException exception;
     private Set<String> acceptedNamespaces;
     protected Map<String, Extension> extensionNamespaces;
+    private StringBuilder characterBuffer = new StringBuilder();
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -103,6 +104,7 @@ public class DelegatorHandler extends DefaultHandler {
         return exception;
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (elementStack.isEmpty() || delegate == null) {
             startRootElement(uri, localName, qName, attributes);
@@ -170,6 +172,7 @@ public class DelegatorHandler extends DefaultHandler {
         delegate.setExtensionNamespaces(extensionNamespaces);
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (delegate != null) {
             delegate.endElement(uri, localName, qName);
@@ -177,10 +180,31 @@ public class DelegatorHandler extends DefaultHandler {
         elementStack.pop();
     }
 
+    @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         if (delegate != null) {
             delegate.characters(ch, start, length);
         }
+    }
+
+    protected void appendCharacterBuffer(char ch[], int start, int length) {
+        for (int i = start; i < start + length; i++) {
+            characterBuffer.append(ch[i]);
+        }
+    }
+
+    protected void appendCharacterBuffer(String str) {
+        characterBuffer.append(str);
+    }
+
+    protected String getAndResetCharacterBuffer() {
+        String value = characterBuffer.toString();
+        resetCharacterBuffer();
+        return value;
+    }
+
+    protected void resetCharacterBuffer() {
+        characterBuffer = new StringBuilder();
     }
 
     protected String currentElement() {
@@ -197,25 +221,56 @@ public class DelegatorHandler extends DefaultHandler {
         return delegate.getSiteMap();
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         if (delegate != null) {
             delegate.error(e);
         }
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         if (delegate != null) {
             delegate.fatalError(e);
         }
     }
 
+    /**
+     * Return true if character sequence contains only white space including
+     * Unicode whitespace, cf. {@link #isWhitespace(char)}
+     */
     public static boolean isAllBlank(CharSequence charSeq) {
         for (int i = 0; i < charSeq.length(); i++) {
-            if (!Character.isWhitespace(charSeq.charAt(i))) {
+            if (!isWhitespace(charSeq.charAt(i))) {
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Check whether character is any Unicode whitespace, including the space
+     * characters not covered by {@link Character#isWhitespace(char)}
+     */
+    public static boolean isWhitespace(char c) {
+        return Character.isWhitespace(c) || c == '\u00a0' || c == '\u2007' || c == '\u202f';
+    }
+
+    /** Trim all whitespace including Unicode whitespace */
+    public static String stripAllBlank(CharSequence charSeq) {
+        if (charSeq.length() == 0) {
+            return charSeq.toString();
+        }
+        int start = 0;
+        int end = charSeq.length() - 1;
+        while (isWhitespace(charSeq.charAt(start)) && start < end) {
+            start++;
+        }
+        if (start < end) {
+            while (isWhitespace(charSeq.charAt(end))) {
+                end--;
+            }
+        }
+        return charSeq.subSequence(start, end + 1).toString();
+    }
 }

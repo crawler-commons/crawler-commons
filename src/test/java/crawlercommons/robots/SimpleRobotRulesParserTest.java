@@ -16,22 +16,18 @@
 
 package crawlercommons.robots;
 
-import static java.nio.charset.StandardCharsets.US_ASCII;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleRobotRulesParserTest {
     private static final String LF = "\n";
@@ -39,198 +35,216 @@ public class SimpleRobotRulesParserTest {
     private static final String CRLF = "\r\n";
     private static final String FAKE_ROBOTS_URL = "http://domain.com";
 
-    private static BaseRobotRules createRobotRules(String crawlerName, byte[] content) {
+    private static BaseRobotRules createRobotRules(String crawlerName, String content) {
+        return createRobotRules(crawlerName, content.getBytes(UTF_8));
+    }
+
+    private static BaseRobotRules createRobotRules(String crawlerName, byte[] contentBytes) {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
-        return robotParser.parseContent(FAKE_ROBOTS_URL, content, "text/plain", crawlerName);
+        return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", crawlerName);
     }
 
     @Test
-    public void testEmptyRules() {
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", "".getBytes(UTF_8));
+    void testEmptyRules() {
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", "");
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testQueryParamInDisallow() {
+    void testQueryParamInDisallow() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /index.cfm?fuseaction=sitesearch.results*";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://searchservice.domain.com/index.cfm?fuseaction=sitesearch.results&type=People&qry=california&pg=2"));
     }
 
-    @Test
-    public void testGooglePatternMatching() {
-
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/fish",//
+                    "False, http://www.fict.com/fish.html",//
+                    "False, http://www.fict.com/fish/salmon.html",//
+                    "False, http://www.fict.com/fishheads",//
+                    "False, http://www.fict.com/fishheads/yummy.html",//
+                    "False, http://www.fict.com/fish.php?id=anything",//
+                    "True, http://www.fict.com/Fish.asp",//
+                    "True, http://www.fict.com/catfish",//
+                    "True, http://www.fict.com/?id=fish",//
+                    "True, http://www.fict.com/fis" })
+    void testGooglePatternMatching1(boolean isAllowed, String urlStr) {
         // Test for /fish
         final String simpleRobotsTxt1 = "User-agent: *" + CRLF + "Disallow: /fish" + CRLF;
-
-        BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1.getBytes(UTF_8));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fish"));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fish.html"));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fish/salmon.html"));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fishheads"));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fishheads/yummy.html"));
-        assertFalse(rule1.isAllowed("http://www.fict.com/fish.php?id=anything"));
-
-        assertTrue(rule1.isAllowed("http://www.fict.com/Fish.asp"));
-        assertTrue(rule1.isAllowed("http://www.fict.com/catfish"));
-        assertTrue(rule1.isAllowed("http://www.fict.com/?id=fish"));
-        assertTrue(rule1.isAllowed("http://www.fict.com/fis"));
+        BaseRobotRules rule1 = createRobotRules("Any-darn-crawler", simpleRobotsTxt1);
+        assertEquals(isAllowed, rule1.isAllowed(urlStr));
 
         // Test for /fish*
         final String simpleRobotsTxt2 = "User-agent: *" + CRLF + "Disallow: /fish*" + CRLF;
+        BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2);
+        assertEquals(isAllowed, rule2.isAllowed(urlStr));
+    }
 
-        BaseRobotRules rule2 = createRobotRules("Any-darn-crawler", simpleRobotsTxt2.getBytes(UTF_8));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fish"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fish.html"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fish/salmon.html"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fishheads"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fishheads/yummy.html"));
-        assertFalse(rule2.isAllowed("http://www.fict.com/fish.php?id=anything"));
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/fish/",//
+                    "False, http://www.fict.com/fish/?id=anything",//
+                    "False, http://www.fict.com/fish/salmon.htm",//
+                    "True, http://www.fict.com/fish",//
+                    "True, http://www.fict.com/fish.html",//
+                    "True, http://www.fict.com/Fish/Salmon.asp" })
+    void testGooglePatternMatching2(boolean isAllowed, String urlStr) {
+        // Test for /fish
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /fish/" + CRLF;
+        BaseRobotRules rule = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertEquals(isAllowed, rule.isAllowed(urlStr));
+    }
 
-        assertTrue(rule2.isAllowed("http://www.fict.com/Fish.asp"));
-        assertTrue(rule2.isAllowed("http://www.fict.com/catfish"));
-        assertTrue(rule2.isAllowed("http://www.fict.com/?id=fish"));
-        assertTrue(rule2.isAllowed("http://www.fict.com/fis"));
-
-        // Test for /fish/
-        final String simpleRobotsTxt3 = "User-agent: *" + CRLF + "Disallow: /fish/" + CRLF;
-
-        BaseRobotRules rule3 = createRobotRules("Any-darn-crawler", simpleRobotsTxt3.getBytes(UTF_8));
-        assertFalse(rule3.isAllowed("http://www.fict.com/fish/"));
-        assertFalse(rule3.isAllowed("http://www.fict.com/fish/?id=anything"));
-        assertFalse(rule3.isAllowed("http://www.fict.com/fish/salmon.htm"));
-
-        assertTrue(rule3.isAllowed("http://www.fict.com/fish"));
-        assertTrue(rule3.isAllowed("http://www.fict.com/fish.html"));
-        assertTrue(rule3.isAllowed("http://www.fict.com/Fish/Salmon.asp"));
-
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/filename.php",//
+                    "False, http://www.fict.com/folder/filename.php",//
+                    "False, http://www.fict.com/folder/filename.php?parameters",//
+                    "False, http://www.fict.com/folder/any.php.file.html",//
+                    "False, http://www.fict.com/filename.php/",//
+                    "True, http://www.fict.com/",//
+                    "True, http://www.fict.com/windows.PHP" })
+    void testGooglePatternMatching3(boolean isAllowed, String urlStr) {
         // Test for /*.php
-        final String simpleRobotsTxt4 = "User-agent: *" + CRLF + "Disallow: /*.php" + CRLF;
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /*.php" + CRLF;
+        BaseRobotRules rule = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertEquals(isAllowed, rule.isAllowed(urlStr));
+    }
 
-        BaseRobotRules rule4 = createRobotRules("Any-darn-crawler", simpleRobotsTxt4.getBytes(UTF_8));
-        assertFalse(rule4.isAllowed("http://www.fict.com/filename.php"));
-        assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php"));
-        assertFalse(rule4.isAllowed("http://www.fict.com/folder/filename.php?parameters"));
-        assertFalse(rule4.isAllowed("http://www.fict.com/folder/any.php.file.html"));
-        assertFalse(rule4.isAllowed("http://www.fict.com/filename.php/"));
-
-        assertTrue(rule4.isAllowed("http://www.fict.com/"));
-        assertTrue(rule4.isAllowed("http://www.fict.com/windows.PHP"));
-
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/filename.php",//
+                    "False, http://www.fict.com/folder/filename.php",//
+                    "True, http://www.fict.com/filename.php?parameters",//
+                    "True, http://www.fict.com/filename.php/",//
+                    "True, http://www.fict.com/filename.php5",//
+                    "True, http://www.fict.com/windows.PHP" })
+    void testGooglePatternMatching4(boolean isAllowed, String urlStr) {
         // Test for /*.php$
-        final String simpleRobotsTxt5 = "User-agent: *" + CRLF + "Disallow: /*.php$" + CRLF;
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /*.php$" + CRLF;
+        BaseRobotRules rule = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertEquals(isAllowed, rule.isAllowed(urlStr));
+    }
 
-        BaseRobotRules rule5 = createRobotRules("Any-darn-crawler", simpleRobotsTxt5.getBytes(UTF_8));
-        assertFalse(rule5.isAllowed("http://www.fict.com/filename.php"));
-        assertFalse(rule5.isAllowed("http://www.fict.com/folder/filename.php"));
-
-        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php?parameters"));
-        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php/"));
-        assertTrue(rule5.isAllowed("http://www.fict.com/filename.php5"));
-        assertTrue(rule5.isAllowed("http://www.fict.com/windows.PHP"));
-
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/fish.php",//
+                    "False, http://www.fict.com/fishheads/catfish.php?parameters",//
+                    "True, http://www.fict.com/Fish.PHP" })
+    void testGooglePatternMatching5(boolean isAllowed, String urlStr) {
         // Test for /fish*.php
-        final String simpleRobotsTxt6 = "User-agent: *" + CRLF + "Disallow: /fish*.php" + CRLF;
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /fish*.php" + CRLF;
+        BaseRobotRules rule = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertEquals(isAllowed, rule.isAllowed(urlStr));
+    }
 
-        BaseRobotRules rule6 = createRobotRules("Any-darn-crawler", simpleRobotsTxt6.getBytes(UTF_8));
-        assertFalse(rule6.isAllowed("http://www.fict.com/fish.php"));
-        assertFalse(rule6.isAllowed("http://www.fict.com/fishheads/catfish.php?parameters"));
-
-        assertTrue(rule6.isAllowed("http://www.fict.com/Fish.PHP"));
-
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.com/fish.php",//
+                    "False, http://www.fict.com/superfishheads/catfish.php?parameters",//
+                    "True, http://www.fict.com/fishheads/catfish.htm" })
+    void testGooglePatternMatching6(boolean isAllowed, String urlStr) {
         // Test rule with multiple '*' characters
-        final String simpleRobotsTxt7 = "User-agent: *" + CRLF + "Disallow: /*fish*.php" + CRLF;
-
-        BaseRobotRules rule7 = createRobotRules("Any-darn-crawler", simpleRobotsTxt7.getBytes(UTF_8));
-        assertFalse(rule7.isAllowed("http://www.fict.com/fish.php"));
-        assertFalse(rule7.isAllowed("http://www.fict.com/superfishheads/catfish.php?parameters"));
-        assertTrue(rule7.isAllowed("http://www.fict.com/fishheads/catfish.htm"));
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /*fish*.php" + CRLF;
+        BaseRobotRules rule = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertEquals(isAllowed, rule.isAllowed(urlStr));
     }
 
     @Test
-    public void testCommentedOutLines() {
+    void testCommentedOutLines() {
         final String simpleRobotsTxt = "#user-agent: testAgent" + LF + LF + "#allow: /index.html" + LF + "#allow: /test" + LF + LF + "#user-agent: test" + LF + LF + "#allow: /index.html" + LF
                         + "#disallow: /test" + LF + LF + "#user-agent: someAgent" + LF + LF + "#disallow: /index.html" + LF + "#disallow: /test" + LF + LF;
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
-        Assert.assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
+        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testRobotsTxtAlwaysAllowed() {
+    void testRobotsTxtAlwaysAllowed() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/robots.txt"));
     }
 
     @Test
-    public void testAgentNotListed() {
+    void testAgentNotListed() {
         // Access is assumed to be allowed, if no rules match an agent.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: crawler2" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler3", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("crawler3", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/index.html"));
     }
 
     @Test
-    public void testNonAsciiEncoding() {
+    void testNonAsciiEncoding() {
         final String simpleRobotsTxt = "User-agent: *" + " # \u00A2 \u20B5" + CRLF + "Disallow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testSimplestAllowAll() {
+    void testSimplestAllowAll() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     // https://github.com/crawler-commons/crawler-commons/issues/215
-
     @Test
-    public void testDisallowWithQueryOnly() {
+    void testDisallowWithQueryOnly() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.example.com"));
         assertFalse(rules.isAllowed("http://www.example.com?q=a"));
     }
 
-    @Test
-    public void testMixedEndings() {
+    @ParameterizedTest
+    @CsvSource({ "True, http://www.fict.org/",//
+                    "True, http://www.fict.org/index.html" })
+    void testMixedEndings1(boolean isAllowed, String urlStr) {
         final String mixedEndingsRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CR + LF + "User-agent: unhipbot" + LF + "Disallow: /" + CR + ""
                         + CRLF + "User-agent: webcrawler" + LF + "User-agent: excite" + CR + "Disallow: " + "\u0085" + CR + "User-agent: *" + CRLF + "Disallow: /org/plans.html" + LF + "Allow: /org/"
                         + CR + "Allow: /serv" + CRLF + "Allow: /~mak" + LF + "Disallow: /" + CRLF;
 
-        BaseRobotRules rules;
-
-        rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.fict.org/"));
-        assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
-
-        rules = createRobotRules("Unknown/1.0", mixedEndingsRobotsTxt.getBytes(UTF_8));
-        assertFalse(rules.isAllowed("http://www.fict.org/"));
-        assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
-        assertTrue(rules.isAllowed("http://www.fict.org/server.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/fast.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/slow.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/orgo.gif"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/about.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/org/plans.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
-
+        BaseRobotRules rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
     }
 
-    @Test
-    public void testRfpCases() {
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.org/",//
+                    "False, http://www.fict.org/index.html",//
+                    "True, http://www.fict.org/robots.txt",//
+                    "True, http://www.fict.org/server.html",//
+                    "True, http://www.fict.org/services/fast.html",//
+                    "True, http://www.fict.org/services/slow.html",//
+                    "False, http://www.fict.org/orgo.gif",//
+                    "True, http://www.fict.org/org/about.html",//
+                    "False, http://www.fict.org/org/plans.html",//
+                    "False, http://www.fict.org/%7Ejim/jim.html",//
+                    "True, http://www.fict.org/%7Emak/mak.html" })
+    void testMixedEndings2(boolean isAllowed, String urlStr) {
+        final String mixedEndingsRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CR + LF + "User-agent: unhipbot" + LF + "Disallow: /" + CR + ""
+                        + CRLF + "User-agent: webcrawler" + LF + "User-agent: excite" + CR + "Disallow: " + "\u0085" + CR + "User-agent: *" + CRLF + "Disallow: /org/plans.html" + LF + "Allow: /org/"
+                        + CR + "Allow: /serv" + CRLF + "Allow: /~mak" + LF + "Disallow: /" + CRLF;
+
+        BaseRobotRules rules = createRobotRules("Unknown/1.0", mixedEndingsRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.org/",//
+                    "False, http://www.fict.org/index.html",//
+                    "True, http://www.fict.org/robots.txt",//
+                    "False, http://www.fict.org/server.html",//
+                    "False, http://www.fict.org/services/fast.html",//
+                    "False, http://www.fict.org/services/slow.html",//
+                    "False, http://www.fict.org/orgo.gif",//
+                    "False, http://www.fict.org/org/about.html",//
+                    "False, http://www.fict.org/org/plans.html",//
+                    "False, http://www.fict.org/%7Ejim/jim.html",//
+                    "False, http://www.fict.org/%7Emak/mak.html" })
+    void testRfpCases(boolean isAllowed, String urlStr) {
         // Run through all of the tests that are part of the robots.txt RFP
         // http://www.robotstxt.org/norobots-rfc.txt
         final String rfpExampleRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CRLF + CRLF + "User-agent: unhipbot" + CRLF + "Disallow: /" + CRLF
@@ -239,223 +253,164 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt.getBytes(UTF_8));
-        assertFalse(rules.isAllowed("http://www.fict.org/"));
-        assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
-        assertFalse(rules.isAllowed("http://www.fict.org/server.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/services/fast.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/services/slow.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/orgo.gif"));
-        assertFalse(rules.isAllowed("http://www.fict.org/org/about.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/org/plans.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
+        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
 
-        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.fict.org/"));
-        assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
-        assertTrue(rules.isAllowed("http://www.fict.org/server.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/fast.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/slow.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/orgo.gif"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/about.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/plans.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
+        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt);
+        assertTrue(rules.isAllowed(urlStr));
 
-        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.fict.org/"));
-        assertTrue(rules.isAllowed("http://www.fict.org/index.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
-        assertTrue(rules.isAllowed("http://www.fict.org/server.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/fast.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/slow.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/orgo.gif"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/about.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/plans.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
-
-        rules = createRobotRules("Unknown/1.0", rfpExampleRobotsTxt.getBytes(UTF_8));
-        assertFalse(rules.isAllowed("http://www.fict.org/"));
-        assertFalse(rules.isAllowed("http://www.fict.org/index.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/robots.txt"));
-        assertTrue(rules.isAllowed("http://www.fict.org/server.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/fast.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/services/slow.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/orgo.gif"));
-        assertTrue(rules.isAllowed("http://www.fict.org/org/about.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/org/plans.html"));
-        assertFalse(rules.isAllowed("http://www.fict.org/%7Ejim/jim.html"));
-        assertTrue(rules.isAllowed("http://www.fict.org/%7Emak/mak.html"));
+        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt);
+        assertTrue(rules.isAllowed(urlStr));
     }
 
-    @Test
-    public void testNutchCases() {
-        // Run through the Nutch test cases.
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.fict.org/",//
+                    "False, http://www.fict.org/index.html",//
+                    "True, http://www.fict.org/robots.txt",//
+                    "True, http://www.fict.org/server.html",//
+                    "True, http://www.fict.org/services/fast.html",//
+                    "True, http://www.fict.org/services/slow.html",//
+                    "False, http://www.fict.org/orgo.gif",//
+                    "True, http://www.fict.org/org/about.html",//
+                    "False, http://www.fict.org/org/plans.html",//
+                    "False, http://www.fict.org/%7Ejim/jim.html",//
+                    "True, http://www.fict.org/%7Emak/mak.html" })
+    void testRfpCases2(boolean isAllowed, String urlStr) {
+        // Run through all of the tests that are part of the robots.txt RFP
+        // http://www.robotstxt.org/norobots-rfc.txt
+        final String rfpExampleRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF + "# comments to webmaster@fict.org" + CRLF + CRLF + "User-agent: unhipbot" + CRLF + "Disallow: /" + CRLF
+                        + "" + CRLF + "User-agent: webcrawler" + CRLF + "User-agent: excite" + CRLF + "Disallow: " + CRLF + CRLF + "User-agent: *" + CRLF + "Disallow: /org/plans.html" + CRLF
+                        + "Allow: /org/" + CRLF + "Allow: /serv" + CRLF + "Allow: /~mak" + CRLF + "Disallow: /" + CRLF;
 
+        BaseRobotRules rules = createRobotRules("Unknown/1.0", rfpExampleRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "False, http://www.domain.com/a",//
+                    "False, http://www.domain.com/a/",//
+                    "False, http://www.domain.com/a/bloh/foo.html",//
+                    "True, http://www.domain.com/b",//
+                    "False, http://www.domain.com/b/a",//
+                    "False, http://www.domain.com/b/a/index.html",//
+                    "True, http://www.domain.com/b/b/foo.html",//
+                    "True, http://www.domain.com/c",//
+                    "True, http://www.domain.com/c/a",//
+                    "True, http://www.domain.com/c/a/index.html",//
+                    "True, http://www.domain.com/c/b/foo.html",//
+                    "True, http://www.domain.com/d",//
+                    "True, http://www.domain.com/d/a",//
+                    "True, http://www.domain.com/e/a/index.html",//
+                    "True, http://www.domain.com/e/d",//
+                    "True, http://www.domain.com/e/d/foo.html",//
+                    "True, http://www.domain.com/e/doh.html",//
+                    "True, http://www.domain.com/f/index.html",//
+                    "True, http://www.domain.com/foo/bar/baz.html",//
+                    "True, http://www.domain.com/f/" })
+    void testNutchCases(boolean isAllowed, String urlStr) {
+        // Run through the Nutch test cases.
         final String nutchRobotsTxt = "User-Agent: Agent1 #foo" + CR + "Disallow: /a" + CR + "Disallow: /b/a" + CR + "#Disallow: /c" + CR + "" + CR + "" + CR + "User-Agent: Agent2 Agent3#foo" + CR
                         + "User-Agent: Agent4" + CR + "Disallow: /d" + CR + "Disallow: /e/d/" + CR + "" + CR + "User-Agent: *" + CR + "Disallow: /foo/bar/" + CR;
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("Agent1", nutchRobotsTxt.getBytes(UTF_8));
-        assertFalse(rules.isAllowed("http://www.domain.com/a"));
-        assertFalse(rules.isAllowed("http://www.domain.com/a/"));
-        assertFalse(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertFalse(rules.isAllowed("http://www.domain.com/b/a"));
-        assertFalse(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
-
-        rules = createRobotRules("Agent2", nutchRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.domain.com/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
-
-        rules = createRobotRules("Agent3", nutchRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.domain.com/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
-
-        rules = createRobotRules("Agent4", nutchRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.domain.com/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertFalse(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
-
-        rules = createRobotRules("Agent5", nutchRobotsTxt.getBytes(UTF_8));
-        assertTrue(rules.isAllowed("http://www.domain.com/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/"));
-        assertTrue(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertFalse(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
+        rules = createRobotRules("Agent1", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
 
         // Note that the SimpleRobotRulesParser only parses the rule set of the
         // first matching agent name. For the following example, the parser
         // returns only the rules matching 'Agent1'.
-        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt.getBytes(UTF_8));
-        assertFalse(rules.isAllowed("http://www.domain.com/a"));
-        assertFalse(rules.isAllowed("http://www.domain.com/a/"));
-        assertFalse(rules.isAllowed("http://www.domain.com/a/bloh/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b"));
-        assertFalse(rules.isAllowed("http://www.domain.com/b/a"));
-        assertFalse(rules.isAllowed("http://www.domain.com/b/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/b/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/c/b/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/d/a"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/a/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/d/foo.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/e/doh.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/index.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/foo/bar/baz.html"));
-        assertTrue(rules.isAllowed("http://www.domain.com/f/"));
+        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "True, http://www.domain.com/a",//
+                    "True, http://www.domain.com/a/",//
+                    "True, http://www.domain.com/a/bloh/foo.html",//
+                    "True, http://www.domain.com/b",//
+                    "True, http://www.domain.com/b/a",//
+                    "True, http://www.domain.com/b/a/index.html",//
+                    "True, http://www.domain.com/b/b/foo.html",//
+                    "True, http://www.domain.com/c",//
+                    "True, http://www.domain.com/c/a",//
+                    "True, http://www.domain.com/c/a/index.html",//
+                    "True, http://www.domain.com/c/b/foo.html",//
+                    "False, http://www.domain.com/d",//
+                    "False, http://www.domain.com/d/a",//
+                    "True, http://www.domain.com/e/a/index.html",//
+                    "True, http://www.domain.com/e/d",//
+                    "False, http://www.domain.com/e/d/foo.html",//
+                    "True, http://www.domain.com/e/doh.html",//
+                    "True, http://www.domain.com/f/index.html",//
+                    "True, http://www.domain.com/foo/bar/baz.html",//
+                    "True, http://www.domain.com/f/" })
+    void testNutchCases2(boolean isAllowed, String urlStr) {
+        // Run through the Nutch test cases.
+        final String nutchRobotsTxt = "User-Agent: Agent1 #foo" + CR + "Disallow: /a" + CR + "Disallow: /b/a" + CR + "#Disallow: /c" + CR + "" + CR + "" + CR + "User-Agent: Agent2 Agent3#foo" + CR
+                        + "User-Agent: Agent4" + CR + "Disallow: /d" + CR + "Disallow: /e/d/" + CR + "" + CR + "User-Agent: *" + CR + "Disallow: /foo/bar/" + CR;
+
+        BaseRobotRules rules;
+
+        rules = createRobotRules("Agent2", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+
+        rules = createRobotRules("Agent3", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+
+        rules = createRobotRules("Agent4", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "True, http://www.domain.com/a",//
+                    "True, http://www.domain.com/a/",//
+                    "True, http://www.domain.com/a/bloh/foo.html",//
+                    "True, http://www.domain.com/b",//
+                    "True, http://www.domain.com/b/a",//
+                    "True, http://www.domain.com/b/a/index.html",//
+                    "True, http://www.domain.com/b/b/foo.html",//
+                    "True, http://www.domain.com/c",//
+                    "True, http://www.domain.com/c/a",//
+                    "True, http://www.domain.com/c/a/index.html",//
+                    "True, http://www.domain.com/c/b/foo.html",//
+                    "True, http://www.domain.com/d",//
+                    "True, http://www.domain.com/d/a",//
+                    "True, http://www.domain.com/e/a/index.html",//
+                    "True, http://www.domain.com/e/d",//
+                    "True, http://www.domain.com/e/d/foo.html",//
+                    "True, http://www.domain.com/e/doh.html",//
+                    "True, http://www.domain.com/f/index.html",//
+                    "False, http://www.domain.com/foo/bar/baz.html",//
+                    "True, http://www.domain.com/f/" })
+    void testNutchCases3(boolean isAllowed, String urlStr) {
+        // Run through the Nutch test cases.
+        final String nutchRobotsTxt = "User-Agent: Agent1 #foo" + CR + "Disallow: /a" + CR + "Disallow: /b/a" + CR + "#Disallow: /c" + CR + "" + CR + "" + CR + "User-Agent: Agent2 Agent3#foo" + CR
+                        + "User-Agent: Agent4" + CR + "Disallow: /d" + CR + "Disallow: /e/d/" + CR + "" + CR + "User-Agent: *" + CR + "Disallow: /foo/bar/" + CR;
+
+        BaseRobotRules rules = createRobotRules("Agent5", nutchRobotsTxt);
+        assertEquals(isAllowed, rules.isAllowed(urlStr));
     }
 
     @Test
-    public void testHtmlMarkupInRobotsTxt() {
+    void testHtmlMarkupInRobotsTxt() {
         final String htmlRobotsTxt = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><HTML>\n" + "<HEAD>\n" + "<TITLE>/robots.txt</TITLE>\n" + "</HEAD>\n" + "<BODY>\n"
                         + "User-agent: anybot<BR>\n" + "Disallow: <BR>\n" + "Crawl-Delay: 10<BR>\n" + "\n" + "User-agent: *<BR>\n" + "Disallow: /<BR>\n" + "Crawl-Delay: 30<BR>\n" + "\n" + "</BODY>\n"
                         + "</HTML>\n";
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("anybot", htmlRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("anybot", htmlRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/index.html"));
         assertEquals(10000, rules.getCrawlDelay());
 
-        rules = createRobotRules("bogusbot", htmlRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("bogusbot", htmlRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertEquals(30000, rules.getCrawlDelay());
     }
 
     @Test
-    public void testIgnoreOfHtml() {
+    void testIgnoreOfHtml() {
         final String htmlFile = "<HTML><HEAD><TITLE>Site under Maintenance</TITLE></HTML>";
 
         BaseRobotRules rules = createRobotRules("anybot", htmlFile.getBytes(US_ASCII));
@@ -464,39 +419,39 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testHeritrixCases() {
+    void testHeritrixCases() {
         final String heritrixRobotsTxt = "User-agent: *\n" + "Disallow: /cgi-bin/\n" + "Disallow: /details/software\n" + "\n" + "User-agent: denybot\n" + "Disallow: /\n" + "\n"
                         + "User-agent: allowbot1\n" + "Disallow: \n" + "\n" + "User-agent: allowbot2\n" + "Disallow: /foo\n" + "Allow: /\n" + "\n" + "User-agent: delaybot\n" + "Disallow: /\n"
                         + "Crawl-Delay: 20\n" + "Allow: /images/\n";
 
         BaseRobotRules rules;
-        rules = createRobotRules("Mozilla allowbot1 99.9", heritrixRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Mozilla allowbot1 99.9", heritrixRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertTrue(rules.isAllowed("http://www.domain.com/"));
 
-        rules = createRobotRules("Mozilla allowbot2 99.9", heritrixRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Mozilla allowbot2 99.9", heritrixRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertTrue(rules.isAllowed("http://www.domain.com/"));
         assertFalse(rules.isAllowed("http://www.domain.com/foo"));
 
-        rules = createRobotRules("Mozilla denybot 99.9", heritrixRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Mozilla denybot 99.9", heritrixRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/path"));
         assertFalse(rules.isAllowed("http://www.domain.com/"));
         assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, rules.getCrawlDelay());
 
-        rules = createRobotRules("Mozilla anonbot 99.9", heritrixRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Mozilla anonbot 99.9", heritrixRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/path"));
         assertFalse(rules.isAllowed("http://www.domain.com/cgi-bin/foo.pl"));
 
-        rules = createRobotRules("Mozilla delaybot 99.9", heritrixRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Mozilla delaybot 99.9", heritrixRobotsTxt);
         assertEquals(20000, rules.getCrawlDelay());
     }
 
     @Test
-    public void testCaseSensitivePaths() {
+    void testCaseSensitivePaths() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Allow: /AnyPage.html" + CRLF + "Allow: /somepage.html" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/AnyPage.html"));
         assertFalse(rules.isAllowed("http://www.domain.com/anypage.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/somepage.html"));
@@ -504,72 +459,72 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testEmptyDisallow() {
+    void testEmptyDisallow() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testEmptyAllow() {
+    void testEmptyAllow() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Allow:";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiWildcard() {
+    void testMultiWildcard() {
         // Make sure we only take the first wildcard entry.
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: *" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiMatches() {
+    void testMultiMatches() {
         // Make sure we only take the first record that matches.
         final String simpleRobotsTxt = "User-agent: crawlerbot" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: crawler" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawlerbot", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("crawlerbot", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiAgentNames() {
+    void testMultiAgentNames() {
         // When there are more than one agent name on a line.
         final String simpleRobotsTxt = "User-agent: crawler1 crawler2" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testMultiWordAgentName() {
+    void testMultiWordAgentName() {
         // When the user agent name has a space in it.
         final String simpleRobotsTxt = "User-agent: Download Ninja" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /";
 
-        BaseRobotRules rules = createRobotRules("Download Ninja", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Download Ninja", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testUnsupportedFields() {
+    void testUnsupportedFields() {
         // When we have a new field type that we don't know about.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + "newfield: 234" + CRLF + "User-agent: crawler2" + CRLF + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
 
     @Test
-    public void testAcapFields() {
+    void testAcapFields() {
         final String robotsTxt = "acap-crawler: *" + CRLF + "acap-disallow-crawl: /ultima_ora/";
 
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
@@ -578,7 +533,7 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testStatusCodeCreation() {
+    void testStatusCodeCreation() {
         BaseRobotRules rules;
 
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
@@ -611,148 +566,169 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testCrawlDelay() {
+    void testCrawlDelay() {
         final String delayRules1RobotsTxt = "User-agent: bixo" + CR + "Crawl-delay: 10" + CR + "User-agent: foobot" + CR + "Crawl-delay: 20" + CR + "User-agent: *" + CR + "Disallow:/baz" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", delayRules1RobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("bixo", delayRules1RobotsTxt);
         long crawlDelay = rules.getCrawlDelay();
-        assertEquals("testing crawl delay for agent bixo - rule 1", 10000, crawlDelay);
+        assertEquals(10000, crawlDelay, "testing crawl delay for agent bixo - rule 1");
 
         final String delayRules2RobotsTxt = "User-agent: foobot" + CR + "Crawl-delay: 20" + CR + "User-agent: *" + CR + "Disallow:/baz" + CR;
 
-        rules = createRobotRules("bixo", delayRules2RobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("bixo", delayRules2RobotsTxt);
         crawlDelay = rules.getCrawlDelay();
-        assertEquals("testing crawl delay for agent bixo - rule 2", BaseRobotRules.UNSET_CRAWL_DELAY, crawlDelay);
+        assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, crawlDelay, "testing crawl delay for agent bixo - rule 2");
     }
 
     @Test
-    public void testBigCrawlDelay() {
+    void testBigCrawlDelay() {
         final String robotsTxt = "User-agent: *" + CR + "Crawl-delay: 3600" + CR + "Disallow:" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes(UTF_8));
-        assertFalse("disallow all if huge crawl delay", rules.isAllowed("http://www.domain.com/"));
+        BaseRobotRules rules = createRobotRules("bixo", robotsTxt);
+        assertFalse(rules.isAllowed("http://www.domain.com/"), "disallow all if huge crawl delay");
     }
 
     @Test
-    public void testBrokenKrugleRobotsTxtFile() {
+    void testBrokenKrugleRobotsTxtFile() {
         final String krugleRobotsTxt = "User-agent: *" + CR + "Disallow: /maintenance.html" + CR + "Disallow: /perl/" + CR + "Disallow: /cgi-bin/" + CR + "Disallow: /examples/" + CR
                         + "Crawl-delay: 3" + CR + "" + CR + "User-agent: googlebot" + CR + "Crawl-delay: 1" + CR + "" + CR + "User-agent: qihoobot" + CR + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
     }
 
     @Test
-    public void testRobotsWithUTF8BOM() throws Exception {
+    void testRobotsWithUTF8BOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf8-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
-    public void testRobotsWithUTF16LEBOM() throws Exception {
+    void testRobotsWithUTF16LEBOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16le-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
-    public void testRobotsWithUTF16BEBOM() throws Exception {
+    void testRobotsWithUTF16BEBOM() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/robots-with-utf16be-bom.txt"));
-        assertFalse("Disallow match against *", rules.isAllowed("http://www.domain.com/profile"));
+        assertFalse(rules.isAllowed("http://www.domain.com/profile"), "Disallow match against *");
     }
 
     @Test
-    public void testFloatingPointCrawlDelay() {
+    void testFloatingPointCrawlDelay() {
         final String robotsTxt = "User-agent: *" + CR + "Crawl-delay: 0.5" + CR + "Disallow:" + CR;
 
-        BaseRobotRules rules = createRobotRules("bixo", robotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("bixo", robotsTxt);
         assertEquals(500, rules.getCrawlDelay());
     }
 
     @Test
-    public void testIgnoringHost() throws Exception {
+    void testIgnoringHost() throws Exception {
         BaseRobotRules rules = createRobotRules("foobot", readFile("/robots/www.flot.com-robots.txt"));
-        assertFalse("Disallow img directory", rules.isAllowed("http://www.flot.com/img/"));
+        assertFalse(rules.isAllowed("http://www.flot.com/img/"), "Disallow img directory");
     }
 
     @Test
-    public void testDirectiveTypos() throws Exception {
+    void testDirectiveTypos() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("desallow", rules.isAllowed("http://domain.com/desallow/"));
-        assertFalse("dissalow", rules.isAllowed("http://domain.com/dissalow/"));
+        assertFalse(rules.isAllowed("http://domain.com/desallow/"), "desallow");
+        assertFalse(rules.isAllowed("http://domain.com/dissalow/"), "dissalow");
 
         rules = createRobotRules("bot2", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useragent", rules.isAllowed("http://domain.com/useragent/"));
+        assertFalse(rules.isAllowed("http://domain.com/useragent/"), "useragent");
 
         rules = createRobotRules("bot3", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useg-agent", rules.isAllowed("http://domain.com/useg-agent/"));
+        assertFalse(rules.isAllowed("http://domain.com/useg-agent/"), "useg-agent");
 
         rules = createRobotRules("bot4", readFile("/robots/directive-typos-robots.txt"));
-        assertFalse("useragent-no-colon", rules.isAllowed("http://domain.com/useragent-no-colon/"));
+        assertFalse(rules.isAllowed("http://domain.com/useragent-no-colon/"), "useragent-no-colon");
     }
 
     @Test
-    public void testFormatErrors() throws Exception {
+    void testFormatErrors() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/format-errors-robots.txt"));
-        assertFalse("whitespace-before-colon", rules.isAllowed("http://domain.com/whitespace-before-colon/"));
-        assertFalse("no-colon", rules.isAllowed("http://domain.com/no-colon/"));
+        assertFalse(rules.isAllowed("http://domain.com/whitespace-before-colon/"), "whitespace-before-colon");
+        assertFalse(rules.isAllowed("http://domain.com/no-colon/"), "no-colon");
 
         rules = createRobotRules("bot2", readFile("/robots/format-errors-robots.txt"));
-        assertFalse("no-colon-useragent", rules.isAllowed("http://domain.com/no-colon-useragent/"));
+        assertFalse(rules.isAllowed("http://domain.com/no-colon-useragent/"), "no-colon-useragent");
 
         rules = createRobotRules("bot3", readFile("/robots/format-errors-robots.txt"));
-        assertTrue("whitespace-before-colon", rules.isAllowed("http://domain.com/whitespace-before-colon/"));
+        assertTrue(rules.isAllowed("http://domain.com/whitespace-before-colon/"), "whitespace-before-colon");
     }
 
     // See http://www.conman.org/people/spc/robots2.html
     @Test
-    public void testExtendedStandard() throws Exception {
+    void testExtendedStandard() throws Exception {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
         robotParser.parseContent(FAKE_ROBOTS_URL, readFile("/robots/extended-standard-robots.txt"), "text/plain", "foobot");
-        assertEquals("Zero warnings with expended directives", 0, robotParser.getNumWarnings());
+        assertEquals(0, robotParser.getNumWarnings(), "Zero warnings with expended directives");
     }
 
     @Test
-    public void testSitemap() throws Exception {
+    void testSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots.txt"));
-        assertEquals("Found sitemap", 3, rules.getSitemaps().size());
+        assertEquals(3, rules.getSitemaps().size(), "Found sitemap");
         // check that the last one is not lowercase only
         String url = rules.getSitemaps().get(2);
         boolean lowercased = url.equals(url.toLowerCase(Locale.ROOT));
-        assertFalse("Sitemap case check", lowercased);
+        assertFalse(lowercased, "Sitemap case check");
     }
 
     @Test
-    public void testRelativeSitemap() throws Exception {
+    void testRelativeSitemap() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/relative-sitemap-robots.txt"));
-        assertEquals("Found sitemap", 1, rules.getSitemaps().size());
+        assertEquals(1, rules.getSitemaps().size(), "Found sitemap");
     }
 
     @Test
-    public void testManyUserAgents() throws Exception {
+    void testSitemapInvalidBaseUrl() {
+        // test https://github.com/crawler-commons/crawler-commons/issues/240
+        // - should handle absolute sitemap URL even if base URL isn't valid
+
+        final String simpleRobotsTxt = "Sitemap: https://www.example.com/sitemap.xml";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        BaseRobotRules rules = robotParser.parseContent("example.com", simpleRobotsTxt.getBytes(UTF_8), "text/plain", "a");
+
+        assertEquals(1, rules.getSitemaps().size());
+        assertEquals("https://www.example.com/sitemap.xml", rules.getSitemaps().get(0));
+        assertEquals(1, rules.getSitemaps().size(), "Found sitemap");
+    }
+
+    @Test
+    void testSitemapDedup() throws Exception {
+        BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/sitemap-robots-dedup.txt"));
+        assertEquals(1, rules.getSitemaps().size(), "Sitemaps deduped");
+    }
+
+    @Test
+    void testManyUserAgents() throws Exception {
         BaseRobotRules rules = createRobotRules("wget", readFile("/robots/many-user-agents.txt"));
-        assertFalse("many-user-agents", rules.isAllowed("http://domain.com/"));
+        assertFalse(rules.isAllowed("http://domain.com/"), "many-user-agents");
 
         rules = createRobotRules("mysuperlongbotnamethatmatchesnothing", readFile("/robots/many-user-agents.txt"));
-        assertTrue("many-user-agents", rules.isAllowed("http://domain.com/"));
-        assertFalse("many-user-agents", rules.isAllowed("http://domain.com/bot-trap/"));
+        assertTrue(rules.isAllowed("http://domain.com/"), "many-user-agents");
+        assertFalse(rules.isAllowed("http://domain.com/bot-trap/"), "many-user-agents");
     }
 
     @Test
-    public void testMalformedPathInRobotsFile() throws Exception {
+    void testMalformedPathInRobotsFile() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/malformed-path.txt"));
-        assertFalse("Disallowed URL", rules.isAllowed("http://en.wikipedia.org/wiki/Wikipedia_talk:Mediation_Committee/"));
-        assertTrue("Regular URL", rules.isAllowed("http://en.wikipedia.org/wiki/"));
+        assertFalse(rules.isAllowed("http://en.wikipedia.org/wiki/Wikipedia_talk:Mediation_Committee/"), "Disallowed URL");
+        assertTrue(rules.isAllowed("http://en.wikipedia.org/wiki/"), "Regular URL");
     }
 
     @Test
-    public void testDOSlineEndings() throws Exception {
+    void testDOSlineEndings() throws Exception {
         BaseRobotRules rules = createRobotRules("bot1", readFile("/robots/dos-line-endings.txt"));
-        assertTrue("Allowed URL", rules.isAllowed("http://ford.com/"));
+        assertTrue(rules.isAllowed("http://ford.com/"), "Allowed URL");
         assertEquals(1000L, rules.getCrawlDelay());
     }
 
     @Test
-    public void testAmazonRobotsWithWildcards() throws Exception {
+    void testAmazonRobotsWithWildcards() throws Exception {
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", readFile("/robots/wildcards.txt"));
         assertFalse(rules.isAllowed("http://www.fict.com/wishlist/bogus"));
         assertTrue(rules.isAllowed("http://www.fict.com/wishlist/universal/page"));
@@ -760,38 +736,37 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
-    public void testAllowBeforeDisallow() throws Exception {
+    void testAllowBeforeDisallow() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /fish" + CRLF + "Allow: /fish" + CRLF;
-
-        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
 
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
 
     @Test
-    public void testSpacesInMultipleUserAgentNames() throws Exception {
+    void testSpacesInMultipleUserAgentNames() {
         final String simpleRobotsTxt = "User-agent: One, Two, Three" + CRLF + "Disallow: /" + CRLF + "" + CRLF + "User-agent: *" + CRLF + "Allow: /" + CRLF;
 
-        BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Two", simpleRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Two", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Three", simpleRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Three", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt.getBytes(UTF_8));
+        rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
 
     // https://github.com/crawler-commons/crawler-commons/issues/112
     @Test
-    public void testSitemapAtEndOfFile() throws Exception {
+    void testSitemapAtEndOfFile() {
         final String simpleRobotsTxt = "User-agent: a" + CRLF + "Disallow: /content/dam/" + CRLF + CRLF + "User-agent: b" + CRLF + "Disallow: /content/dam/" + CRLF + CRLF + "User-agent: c" + CRLF
                         + "Disallow: /content/dam/" + CRLF + CRLF + CRLF + "Sitemap: https://wwwfoocom/sitemapxml";
 
-        BaseRobotRules rules = createRobotRules("a", simpleRobotsTxt.getBytes(UTF_8));
+        BaseRobotRules rules = createRobotRules("a", simpleRobotsTxt);
         assertEquals(1, rules.getSitemaps().size());
         assertEquals("https://wwwfoocom/sitemapxml", rules.getSitemaps().get(0));
     }

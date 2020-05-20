@@ -18,13 +18,13 @@ package crawlercommons.robots;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
  * rules, and a crawl-delay.
  */
-
 @SuppressWarnings("serial")
 public abstract class BaseRobotRules implements Serializable {
 
@@ -38,10 +38,10 @@ public abstract class BaseRobotRules implements Serializable {
 
     private long _crawlDelay = UNSET_CRAWL_DELAY;
     private boolean _deferVisits = false;
-    private List<String> _sitemaps;
+    private LinkedHashSet<String> _sitemaps;
 
     public BaseRobotRules() {
-        _sitemaps = new ArrayList<String>();
+        _sitemaps = new LinkedHashSet<>();
     }
 
     public long getCrawlDelay() {
@@ -60,19 +60,16 @@ public abstract class BaseRobotRules implements Serializable {
         _deferVisits = deferVisits;
     }
 
+    /** Add sitemap URL to rules if not a duplicate */
     public void addSitemap(String sitemap) {
         _sitemaps.add(sitemap);
     }
 
+    /** Get URLs of sitemap links found in robots.txt */
     public List<String> getSitemaps() {
-        return _sitemaps;
+        return new ArrayList<>(_sitemaps);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -83,11 +80,6 @@ public abstract class BaseRobotRules implements Serializable {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -109,10 +101,9 @@ public abstract class BaseRobotRules implements Serializable {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
+    /**
+     * Returns a string with the crawl delay as well as a list of sitemaps if
+     * they exist (and aren't more than 10)
      */
     @Override
     public String toString() {
@@ -124,14 +115,19 @@ public abstract class BaseRobotRules implements Serializable {
         } else {
             sb.append(" - crawl delay: ").append(delay).append('\n');
         }
-        int nSitemaps = getSitemaps().size();
+
+        List<String> sitemaps = getSitemaps();
+        int nSitemaps = sitemaps.size();
         if (nSitemaps == 0) {
             sb.append(" - no sitemap URLs\n");
         } else {
             sb.append(" - number of sitemap URLs: ").append(nSitemaps).append('\n');
-            sb.append("   sitemaps[0]: ").append(getSitemaps().get(0)).append('\n');
+            int numOfSitemapsToShow = Math.min(nSitemaps, 10);
+            for (int i = 0; i < numOfSitemapsToShow; i++) {
+                sb.append(sitemaps.get(i)).append("\n");
+            }
         }
+
         return sb.toString();
     }
-
 }

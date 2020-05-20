@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Crawler-Commons
+ * Copyright 2019 Crawler-Commons
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package crawlercommons.domains;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-import crawlercommons.domains.EffectiveTldFinder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EffectiveTldFinderPSLTest {
 
@@ -148,5 +146,4 @@ public class EffectiveTldFinderPSLTest {
         String domain = EffectiveTldFinder.getAssignedDomain(hostname, true);
         assertEquals(expectedDomain, domain);
     }
-
 }

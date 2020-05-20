@@ -170,6 +170,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // skip all remaining user agent blocks.
         private boolean _skipAgents;
 
+        /*
+         * Counter of warnings reporting invalid rules/lines in the robots.txt
+         * file. The counter is used to limit the number of logged warnings.
+         */
+        private int _numWarnings;
+
         private String _url;
         private String _targetName;
 
@@ -351,7 +357,9 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     // greater than this, we'll skip all pages.
     private static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
 
-    private int _numWarnings;
+    // number of warnings found in the latest processed robots.txt file
+    private ThreadLocal<Integer> _numWarningsDuringLastParse = new ThreadLocal<>();
+
     private int _maxWarnings;
     private long _maxCrawlDelay;
 
@@ -398,7 +406,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      */
     @Override
     public SimpleRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
-        _numWarnings = 0;
 
         // If there's nothing there, treat it like we have no restrictions.
         if ((content == null) || (content.length == 0)) {
@@ -513,12 +520,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case UNKNOWN:
-                reportWarning("Unknown directive in robots.txt file: " + line, url);
+                reportWarning(parseState, "Unknown directive in robots.txt file: {}", line);
                 parseState.setFinishedAgentFields(true);
                     break;
 
                 case MISSING:
-                reportWarning(String.format(Locale.ROOT, "Unknown line in robots.txt file (size %d): %s", content.length, line), url);
+                reportWarning(parseState, "Unknown line in robots.txt file (size {}): {}", content.length, line);
                 parseState.setFinishedAgentFields(true);
                     break;
 
@@ -532,6 +539,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
         }
 
+        this._numWarningsDuringLastParse.set(parseState._numWarnings);
         SimpleRobotRules result = parseState.getRobotRules();
         if (result.getCrawlDelay() > _maxCrawlDelay) {
             // Some evil sites use a value like 3600 (seconds) for the crawl
@@ -545,15 +553,21 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
     }
 
-    private void reportWarning(String msg, String url) {
-        _numWarnings += 1;
+    private void reportWarning(ParseState state, String msg, Object... args) {
+        state._numWarnings += 1;
 
-        if (_numWarnings == 1) {
-            LOGGER.warn("Problem processing robots.txt for {}", url);
+        if (state._numWarnings == 1) {
+            LOGGER.warn("Problem processing robots.txt for {}", state._url);
         }
 
-        if (_numWarnings < _maxWarnings) {
-            LOGGER.warn("\t {}", msg);
+        if (state._numWarnings < _maxWarnings) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof String && ((String) args[i]).length() > 1024) {
+                    // clip overlong strings to prevent from overflows in log messages
+                    args[i] = ((String) args[i]).substring(0, 1024) + " ...";
+                }
+            }
+            LOGGER.warn("\t " + msg, args);
         }
     }
 
@@ -648,7 +662,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 state.addRule(path, false);
             }
         } catch (Exception e) {
-            reportWarning("Error parsing robots rules - can't decode path: " + path, state.getUrl());
+            reportWarning(state, "Error parsing robots rules - can't decode path: {}", path);
         }
     }
 
@@ -676,7 +690,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         try {
             path = URLDecoder.decode(path, "UTF-8");
         } catch (Exception e) {
-            reportWarning("Error parsing robots rules - can't decode path: " + path, state.getUrl());
+            reportWarning(state, "Error parsing robots rules - can't decode path: {}", path);
         }
 
         if (path.length() == 0) {
@@ -720,7 +734,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     state.setCrawlDelay(delayValue);
                 }
             } catch (Exception e) {
-                reportWarning("Error parsing robots rules - can't decode crawl delay: " + delayString, state.getUrl());
+                reportWarning(state, "Error parsing robots rules - can't decode crawl delay: {}", delayString);
             }
         }
     }
@@ -737,13 +751,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         String sitemap = token.getData();
         try {
-            URL sitemap_url = new URL(new URL(state.getUrl()), sitemap);
-            String hostname = sitemap_url.getHost();
+            URL sitemapUrl;
+            URL base = null;
+            try {
+                base = new URL(state.getUrl());
+            } catch (MalformedURLException e) {
+                // must try without base URL
+            }
+            if (base != null) {
+                sitemapUrl = new URL(base, sitemap);
+            } else {
+                sitemapUrl = new URL(sitemap);
+            }
+            String hostname = sitemapUrl.getHost();
             if ((hostname != null) && (hostname.length() > 0)) {
-                state.addSitemap(sitemap_url.toExternalForm());
+                state.addSitemap(sitemapUrl.toExternalForm());
             }
         } catch (Exception e) {
-            reportWarning("Invalid URL with sitemap directive: " + sitemap, state.getUrl());
+            reportWarning(state, "Invalid URL with sitemap directive:  {}", sitemap);
         }
     }
 
@@ -762,13 +787,22 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             RobotToken fixedToken = new RobotToken(RobotDirective.SITEMAP, "http:" + token.getData());
             handleSitemap(state, fixedToken);
         } else {
-            reportWarning("Found raw non-sitemap URL: http:" + urlFragment, state.getUrl());
+            reportWarning(state, "Found raw non-sitemap URL: http:{}", urlFragment);
         }
     }
 
-    // For testing
+    /**
+     * Get the number of warnings due to invalid rules/lines in the latest
+     * processed robots.txt file (see
+     * {@link #parseContent(String, byte[], String, String)}.
+     * 
+     * Note: an incorrect value may be returned if the processing of the
+     * robots.txt happened in a different than the current thread.
+     * 
+     * @return number of warnings
+     */
     public int getNumWarnings() {
-        return _numWarnings;
+        return _numWarningsDuringLastParse.get();
     }
 
     public int getMaxWarnings() {

@@ -77,6 +77,7 @@ class AtomHandler extends DelegatorHandler {
         sitemap.setType(SitemapType.ATOM);
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if ("entry".equals(localName)) {
             loc = null;
@@ -107,22 +108,25 @@ class AtomHandler extends DelegatorHandler {
         }
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        if ("entry".equals(currentElement())) {
+        if ("entry".equals(localName)) {
             maybeAddSiteMapUrl();
-        } else if ("feed".equals(currentElement())) {
+        } else if ("feed".equals(localName)) {
             sitemap.setProcessed(true);
+        } else if ("updated".equals(localName)) {
+            lastMod = getAndResetCharacterBuffer();
         }
     }
 
+    @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        String localName = super.currentElement();
-        String value = String.valueOf(ch, start, length);
-        if ("updated".equals(localName)) {
-            lastMod = value;
+        if ("updated".equals(currentElement())) {
+            appendCharacterBuffer(ch, start, length);
         }
     }
 
+    @Override
     public AbstractSiteMap getSiteMap() {
         return sitemap;
     }
@@ -142,10 +146,12 @@ class AtomHandler extends DelegatorHandler {
         lastMod = null;
     }
 
+    @Override
     public void error(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }
 
+    @Override
     public void fatalError(SAXParseException e) throws SAXException {
         maybeAddSiteMapUrl();
     }

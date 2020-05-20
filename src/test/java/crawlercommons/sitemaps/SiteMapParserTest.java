@@ -16,14 +16,12 @@
 
 package crawlercommons.sitemaps;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,27 +29,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.*;
 
-import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
-
-@RunWith(JUnit4.class)
 public class SiteMapParserTest {
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
     }
 
@@ -72,6 +66,7 @@ public class SiteMapParserTest {
                         .append(" </sitemap>\n") //
                         .append("<sitemap>\n") //
                         .append("  <loc>http://www.example.com/dynsitemap?date=now&amp;all=true</loc>\n") //
+                        .append("  <lastmod>2004-10-01T18:23:17&#43;00:00</lastmod>\n") //
                         .append(" </sitemap>\n") //
                         .append("<sitemap>\n") //
                         .append("  <loc>http://www.example.com/dynsitemap<![CDATA[?date=lastyear&all=false]]></loc>\n") //
@@ -100,11 +95,15 @@ public class SiteMapParserTest {
         assertEquals(SiteMap.convertToDate("2005-01-01"), currentSiteMap.getLastModified());
 
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=now&all=true"));
-        assertNotNull("<loc> with entities not found", currentSiteMap);
+        assertNotNull(currentSiteMap, "<loc> with entities not found");
         assertEquals("http://www.example.com/dynsitemap?date=now&all=true", currentSiteMap.getUrl().toString());
+        // test <lastmodified> containing a character entity - the input is
+        // passed in chunks to the characters(...) method in the XMLIndexHandler
+        assertNotNull(currentSiteMap.getLastModified(), "<lastmod> containing entities");
+        assertEquals(SiteMap.convertToDate("2004-10-01T18:23:17+00:00"), currentSiteMap.getLastModified(), "<lastmod> containing entities");
 
         currentSiteMap = smi.getSitemap(new URL("http://www.example.com/dynsitemap?date=lastyear&all=false"));
-        assertNotNull("<loc> with CDATA not found", currentSiteMap);
+        assertNotNull(currentSiteMap, "<loc> with CDATA not found");
         assertEquals("http://www.example.com/dynsitemap?date=lastyear&all=false", currentSiteMap.getUrl().toString());
     }
 
@@ -216,8 +215,23 @@ public class SiteMapParserTest {
 
         SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
         for (int i = 0; i < found.length; i++) {
-            assertEquals(SITEMAP_URLS[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+            validateSiteMapUrl(i, found[i]);
         }
+    }
+
+    @Test
+    public void testSitemapXMLleadingWhiteSpace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("\ufeff"); // leading BOM
+        scontent.append("\n \t\r\n"); // and leading white space
+        byte[] content = getXMLSitemapAsBytes(scontent);
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
     }
 
     @Test
@@ -235,28 +249,27 @@ public class SiteMapParserTest {
             assertEquals(5, sm.getSiteMapUrls().size());
             SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
             for (int i = 0; i < found.length; i++) {
-                assertEquals(SITEMAP_URLS[i].replaceAll("&amp;", "&"), found[i].getUrl().toExternalForm());
+                validateSiteMapUrl(i, found[i]);
             }
         }
     }
 
-    /**
-     * This Sitemap contains badly formatted XML and can't be read
-     */
-    @Test(expected = UnknownFormatException.class)
+    /** This Sitemap contains badly formatted XML and can't be read */
+    @Test
     public void testSitemapParserBrokenXml() throws IOException, UnknownFormatException {
-        SiteMapParser parser = new SiteMapParser();
-        String contentType = "text/xml";
-        StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
-                        .append("<url><!-- This file is not a valid XML file --></url>").append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
-                        .append("</url><!-- missing opening url tag --></url></urlset>");
-        byte[] content = scontent.toString().getBytes(UTF_8);
-        URL url = new URL("http://www.example.com/sitemapindex.xml");
+        Assertions.assertThrows(UnknownFormatException.class, () -> {
+            SiteMapParser parser = new SiteMapParser();
+            String contentType = "text/xml";
+            StringBuilder scontent = new StringBuilder(1024);
+            scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+                            .append("<url><!-- This file is not a valid XML file --></url>").append("<url><loc> http://cs.harding.edu/fmccown/sitemaps/something.html</loc>")
+                            .append("</url><!-- missing opening url tag --></url></urlset>");
+            byte[] content = scontent.toString().getBytes(UTF_8);
+            URL url = new URL("http://www.example.com/sitemapindex.xml");
 
-        parser.parseSiteMap(contentType, content, url); // This Sitemap contains
-                                                        // badly formatted XML
-                                                        // and can't be read
+            // This Sitemap contains badly formatted XML and can't be read
+            parser.parseSiteMap(contentType, content, url);
+        });
     }
 
     @Test
@@ -271,7 +284,7 @@ public class SiteMapParserTest {
         SiteMapIndex sm = (SiteMapIndex) asm;
         assertEquals(15, sm.getSitemaps().size());
         String sitemap = "https://example.com/sitemap.jss?portalCode=10260&lang=en";
-        assertNotNull("Sitemap " + sitemap + " not found in sitemap index", sm.getSitemap(new URL(sitemap)));
+        assertNotNull(sm.getSitemap(new URL(sitemap)), "Sitemap " + sitemap + " not found in sitemap index");
     }
 
     @Test
@@ -295,7 +308,7 @@ public class SiteMapParserTest {
         assertEquals(2, sm.getSitemaps().size());
         String urlSecondSitemap = "https://www.example.org/sitemap2.xml";
         AbstractSiteMap secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
-        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
+        assertNotNull(secondSitemap, "Sitemap " + urlSecondSitemap + " not found in sitemap index");
 
         // check reset of attributes (lastmod) when "autoclosing" <sitemap>
         // elements
@@ -317,8 +330,36 @@ public class SiteMapParserTest {
         sm = (SiteMapIndex) asm;
         assertEquals(3, sm.getSitemaps().size());
         secondSitemap = sm.getSitemap(new URL(urlSecondSitemap));
-        assertNotNull("Sitemap " + urlSecondSitemap + " not found in sitemap index", secondSitemap);
-        assertNull("Sitemap " + urlSecondSitemap + " without modification date", secondSitemap.getLastModified());
+        assertNotNull(secondSitemap, "Sitemap " + urlSecondSitemap + " not found in sitemap index");
+        assertNull(secondSitemap.getLastModified(), "Sitemap " + urlSecondSitemap + " without modification date");
+    }
+
+    @Test
+    public void testStripUnicodeWhiteSpace() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        StringBuilder scontent = new StringBuilder();
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<sitemapindex>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>\n") //
+                        .append("   <![CDATA[ https://www.example.com/sitemap1.xml ]]>\n") //
+                        .append("  </loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append(" <sitemap>\n") //
+                        .append("  <loc>\n") //
+                        .append("   <![CDATA[\u00a0https://www.example.com/sitemap2.xml ]]> \u2000\n") //
+                        .append("  </loc>\n") //
+                        .append(" </sitemap>\n") //
+                        .append("</sitemapindex>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        URL url = new URL("https://www.example.com/sitemapindex.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(content, url);
+        assertEquals(true, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMapIndex);
+        SiteMapIndex sm = (SiteMapIndex) asm;
+        assertEquals(2, sm.getSitemaps().size());
+        String sitemap = "https://www.example.com/sitemap2.xml";
+        assertNotNull(sm.getSitemap(new URL(sitemap)), "Sitemap " + sitemap + " not found in sitemap index");
     }
 
     @Test
@@ -365,14 +406,16 @@ public class SiteMapParserTest {
         }
     }
 
-    @Test(expected = UnknownFormatException.class)
+    @Test
     public void testSitemapWithInvalidContent() throws UnknownFormatException, IOException {
-        SiteMapParser parser = new SiteMapParser();
-        String contentType = "application/octet-stream";
-        byte[] content = "this is a bogus sitemap".getBytes(StandardCharsets.UTF_8);
-        URL url = new URL("http://www.example.com/sitemap");
+        Assertions.assertThrows(UnknownFormatException.class, () -> {
+            SiteMapParser parser = new SiteMapParser();
+            String contentType = "application/octet-stream";
+            byte[] content = "this is a bogus sitemap".getBytes(StandardCharsets.UTF_8);
+            URL url = new URL("http://www.example.com/sitemap");
 
-        parser.parseSiteMap(contentType, content, url);
+            parser.parseSiteMap(contentType, content, url);
+        });
     }
 
     @Test
@@ -411,7 +454,11 @@ public class SiteMapParserTest {
 
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
         assertEquals(1, sm.getSiteMapUrls().size());
-        assertEquals(new URL("http://example.org/2003/12/13/atom03"), sm.getSiteMapUrls().iterator().next().getUrl());
+        SiteMapURL smu = sm.getSiteMapUrls().iterator().next();
+        assertEquals(new URL("http://example.org/2003/12/13/atom03"), smu.getUrl());
+        // test for <updated>2003-12-13T18:30:02Z</updated>
+        assertNotNull(smu.getLastModified());
+        assertEquals(12, ZonedDateTime.ofInstant(smu.getLastModified().toInstant(), AbstractSiteMap.TIME_ZONE_UTC).get(ChronoField.MONTH_OF_YEAR));
     }
 
     @Test
@@ -423,7 +470,12 @@ public class SiteMapParserTest {
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
         assertEquals(4, sm.getSiteMapUrls().size());
         Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
-        assertEquals(new URL("https://www.example.com/blog/post/1"), it.next().getUrl());
+        SiteMapURL smu = it.next();
+        assertEquals(new URL("https://www.example.com/blog/post/1"), smu.getUrl());
+        // test for <pubDate>Sun, 06 Sep 2009 16:20:00 +0000</pubDate>
+        assertNotNull(smu.getLastModified());
+        assertEquals(9, ZonedDateTime.ofInstant(smu.getLastModified().toInstant(), AbstractSiteMap.TIME_ZONE_UTC).get(ChronoField.MONTH_OF_YEAR));
+
         assertEquals(new URL("https://www.example.com/guid.html"), it.next().getUrl());
         assertEquals(new URL("https://www.example.com/foo?q=a&l=en"), it.next().getUrl());
         assertEquals(new URL("https://www.example.com/foo?q=a&l=fr"), it.next().getUrl());
@@ -487,12 +539,12 @@ public class SiteMapParserTest {
         URL url = new URL("http://www.example.com/rss.xml");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
-        assertSame("Not an RSS", SitemapType.RSS, asm.getType());
-        assertNotNull("GMT timestamp not parsed", asm.getLastModified());
+        assertSame(SitemapType.RSS, asm.getType(), "Not an RSS");
+        assertNotNull(asm.getLastModified(), "GMT timestamp not parsed");
         long pubDate = 1483619690000L; // Thu, 05 Jan 17 12:34:50 GMT
-        assertEquals("GMT timestamp", pubDate, asm.getLastModified().getTime());
+        assertEquals(pubDate, asm.getLastModified().getTime(), "GMT timestamp");
         SiteMap rss = (SiteMap) asm;
-        assertEquals("Incorrect items count", 7, rss.getSiteMapUrls().size());
+        assertEquals(7, rss.getSiteMapUrls().size(), "Incorrect items count");
         Iterator<SiteMapURL> it = rss.getSiteMapUrls().iterator();
         assertPubDate("Local differential offset", "article_1", pubDate + 1000, it);
         assertPubDate("Short year", "article_2", pubDate + 2000, it);
@@ -504,14 +556,14 @@ public class SiteMapParserTest {
     }
 
     private static void assertPubDate(String message, String path, Long pubDate, Iterator<SiteMapURL> it) {
-        assertTrue(message + " item missed", it.hasNext());
+        assertTrue(it.hasNext(), message + " item missed");
         SiteMapURL url = it.next();
-        assertEquals(message + " link", "http://www.example.com/" + path, url.getUrl().toString());
+        assertEquals("http://www.example.com/" + path, url.getUrl().toString(), message + " link");
         if (pubDate == null) {
-            assertNull(message + " pubDate not NULL", url.getLastModified());
+            assertNull(url.getLastModified(), message + " pubDate not NULL");
         } else {
-            assertNotNull(message + " pubDate is missing", url.getLastModified());
-            assertEquals(message + " pub date", pubDate.longValue(), url.getLastModified().getTime());
+            assertNotNull(url.getLastModified(), message + " pubDate is missing");
+            assertEquals(pubDate.longValue(), url.getLastModified().getTime(), message + " pub date");
         }
     }
 
@@ -562,9 +614,14 @@ public class SiteMapParserTest {
         SiteMapParser parser = new SiteMapParser(false);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">").append("<url>").append("<loc>").append("<url>")
-                        .append("<![CDATA[").append("http://jobs.optistaffing.com/EXPERIENCED-DISPATCHER-NEEDED-NOW----Jobs-in-Vancouver-WA/2333221").append("]]>").append("</url>").append("</loc>")
-                        .append("<lastmod>2015-04-28</lastmod>").append("<changefreq>daily</changefreq>").append("</url>").append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">") //
+                        .append("<url><loc><url>") //
+                        .append("<![CDATA[http://jobs.optistaffing.com/EXPERIENCED-DISPATCHER-NEEDED-NOW----Jobs-in-Vancouver-WA/2333221]]>") //
+                        .append("</url>").append("</loc>") //
+                        .append("<lastmod>2015-04-28</lastmod>") //
+                        .append("<changefreq>daily</changefreq>") //
+                        .append("</url></urlset>");
 
         byte[] content = scontent.toString().getBytes(UTF_8);
 
@@ -613,17 +670,40 @@ public class SiteMapParserTest {
     }
 
     /**
-     * Returns a good simple default XML sitemap as a byte array
+     * @return good simple default XML sitemap as UTF-8 encoded byte array
      */
     private byte[] getXMLSitemapAsBytes() {
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[0]).append("</loc>  <lastmod>2005-01-01</lastmod>").append("  <changefreq>monthly</changefreq>").append("  <priority>0.8</priority>")
-                        .append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[1]).append("</loc>  <changefreq>weekly</changefreq>").append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[2]).append("</loc>  <lastmod>2004-12-23</lastmod>").append("  <changefreq>weekly</changefreq>").append("</url>");
-        scontent.append("<url>  <loc>").append(SITEMAP_URLS[3]).append("</loc>  <lastmod>2004-12-23T18:00:15+00:00</lastmod>").append("  <priority>0.3</priority>").append("</url>");
-        scontent.append("<url>  <loc><url><![CDATA[").append(SITEMAP_URLS[4]).append("]]></url></loc>  <lastmod>2004-11-23</lastmod>").append("</url>");
+        return getXMLSitemapAsBytes(scontent);
+    }
+
+    /**
+     * See {@link #getXMLSitemapAsBytes()}.
+     * 
+     * @param scontent
+     *            The sitemap content is appended to the passed StringBuilder
+     *            which allows to prefix/suffix the sitemap content or get the
+     *            encoding from the StringBuilder in a different encoding (not
+     *            UTF-8).
+     * @return content of passed StringBuilder plus appended sitemap content as
+     *         UTF-8 encoded bytes
+     */
+    private byte[] getXMLSitemapAsBytes(StringBuilder scontent) {
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+        for (String[] surl : SITEMAP_URLS) {
+            scontent.append(" <url>\n  <loc>").append(surl[0]).append("</loc>\n");
+            if (surl[1] != null) {
+                scontent.append("  <lastmod>").append(surl[1]).append("</lastmod>\n");
+            }
+            if (surl[2] != null) {
+                scontent.append("  <changefreq>").append(surl[2]).append("</changefreq>\n");
+            }
+            if (surl[3] != null) {
+                scontent.append("  <priority>").append(surl[3]).append("</priority>\n");
+            }
+            scontent.append(" </url>\n");
+        }
         scontent.append("</urlset>");
 
         return scontent.toString().getBytes(UTF_8);
@@ -643,10 +723,22 @@ public class SiteMapParserTest {
         return IOUtils.toByteArray(is);
     }
 
-    private static String[] SITEMAP_URLS = { "http://www.example.com/", //
-                    "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", //
-                    "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", //
-                    "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", //
-                    "http://www.example.com/catalog?item=83&desc=vacation_usa" };
+    private static String[][] SITEMAP_URLS = { { "http://www.example.com/", "2005-01-01", "monthly", "0.8" },
+                    { "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", null, "weekly", null }, //
+                    { "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", "2004-12-23", "weekly", null }, //
+                    { "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", "2004-12-23T18:00:15&#43;00:00", null, "0.3" }, //
+                    { "http://www.example.com/catalog?item=83&amp;desc=vacation_usa", "2004-11-23", null, null } };
 
+    private static void validateSiteMapUrl(int i, SiteMapURL u) {
+        assertEquals(SITEMAP_URLS[i][0].replaceAll("&amp;", "&"), u.getUrl().toExternalForm());
+        if (SITEMAP_URLS[i][1] != null) {
+            assertNotNull(u.getLastModified(), "No <lastmod>" + SITEMAP_URLS[i][1] + "</lastmod>");
+        }
+        if (SITEMAP_URLS[i][2] != null) {
+            assertEquals(SITEMAP_URLS[i][2], u.getChangeFrequency().toString().toLowerCase(Locale.ROOT), "Wrong <changefreq>" + SITEMAP_URLS[i][2] + "</changefreq>");
+        }
+        if (SITEMAP_URLS[i][3] != null) {
+            assertEquals(Double.parseDouble(SITEMAP_URLS[i][3]), u.getPriority(), .0001, "Wrong <priority>" + SITEMAP_URLS[i][3] + "</priority>");
+        }
+    }
 }

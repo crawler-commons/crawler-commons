@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,26 +40,30 @@ import org.slf4j.LoggerFactory;
  * of the various domain registrars and their assignment policies. The best
  * publicly available knowledge base is the public suffix list maintained and
  * available at <a href="https://publicsuffix.org/">publicsuffix.org</a>. This
- * class implements the <a
- * href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and uses a
- * copy of the public suffix list. data file format.
+ * class implements the
+ * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
+ * uses a copy of the public suffix list.
  * 
  * For more information, see
  * <ul>
- * <li><a href="http://www.publicsuffix.org">publicsuffix.org</a></li>
+ * <li><a href="https://www.publicsuffix.org/">publicsuffix.org</a></li>
  * <li><a href="https://en.wikipedia.org/wiki/Public_Suffix_List">Wikipedia
  * article about the public suffix list</a></li>
- * <li>Mozilla's <a
- * href="http://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
+ * <li>Mozilla's
+ * <a href="https://wiki.mozilla.org/Gecko:Effective_TLD_Service">Effective TLD
  * Service</a>: for historic reasons the class name stems from the term
  * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
  * 
- * This class just needs "effective_tld_names.dat" in the classpath. If you want
- * to configure it with other data, call
- * {@link EffectiveTldFinder#getInstance() EffectiveTldFinder.getInstance()}
- * {@link EffectiveTldFinder#initialize(InputStream) .initialize(InputStream)}.
- * Updates to the public suffix list can be found here:
+ * EffectiveTldFinder loads the public suffix list as file
+ * "effective_tld_names.dat" from the Java classpath. Make sure your classpath
+ * does not contain any other file with the same name, eg. an outdated list
+ * shipped with a third party library. To force EffectiveTldFinder to load an
+ * updated or modified public suffix list, call
+ * {@link EffectiveTldFinder#getInstance()
+ * EffectiveTldFinder.getInstance()}{@link EffectiveTldFinder#initialize(InputStream)
+ * .initialize(InputStream)}. Updates to the public suffix list can be found
+ * here:
  * <ul>
  * <li><a href= "https://publicsuffix.org/list/public_suffix_list.dat"
  * >https://publicsuffix.org/list/public_suffix_list.dat</a></li>
@@ -94,16 +99,37 @@ public class EffectiveTldFinder {
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
 
+    /**
+     * Max. length in ASCII characters of a dot-separated segment in host names
+     * (applies to domain names as well), cf.
+     * https://tools.ietf.org/html/rfc1034#section-3.1 and
+     * https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames
+     * 
+     * Note: We only have to validate domain names and not the host names passed
+     * as input. For domain names a verification of the segment length also
+     * implies that the entire domain names stays in the limit of 253
+     * characters. Wildcard suffixes only allow two additional segments (2*63+1
+     * = 127 chars) and all wildcard suffixes are far away from reaching the
+     * critical length of 126 characters.
+     */
+    public static final int MAX_DOMAIN_LENGTH_PART = 63;
+
     private static EffectiveTldFinder instance = null;
     private Map<String, EffectiveTLD> domains = null;
     private SuffixTrie<EffectiveTLD> domainTrie = new SuffixTrie<>();
     private boolean configured = false;
 
     /**
-     * A singleton
+     * A singleton loading the public suffix list from the Java class path.
      */
     private EffectiveTldFinder() {
-        initialize(this.getClass().getResourceAsStream(ETLD_DATA));
+        URL publicSuffixList = this.getClass().getResource(ETLD_DATA);
+        LOGGER.info("Loading public suffix list from class path: {}", publicSuffixList);
+        try (InputStream is = publicSuffixList.openStream()) {
+            initialize(is);
+        } catch (IOException e) {
+            LOGGER.error("Failed to load public suffix list {} from class path: {}", publicSuffixList, e);
+        }
     }
 
     /**
@@ -152,9 +178,7 @@ public class EffectiveTldFinder {
             }
             configured = true;
         } catch (IOException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("EffectiveTldFinder configuration failed: ", e);
-            }
+            LOGGER.error("EffectiveTldFinder configuration failed: ", e);
             configured = false;
         }
         return configured;
@@ -222,6 +246,7 @@ public class EffectiveTldFinder {
                 if (offset == 0 || foundTld.isException() || !foundTld.isWild()) {
                     return res;
                 }
+
                 // wildcards create an open ETLD namespace
                 int wildcardOffset = hostname.lastIndexOf(DOT, offset - 2);
                 String retryTld;
@@ -232,7 +257,14 @@ public class EffectiveTldFinder {
                 } else {
                     retryTld = hostname.substring(wildcardOffset + 1);
                 }
-                foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
+
+                try {
+                    foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
+                } catch (IllegalArgumentException e) {
+                    // retryTld contains forbidden characters
+                    return null;
+                }
+
                 return new SuffixTrie.LookupResult<EffectiveTLD>(wildcardOffset + 1, foundTld);
             }
         }
@@ -319,6 +351,21 @@ public class EffectiveTldFinder {
                 break;
             start = pos + 1;
         }
+        String domainSegment = hostname.substring(start, etldStartPos);
+        if (!EffectiveTLD.isAscii(domainSegment)) {
+            try {
+                IDN.toASCII(domainSegment);
+            } catch (IllegalArgumentException e) {
+                // not a valid IDN segment,
+                // includes check for max. length (63 chars)
+                return (strict ? null : hostname);
+            }
+        } else if (strict) {
+            // (strict mode) check for max. length of segment (63 chars)
+            if (domainSegment.length() > MAX_DOMAIN_LENGTH_PART) {
+                return null;
+            }
+        }
         return hostname.substring(start);
     }
 
@@ -394,6 +441,17 @@ public class EffectiveTldFinder {
         }
     }
 
+    /**
+     * EffectiveTLD objects hold one line of the public suffix list:
+     * <ul>
+     * <li>the suffix (<code>com</code>, <code>co.uk</code>, etc.)</li>
+     * <li>for IDN suffixes: both the ASCII and IDN variant
+     * (<code>xn--p1ai</code> and <code>рф</code>)</li>
+     * <li>and the properties required to parse host/domain names given in the
+     * public suffix list (wildcard suffix, exception, in private domain
+     * section)</li>
+     * </ul>
+     */
     public static class EffectiveTLD {
 
         private boolean exception = false;
@@ -402,7 +460,20 @@ public class EffectiveTldFinder {
         private String domain = null;
         private String idn = null;
 
-        public EffectiveTLD(String line, boolean isPrivateDomain) {
+        /**
+         * Parse one non-empty, non-comment line in the public suffix list and
+         * hold the public suffix and its properties in the created object.
+         * 
+         * @param line
+         *            non-empty, non-comment line in the public suffix list
+         * @param isPrivateDomain
+         *            whether line is in the section of &quot;PRIVATE
+         *            DOMAINS&quot; of the public suffix list
+         * @throws IllegalArgumentException
+         *             if the input line contains non-ASCII Unicode characters
+         *             prohibited in IDNs, cf. {@link IDN#toASCII(String)}
+         */
+        public EffectiveTLD(String line, boolean isPrivateDomain) throws IllegalArgumentException {
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
                 domain = line.substring(EXCEPTION.length(), line.length());
@@ -421,7 +492,18 @@ public class EffectiveTldFinder {
             isPrivate = isPrivateDomain;
         }
 
-        private String normalizeName(String name) {
+        /**
+         * Normalize a domain name: convert characters into to lowercase and
+         * encode dot-separated segments containing non-ASCII characters. Cf.
+         * {@link #asciiConvert(String)} and {@link IDN#toASCII(String)}
+         * 
+         * @param str
+         *            domain name segment
+         * @return normalized domain name containing only ASCII characters
+         * @throws IllegalArgumentException
+         *             if the input contains prohibited characters
+         */
+        private String normalizeName(String name) throws IllegalArgumentException {
             String[] parts = name.split(DOT_REGEX);
             String[] ary = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
@@ -473,14 +555,24 @@ public class EffectiveTldFinder {
             return res;
         }
 
-        private String asciiConvert(String str) {
+        /**
+         * Converts a single domain name segment (separated by dots) to ASCII if
+         * it contains non-ASCII character, cf. {@link IDN#toASCII(String)}.
+         * 
+         * @param str
+         *            domain name segment
+         * @return ASCII "Punycode" representation of the domain name segment
+         * @throws IllegalArgumentException
+         *             if the input contains prohibited characters
+         */
+        private static String asciiConvert(String str) throws IllegalArgumentException {
             if (isAscii(str)) {
                 return str.toLowerCase(Locale.ROOT);
             }
             return IDN.toASCII(str);
         }
 
-        private boolean isAscii(String str) {
+        private static boolean isAscii(String str) {
             char[] chars = str.toCharArray();
             for (char c : chars) {
                 if (c > 127) {
