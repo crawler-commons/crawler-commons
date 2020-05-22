@@ -17,7 +17,7 @@
 package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Data model for Google extension to the sitemap protocol regarding images
@@ -128,4 +128,29 @@ public class ImageAttributes extends ExtensionMetadata {
                         && Objects.equals(license, that.license);
     }
 
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (loc != null) {
+            map.put("loc", new String[]{ loc.toString() });
+        }
+
+        if (caption != null) {
+            map.put("caption", new String[]{ caption });
+        }
+
+        if (geoLocation != null) {
+            map.put("geo_location", new String[]{ geoLocation });
+        }
+
+        if (title != null) {
+            map.put("title", new String[]{ title });
+        }
+
+        if (license != null) {
+            map.put("license", new String[]{ license.toString() });
+        }
+        return Collections.unmodifiableMap(map);
+    }
 }

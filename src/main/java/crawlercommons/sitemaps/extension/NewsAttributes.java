@@ -16,8 +16,8 @@
 package crawlercommons.sitemaps.extension;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Data model for Google's extension to the sitemap protocol regarding news
@@ -184,5 +184,43 @@ public class NewsAttributes extends ExtensionMetadata {
             sb.append(", keywords: ").append(String.join(", ", stockTickers));
         }
         return sb.toString();
+    }
+
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (name != null) {
+            map.put("name", new String[] { name });
+        }
+
+        if (title != null) {
+            map.put("title", new String[] { title });
+        }
+
+        if (language != null) {
+            map.put("language", new String[] { language });
+        }
+
+        if (publicationDate != null) {
+            map.put("publication_date", new String[] { publicationDate.toString() });
+        }
+
+        if (keywords != null) {
+            map.put("keywords", keywords);
+        }
+
+        if (genres != null) {
+            String[] genresStrArr = Arrays.stream(genres)
+                    .map(Enum::name)
+                    .toArray(String[]::new);
+            map.put("genres", genresStrArr);
+        }
+
+        if (stockTickers != null) {
+            map.put("stock_tickers", stockTickers);
+        }
+
+        return map;
     }
 }
