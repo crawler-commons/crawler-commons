@@ -18,10 +18,7 @@ package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Data model for Google extension to the sitemap protocol regarding images
@@ -551,4 +548,104 @@ public class VideoAttributes extends ExtensionMetadata {
         return thumbnailLoc != null && title != null && title.length() <= 100 && description != null && description.length() <= 2048 && (contentLoc != null || playerLoc != null);
     }
 
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (thumbnailLoc != null) {
+            map.put("thumbnail_loc", new String[] { thumbnailLoc.toString() });
+        }
+
+        if (title != null) {
+            map.put("title", new String[] { title });
+        }
+
+        if (description != null) {
+            map.put("description", new String[] { description });
+        }
+
+        if (contentLoc != null) {
+            map.put("content_loc", new String[] { contentLoc.toString() });
+        }
+
+        if (playerLoc != null) {
+            map.put("player_loc", new String[] { playerLoc.toString() });
+        }
+
+        if (expirationDate != null) {
+            map.put("expiration_date", new String[] { expirationDate.toString() });
+        }
+
+        if (rating != null) {
+            map.put("rating", new String[] { rating.toString() });
+        }
+
+        if (viewCount != null) {
+            map.put("view_count", new String[] { viewCount.toString() });
+        }
+
+        if (publicationDate != null) {
+            map.put("publication_date", new String[] { publicationDate.toString() });
+        }
+
+        if (familyFriendly != null) {
+            map.put("family_friendly", new String[] { familyFriendly.toString() });
+        }
+
+        if (tags != null) {
+            map.put("tags", tags);
+        }
+
+        if (category != null) {
+            map.put("category", new String[] { category });
+        }
+
+        if (restrictedCountries != null) {
+            map.put("restricted_countries", restrictedCountries);
+        }
+
+        if (allowedCountries != null) {
+            map.put("allowed_countries", allowedCountries);
+        }
+
+        if (galleryLoc != null) {
+            map.put("gallery_loc", new String[]{ galleryLoc.toString() });
+        }
+
+        if (galleryTitle != null) {
+            map.put("gallery_title", new String[]{ galleryTitle });
+        }
+
+        if (prices != null) {
+            String[] videoPricesArr = Arrays.stream(prices)
+                    .map(VideoPrice::toString)
+                    .toArray(String[]::new);
+            map.put("prices", videoPricesArr);
+        }
+
+        if (requiresSubscription != null) {
+            map.put("requires_subscription", new String[]{ requiresSubscription.toString() });
+        }
+
+        if (uploader != null) {
+            map.put("uploader", new String[]{ uploader });
+        }
+
+        if (uploaderInfo != null) {
+            map.put("uploader_info", new String[]{ uploaderInfo.toString() });
+        }
+
+        if (allowedPlatforms != null) {
+            map.put("allowed_platforms", allowedPlatforms);
+        }
+
+        if (restrictedPlatforms != null) {
+            map.put("restricted_platforms", restrictedPlatforms);
+        }
+
+        if (isLive != null) {
+            map.put("is_live", new String[]{ isLive.toString() });
+        }
+        return Collections.unmodifiableMap(map);
+    }
 }
