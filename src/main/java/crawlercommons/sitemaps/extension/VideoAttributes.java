@@ -18,7 +18,13 @@ package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Data model for Google extension to the sitemap protocol regarding images
