@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class VideoAttributesTest {
 
     @Test
-    public void testVideoAttributes() throws MalformedURLException {
+    public void testVideoAttributesAsMap() throws MalformedURLException {
         VideoAttributes attributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123.jpg"), "Grilling steaks for summer",
                 "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123.flv"), new URL("http://www.example.com/videoplayer.swf?video=123"));
         attributes.setDuration(600);
@@ -64,7 +64,7 @@ public class VideoAttributesTest {
     }
 
     @Test
-    public void testNullVideoAttributes() {
+    public void testNullVideoAttributesAsMap() {
         VideoAttributes attributes = new VideoAttributes(null, null, null, null, null);
         Map<String, String[]> map = attributes.asMap();
 
@@ -92,5 +92,4 @@ public class VideoAttributesTest {
         assertNull(map.get("restricted_platforms"));
         assertNull(map.get("is_live"));
     }
-
 }
