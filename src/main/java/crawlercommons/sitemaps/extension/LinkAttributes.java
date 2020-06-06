@@ -34,6 +34,10 @@ import java.util.Objects;
  * you to check for mistakes.</blockquote>
  */
 public class LinkAttributes extends ExtensionMetadata {
+
+    public static final String HREF = "href";
+    public static final String PARAMS = "params.%s";
+
     /**
      * Link's href attribute
      */
@@ -103,13 +107,13 @@ public class LinkAttributes extends ExtensionMetadata {
         Map<String, String[]> map = new HashMap<>();
 
         if (href != null) {
-            map.put("href", new String[]{ href.toString() });
+            map.put(HREF, new String[]{ href.toString() });
         }
 
         if (params != null) {
 
             for (Entry<String, String> entry : params.entrySet()) {
-                map.put(entry.getKey(), new String[] { entry.getValue() });
+                map.put(String.format(PARAMS, entry.getKey()), new String[] { entry.getValue() });
             }
         }
         return Collections.unmodifiableMap(map);

@@ -19,15 +19,15 @@ public class NewsAttributesTest {
         attributes.setStockTickers(new String[] { "NASDAQ:A", "NASDAQ:B" });
         Map<String, String[]> map = attributes.asMap();
 
-        assertEquals(attributes.getName(), map.get("name")[0]);
-        assertEquals(attributes.getTitle(), map.get("title")[0]);
-        assertEquals(attributes.getLanguage(), map.get("language")[0]);
-        assertEquals(attributes.getPublicationDateTime().toString(), map.get("publication_date")[0]);
-        assertArrayEquals(attributes.getKeywords(), map.get("keywords"));
-        assertArrayEquals(attributes.getStockTickers(), map.get("stock_tickers"));
+        assertEquals(attributes.getName(), map.get(NewsAttributes.NAME)[0]);
+        assertEquals(attributes.getTitle(), map.get(NewsAttributes.TITLE)[0]);
+        assertEquals(attributes.getLanguage(), map.get(NewsAttributes.LANGUAGE)[0]);
+        assertEquals(attributes.getPublicationDateTime().toString(), map.get(NewsAttributes.PUBLICATION_DATE)[0]);
+        assertArrayEquals(attributes.getKeywords(), map.get(NewsAttributes.KEYWORDS));
+        assertArrayEquals(attributes.getStockTickers(), map.get(NewsAttributes.STOCK_TICKERS));
         assertArrayEquals(Arrays.stream(attributes.getGenres())
                 .map(NewsAttributes.NewsGenre::toString)
-                .toArray(String[]::new), map.get("genres"));
+                .toArray(String[]::new), map.get(NewsAttributes.GENRES));
     }
 
     @Test
@@ -35,13 +35,13 @@ public class NewsAttributesTest {
         NewsAttributes attributes = new NewsAttributes(null, null, null, null);
         Map<String, String[]> map = attributes.asMap();
 
-        assertNull(map.get("name"));
-        assertNull(map.get("title"));
-        assertNull(map.get("language"));
-        assertNull(map.get("publication_date"));
-        assertNull(map.get("keywords"));
-        assertNull(map.get("stock_tickers"));
-        assertNull(map.get("genres"));
+        assertNull(map.get(NewsAttributes.NAME));
+        assertNull(map.get(NewsAttributes.TITLE));
+        assertNull(map.get(NewsAttributes.LANGUAGE));
+        assertNull(map.get(NewsAttributes.PUBLICATION_DATE));
+        assertNull(map.get(NewsAttributes.KEYWORDS));
+        assertNull(map.get(NewsAttributes.STOCK_TICKERS));
+        assertNull(map.get(NewsAttributes.GENRES));
     }
 
 }
