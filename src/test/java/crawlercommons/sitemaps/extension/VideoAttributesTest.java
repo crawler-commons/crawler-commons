@@ -36,31 +36,31 @@ public class VideoAttributesTest {
         attributes.setLive(false);
         Map<String, String[]> map = attributes.asMap();
 
-        assertEquals(attributes.getThumbnailLoc().toString(), map.get("thumbnail_loc")[0]);
-        assertEquals(attributes.getTitle(), map.get("title")[0]);
-        assertEquals(attributes.getDescription(), map.get("description")[0]);
-        assertEquals(attributes.getContentLoc().toString(), map.get("content_loc")[0]);
-        assertEquals(attributes.getPlayerLoc().toString(), map.get("player_loc")[0]);
-        assertEquals(attributes.getExpirationDateTime().toString(), map.get("expiration_date")[0]);
-        assertEquals(attributes.getRating().toString(), map.get("rating")[0]);
-        assertEquals(attributes.getViewCount().toString(), map.get("view_count")[0]);
-        assertEquals(attributes.getPublicationDateTime().toString(), map.get("publication_date")[0]);
-        assertEquals(attributes.getFamilyFriendly().toString(), map.get("family_friendly")[0]);
-        assertArrayEquals(attributes.getTags(), map.get("tags"));
-        assertEquals(attributes.getCategory(), map.get("category")[0]);
-        assertArrayEquals(attributes.getRestrictedCountries(), map.get("restricted_countries"));
-        assertArrayEquals(attributes.getAllowedCountries(), map.get("allowed_countries"));
-        assertEquals(attributes.getGalleryLoc().toString(), map.get("gallery_loc")[0]);
-        assertEquals(attributes.getGalleryTitle(), map.get("gallery_title")[0]);
+        assertEquals(attributes.getThumbnailLoc().toString(), map.get(VideoAttributes.THUMBNAIL_LOC)[0]);
+        assertEquals(attributes.getTitle(), map.get(VideoAttributes.TITLE)[0]);
+        assertEquals(attributes.getDescription(), map.get(VideoAttributes.DESCRIPTION)[0]);
+        assertEquals(attributes.getContentLoc().toString(), map.get(VideoAttributes.CONTENT_LOC)[0]);
+        assertEquals(attributes.getPlayerLoc().toString(), map.get(VideoAttributes.PLAYER_LOC)[0]);
+        assertEquals(attributes.getExpirationDateTime().toString(), map.get(VideoAttributes.EXPIRATION_DATE)[0]);
+        assertEquals(attributes.getRating().toString(), map.get(VideoAttributes.RATING)[0]);
+        assertEquals(attributes.getViewCount().toString(), map.get(VideoAttributes.VIEW_COUNT)[0]);
+        assertEquals(attributes.getPublicationDateTime().toString(), map.get(VideoAttributes.PUBLICATION_DATE)[0]);
+        assertEquals(attributes.getFamilyFriendly().toString(), map.get(VideoAttributes.FAMILY_FRIENDLY)[0]);
+        assertArrayEquals(attributes.getTags(), map.get(VideoAttributes.TAGS));
+        assertEquals(attributes.getCategory(), map.get(VideoAttributes.CATEGORY)[0]);
+        assertArrayEquals(attributes.getRestrictedCountries(), map.get(VideoAttributes.RESTRICTED_COUNTRIES));
+        assertArrayEquals(attributes.getAllowedCountries(), map.get(VideoAttributes.ALLOWED_COUNTRIES));
+        assertEquals(attributes.getGalleryLoc().toString(), map.get(VideoAttributes.GALLERY_LOC)[0]);
+        assertEquals(attributes.getGalleryTitle(), map.get(VideoAttributes.GALLERY_TITLE)[0]);
         assertArrayEquals(Arrays.stream(attributes.getPrices())
                 .map(VideoAttributes.VideoPrice::toString)
-                .toArray(String[]::new), map.get("prices"));
-        assertEquals(attributes.getRequiresSubscription().toString(), map.get("requires_subscription")[0]);
-        assertEquals(attributes.getUploader(), map.get("uploader")[0]);
-        assertEquals(attributes.getUploaderInfo().toString(), map.get("uploader_info")[0]);
-        assertArrayEquals(attributes.getAllowedPlatforms(), map.get("allowed_platforms"));
-        assertArrayEquals(attributes.getRestrictedPlatforms(), map.get("restricted_platforms"));
-        assertEquals(attributes.getLive().toString(), map.get("is_live")[0]);
+                .toArray(String[]::new), map.get(VideoAttributes.PRICES));
+        assertEquals(attributes.getRequiresSubscription().toString(), map.get(VideoAttributes.REQUIRES_SUBSCRIPTION)[0]);
+        assertEquals(attributes.getUploader(), map.get(VideoAttributes.UPLOADER)[0]);
+        assertEquals(attributes.getUploaderInfo().toString(), map.get(VideoAttributes.UPLOADER_INFO)[0]);
+        assertArrayEquals(attributes.getAllowedPlatforms(), map.get(VideoAttributes.ALLOWED_PLATFORMS));
+        assertArrayEquals(attributes.getRestrictedPlatforms(), map.get(VideoAttributes.RESTRICTED_PLATFORMS));
+        assertEquals(attributes.getLive().toString(), map.get(VideoAttributes.IS_LIVE)[0]);
     }
 
     @Test
@@ -68,28 +68,28 @@ public class VideoAttributesTest {
         VideoAttributes attributes = new VideoAttributes(null, null, null, null, null);
         Map<String, String[]> map = attributes.asMap();
 
-        assertNull(map.get("thumbnail_loc"));
-        assertNull(map.get("title"));
-        assertNull(map.get("description"));
-        assertNull(map.get("content_loc"));
-        assertNull(map.get("player_loc"));
-        assertNull(map.get("expiration_date"));
-        assertNull(map.get("rating"));
-        assertNull(map.get("view_count"));
-        assertNull(map.get("publication_date"));
-        assertNull(map.get("family_friendly"));
-        assertNull(map.get("tags"));
-        assertNull(map.get("category"));
-        assertNull(map.get("restricted_countries"));
-        assertNull(map.get("allowed_countries"));
-        assertNull(map.get("gallery_loc"));
-        assertNull(map.get("gallery_title"));
-        assertNull(map.get("prices"));
-        assertNull(map.get("requires_subscription"));
-        assertNull(map.get("uploader"));
-        assertNull(map.get("uploader_info"));
-        assertNull(map.get("allowed_platforms"));
-        assertNull(map.get("restricted_platforms"));
-        assertNull(map.get("is_live"));
+        assertNull(map.get(VideoAttributes.THUMBNAIL_LOC));
+        assertNull(map.get(VideoAttributes.TITLE));
+        assertNull(map.get(VideoAttributes.DESCRIPTION));
+        assertNull(map.get(VideoAttributes.CONTENT_LOC));
+        assertNull(map.get(VideoAttributes.PLAYER_LOC));
+        assertNull(map.get(VideoAttributes.EXPIRATION_DATE));
+        assertNull(map.get(VideoAttributes.RATING));
+        assertNull(map.get(VideoAttributes.VIEW_COUNT));
+        assertNull(map.get(VideoAttributes.PUBLICATION_DATE));
+        assertNull(map.get(VideoAttributes.FAMILY_FRIENDLY));
+        assertNull(map.get(VideoAttributes.TAGS));
+        assertNull(map.get(VideoAttributes.CATEGORY));
+        assertNull(map.get(VideoAttributes.RESTRICTED_COUNTRIES));
+        assertNull(map.get(VideoAttributes.ALLOWED_COUNTRIES));
+        assertNull(map.get(VideoAttributes.GALLERY_LOC));
+        assertNull(map.get(VideoAttributes.GALLERY_TITLE));
+        assertNull(map.get(VideoAttributes.PRICES));
+        assertNull(map.get(VideoAttributes.REQUIRES_SUBSCRIPTION));
+        assertNull(map.get(VideoAttributes.UPLOADER));
+        assertNull(map.get(VideoAttributes.UPLOADER_INFO));
+        assertNull(map.get(VideoAttributes.ALLOWED_PLATFORMS));
+        assertNull(map.get(VideoAttributes.RESTRICTED_PLATFORMS));
+        assertNull(map.get(VideoAttributes.IS_LIVE));
     }
 }

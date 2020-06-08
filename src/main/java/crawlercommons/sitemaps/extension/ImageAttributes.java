@@ -17,13 +17,23 @@
 package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Data model for Google extension to the sitemap protocol regarding images
  * indexing, as per http://www.google.com/schemas/sitemap-image/1.1
  */
 public class ImageAttributes extends ExtensionMetadata {
+
+    public static final String LOC = "loc";
+    public static final String CAPTION = "caption";
+    public static final String GEO_LOCATION = "geo_location";
+    public static final String TITLE = "title";
+    public static final String LICENSE = "license";
+
     /**
      * Image location attribute found under image/loc (required)
      */
@@ -133,23 +143,23 @@ public class ImageAttributes extends ExtensionMetadata {
         Map<String, String[]> map = new HashMap<>();
 
         if (loc != null) {
-            map.put("loc", new String[]{ loc.toString() });
+            map.put(LOC, new String[]{ loc.toString() });
         }
 
         if (caption != null) {
-            map.put("caption", new String[]{ caption });
+            map.put(CAPTION, new String[]{ caption });
         }
 
         if (geoLocation != null) {
-            map.put("geo_location", new String[]{ geoLocation });
+            map.put(GEO_LOCATION, new String[]{ geoLocation });
         }
 
         if (title != null) {
-            map.put("title", new String[]{ title });
+            map.put(TITLE, new String[]{ title });
         }
 
         if (license != null) {
-            map.put("license", new String[]{ license.toString() });
+            map.put(LICENSE, new String[]{ license.toString() });
         }
         return Collections.unmodifiableMap(map);
     }

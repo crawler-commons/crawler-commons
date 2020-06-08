@@ -23,9 +23,9 @@ public class LinkAttributesTest {
             }});
         Map<String, String[]> map = attributes.asMap();
 
-        assertEquals(attributes.getHref().toString(), map.get("href")[0]);
-        assertEquals(attributes.getParams().get("rel"), map.get("rel")[0]);
-        assertEquals(attributes.getParams().get("hreflang"), map.get("hreflang")[0]);
+        assertEquals(attributes.getHref().toString(), map.get(LinkAttributes.HREF)[0]);
+        assertEquals(attributes.getParams().get("rel"), map.get("params.rel")[0]);
+        assertEquals(attributes.getParams().get("hreflang"), map.get("params.hreflang")[0]);
     }
 
     @Test
@@ -33,6 +33,6 @@ public class LinkAttributesTest {
         LinkAttributes attributes = new LinkAttributes(null);
         Map<String, String[]> map = attributes.asMap();
 
-        assertNull(map.get("href"));
+        assertNull(map.get(LinkAttributes.HREF));
     }
 }
