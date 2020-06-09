@@ -36,7 +36,11 @@ import java.util.Objects;
 public class LinkAttributes extends ExtensionMetadata {
 
     public static final String HREF = "href";
-    public static final String PARAMS = "params.%s";
+
+    /**
+     * Specifies the prefix used when adding Link Attribute parameters to the Map returned by asMap
+     */
+    private static final String PARAMS_PREFIX = "params.%s";
 
     /**
      * Link's href attribute
@@ -113,7 +117,7 @@ public class LinkAttributes extends ExtensionMetadata {
         if (params != null) {
 
             for (Entry<String, String> entry : params.entrySet()) {
-                map.put(String.format(PARAMS, entry.getKey()), new String[] { entry.getValue() });
+                map.put(String.format(PARAMS_PREFIX, entry.getKey()), new String[] { entry.getValue() });
             }
         }
         return Collections.unmodifiableMap(map);
