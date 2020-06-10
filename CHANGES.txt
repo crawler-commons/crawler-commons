@@ -13,6 +13,7 @@ Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
 - EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Avi Hayun) #251
 - Upgrade unit tests to use JUnit v5.x and parameterized tests (Avi Hayun) #249, #253, #255
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
+- Adding asMap() to ExtensionMetadata Interface #288
 
 Release 1.0 (2019-03-19)
 - [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
