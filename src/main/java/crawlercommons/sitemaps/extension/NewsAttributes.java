@@ -161,7 +161,7 @@ public class NewsAttributes extends ExtensionMetadata {
         return Objects.equals(name, that.name) //
                         && Objects.equals(language, that.language) //
                         && Objects.equals(title, that.title) //
-                        && Objects.equals(publicationDate, that.publicationDate) //
+                        && Objects.equals(publicationDate, publicationDate) //
                         && Objects.deepEquals(keywords, that.keywords) //
                         && Objects.deepEquals(genres, that.genres) //
                         && Objects.deepEquals(stockTickers, that.stockTickers);
