@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Adding asMap to ExtensionMetadata Interface (evanhalley)  #288
 - [Robots] Upgrade the toString() method of the Base/Simple RobotRules (Avi Hayun) #264
 - Upgrade GitIgnore (Avi Hayun) #260
 - [Robots] Deduplicate sitemap links (sebastian-nagel) #261
