@@ -17,6 +17,9 @@
 package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -32,6 +35,14 @@ import java.util.Objects;
  * you to check for mistakes.</blockquote>
  */
 public class LinkAttributes extends ExtensionMetadata {
+
+    public static final String HREF = "href";
+
+    /**
+     * Specifies the prefix used when adding Link Attribute parameters to the Map returned by asMap
+     */
+    private static final String PARAMS_PREFIX = "params.%s";
+
     /**
      * Link's href attribute
      */
@@ -96,4 +107,20 @@ public class LinkAttributes extends ExtensionMetadata {
                         && Objects.equals(params, that.params);
     }
 
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (href != null) {
+            map.put(HREF, new String[]{ href.toString() });
+        }
+
+        if (params != null) {
+
+            for (Entry<String, String> entry : params.entrySet()) {
+                map.put(String.format(Locale.ROOT, PARAMS_PREFIX, entry.getKey()), new String[] { entry.getValue() });
+            }
+        }
+        return Collections.unmodifiableMap(map);
+    }
 }

@@ -16,14 +16,26 @@
 package crawlercommons.sitemaps.extension;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
 
 /**
  * Data model for Google's extension to the sitemap protocol regarding news
  * indexing, as per http://www.google.com/schemas/sitemap-news/0.9
  */
 public class NewsAttributes extends ExtensionMetadata {
+
+    public static final String NAME = "name";
+    public static final String LANGUAGE = "language";
+    public static final String GENRES = "genres";
+    public static final String PUBLICATION_DATE = "publication_date";
+    public static final String TITLE = "title";
+    public static final String KEYWORDS = "keywords";
+    public static final String STOCK_TICKERS = "stock_tickers";
 
     public static enum NewsGenre {
         Blog, OpEd, Opinion, PressRelease, Satire, UserGenerated
@@ -184,5 +196,43 @@ public class NewsAttributes extends ExtensionMetadata {
             sb.append(", keywords: ").append(String.join(", ", stockTickers));
         }
         return sb.toString();
+    }
+
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (name != null) {
+            map.put(NAME, new String[] { name });
+        }
+
+        if (title != null) {
+            map.put(TITLE, new String[] { title });
+        }
+
+        if (language != null) {
+            map.put(LANGUAGE, new String[] { language });
+        }
+
+        if (publicationDate != null) {
+            map.put(PUBLICATION_DATE, new String[] { publicationDate.toString() });
+        }
+
+        if (keywords != null) {
+            map.put(KEYWORDS, keywords);
+        }
+
+        if (genres != null) {
+            String[] genresStrArr = Arrays.stream(genres)
+                    .map(Enum::name)
+                    .toArray(String[]::new);
+            map.put(GENRES, genresStrArr);
+        }
+
+        if (stockTickers != null) {
+            map.put(STOCK_TICKERS, stockTickers);
+        }
+
+        return map;
     }
 }

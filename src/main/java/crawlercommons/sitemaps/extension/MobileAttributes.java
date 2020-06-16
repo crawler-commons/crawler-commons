@@ -16,6 +16,9 @@
 
 package crawlercommons.sitemaps.extension;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * Google mobile sitemap attributes, see
  * http://www.google.de/schemas/sitemap-mobile/1.0/ and
@@ -27,7 +30,7 @@ public class MobileAttributes extends ExtensionMetadata {
 
     @Override
     public String toString() {
-        return "Mobile content avaiblabe: yes";
+        return "Mobile content available: yes";
     }
 
     @Override
@@ -39,6 +42,11 @@ public class MobileAttributes extends ExtensionMetadata {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Map<String, String[]> asMap() {
+        return Collections.emptyMap();
     }
 
 }

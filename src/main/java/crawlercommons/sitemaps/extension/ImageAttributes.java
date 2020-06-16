@@ -17,6 +17,9 @@
 package crawlercommons.sitemaps.extension;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -24,6 +27,13 @@ import java.util.Objects;
  * indexing, as per http://www.google.com/schemas/sitemap-image/1.1
  */
 public class ImageAttributes extends ExtensionMetadata {
+
+    public static final String LOC = "loc";
+    public static final String CAPTION = "caption";
+    public static final String GEO_LOCATION = "geo_location";
+    public static final String TITLE = "title";
+    public static final String LICENSE = "license";
+
     /**
      * Image location attribute found under image/loc (required)
      */
@@ -128,4 +138,29 @@ public class ImageAttributes extends ExtensionMetadata {
                         && Objects.equals(license, that.license);
     }
 
+    @Override
+    public Map<String, String[]> asMap() {
+        Map<String, String[]> map = new HashMap<>();
+
+        if (loc != null) {
+            map.put(LOC, new String[]{ loc.toString() });
+        }
+
+        if (caption != null) {
+            map.put(CAPTION, new String[]{ caption });
+        }
+
+        if (geoLocation != null) {
+            map.put(GEO_LOCATION, new String[]{ geoLocation });
+        }
+
+        if (title != null) {
+            map.put(TITLE, new String[]{ title });
+        }
+
+        if (license != null) {
+            map.put(LICENSE, new String[]{ license.toString() });
+        }
+        return Collections.unmodifiableMap(map);
+    }
 }
