@@ -183,7 +183,7 @@ public class SiteMapParserExtensionTest {
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
-        ZonedDateTime dt = ZonedDateTime.parse("2008-11-23T00:00:00+00:00");
+        ZonedDateTime dt = ZonedDateTime.parse("2008-12-23T00:00:00+00:00");
         NewsAttributes expectedNewsAttributes = new NewsAttributes("The Example Times", "en", dt, "Companies A, B in Merger Talks");
         expectedNewsAttributes.setKeywords(new String[] { "business", "merger", "acquisition", "A", "B" });
         expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.PressRelease, NewsAttributes.NewsGenre.Blog });

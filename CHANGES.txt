@@ -15,6 +15,7 @@ Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
 - Upgrade unit tests to use JUnit v5.x and parameterized tests (Avi Hayun) #249, #253, #255
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
 - Adding asMap() to ExtensionMetadata Interface #288
+- NewsAttribute.equals() compares the instance variable PublicationDate with itself. #289
 
 Release 1.0 (2019-03-19)
 - [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238
