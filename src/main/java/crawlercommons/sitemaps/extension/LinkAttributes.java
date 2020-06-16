@@ -19,6 +19,7 @@ package crawlercommons.sitemaps.extension;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -117,7 +118,7 @@ public class LinkAttributes extends ExtensionMetadata {
         if (params != null) {
 
             for (Entry<String, String> entry : params.entrySet()) {
-                map.put(String.format(PARAMS_PREFIX, entry.getKey()), new String[] { entry.getValue() });
+                map.put(String.format(Locale.ROOT, PARAMS_PREFIX, entry.getKey()), new String[] { entry.getValue() });
             }
         }
         return Collections.unmodifiableMap(map);
