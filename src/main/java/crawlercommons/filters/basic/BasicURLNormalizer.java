@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -70,12 +71,62 @@ public class BasicURLNormalizer extends URLFilter {
              * when found in a URI, should be decoded to their corresponding
              * unreserved characters by URI normalizers.
              */
-            if ((0x41 <= c && c <= 0x5A) || (0x61 <= c && c <= 0x7A) || (0x30 <= c && c <= 0x39) || c == 0x2D || c == 0x2E || c == 0x5F || c == 0x7E) {
+            if (isAlphaNumeric(c) || c == 0x2D || c == 0x2E || c == 0x5F || c == 0x7E) {
                 unescapedCharacters[c] = true;
             } else {
                 unescapedCharacters[c] = false;
             }
         }
+    }
+
+    /**
+     * look-up table for characters which should always be escaped in URL path
+     * and query, cf. https://url.spec.whatwg.org/#percent-encoded-bytes and
+     * https://en.wikipedia.org/wiki/Percent-encoding
+     */
+    private final static boolean[] escapedCharacters = new boolean[128];
+    static {
+        for (int c = 0; c < 128; c++) {
+            if (unescapedCharacters[c]) {
+                escapedCharacters[c] = false;
+            } else if (c <= 0x1F // control characters
+                            || c == 0x20 // space
+                            || c == 0x22 // "
+                            || c == 0x23 // #
+                            || c == 0x3C // <
+                            || c == 0x3E // >
+                            || c == 0x5B // [
+                            || c == 0x5D // ]
+                            || c == 0x5E // ^
+                            || c == 0x60 // `
+                            || c == 0x7B // {
+                            || c == 0x7C // |
+                            || c == 0x7D // }
+                            || c == 0x7F // DEL
+            ) {
+                escapedCharacters[c] = true;
+            } else {
+                LOG.debug("Character {} ({}) not handled as escaped or unescaped", c, (char) c);
+            }
+        }
+    }
+
+    private static boolean isAlphaNumeric(int c) {
+        return (0x41 <= c && c <= 0x5A) || (0x61 <= c && c <= 0x7A) || (0x30 <= c && c <= 0x39);
+    }
+
+    private static boolean isHexCharacter(int c) {
+        return (0x41 <= c && c <= 0x46) || (0x61 <= c && c <= 0x66) || (0x30 <= c && c <= 0x39);
+    }
+
+    private static boolean isAscii(String str) {
+        char[] chars = str.toCharArray();
+        for (char c : chars) {
+            if (c > 127) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -100,6 +151,7 @@ public class BasicURLNormalizer extends URLFilter {
         String file = url.getFile();
 
         boolean changed = false;
+        boolean normalizePath = false;
 
         if (!urlString.startsWith(protocol)) // protocol was lowercased
             changed = true;
@@ -107,8 +159,13 @@ public class BasicURLNormalizer extends URLFilter {
         if ("http".equals(protocol) || "https".equals(protocol) || "ftp".equals(protocol)) {
 
             if (host != null && url.getAuthority() != null) {
-                String newHost = host.toLowerCase(Locale.ROOT); // lowercase
-                                                                // host
+                String newHost;
+                try {
+                    newHost = normalizeHostName(host);
+                } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+                    LOG.info("Invalid hostname: {}", host, e);
+                    return null;
+                }
                 if (!host.equals(newHost)) {
                     host = newHost;
                     changed = true;
@@ -127,30 +184,22 @@ public class BasicURLNormalizer extends URLFilter {
                 changed = true;
             }
 
+            normalizePath = true;
             if (file == null || "".equals(file)) { // add a slash
                 file = "/";
                 changed = true;
+                normalizePath = false; // no further path normalization required
             } else if (!file.startsWith("/")) {
-              file = "/" + file;
-              changed = true;
+                file = "/" + file;
+                changed = true;
+                normalizePath = false; // no further path normalization required
             }
 
             if (url.getRef() != null) { // remove the ref
                 changed = true;
             }
-
-            // check for unnecessary use of "/../", "/./", and "//"
-            String file2 = null;
-            try {
-                file2 = getFileWithNormalizedPath(url);
-            } catch (MalformedURLException e) {
-                LOG.info("Malformed URL {}", url);
-                return null;
-            }
-            if (!file.equals(file2)) {
-                changed = true;
-                file = file2;
-            }
+        } else if (protocol.equals("file")) {
+            normalizePath = true;
         }
 
         // properly encode characters in path/file using percent-encoding
@@ -161,11 +210,28 @@ public class BasicURLNormalizer extends URLFilter {
             file = file2;
         }
 
+        if (normalizePath) {
+            // check for unnecessary use of "/../", "/./", and "//"
+            try {
+                if (changed) {
+                    url = new URL(protocol, host, port, file);
+                }
+                file2 = getFileWithNormalizedPath(url);
+                if (!file.equals(file2)) {
+                    changed = true;
+                    file = file2;
+                }
+            } catch (MalformedURLException e) {
+                LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
+                return null;
+            }
+        }
+
         if (changed)
             try {
                 urlString = new URL(protocol, host, port, file).toString();
             } catch (MalformedURLException e) {
-                LOG.info("Malformed URL {}{}{}{}", protocol, host, port, file);
+                LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
                 return null;
             }
 
@@ -183,7 +249,7 @@ public class BasicURLNormalizer extends URLFilter {
                 // URI.normalize() does not normalize leading dot segments,
                 // see also http://tools.ietf.org/html/rfc3986#section-5.2.4
                 int start = 0;
-                while (file.startsWith("/../", start)) {
+                while (file.startsWith("/..", start) && ((start + 3) == file.length() || file.charAt(3) == '/')) {
                     start += 3;
                 }
                 if (start > 0) {
@@ -208,8 +274,8 @@ public class BasicURLNormalizer extends URLFilter {
 
     /**
      * Remove % encoding from path segment in URL for characters which should be
-     * unescaped according to <a
-     * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
+     * unescaped according to
+     * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
     private String unescapePath(String path) {
         StringBuilder sb = new StringBuilder();
@@ -230,7 +296,7 @@ public class BasicURLNormalizer extends URLFilter {
 
             if (letter < 128 && unescapedCharacters[letter]) {
                 // character should be unescaped in URLs
-                sb.append(new Character((char) letter));
+                sb.append(Character.valueOf((char) letter));
             } else {
                 // Append the encoded character as uppercase
                 sb.append(matcher.group().toUpperCase(Locale.ROOT));
@@ -246,22 +312,23 @@ public class BasicURLNormalizer extends URLFilter {
             sb.append(path.substring(end + 1, letter));
         }
 
-        // Ok!
         return sb.toString();
     }
 
     /**
      * Convert path segment of URL from Unicode to UTF-8 and escape all
-     * characters which should be escaped according to <a
-     * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>..
+     * characters which should be escaped according to
+     * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>..
      */
     private String escapePath(String path) {
         StringBuilder sb = new StringBuilder(path.length());
 
         // Traverse over all bytes in this URL
-        for (byte b : path.getBytes(UTF_8)) {
+        byte[] bytes = path.getBytes(UTF_8);
+        for (int i = 0; i < bytes.length; i++) {
+            byte b = bytes[i];
             // Is this a control character?
-            if (b < 33 || b == 91 || b == 93) {
+            if (b < 0 || escapedCharacters[b]) {
                 // Start escape sequence
                 sb.append('%');
 
@@ -276,6 +343,25 @@ public class BasicURLNormalizer extends URLFilter {
                     // No, append this hexadecimal representation
                     sb.append(hex);
                 }
+            } else if (b == 0x25) {
+                // percent sign (%): read-ahead to check whether a valid escape
+                // sequence
+                if ((i + 2) >= bytes.length) {
+                    // need at least two more characters
+                    sb.append("%25");
+                } else {
+                    byte e1 = bytes[i + 1];
+                    byte e2 = bytes[i + 2];
+                    if (isHexCharacter(e1) && isHexCharacter(e2)) {
+                        // valid percent encoding, output and fast-forward
+                        i += 2;
+                        sb.append((char) b);
+                        sb.append((char) e1);
+                        sb.append((char) e2);
+                    } else {
+                        sb.append("%25");
+                    }
+                }
             } else {
                 // No, just append this character as-is
                 sb.append((char) b);
@@ -283,6 +369,35 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         return sb.toString();
+    }
+
+    private String normalizeHostName(String host) throws IllegalArgumentException, IndexOutOfBoundsException {
+
+        /* 1. lowercase host name */
+        host = host.toLowerCase(Locale.ROOT);
+
+        /*
+         * 2. convert between Unicode and ASCII forms for Internationalized
+         * Domain Names (IDNs)
+         */
+        if (!isAscii(host)) {
+            /*
+             * IllegalArgumentException: thrown if the input string contains
+             * non-convertible Unicode codepoints
+             * 
+             * IndexOutOfBoundsException: thrown (undocumented) if one "label"
+             * (non-ASCII dot-separated segment) is longer than 256 characters,
+             * cf. https://bugs.openjdk.java.net/browse/JDK-6806873
+             */
+            host = IDN.toASCII(host);
+        }
+
+        /* 3. trim a trailing dot */
+        if (host.endsWith(".")) {
+            host = host.substring(0, host.length() - 1);
+        }
+
+        return host;
     }
 
     public static void main(String args[]) throws IOException {
