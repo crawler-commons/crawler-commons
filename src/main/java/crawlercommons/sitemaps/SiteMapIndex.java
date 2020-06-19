@@ -19,7 +19,10 @@ package crawlercommons.sitemaps;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SiteMapIndex extends AbstractSiteMap {
 
@@ -39,6 +42,21 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return a Collection of Sitemaps in this Sitemap Index.
      */
     public Collection<AbstractSiteMap> getSitemaps() {
+        return sitemaps;
+    }
+
+    /**
+     * @param deduplicate
+     *            deduplicate sitemaps by URL: from two or more sitemaps
+     *            pointing to the same URL only the first is kept in the
+     *            returned collection
+     * @return the (deduplicated) Collection of Sitemaps in this Sitemap Index.
+     */
+    public Collection<AbstractSiteMap> getSitemaps(boolean deduplicate) {
+        if (deduplicate) {
+            Set<String> urls = new HashSet<>(sitemaps.size());
+            return sitemaps.stream().filter(s -> urls.add(s.url.toString())).collect(Collectors.toList());
+        }
         return sitemaps;
     }
 
