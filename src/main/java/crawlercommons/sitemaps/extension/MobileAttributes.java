@@ -26,6 +26,7 @@ import java.util.Map;
  * <blockquote>Mobile sitemaps just contain an empty "mobile" tag to identify a
  * URL as having mobile content.</blockquote>
  */
+@SuppressWarnings("serial")
 public class MobileAttributes extends ExtensionMetadata {
 
     @Override

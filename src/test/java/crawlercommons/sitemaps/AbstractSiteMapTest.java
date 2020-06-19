@@ -18,11 +18,18 @@ package crawlercommons.sitemaps;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -125,5 +132,45 @@ public class AbstractSiteMapTest {
         String datestr1 = SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(date1);
         String datestr2 = SiteMap.W3C_FULLDATE_FORMATTER_UTC.format(date2);
         assertEquals(datestr1, datestr2, "Failed to format date");
+    }
+
+    /**
+     * Test whether a sitemap is serializable. To be called in sitemap parser
+     * tests on all types of sitemaps (index, with extensions, etc.)
+     */
+    public static void testSerializable(AbstractSiteMap sitemap) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(sitemap);
+            oos.flush();
+            oos.close();
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            AbstractSiteMap s = (AbstractSiteMap) ois.readObject();
+            ois.close();
+
+            assertNotNull(s);
+            assertEquals(sitemap.getClass(), s.getClass());
+            assertEquals(sitemap.getType(), s.getType());
+            assertEquals(sitemap.isIndex(), s.isIndex());
+            assertEquals(sitemap.getLastModified(), s.getLastModified());
+            assertEquals(sitemap.url.toString(), s.url.toString());
+
+            if (sitemap instanceof SiteMap) {
+                assertEquals(((SiteMap) sitemap).getSiteMapUrls(), ((SiteMap) s).getSiteMapUrls());
+            } else if (sitemap instanceof SiteMapIndex) {
+                Collection<AbstractSiteMap> sitemaps1 = ((SiteMapIndex) sitemap).getSitemaps();
+                Collection<AbstractSiteMap> sitemaps2 = ((SiteMapIndex) s).getSitemaps();
+                assertEquals(sitemaps1.size(), sitemaps2.size());
+                Iterator<AbstractSiteMap> i1 = sitemaps1.iterator(), i2 = sitemaps2.iterator();
+                while (i1.hasNext() && i2.hasNext()) {
+                    assertEquals(i1.next().getUrl().toString(), i2.next().getUrl().toString());
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            fail("Failed to serialize sitemap " + sitemap, e);
+        }
     }
 }

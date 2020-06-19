@@ -18,13 +18,15 @@ package crawlercommons.sitemaps.extension;
 
 import crawlercommons.sitemaps.SiteMapURL;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Container for attributes of a {@link SiteMapURL} defined by a sitemap
  * extension.
  */
-public abstract class ExtensionMetadata {
+@SuppressWarnings("serial")
+public abstract class ExtensionMetadata implements Serializable {
 
     public abstract boolean equals(Object other);
 

@@ -76,6 +76,7 @@ public class SiteMapParserTest {
         URL url = new URL("http://www.example.com/sitemapindex.xml");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMapTest.testSerializable(asm);
         assertEquals(true, asm.isIndex());
         assertEquals(true, asm instanceof SiteMapIndex);
 
@@ -160,6 +161,7 @@ public class SiteMapParserTest {
         URL url = new URL("http://www.example.com/sitemap.txt");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMapTest.testSerializable(asm);
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
 
@@ -207,6 +209,7 @@ public class SiteMapParserTest {
         URL url = new URL("http://www.example.com/sitemap.xml");
 
         AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMapTest.testSerializable(asm);
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
 
@@ -256,7 +259,7 @@ public class SiteMapParserTest {
 
     /** This Sitemap contains badly formatted XML and can't be read */
     @Test
-    public void testSitemapParserBrokenXml() throws IOException, UnknownFormatException {
+    public void testSitemapParserBrokenXml() {
         Assertions.assertThrows(UnknownFormatException.class, () -> {
             SiteMapParser parser = new SiteMapParser();
             String contentType = "text/xml";
@@ -407,7 +410,7 @@ public class SiteMapParserTest {
     }
 
     @Test
-    public void testSitemapWithInvalidContent() throws UnknownFormatException, IOException {
+    public void testSitemapWithInvalidContent() {
         Assertions.assertThrows(UnknownFormatException.class, () -> {
             SiteMapParser parser = new SiteMapParser();
             String contentType = "application/octet-stream";
@@ -453,6 +456,8 @@ public class SiteMapParserTest {
         URL url = new URL("http://example.org/atom.xml");
 
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
+        AbstractSiteMapTest.testSerializable(sm);
+
         assertEquals(1, sm.getSiteMapUrls().size());
         SiteMapURL smu = sm.getSiteMapUrls().iterator().next();
         assertEquals(new URL("http://example.org/2003/12/13/atom03"), smu.getUrl());
@@ -468,6 +473,8 @@ public class SiteMapParserTest {
         URL url = new URL("https://www.example.com/index.php?feed/rss");
 
         SiteMap sm = (SiteMap) parser.parseSiteMap(content, url);
+        AbstractSiteMapTest.testSerializable(sm);
+
         assertEquals(4, sm.getSiteMapUrls().size());
         Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
         SiteMapURL smu = it.next();

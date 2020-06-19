@@ -16,6 +16,7 @@
 
 package crawlercommons.sitemaps.extension;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import java.util.Objects;
  * Data model for Google extension to the sitemap protocol regarding images
  * indexing, as per http://www.google.com/schemas/sitemap-video/1.1
  */
+@SuppressWarnings("serial")
 public class VideoAttributes extends ExtensionMetadata {
 
     public static final String THUMBNAIL_LOC = "thumbnail_loc";
@@ -437,7 +439,7 @@ public class VideoAttributes extends ExtensionMetadata {
         SD, HD
     }
 
-    public static final class VideoPrice {
+    public static final class VideoPrice implements Serializable {
         /**
          * Video price currency found under video/price[@currency] (required)
          */

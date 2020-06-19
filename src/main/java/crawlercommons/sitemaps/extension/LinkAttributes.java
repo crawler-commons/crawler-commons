@@ -34,6 +34,7 @@ import java.util.Objects;
  * though you might want to keep them in the same order to make them easier for
  * you to check for mistakes.</blockquote>
  */
+@SuppressWarnings("serial")
 public class LinkAttributes extends ExtensionMetadata {
 
     public static final String HREF = "href";

@@ -16,6 +16,7 @@
 
 package crawlercommons.sitemaps;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.Year;
@@ -31,7 +32,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /** SiteMap or SiteMapIndex **/
-public abstract class AbstractSiteMap {
+@SuppressWarnings("serial")
+public abstract class AbstractSiteMap  implements Serializable {
 
     /** Various Sitemap types */
     public enum SitemapType {
