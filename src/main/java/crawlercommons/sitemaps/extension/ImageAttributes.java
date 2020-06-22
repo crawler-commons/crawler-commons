@@ -26,6 +26,7 @@ import java.util.Objects;
  * Data model for Google extension to the sitemap protocol regarding images
  * indexing, as per http://www.google.com/schemas/sitemap-image/1.1
  */
+@SuppressWarnings("serial")
 public class ImageAttributes extends ExtensionMetadata {
 
     public static final String LOC = "loc";

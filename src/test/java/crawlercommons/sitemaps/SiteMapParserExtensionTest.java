@@ -30,16 +30,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SiteMapParserExtensionTest {
 
+    private AbstractSiteMap parse(SiteMapParser parser, String resourcePath, URL url) throws IOException, UnknownFormatException {
+        byte[] content = SiteMapParserTest.getResourceAsBytes(resourcePath);
+        AbstractSiteMap asm = parser.parseSiteMap("text/xml", content, url);
+        AbstractSiteMapTest.testSerializable(asm);
+        return asm;
+    }
+
     @Test
     public void testVideosSitemap() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.VIDEO);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-videos.xml");
-
         URL url = new URL("http://www.example.com/sitemap-video.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-videos.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -95,11 +100,9 @@ public class SiteMapParserExtensionTest {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.IMAGE);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-images.xml");
-
         URL url = new URL("http://www.example.com/sitemap-images.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-images.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -127,11 +130,9 @@ public class SiteMapParserExtensionTest {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.LINKS);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-links.xml");
-
         URL url = new URL("http://www.example.com/sitemap-links.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-links.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -174,11 +175,9 @@ public class SiteMapParserExtensionTest {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.NEWS);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-news.xml");
-
         URL url = new URL("http://www.example.org/sitemap-news.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-news.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -200,11 +199,9 @@ public class SiteMapParserExtensionTest {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.MOBILE);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/sitemap-mobile.xml");
-
         URL url = new URL("http://www.example.org/sitemap-mobile.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-mobile.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -227,11 +224,9 @@ public class SiteMapParserExtensionTest {
         parser.setStrictNamespace(true);
         parser.enableExtension(Extension.NEWS);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/shinpaideshou-news-sitemap.xml");
-
         URL url = new URL("https://shinpaideshou.wordpress.com/news-sitemap.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/shinpaideshou-news-sitemap.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
@@ -254,11 +249,9 @@ public class SiteMapParserExtensionTest {
         parser.enableExtension(Extension.VIDEO);
         parser.enableExtension(Extension.MOBILE);
 
-        String contentType = "text/xml";
-        byte[] content = SiteMapParserTest.getResourceAsBytes("src/test/resources/sitemaps/extension/hebdenbridgetimes-articles-sitemap.xml");
-
         URL url = new URL("http://www.hebdenbridgetimes.co.uk/sitemap-article-2015-18.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/hebdenbridgetimes-articles-sitemap.xml", url);
+
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;

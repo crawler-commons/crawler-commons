@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+@SuppressWarnings("serial")
 public class SiteMap extends AbstractSiteMap {
 
     /**

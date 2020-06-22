@@ -27,6 +27,7 @@ import java.util.Objects;
  * Data model for Google's extension to the sitemap protocol regarding news
  * indexing, as per http://www.google.com/schemas/sitemap-news/0.9
  */
+@SuppressWarnings("serial")
 public class NewsAttributes extends ExtensionMetadata {
 
     public static final String NAME = "name";

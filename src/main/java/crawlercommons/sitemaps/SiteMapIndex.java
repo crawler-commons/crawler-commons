@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("serial")
 public class SiteMapIndex extends AbstractSiteMap {
 
     /** URLs found in this Sitemap Index */
