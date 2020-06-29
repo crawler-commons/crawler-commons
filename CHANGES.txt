@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
-Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
+Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+
+Release 1.1 (2020-06-29)
 - [sitemaps] Sitemaps to implement Serializable (cdalexndr, sebastian-nagel) #244
 - [sitemaps] Allow to deduplicate sitemap links in sitemap indexes (sebastian-nagel) #262
 - [Robots] Upgrade the toString() method of the Base/Simple RobotRules (Avi Hayun) #264
