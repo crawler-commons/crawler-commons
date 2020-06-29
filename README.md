@@ -8,7 +8,7 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 # User Documentation
 
 ## Javadocs
-* [1.0](http://crawler-commons.github.io/crawler-commons/1.1/)
+* [1.1](http://crawler-commons.github.io/crawler-commons/1.1/)
 * [1.0](http://crawler-commons.github.io/crawler-commons/1.0/)
 * [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
 * [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
