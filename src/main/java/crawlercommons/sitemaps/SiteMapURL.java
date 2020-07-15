@@ -205,7 +205,7 @@ public class SiteMapURL implements Serializable {
     public void setPriority(double priority) {
 
         // Ensure proper value
-        if (priority < 0.0 || priority > 1.0) {
+        if (priority < 0.0 || priority > 1.0 || Double.isNaN(priority)) {
             this.priority = DEFAULT_PRIORITY;
             LOG.warn("Can't set the priority to {}, Priority should be between 0 to 1, reverting to default priority value: {}", priority, DEFAULT_PRIORITY);
         } else {
