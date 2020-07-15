@@ -16,6 +16,9 @@
 
 package crawlercommons.sitemaps;
 
+/**
+ * Exception thrown if the format of a sitemap failed to parse.
+ */
 @SuppressWarnings("serial")
 public class UnknownFormatException extends Exception {
 

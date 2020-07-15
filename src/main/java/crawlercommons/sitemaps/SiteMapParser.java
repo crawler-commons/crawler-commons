@@ -72,10 +72,15 @@ public class SiteMapParser {
     /**
      * True (by default) meaning that invalid URLs should be rejected, as the
      * official docs allow the siteMapURLs to be only under the base url:
-     * http://www.sitemaps.org/protocol.html#location
+     * https://www.sitemaps.org/protocol.html#location
      */
     protected boolean strict = true;
 
+    /**
+     * If true: allow URLs from sitemaps only partially parsed because of format
+     * errors or truncated (incompletely fetched) content. If false any parser
+     * error will cause an {@link UnknownFormatException}.
+     */
     private boolean allowPartial = false;
 
     /**
@@ -95,14 +100,34 @@ public class SiteMapParser {
 
     private MimeTypeDetector mimeTypeDetector;
 
+    /**
+     * SiteMapParser with strict location validation ({@link #isStrict()}) and not
+     * allowing partially parsed content.
+     */
     public SiteMapParser() {
         this(true, false);
     }
 
+    /**
+     * SiteMapParser with configurable location validation, not allowing
+     * partially parsed content.
+     * 
+     * @param strict
+     *            see {@link #isStrict()}
+     */
     public SiteMapParser(boolean strict) {
         this(strict, false);
     }
 
+    /**
+     * @param strict
+     *            see {@link #isStrict()}
+     * @param allowPartial
+     *            if true: allow URLs from sitemaps only partially parsed
+     *            because of format errors or truncated (incompletely fetched)
+     *            content. If false any parser error will cause an
+     *            {@link UnknownFormatException}.
+     */
     public SiteMapParser(boolean strict, boolean allowPartial) {
         this.strict = strict;
         this.allowPartial = allowPartial;
@@ -112,7 +137,9 @@ public class SiteMapParser {
 
     /**
      * @return whether invalid URLs will be rejected (where invalid means that
-     *         the url is not under the base url)
+     *         the URL is not under the base URL, see <a href=
+     *         "https://www.sitemaps.org/protocol.html#location">sitemap file
+     *         location</a>)
      */
     public boolean isStrict() {
         return strict;
