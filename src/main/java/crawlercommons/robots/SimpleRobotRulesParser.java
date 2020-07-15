@@ -72,11 +72,13 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * </p>
  * 
  * <p>
- * The crawl delay is parsed and added to the rules. Note that if the crawl
+ * The crawl-delay is parsed and added to the rules. Note that if the crawl
  * delay inside the file exceeds a maximum value, the crawling of all resources
  * is prohibited. The default maximum value is defined with
- * {@link #DEFAULT_MAX_CRAWL_DELAY}={@value #DEFAULT_MAX_CRAWL_DELAY}. The
- * default value can be changed using the constructor.
+ * {@link #DEFAULT_MAX_CRAWL_DELAY}={@value #DEFAULT_MAX_CRAWL_DELAY}
+ * milliseconds. The default value can be changed using the constructor
+ * ({@link #SimpleRobotRulesParser(long, int)} or via
+ * {@link #setMaxCrawlDelay(long)}.
  * </p>
  * 
  * <p>
@@ -350,12 +352,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Pattern SIMPLE_HTML_PATTERN = Pattern.compile("(?is)<(html|head|body)\\s*>");
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile("(?i)user-agent:");
 
-    // Max # of warnings during parse of any one robots.txt file.
-    private static final int DEFAULT_MAX_WARNINGS = 5;
+    /**
+     * Default max number of warnings logged during parse of any one robots.txt
+     * file, see {@link #setMaxWarnings(int)}
+     */
+    public static final int DEFAULT_MAX_WARNINGS = 5;
 
-    // Max value for crawl delay we'll use from robots.txt file. If the value is
-    // greater than this, we'll skip all pages.
-    private static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
+    /**
+     * Default max Crawl-Delay in milliseconds, see
+     * {@link #setMaxCrawlDelay(long)}
+     */
+    public static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
 
     // number of warnings found in the latest processed robots.txt file
     private ThreadLocal<Integer> _numWarningsDuringLastParse = new ThreadLocal<>();
@@ -367,6 +374,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         this(DEFAULT_MAX_CRAWL_DELAY, DEFAULT_MAX_WARNINGS);
     }
 
+    /**
+     * @param maxCrawlDelay
+     *            see {@link #setMaxCrawlDelay(long)}
+     * @param maxWarnings
+     *            see {@link #setMaxWarnings(int)}
+     */
     public SimpleRobotRulesParser(long maxCrawlDelay, int maxWarnings) {
         this._maxCrawlDelay = maxCrawlDelay;
         this._maxWarnings = maxWarnings;
@@ -805,18 +818,36 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return _numWarningsDuringLastParse.get();
     }
 
+    /** Get max number of logged warnings per robots.txt */
     public int getMaxWarnings() {
         return _maxWarnings;
     }
 
+    /**
+     * Set the max number of warnings about parse errors logged per robots.txt
+     */
     public void setMaxWarnings(int maxWarnings) {
         _maxWarnings = maxWarnings;
     }
 
+    /**
+     * Get configured max crawl delay.
+     *
+     * @return the configured max. crawl delay, see
+     *         {@link #setMaxCrawlDelay(long)}
+     */
     public long getMaxCrawlDelay() {
         return _maxCrawlDelay;
     }
 
+    /**
+     * Set the max value in milliseconds accepted for the <a href=
+     * "https://en.wikipedia.org/wiki/Robots_exclusion_standard#Crawl-delay_directive">Crawl-Delay</a>
+     * directive. If the value in the robots.txt is greater than the max. value,
+     * all pages are skipped to avoid that overtly long Crawl-Delays block fetch
+     * queues and make the crawling slow. Note: the value is in milliseconds as
+     * some sites use floating point numbers to define the delay.
+     */
     public void setMaxCrawlDelay(long maxCrawlDelay) {
         _maxCrawlDelay = maxCrawlDelay;
     }
