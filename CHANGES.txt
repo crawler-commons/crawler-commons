@@ -2,6 +2,7 @@ Crawler-Commons Change Log
 
 Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
 - [SiteMapParser] Document options *strict* and *allowPartial* in SiteMapParser constructors (sebastian-nagel) #267
+- [Robots] Maximum values (crawl-delay and warnings): document and make visible (sebastian-nagel, Avi Hayun) #276
 
 Release 1.1 (2020-06-29)
 - [sitemaps] Sitemaps to implement Serializable (cdalexndr, sebastian-nagel) #244
