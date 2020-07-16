@@ -1,7 +1,12 @@
 Crawler-Commons Change Log
 
-Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
-- [Sitemaps] Adding asMap to ExtensionMetadata Interface (evanhalley)  #288
+Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+- [SiteMapParser] Document options *strict* and *allowPartial* in SiteMapParser constructors (sebastian-nagel) #267
+- [Robots] Maximum values (crawl-delay and warnings): document and make visible (sebastian-nagel, Avi Hayun) #276
+
+Release 1.1 (2020-06-29)
+- [sitemaps] Sitemaps to implement Serializable (cdalexndr, sebastian-nagel) #244
+- [sitemaps] Allow to deduplicate sitemap links in sitemap indexes (sebastian-nagel) #262
 - [Robots] Upgrade the toString() method of the Base/Simple RobotRules (Avi Hayun) #264
 - Upgrade GitIgnore (Avi Hayun) #260
 - [Robots] Deduplicate sitemap links (sebastian-nagel) #261
@@ -14,7 +19,8 @@ Current Development 1.1-SNAPSHOT (yyyy-mm-dd)
 - EffectiveTldFinder to validate returned domain names for length restrictions (sebastian-nagel, Avi Hayun) #251
 - Upgrade unit tests to use JUnit v5.x and parameterized tests (Avi Hayun) #249, #253, #255
 - [Robots] Robots parser to always handle absolute sitemap URL even without valid base URL (pr3mar, kkrugler, sebastian-nagel) #240
-- Adding asMap() to ExtensionMetadata Interface #288
+- [Sitemaps] Adding asMap to ExtensionMetadata Interface (evanhalley)  #288
+- [Sitemaps] NewsAttribute.equals() compares the instance variable PublicationDate with itself (evanhalley) #289
 
 Release 1.0 (2019-03-19)
 - [Sitemaps] Unit tests depend on system timezone (kkrugler, sebastian-nagel) #238

@@ -8,6 +8,7 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 # User Documentation
 
 ## Javadocs
+* [1.1](http://crawler-commons.github.io/crawler-commons/1.1/)
 * [1.0](http://crawler-commons.github.io/crawler-commons/1.0/)
 * [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
 * [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
@@ -24,6 +25,10 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
 
 # Crawler-Commons News
+
+## 29th June 2020  - crawler-commons 1.1 released
+
+We are glad to announce the 1.1 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.1/CHANGES.txt) file included with the release for a full list of details.
 
 ## 21st March 2019  - crawler-commons 1.0 released
 

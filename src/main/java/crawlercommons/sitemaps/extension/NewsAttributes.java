@@ -25,8 +25,9 @@ import java.util.Objects;
 
 /**
  * Data model for Google's extension to the sitemap protocol regarding news
- * indexing, as per http://www.google.com/schemas/sitemap-news/0.9
+ * indexing, as per <a href="http://www.google.com/schemas/sitemap-news/0.9">http://www.google.com/schemas/sitemap-news/0.9</a>.
  */
+@SuppressWarnings("serial")
 public class NewsAttributes extends ExtensionMetadata {
 
     public static final String NAME = "name";
@@ -69,8 +70,7 @@ public class NewsAttributes extends ExtensionMetadata {
 
     /**
      * News keywords found under news/keywords (optional)
-     * 
-     * @see https://support.google.com/news/publisher/answer/116037 for examples
+     * See <a href="https://support.google.com/news/publisher/answer/116037">https://support.google.com/news/publisher/answer/116037</a> for examples
      */
     private String[] keywords;
 
@@ -161,7 +161,7 @@ public class NewsAttributes extends ExtensionMetadata {
         return Objects.equals(name, that.name) //
                         && Objects.equals(language, that.language) //
                         && Objects.equals(title, that.title) //
-                        && Objects.equals(publicationDate, publicationDate) //
+                        && Objects.equals(publicationDate, that.publicationDate) //
                         && Objects.deepEquals(keywords, that.keywords) //
                         && Objects.deepEquals(genres, that.genres) //
                         && Objects.deepEquals(stockTickers, that.stockTickers);

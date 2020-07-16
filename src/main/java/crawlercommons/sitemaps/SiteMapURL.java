@@ -19,6 +19,7 @@ package crawlercommons.sitemaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
@@ -36,7 +37,8 @@ import crawlercommons.sitemaps.extension.ExtensionMetadata;
  * 
  * @author fmccown
  */
-public class SiteMapURL {
+@SuppressWarnings("serial")
+public class SiteMapURL implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(SiteMapURL.class);
     public static final double DEFAULT_PRIORITY = 0.5;
 
