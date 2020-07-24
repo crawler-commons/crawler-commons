@@ -36,6 +36,7 @@ public class VideoAttributesTest {
         attributes.setUploader("GrillyMcGrillerson");
         attributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
         attributes.setLive(false);
+        attributes.setDuration(54321);
         Map<String, String[]> map = attributes.asMap();
 
         assertEquals(attributes.getThumbnailLoc().toString(), map.get(VideoAttributes.THUMBNAIL_LOC)[0]);
@@ -63,6 +64,7 @@ public class VideoAttributesTest {
         assertArrayEquals(attributes.getAllowedPlatforms(), map.get(VideoAttributes.ALLOWED_PLATFORMS));
         assertArrayEquals(attributes.getRestrictedPlatforms(), map.get(VideoAttributes.RESTRICTED_PLATFORMS));
         assertEquals(attributes.getLive().toString(), map.get(VideoAttributes.IS_LIVE)[0]);
+        assertEquals(attributes.getDuration().toString(), map.get(VideoAttributes.DURATION)[0]);
     }
 
     @Test
@@ -93,5 +95,6 @@ public class VideoAttributesTest {
         assertNull(map.get(VideoAttributes.ALLOWED_PLATFORMS));
         assertNull(map.get(VideoAttributes.RESTRICTED_PLATFORMS));
         assertNull(map.get(VideoAttributes.IS_LIVE));
+        assertNull(map.get(VideoAttributes.DURATION));
     }
 }
