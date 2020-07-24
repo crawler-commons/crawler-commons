@@ -57,6 +57,7 @@ public class VideoAttributes extends ExtensionMetadata {
     public static final String ALLOWED_PLATFORMS = "allowed_platforms";
     public static final String RESTRICTED_PLATFORMS = "restricted_platforms";
     public static final String IS_LIVE = "is_live";
+    public static final String DURATION = "duration";
     
     /**
      * Video thumbnail URL found under video/thumbnail_loc (required)
@@ -677,6 +678,10 @@ public class VideoAttributes extends ExtensionMetadata {
 
         if (isLive != null) {
             map.put(IS_LIVE, new String[]{ isLive.toString() });
+        }
+
+        if (duration != null) {
+            map.put(DURATION, new String[]{ duration.toString() });
         }
         return Collections.unmodifiableMap(map);
     }
