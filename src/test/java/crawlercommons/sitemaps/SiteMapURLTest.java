@@ -43,5 +43,18 @@ public class SiteMapURLTest {
         assertEquals(0.6, siteMapURL.getPriority(), 0);
         siteMapURL.setPriority("1.1");
         assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+
+        siteMapURL.setPriority("NaN");
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+        siteMapURL.setPriority(Double.NaN);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+        siteMapURL.setPriority("Infinity");
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+        siteMapURL.setPriority(Double.POSITIVE_INFINITY);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+        siteMapURL.setPriority("-Infinity");
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+        siteMapURL.setPriority(Double.NEGATIVE_INFINITY);
+        assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
     }
 }
