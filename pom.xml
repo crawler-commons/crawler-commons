@@ -225,12 +225,36 @@
                     </execution>
                 </executions>
             </plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>${maven.download.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>download-public-suffix-list.dat</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://publicsuffix.org/list/effective_tld_names.dat</url>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<failOnError>true</failOnError>
+							<overwrite>false</overwrite>
+							<skipCache>${skip.download.cache}</skipCache>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<profiles>
 		<profile>
 			<id>release</id>
+			<properties>
+				<skip.download.cache>true</skip.download.cache>
+			</properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -336,6 +360,7 @@
 		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
 		<maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
 		<checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+		<maven.download.plugin.version>1.6.0</maven.download.plugin.version>
 
 		<!-- General Properties -->
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -344,6 +369,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
 		<skipTests>false</skipTests>
+		<skip.download.cache>false</skip.download.cache>
 		<assembly.finalName>${project.build.finalName}</assembly.finalName>
 	</properties>
 
