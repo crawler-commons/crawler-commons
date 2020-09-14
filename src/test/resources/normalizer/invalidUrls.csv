@@ -1,0 +1,9 @@
+# Test with invalid URLs
+# - BasicURLNormalizer should return null
+# - but never throw an exception
+
+# invalid percent-encoded sequence in host name
+https://example%2Xcom/
+# not a valid UTF-8 sequence
+https://abc%FEdef.org/
+
