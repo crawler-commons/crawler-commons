@@ -33,6 +33,12 @@ public class BasicURLNormalizerTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/normalizer/weirdToNormalizedUrls.csv")
     void testBasicNormalizer(String weirdUrl, String expectedNormalizedUrl) throws Exception {
-      Assertions.assertEquals(expectedNormalizedUrl, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
+        Assertions.assertEquals(expectedNormalizedUrl, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/normalizer/invalidUrls.csv")
+    void testBasicNormalizerExceptionCaught(String weirdUrl) throws Exception {
+        Assertions.assertEquals(null, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
     }
 }

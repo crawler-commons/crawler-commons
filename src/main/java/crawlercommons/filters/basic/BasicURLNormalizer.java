@@ -21,10 +21,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -162,7 +164,7 @@ public class BasicURLNormalizer extends URLFilter {
                 String newHost;
                 try {
                     newHost = normalizeHostName(host);
-                } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+                } catch (IllegalArgumentException | IndexOutOfBoundsException | UnsupportedEncodingException e) {
                     LOG.info("Invalid hostname: {}", host, e);
                     return null;
                 }
@@ -274,8 +276,8 @@ public class BasicURLNormalizer extends URLFilter {
 
     /**
      * Remove % encoding from path segment in URL for characters which should be
-     * unescaped according to
-     * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
+     * unescaped according to <a
+     * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
     private String unescapePath(String path) {
         StringBuilder sb = new StringBuilder();
@@ -317,8 +319,8 @@ public class BasicURLNormalizer extends URLFilter {
 
     /**
      * Convert path segment of URL from Unicode to UTF-8 and escape all
-     * characters which should be escaped according to
-     * <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>..
+     * characters which should be escaped according to <a
+     * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
     private String escapePath(String path) {
         StringBuilder sb = new StringBuilder(path.length());
@@ -371,13 +373,22 @@ public class BasicURLNormalizer extends URLFilter {
         return sb.toString();
     }
 
-    private String normalizeHostName(String host) throws IllegalArgumentException, IndexOutOfBoundsException {
+    private String normalizeHostName(String host) throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedEncodingException {
 
-        /* 1. lowercase host name */
+        /* 1. unescape percent-encoded characters in host name */
+        if (host.indexOf('%') != -1) {
+            /*
+             * throws IllegalArgumentException on illegal percent-encoded
+             * sequences
+             */
+            host = URLDecoder.decode(host, UTF_8.toString());
+        }
+
+        /* 2. lowercase host name */
         host = host.toLowerCase(Locale.ROOT);
 
         /*
-         * 2. convert between Unicode and ASCII forms for Internationalized
+         * 3. convert between Unicode and ASCII forms for Internationalized
          * Domain Names (IDNs)
          */
         if (!isAscii(host)) {
@@ -392,7 +403,7 @@ public class BasicURLNormalizer extends URLFilter {
             host = IDN.toASCII(host);
         }
 
-        /* 3. trim a trailing dot */
+        /* 4. trim a trailing dot */
         if (host.endsWith(".")) {
             host = host.substring(0, host.length() - 1);
         }
