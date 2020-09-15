@@ -55,6 +55,9 @@ http://bücher.de/, http://xn--bcher-kva.de/
 http://êxample.com, http://xn--xample-hva.com/
 https://нэб.рф/, https://xn--90ax2c.xn--p1ai/
 
+# unescape percent-encoded characters also in IDNs
+https://www.0251-sachverst%c3%a4ndiger.de/, https://www.xn--0251-sachverstndiger-ozb.de/
+
 # test whether percent-encoding works together with other normalizations
 http://x.com/./a/../%66.html, http://x.com/f.html
 
@@ -77,6 +80,9 @@ http://foo.com/, http://foo.com/
 # check that host is lower cased
 http://Foo.Com/index.html, http://foo.com/index.html
 http://Foo.Com/index.html, http://foo.com/index.html
+
+# unescape percent characters in host names
+https://example%2Ecom/, https://example.com/
 
 # check that port number is normalized
 http://foo.com:80/index.html, http://foo.com/index.html
