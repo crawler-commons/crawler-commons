@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+- EffectiveTldFinder: upgrade public suffix list / Download latest effective_tld_names.dat during Maven build (Richard Zowalla) #295, #302
 - [BasicNormalizer] decode percent-encoded host names (sebastian-nagel) #303
 - [SiteMapParser] Document options *strict* and *allowPartial* in SiteMapParser constructors (sebastian-nagel) #267
 - [Robots] Maximum values (crawl-delay and warnings): document and make visible (sebastian-nagel, Avi Hayun) #276
