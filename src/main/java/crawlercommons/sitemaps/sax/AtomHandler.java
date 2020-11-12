@@ -137,7 +137,12 @@ class AtomHandler extends DelegatorHandler {
                 LOG.debug("Missing url");
                 LOG.trace("Can't create an entry with a missing URL");
             } else {
-                SiteMapURL sUrl = new SiteMapURL(loc.toString(), lastMod, null, null, valid);
+                String urlFiltered = urlFilter.apply(loc.toString());
+                if (urlFiltered == null) {
+                    LOG.debug("Filtered URL {}", loc.toString());
+                    return;
+                }
+                SiteMapURL sUrl = new SiteMapURL(urlFiltered, lastMod, null, null, valid);
                 sitemap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", (++i), sUrl);
             }
