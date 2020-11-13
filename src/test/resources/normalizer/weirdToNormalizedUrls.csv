@@ -166,6 +166,12 @@ http://www.example.com/search?q=foobar%252, http://www.example.com/search?q=foob
 # protocol to be lowercased
 HTTP://foo.com/, http://foo.com/
 
+# no protocol/scheme, see #271
+foo.com/index.html, http://foo.com/index.html
+# but do not break potentially valid URLs with less-used schemes
+ftp://foo.com/index.html, ftp://foo.com/index.html
+file:/path/index.html, file:/path/index.html
+
 # removal of trailing dot in hostname
 https://www.example.org./, https://www.example.org/
 

@@ -60,6 +60,12 @@ public class BasicURLNormalizer extends URLFilter {
      */
     private final static Pattern unescapeRulePattern = Pattern.compile("%([0-9A-Fa-f]{2})");
 
+    /**
+     * Match URLs starting with a valid scheme, see
+     * https://tools.ietf.org/html/rfc2396#section-3.1
+     */
+    private final static Pattern hasSchemePattern = Pattern.compile("^[A-Za-z][A-Za-z0-9+.-]*:/");
+
     /** look-up table for characters which should not be escaped in URL paths */
     private final static boolean[] unescapedCharacters = new boolean[128];
 
@@ -143,7 +149,16 @@ public class BasicURLNormalizer extends URLFilter {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            LOG.info("Malformed URL {}", urlString);
+            if (!hasSchemePattern.matcher(urlString).find()) {
+                // no protocol/scheme : try to prefix http://
+                try {
+                    url = new URL("http://" + urlString);
+                } catch (MalformedURLException e1) {
+                }
+            }
+        }
+        if (url == null) {
+            LOG.debug("Malformed URL {}", urlString);
             return null;
         }
 
