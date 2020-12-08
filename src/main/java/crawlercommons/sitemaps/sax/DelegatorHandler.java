@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -49,6 +50,7 @@ public class DelegatorHandler extends DefaultHandler {
     private Set<String> acceptedNamespaces;
     protected Map<String, Extension> extensionNamespaces;
     private StringBuilder characterBuffer = new StringBuilder();
+    protected Function<String, String> urlFilter = (String url) -> url;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -94,6 +96,10 @@ public class DelegatorHandler extends DefaultHandler {
             return false;
         }
         return extensionNamespaces.containsKey(uri);
+    }
+
+    public void setURLFilter(Function<String, String> urlFilter) {
+        this.urlFilter = urlFilter;
     }
 
     protected void setException(UnknownFormatException exception) {
@@ -170,6 +176,7 @@ public class DelegatorHandler extends DefaultHandler {
             }
         }
         delegate.setExtensionNamespaces(extensionNamespaces);
+        delegate.setURLFilter(urlFilter);
     }
 
     @Override
@@ -273,4 +280,5 @@ public class DelegatorHandler extends DefaultHandler {
         }
         return charSeq.subSequence(start, end + 1).toString();
     }
+
 }

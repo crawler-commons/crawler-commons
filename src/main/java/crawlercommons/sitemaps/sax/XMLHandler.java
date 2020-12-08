@@ -168,10 +168,15 @@ class XMLHandler extends DelegatorHandler {
         if (value == null || isAllBlank(value)) {
             return;
         }
+        String urlFiltered = urlFilter.apply(value);
+        if (urlFiltered == null) {
+            LOG.debug("Filtered URL {}", value);
+            return;
+        }
         try {
             // check that the value is a valid URL
-            URL locURL = new URL(value);
-            boolean valid = urlIsValid(sitemap.getBaseUrl(), value);
+            URL locURL = new URL(urlFiltered);
+            boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (valid || !isStrict()) {
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);

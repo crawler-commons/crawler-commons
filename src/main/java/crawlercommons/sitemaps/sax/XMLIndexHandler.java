@@ -132,9 +132,14 @@ class XMLIndexHandler extends DelegatorHandler {
             return;
         }
         String value = stripAllBlank(loc);
+        String urlFiltered = urlFilter.apply(value);
+        if (urlFiltered == null) {
+            LOG.debug("Filtered URL {}", value);
+            return;
+        }
         try {
             // check that the value is a valid URL
-            URL locURL = new URL(value);
+            URL locURL = new URL(urlFiltered);
             SiteMap s = new SiteMap(locURL, lastMod);
             sitemap.addSitemap(s);
             LOG.debug("  {}. {}", (i + 1), s);

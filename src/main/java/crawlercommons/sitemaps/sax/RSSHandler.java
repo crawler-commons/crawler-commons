@@ -161,6 +161,12 @@ class RSSHandler extends DelegatorHandler {
         try {
             // check that the value is a valid URL
             locURL = new URL(sitemap.getUrl(), value);
+            String urlFiltered = urlFilter.apply(locURL.toString());
+            if (urlFiltered == null) {
+                LOG.debug("Filtered URL {}", value);
+                return;
+            }
+            locURL = new URL(urlFiltered);
         } catch (MalformedURLException e) {
             LOG.debug("Bad url: [{}]", value);
             LOG.trace("Can't create an entry with a bad URL", e);

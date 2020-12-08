@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,6 +49,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import crawlercommons.filters.URLFilter;
 import crawlercommons.mimetypes.MimeTypeDetector;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import crawlercommons.sitemaps.extension.Extension;
@@ -99,6 +101,9 @@ public class SiteMapParser {
     protected Map<String, Extension> extensionNamespaces = new HashMap<>();
 
     private MimeTypeDetector mimeTypeDetector;
+
+    /* Function to normalize or filter URLs. Does nothing by default. */
+    private Function<String, String> urlFilter = (String url) -> url;
 
     /**
      * SiteMapParser with strict location validation ({@link #isStrict()}) and not
@@ -217,6 +222,26 @@ public class SiteMapParser {
         }
     }
 
+    /**
+     * Set URL filter function to normalize URLs found in sitemaps or filter
+     * URLs away if the function returns null.
+     */
+    public void setURLFilter(Function<String, String> filter) {
+        urlFilter = filter;
+    }
+
+    /**
+     * Use {@link URLFilter} to filter URLs, eg. to configure that URLs found in
+     * sitemaps are normalized by
+     * {@link crawlercommons.filters.basic.BasicURLNormalizer}:
+     * 
+     * <pre>
+     * sitemapParser.setURLFilter(new BasicURLNormalizer());
+     * </pre>
+     */
+    public void setURLFilter(URLFilter filter) {
+        urlFilter = filter::filter;
+    }
     /**
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL
      *
@@ -487,8 +512,13 @@ public class SiteMapParser {
             if (line.isEmpty()) {
                 continue;
             }
+            String urlFiltered = urlFilter.apply(line);
+            if (urlFiltered == null) {
+                LOG.debug("Filtered url: [{}]", line.substring(0, Math.min(1024, line.length())));
+                continue;
+            }
             try {
-                URL url = new URL(line);
+                URL url = new URL(urlFiltered);
                 boolean valid = urlIsValid(textSiteMap.getBaseUrl(), url.toString());
                 if (valid || !strict) {
                     SiteMapURL sUrl = new SiteMapURL(url, valid);
@@ -571,6 +601,7 @@ public class SiteMapParser {
             handler.setAcceptedNamespaces(acceptedNamespaces);
         }
         handler.setExtensionNamespaces(extensionNamespaces);
+        handler.setURLFilter(urlFilter);
 
         try {
             SAXParser saxParser = factory.newSAXParser();
