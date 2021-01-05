@@ -42,7 +42,7 @@ http://mydomain.com/en Español.aspx, http://mydomain.com/en%20Espa%C3%B1ol.aspx
 
 
 # Ampersand and colon and other punctuation characters are not to be unescaped
-http://x.com/s?q=a%26b&m=10, http://x.com/s?q=a%26b&m=10
+http://x.com/s?m=10&q=a%26b, http://x.com/s?m=10&q=a%26b
 http://x.com/show?http%3A%2F%2Fx.com%2Fb, http://x.com/show?http%3A%2F%2Fx.com%2Fb
 http://google.com/search?q=c%2B%2B, http://google.com/search?q=c%2B%2B
 
@@ -124,7 +124,7 @@ http://foo.com/aa/bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com//aa//bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com////aa////bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com////aa////bb////foo.html, http://foo.com/aa/bb/foo.html
-http://foo.com/aa?referer=http://bar.com, http://foo.com/aa?referer=http://bar.com
+http://foo.com/aa?referer=http://bar.com, http://foo.com/aa?referer=http%3A%2F%2Fbar.com
 # also normalize  /..  (already in the root directory)
 http://foo.com/.., http://foo.com/
 
@@ -136,7 +136,7 @@ http:////, http:/
 http:///////, http:/
 
 # empty path with trailing question mark (empty query) #247
-http://example.com?,http://example.com/?
+http://example.com?,http://example.com/
 http://example.com?a=1,http://example.com/?a=1
 
 # normalizing percent escapes #263
@@ -178,3 +178,39 @@ https://www.example.org./, https://www.example.org/
 # file:/ URLs
 file:/var/www/html/////./bar/index.html, file:/var/www/html/bar/index.html
 file:/var/www/html/foo/../bar/index.html, file:/var/www/html/bar/index.html
+
+# check that parameters are sorted
+http://example.com/?b=1&a=1, http://example.com/?a=1&b=1
+http://foo.com/foo.html?b=1&a=1, http://foo.com/foo.html?a=1&b=1
+http://foo.com/index?a=1&b=2, http://foo.com/index?a=1&b=2
+http://foo.com/index?b=2&a=1, http://foo.com/index?a=1&b=2
+http://foo.com/index?b=2&a=1#c, http://foo.com/index?a=1&b=2
+
+# normalize query parameters separated by semicolons
+http://example.com/?b=1;a=1, http://example.com/?a=1&b=1
+http://foo.com/foo.html?b=1;a=1, http://foo.com/foo.html?a=1&b=1
+http://foo.com/index?a=1;b=2, http://foo.com/index?a=1&b=2
+http://foo.com/index?b=2&;a=1, http://foo.com/index?a=1&b=2
+http://foo.com/index?b=2;a=1#c, http://foo.com/index?a=1&b=2
+
+# normalize empty query parameter values
+http://foo.com/index?a=1&b, http://foo.com/index?a=1&b
+http://foo.com/index?a=1&b=, http://foo.com/index?a=1&b
+http://foo.com/index?a=1&b#c, http://foo.com/index?a=1&b
+
+http://foo.com/index?b&a=1, http://foo.com/index?a=1&b
+http://foo.com/index?b=&a=1, http://foo.com/index?a=1&b
+
+# sorting with query parameters with degenerate cases
+http://foo.com/index?b=1&a=1&, http://foo.com/index?a=1&b=1
+http://foo.com/index?&b=1&a=1, http://foo.com/index?a=1&b=1
+http://foo.com/index?&=1&a=1, http://foo.com/index?a=1
+http://foo.com/index?=1&b=1&a=1, http://foo.com/index?a=1&b=1
+
+# encode query pairs as 'application/x-www-form-urlencoded'
+http://foo.com/index?q=web crawler, http://foo.com/index?q=web+crawler
+http://foo.com/index?q=web+crawler, http://foo.com/index?q=web+crawler
+http://foo.com/index?q=web+crawler+!, http://foo.com/index?q=web+crawler+%21
+
+# remove question mark when there are no query parameters
+http://example.com/?, http://example.com/

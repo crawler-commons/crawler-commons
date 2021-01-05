@@ -18,6 +18,8 @@ package crawlercommons.filters.basic;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import crawlercommons.utils.Strings;
+import crawlercommons.utils.URLEncoding;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +29,14 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -137,6 +146,16 @@ public class BasicURLNormalizer extends URLFilter {
         return true;
     }
 
+    final Set<String> queryElementsToRemove;
+
+    public BasicURLNormalizer() {
+        this(new TreeSet<>());
+    }
+
+    public BasicURLNormalizer(Set<String> queryElementsToRemove) {
+        this.queryElementsToRemove = new TreeSet<>(queryElementsToRemove);
+    }
+
     @Override
     public String filter(String urlString) {
 
@@ -145,18 +164,7 @@ public class BasicURLNormalizer extends URLFilter {
 
         urlString = urlString.trim(); // remove extra spaces
 
-        URL url = null;
-        try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            if (!hasSchemePattern.matcher(urlString).find()) {
-                // no protocol/scheme : try to prefix http://
-                try {
-                    url = new URL("http://" + urlString);
-                } catch (MalformedURLException e1) {
-                }
-            }
-        }
+        URL url = parseStringToURL(urlString);
         if (url == null) {
             LOG.debug("Malformed URL {}", urlString);
             return null;
@@ -220,8 +228,7 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         // properly encode characters in path/file using percent-encoding
-        String file2 = unescapePath(file);
-        file2 = escapePath(file2);
+        String file2 = normalizeUrlFile(file);
         if (!file.equals(file2)) {
             changed = true;
             file = file2;
@@ -253,6 +260,213 @@ public class BasicURLNormalizer extends URLFilter {
             }
 
         return urlString;
+    }
+
+    /**
+     * Tries to parse the given string into a java.net.URL object.
+     *
+     * @param urlString a string which possibly contains a URL
+     * @return a URL object or null if an exception occurs.
+     */
+    private static URL parseStringToURL(String urlString) {
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            if (!hasSchemePattern.matcher(urlString).find()) {
+                // no protocol/scheme : try to prefix http://
+                try {
+                    url = new URL("http://" + urlString);
+                } catch (MalformedURLException e1) {
+                }
+            }
+        }
+        return url;
+    }
+
+    /**
+     * Parses the URL file and applies normalizations to the path and query components.
+     *
+     * @param file the URL file (as in java.net.URL.getFile()).
+     * @return a normalized URL file
+     */
+    private String normalizeUrlFile(String file) {
+        // find the beginning of the query parameters
+        int queryStartIdx;
+        int endPathIdx = file.indexOf('?');
+        if (endPathIdx == -1) {
+            // no query parameters, just properly normalize the path
+            return escapePath(unescapePath(file));
+        } else {
+            queryStartIdx = endPathIdx + 1;
+            if(queryStartIdx >= file.length())  {
+                // question mark was the last char in the file, so the query parameters
+                // string is empty. we can just remove the question mark and properly
+                // normalize the path.
+                final String path = file.substring(0, file.length() - 1);
+                return escapePath(unescapePath(path));
+            }
+        }
+
+        List<NameValuePair> pairs =
+            parseQueryParameters(file, queryStartIdx, UTF_8, queryElementsToRemove);
+
+        StringBuilder normalizedFile = new StringBuilder();
+
+        // properly normalize the path
+        String path = file.substring(0, endPathIdx);
+        if (!Strings.isBlank(path)) {
+            normalizedFile.append(escapePath(unescapePath(path)));
+        }
+
+        // reconstruct query parameters in sorted order
+        if (!pairs.isEmpty()) {
+            pairs.sort(NameValuePair.NAME_COMPARATOR);
+            normalizedFile
+                .append('?')
+                .append(formatQueryParameters(pairs));
+        }
+
+        return normalizedFile.toString();
+    }
+
+    /**
+     * Receives the URL query string and parses it into a list of name-value pairs. Optionally,
+     * allows to remove query parameters. All name-value string are consistently encoded using
+     * the 'application/x-www-form-urlencoded' media type, i.e., URL encoding including empty space as the plus sign.
+     *
+     * @param s a String containing the URL file (as per java.net.URL.getFile(), i.e., the path + query +
+     * fragment)
+     * @param queryStartIdx the index position of the query part in the string {@param s}.
+     * @param charset the charset to be used to decode the string
+     * @param queryElementsToRemove a set of query parameter names to be ignored while parsing the
+     * query parameters.
+     */
+    public static List<NameValuePair> parseQueryParameters(final String s, final int queryStartIdx,
+        final Charset charset, final Set<String> queryElementsToRemove) {
+
+        if (s == null || s.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        final List<NameValuePair> list = new ArrayList<>();
+
+        int nameBeginIdx;
+        String name;
+        int valueBeginIdx;
+        String value;
+
+        char c = s.charAt(queryStartIdx);
+        for (int i = queryStartIdx, len = s.length(); i < len; i++) {
+
+            // parse query parameter name
+            nameBeginIdx = i;
+            while (i < len) {
+                c = s.charAt(i);
+                if (isNameEnd(c)) {
+                    break;
+                }
+                i++;
+            }
+            name = s.substring(nameBeginIdx, i);
+
+            // parse query parameter value
+            value = null;
+            if (i < len && c == '=') {
+                i++;
+                valueBeginIdx = i;
+                while (i < len) {
+                    c = s.charAt(i);
+                    if (isValueEnd(c)) {
+                        break;
+                    }
+                    i++;
+                }
+                if (valueBeginIdx < i) {
+                    value = s.substring(valueBeginIdx, i);
+                }
+            }
+
+            if (!name.isEmpty()) {
+                final String decodedName = URLEncoding.decode(name, charset);
+                final String decodedValue = URLEncoding.decode(value, charset);
+                if (queryElementsToRemove != null && !queryElementsToRemove.contains(decodedName)) {
+                    list.add(new NameValuePair(
+                        URLEncoding.encode(decodedName, charset),
+                        URLEncoding.encode(decodedValue, charset)
+                    ));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Checks if the given char is a delimiter of a query parameter value.
+     *
+     * @param c the char to be checked
+     * @return true if the char is a delimiter, false otherwise.
+     */
+    private static boolean isValueEnd(final char c) {
+        return c == '&' || c == ';';
+    }
+
+    /**
+     * Checks if the given char is a delimiter of a query parameter name.
+     *
+     * @param c the char to be checked
+     * @return true if the char is a delimiter, false otherwise.
+     */
+    private static boolean isNameEnd(final char c) {
+        return c == '=' || c == '&' || c == ';';
+    }
+
+    /**
+     * Formats a list of query parameter name-value pairs into a query parameter string.
+     *
+     * @param parameters the query parameter name-value pairs
+     * @return a URL query string
+     */
+    public static String formatQueryParameters(final List<NameValuePair> parameters) {
+        final StringBuilder result = new StringBuilder();
+        for (final NameValuePair parameter : parameters) {
+            if (result.length() > 0) {
+                result.append('&');
+            }
+            result.append(parameter.getName());
+            final String value = parameter.getValue();
+            if (value != null) {
+                result.append('=');
+                result.append(value);
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * Represents the name-value pairs of each URL query parameter.
+     */
+    private static class NameValuePair {
+
+        protected final String name;
+        protected final String value;
+
+        public NameValuePair(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public final static Comparator<NameValuePair> NAME_COMPARATOR =
+            Comparator.comparing(NameValuePair::getName);
+
     }
 
     private String getFileWithNormalizedPath(URL url) throws MalformedURLException {
@@ -294,7 +508,7 @@ public class BasicURLNormalizer extends URLFilter {
      * unescaped according to <a
      * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
-    private String unescapePath(String path) {
+    public static String unescapePath(String path) {
         StringBuilder sb = new StringBuilder();
 
         Matcher matcher = unescapeRulePattern.matcher(path);
@@ -305,7 +519,7 @@ public class BasicURLNormalizer extends URLFilter {
         // Traverse over all encoded groups
         while (matcher.find()) {
             // Append everything up to this group
-            sb.append(path.substring(end + 1, matcher.start()));
+            sb.append(path, end + 1, matcher.start());
 
             // Get the integer representation of this hexadecimal encoded
             // character
@@ -326,7 +540,7 @@ public class BasicURLNormalizer extends URLFilter {
 
         // Append the rest if there's anything
         if (end <= letter - 1) {
-            sb.append(path.substring(end + 1, letter));
+            sb.append(path, end + 1, letter);
         }
 
         return sb.toString();
@@ -337,7 +551,7 @@ public class BasicURLNormalizer extends URLFilter {
      * characters which should be escaped according to <a
      * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
-    private String escapePath(String path) {
+    private static String escapePath(String path) {
         StringBuilder sb = new StringBuilder(path.length());
 
         // Traverse over all bytes in this URL
