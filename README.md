@@ -3,7 +3,14 @@
 
 # Overview
 
-Crawler-Commons is a set of reusable Java components that implement functionality common to any web crawler. These components benefit from collaboration among various existing web crawler projects, and reduce duplication of effort.
+Crawler-Commons is a set of reusable Java components that implement functionality common to any web crawler.  
+These components benefit from collaboration among various existing web crawler projects, and reduce duplication of effort.
+
+# Table of Contents
+- [Documentation](#user-documentation)
+- [Mailing List](#mailing-list)
+- [Installation](#installation)
+- [News](#news)
 
 # User Documentation
 
@@ -20,11 +27,19 @@ Crawler-Commons is a set of reusable Java components that implement functionalit
 
 There is a mailing list on [Google Groups](https://groups.google.com/forum/?fromgroups#!forum/crawler-commons).
 
-# Issue Tracking
+# Installation
 
-If you find an issue, please file a report [here](https://github.com/crawler-commons/crawler-commons/issues)
+Using Maven
+Add the following dependency to your pom.xml:
+~~~xml
+<dependency>
+    <groupId>com.github.crawler-commons</groupId>
+    <artifactId>crawler-commons</artifactId>
+    <version>1.1</version>
+</dependency>
+~~~
 
-# Crawler-Commons News
+# News
 
 ## 29th June 2020  - crawler-commons 1.1 released
 
@@ -115,3 +130,6 @@ See [Apache Nutch v2.2 Released](http://nutch.apache.org/#08+June+2013+-+Apache+
 This release improves robots.txt and sitemap parsing support.
 
 See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
+
+# License
+Published under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0), see [LICENSE](https://github.com/crawler-commons/crawler-commons/blob/master/LICENSE)
