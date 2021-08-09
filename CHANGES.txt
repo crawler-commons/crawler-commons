@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+- Readme.MD Overhaul of TOC, Installation, License (Avi Hayun) #311
 - [BasicNormalizer] Normalize URL without a scheme (Avi Hayun, sebastian-nagel) #271
 - EffectiveTldFinder: upgrade public suffix list / Download latest effective_tld_names.dat during Maven build (Richard Zowalla) #295, #302
 - [BasicNormalizer] decode percent-encoded host names (sebastian-nagel) #303
