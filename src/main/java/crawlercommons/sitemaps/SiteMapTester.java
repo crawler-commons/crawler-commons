@@ -24,6 +24,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.filters.basic.BasicURLNormalizer;
+
 /**
  * Sitemap Tool for recursively fetching all URL's from a sitemap (and all of
  * it's children)
@@ -46,6 +48,9 @@ public class SiteMapTester {
             LOG.error("                  if true sitemaps are required to use the standard namespace URI");
             LOG.error("  sitemap.extensions");
             LOG.error("                  if true enable sitemap extension parsing");
+            LOG.error("  sitemap.filter.urls");
+            LOG.error("                  if true filter and normalize all URLs found in the sitemap");
+            LOG.error("                  using crawlercommons.filters.basic.BasicURLNormalizer");
         } else {
             URL url = new URL(args[0]);
             String mt = (args.length > 1) ? args[1] : null;
@@ -63,12 +68,17 @@ public class SiteMapTester {
 
         LOG.info("Parsing {} {}", url, ((mt != null && !mt.isEmpty()) ? "as MIME type " + mt : ""));
 
-        boolean strictNamespace = new Boolean(System.getProperty("sitemap.strictNamespace"));
+        boolean strictNamespace = Boolean.getBoolean("sitemap.strictNamespace");
         saxParser.setStrictNamespace(strictNamespace);
 
-        boolean enableExtensions = new Boolean(System.getProperty("sitemap.extensions"));
+        boolean enableExtensions = Boolean.getBoolean("sitemap.extensions");
         if (enableExtensions) {
             saxParser.enableExtensions();
+        }
+
+        boolean enableURLFilter = Boolean.getBoolean("sitemap.filter.urls");
+        if (enableURLFilter) {
+            saxParser.setURLFilter(new BasicURLNormalizer());
         }
 
         AbstractSiteMap sm = null;

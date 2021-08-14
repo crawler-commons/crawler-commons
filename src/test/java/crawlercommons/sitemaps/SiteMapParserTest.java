@@ -16,7 +16,9 @@
 
 package crawlercommons.sitemaps;
 
+import crawlercommons.filters.basic.BasicURLNormalizer;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -32,9 +34,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
@@ -202,6 +206,27 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testSitemapTXTfilterUrls() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setURLFilter(new BasicURLNormalizer());
+        String contentType = "text/plain";
+        String scontent = "www.example.com/catalog?item=1\nhttp://www.example.com/catalog?item=11#anchor";
+        byte[] content = scontent.getBytes(UTF_8);
+        URL url = new URL("http://www.example.com/sitemap.txt");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMapTest.testSerializable(asm);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(2, sm.getSiteMapUrls().size());
+        String[] normUrls = { "http://www.example.com/catalog?item=1", "http://www.example.com/catalog?item=11" };
+        List<String> urls = sm.getSiteMapUrls().stream().map(u -> u.getUrl().toString()).collect(Collectors.toList());
+        assertTrue(urls.containsAll(Arrays.asList(normUrls)));
+    }
+
+    @Test
     public void testSitemapXML() throws UnknownFormatException, IOException {
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
@@ -254,6 +279,39 @@ public class SiteMapParserTest {
             for (int i = 0; i < found.length; i++) {
                 validateSiteMapUrl(i, found[i]);
             }
+        }
+    }
+
+    @Test
+    public void testSitemapXMLfilterUrls() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setURLFilter(new BasicURLNormalizer());
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        getXMLSitemapAsBytes(scontent);
+
+        // remove "http://" for first URL
+        int pos = scontent.indexOf(SITEMAP_URLS[0][0]);
+        scontent.replace(pos, pos + 7, "");
+
+        // append "#anchor" to second URL
+        pos = scontent.indexOf(SITEMAP_URLS[1][0]) + SITEMAP_URLS[1][0].length();
+        scontent.replace(pos, pos, "#anchor"); // remove "http://"
+
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        URL url = new URL("http://www.example.com/sitemap.xml");
+
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        AbstractSiteMapTest.testSerializable(asm);
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(5, sm.getSiteMapUrls().size());
+
+        SiteMapURL[] found = sm.getSiteMapUrls().toArray(new SiteMapURL[5]);
+        for (int i = 0; i < found.length; i++) {
+            validateSiteMapUrl(i, found[i]);
         }
     }
 
@@ -696,8 +754,8 @@ public class SiteMapParserTest {
      *         UTF-8 encoded bytes
      */
     private byte[] getXMLSitemapAsBytes(StringBuilder scontent) {
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>") //
-                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        scontent.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         for (String[] surl : SITEMAP_URLS) {
             scontent.append(" <url>\n  <loc>").append(surl[0]).append("</loc>\n");
             if (surl[1] != null) {
