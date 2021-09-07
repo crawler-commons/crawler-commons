@@ -186,12 +186,11 @@ http://foo.com/index?a=1&b=2, http://foo.com/index?a=1&b=2
 http://foo.com/index?b=2&a=1, http://foo.com/index?a=1&b=2
 http://foo.com/index?b=2&a=1#c, http://foo.com/index?a=1&b=2
 
-# normalize query parameters separated by semicolons
-http://example.com/?b=1;a=1, http://example.com/?a=1&b=1
-http://foo.com/foo.html?b=1;a=1, http://foo.com/foo.html?a=1&b=1
-http://foo.com/index?a=1;b=2, http://foo.com/index?a=1&b=2
-http://foo.com/index?b=2&;a=1, http://foo.com/index?a=1&b=2
-http://foo.com/index?b=2;a=1#c, http://foo.com/index?a=1&b=2
+# Should not split query parameters on semicolon separators as
+# this W3C recommendation is now obsolete:
+# https://www.w3.org/TR/1999/REC-html401-19991224/appendix/notes.html#h-B.2.2
+https://foo.com/search?q=tl;dr, https://foo.com/search?q=tl%3Bdr
+
 
 # normalize empty query parameter values
 http://foo.com/index?a=1&b, http://foo.com/index?a=1&b

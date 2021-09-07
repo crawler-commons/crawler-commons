@@ -408,7 +408,7 @@ public class BasicURLNormalizer extends URLFilter {
      * @return true if the char is a delimiter, false otherwise.
      */
     private static boolean isValueEnd(final char c) {
-        return c == '&' || c == ';';
+        return c == '&';
     }
 
     /**
@@ -418,7 +418,7 @@ public class BasicURLNormalizer extends URLFilter {
      * @return true if the char is a delimiter, false otherwise.
      */
     private static boolean isNameEnd(final char c) {
-        return c == '=' || c == '&' || c == ';';
+        return c == '=' || c == '&';
     }
 
     /**
