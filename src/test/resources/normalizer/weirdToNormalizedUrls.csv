@@ -124,7 +124,8 @@ http://foo.com/aa/bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com//aa//bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com////aa////bb//foo.html, http://foo.com/aa/bb/foo.html
 http://foo.com////aa////bb////foo.html, http://foo.com/aa/bb/foo.html
-http://foo.com/aa?referer=http://bar.com, http://foo.com/aa?referer=http%3A%2F%2Fbar.com
+http://foo.com/aa?referer=http://bar.com, http://foo.com/aa?referer=http://bar.com
+
 # also normalize  /..  (already in the root directory)
 http://foo.com/.., http://foo.com/
 
@@ -189,14 +190,12 @@ http://foo.com/index?b=2&a=1#c, http://foo.com/index?a=1&b=2
 # Should not split query parameters on semicolon separators as
 # this W3C recommendation is now obsolete:
 # https://www.w3.org/TR/1999/REC-html401-19991224/appendix/notes.html#h-B.2.2
-https://foo.com/search?q=tl;dr, https://foo.com/search?q=tl%3Bdr
-
+https://foo.com/search?q=tl;dr, https://foo.com/search?q=tl;dr
 
 # normalize empty query parameter values
 http://foo.com/index?a=1&b, http://foo.com/index?a=1&b
 http://foo.com/index?a=1&b=, http://foo.com/index?a=1&b
 http://foo.com/index?a=1&b#c, http://foo.com/index?a=1&b
-
 http://foo.com/index?b&a=1, http://foo.com/index?a=1&b
 http://foo.com/index?b=&a=1, http://foo.com/index?a=1&b
 
@@ -206,10 +205,9 @@ http://foo.com/index?&b=1&a=1, http://foo.com/index?a=1&b=1
 http://foo.com/index?&=1&a=1, http://foo.com/index?a=1
 http://foo.com/index?=1&b=1&a=1, http://foo.com/index?a=1&b=1
 
-# encode query pairs as 'application/x-www-form-urlencoded'
-http://foo.com/index?q=web crawler, http://foo.com/index?q=web+crawler
-http://foo.com/index?q=web+crawler, http://foo.com/index?q=web+crawler
-http://foo.com/index?q=web+crawler+!, http://foo.com/index?q=web+crawler+%21
-
 # remove question mark when there are no query parameters
 http://example.com/?, http://example.com/
+
+# Should not decode URL query data
+https://foo.com/?one/valid_query/without_%2F_params, https://foo.com/?one/valid_query/without_%2F_params
+http://foo.com/asdf/page.php?article%2F1234, http://foo.com/asdf/page.php?article%2F1234
