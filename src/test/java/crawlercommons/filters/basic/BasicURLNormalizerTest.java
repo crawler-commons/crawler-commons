@@ -16,10 +16,16 @@
 
 package crawlercommons.filters.basic;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 
 /** Unit tests for BasicURLNormalizer. */
 public class BasicURLNormalizerTest {
@@ -32,13 +38,28 @@ public class BasicURLNormalizerTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/normalizer/weirdToNormalizedUrls.csv")
-    void testBasicNormalizer(String weirdUrl, String expectedNormalizedUrl) throws Exception {
-        Assertions.assertEquals(expectedNormalizedUrl, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
+    void testBasicNormalizer(String weirdUrl, String expectedNormalizedUrl) {
+        assertEquals(expectedNormalizedUrl, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
     }
 
     @ParameterizedTest
     @CsvFileSource(resources = "/normalizer/invalidUrls.csv")
-    void testBasicNormalizerExceptionCaught(String weirdUrl) throws Exception {
-        Assertions.assertEquals(null, normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
+    void testBasicNormalizerExceptionCaught(String weirdUrl) {
+        assertNull(normalizer.filter(weirdUrl), "normalizing: " + weirdUrl);
     }
+
+    @Test
+    public void testRemoveSessionQueryParameters() {
+        List<String> invalidParameters = Arrays
+            .asList("sid", "phpsessid", "sessionid", "jsessionid");
+        normalizer = new BasicURLNormalizer(new TreeSet<>(invalidParameters));
+        normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1", "http://foo.com/foo.php?a=1");
+        normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1&b", "http://foo.com/foo.php?a=1&b");
+        normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf", "http://foo.com/foo.php");
+    }
+
+    private void normalizeTest(String weird, String normal) {
+        assertEquals(normal, normalizer.filter(weird), "normalizing: " + weird);
+    }
+
 }

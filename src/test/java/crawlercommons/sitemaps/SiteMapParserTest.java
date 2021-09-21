@@ -296,7 +296,7 @@ public class SiteMapParserTest {
 
         // append "#anchor" to second URL
         pos = scontent.indexOf(SITEMAP_URLS[1][0]) + SITEMAP_URLS[1][0].length();
-        scontent.replace(pos, pos, "#anchor"); // remove "http://"
+        scontent.replace(pos, pos, "#anchor");
 
         byte[] content = scontent.toString().getBytes(UTF_8);
         URL url = new URL("http://www.example.com/sitemap.xml");
@@ -789,10 +789,10 @@ public class SiteMapParserTest {
     }
 
     private static String[][] SITEMAP_URLS = { { "http://www.example.com/", "2005-01-01", "monthly", "0.8" },
-                    { "http://www.example.com/catalog?item=12&amp;desc=vacation_hawaii", null, "weekly", null }, //
-                    { "http://www.example.com/catalog?item=73&amp;desc=vacation_new_zealand", "2004-12-23", "weekly", null }, //
-                    { "http://www.example.com/catalog?item=74&amp;desc=vacation_newfoundland", "2004-12-23T18:00:15&#43;00:00", null, "0.3" }, //
-                    { "http://www.example.com/catalog?item=83&amp;desc=vacation_usa", "2004-11-23", null, null } };
+                    { "http://www.example.com/catalog?desc=vacation_hawaii&amp;item=12", null, "weekly", null }, //
+                    { "http://www.example.com/catalog?desc=vacation_new_zealand&amp;item=73", "2004-12-23", "weekly", null }, //
+                    { "http://www.example.com/catalog?desc=vacation_newfoundland&amp;item=74", "2004-12-23T18:00:15&#43;00:00", null, "0.3" }, //
+                    { "http://www.example.com/catalog?desc=vacation_usa&amp;item=83", "2004-11-23", null, null } };
 
     private static void validateSiteMapUrl(int i, SiteMapURL u) {
         assertEquals(SITEMAP_URLS[i][0].replaceAll("&amp;", "&"), u.getUrl().toExternalForm());
