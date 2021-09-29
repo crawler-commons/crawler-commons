@@ -589,7 +589,11 @@ public class SiteMapParser {
         // support the use of an explicit namespace.
         factory.setNamespaceAware(true);
 
+        // Configure underlying parser features to reduce the risk of XXE attacks
+        // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java
         try {
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (Exception e) {
             throw new RuntimeException("Failed to configure XML parser: " + e.toString());
