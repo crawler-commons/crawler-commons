@@ -116,10 +116,8 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapXXE() throws UnknownFormatException, IOException {
-        // Create a temporary file on disk that would be read if we were vulnerable to XXE
-        Path doNotVisit = Files.createTempFile("do-not-visit", ".txt");
-        doNotVisit.toFile().deleteOnExit();
-        Files.write(doNotVisit, "http://www.example.com/do-not-visit-here".getBytes(StandardCharsets.UTF_8));
+        // A file on disk that would be read if we were vulnerable to XXE
+        File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
 
         // Create a sitemap with an external entity referring to the local temporary file
         SiteMapParser parser = new SiteMapParser();
@@ -127,7 +125,7 @@ public class SiteMapParserTest {
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
                 .append("<!DOCTYPE urlset [\n")
-                .append("  <!ENTITY test SYSTEM \"file://" + doNotVisit + "\">\n")
+                .append("  <!ENTITY test SYSTEM \"file://" + doNotVisit.toPath().toAbsolutePath() + "\">\n")
                 .append("]>\n")
                 .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
                 .append("  <url>\n")
@@ -139,7 +137,6 @@ public class SiteMapParserTest {
                 .append("    <lastmod>2019-06-19</lastmod>\n")
                 .append("  </url>\n")
                 .append("</urlset>");
-        // assertEquals("", scontent.toString());
         byte[] content = scontent.toString().getBytes(UTF_8);
 
         URL url = new URL("http://www.example.com/sitemap.xxe.xml");
