@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-
 /**
  * Data model for Google's extension to the sitemap protocol regarding news
- * indexing, as per <a href="http://www.google.com/schemas/sitemap-news/0.9">http://www.google.com/schemas/sitemap-news/0.9</a>.
+ * indexing, as per <a
+ * href="http://www.google.com/schemas/sitemap-news/0.9">http
+ * ://www.google.com/schemas/sitemap-news/0.9</a>.
  */
 @SuppressWarnings("serial")
 public class NewsAttributes extends ExtensionMetadata {
@@ -69,8 +70,9 @@ public class NewsAttributes extends ExtensionMetadata {
     private String title;
 
     /**
-     * News keywords found under news/keywords (optional)
-     * See <a href="https://support.google.com/news/publisher/answer/116037">https://support.google.com/news/publisher/answer/116037</a> for examples
+     * News keywords found under news/keywords (optional) See <a
+     * href="https://support.google.com/news/publisher/answer/116037"
+     * >https://support.google.com/news/publisher/answer/116037</a> for examples
      */
     private String[] keywords;
 

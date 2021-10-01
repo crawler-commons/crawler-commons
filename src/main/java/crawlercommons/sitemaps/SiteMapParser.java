@@ -581,15 +581,19 @@ public class SiteMapParser {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
 
-        // disable validation and avoid that remote DTDs, schemas, etc. are
-        // fetched
+        // disable validation and avoid that DTDs, schemas, XML snippets, etc.
+        // are fetched from remote servers or the local file system
         factory.setValidating(false);
         factory.setXIncludeAware(false);
 
         // support the use of an explicit namespace.
         factory.setNamespaceAware(true);
 
+        // Configure underlying parser features to reduce the risk of XXE attacks
+        // See https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java
         try {
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (Exception e) {
             throw new RuntimeException("Failed to configure XML parser: " + e.toString());

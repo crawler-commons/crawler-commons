@@ -40,7 +40,8 @@ public class LinkAttributes extends ExtensionMetadata {
     public static final String HREF = "href";
 
     /**
-     * Specifies the prefix used when adding Link Attribute parameters to the Map returned by asMap
+     * Specifies the prefix used when adding Link Attribute parameters to the
+     * Map returned by asMap
      */
     private static final String PARAMS_PREFIX = "params.%s";
 
