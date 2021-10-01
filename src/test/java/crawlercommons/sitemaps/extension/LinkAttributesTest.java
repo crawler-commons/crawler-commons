@@ -18,7 +18,8 @@ public class LinkAttributesTest {
             {
                 put("rel", "alternate");
                 put("hreflang", "de");
-            }});
+            }
+        });
         Map<String, String[]> map = attributes.asMap();
 
         assertEquals(attributes.getHref().toString(), map.get(LinkAttributes.HREF)[0]);

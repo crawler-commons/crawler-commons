@@ -33,7 +33,7 @@ import java.util.Locale;
 
 /** SiteMap or SiteMapIndex **/
 @SuppressWarnings("serial")
-public abstract class AbstractSiteMap  implements Serializable {
+public abstract class AbstractSiteMap implements Serializable {
 
     /** Various Sitemap types */
     public enum SitemapType {

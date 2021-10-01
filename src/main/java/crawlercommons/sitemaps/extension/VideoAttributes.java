@@ -58,7 +58,7 @@ public class VideoAttributes extends ExtensionMetadata {
     public static final String RESTRICTED_PLATFORMS = "restricted_platforms";
     public static final String IS_LIVE = "is_live";
     public static final String DURATION = "duration";
-    
+
     /**
      * Video thumbnail URL found under video/thumbnail_loc (required)
      */

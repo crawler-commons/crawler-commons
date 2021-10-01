@@ -581,8 +581,8 @@ public class SiteMapParser {
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
 
-        // disable validation and avoid that remote DTDs, schemas, etc. are
-        // fetched
+        // disable validation and avoid that DTDs, schemas, XML snippets, etc.
+        // are fetched from remote servers or the local file system
         factory.setValidating(false);
         factory.setXIncludeAware(false);
 

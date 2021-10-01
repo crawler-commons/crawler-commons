@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
@@ -119,24 +117,24 @@ public class SiteMapParserTest {
         // A file on disk that would be read if we were vulnerable to XXE
         File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
 
-        // Create a sitemap with an external entity referring to the local temporary file
+        // Create a sitemap with an external entity referring to the local file
         SiteMapParser parser = new SiteMapParser();
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
-        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-                .append("<!DOCTYPE urlset [\n")
-                .append("  <!ENTITY test SYSTEM \"file://" + doNotVisit.toPath().toAbsolutePath() + "\">\n")
-                .append("]>\n")
-                .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
-                .append("  <url>\n")
-                .append("    <loc>http://www.example.com/visit-here</loc>\n")
-                .append("    <lastmod>2019-06-19</lastmod>\n")
-                .append("   </url>\n")
-                .append("  <url>\n")
-                .append("    <loc>&test;</loc>\n")
-                .append("    <lastmod>2019-06-19</lastmod>\n")
-                .append("  </url>\n")
-                .append("</urlset>");
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<!DOCTYPE urlset [\n") //
+                        .append("  <!ENTITY test SYSTEM \"file://" + doNotVisit.getAbsolutePath() + "\">\n") //
+                        .append("]>\n") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n") //
+                        .append("  <url>\n") //
+                        .append("    <loc>http://www.example.com/visit-here</loc>\n") //
+                        .append("    <lastmod>2019-06-19</lastmod>\n") //
+                        .append("   </url>\n") //
+                        .append("  <url>\n") //
+                        .append("    <loc>&test;</loc>\n") //
+                        .append("    <lastmod>2019-06-19</lastmod>\n") //
+                        .append("  </url>\n") //
+                        .append("</urlset>");
         byte[] content = scontent.toString().getBytes(UTF_8);
 
         URL url = new URL("http://www.example.com/sitemap.xxe.xml");
@@ -146,7 +144,44 @@ public class SiteMapParserTest {
         assertEquals(true, asm.isProcessed());
         SiteMap sm = (SiteMap) asm;
 
-        // Should only return a single valid URL and ignore the external entity one
+        // Should only return a single valid URL and ignore the external entity
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertEquals(new URL("http://www.example.com/visit-here"), sm.getSiteMapUrls().iterator().next().getUrl());
+    }
+
+    @Test
+    public void testSitemapXIncludeDisabled() throws UnknownFormatException, IOException {
+        // A file on disk that would be read if we were vulnerable to XInclude
+        // attacks
+        File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
+
+        // Create a sitemap containing a XInclude referring to the local file
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+                        .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\n") //
+                        .append("        xmlns:xi=\"http://www.w3.org/2001/XInclude\">") //
+                        .append("  <url>\n") //
+                        .append("    <loc>http://www.example.com/visit-here</loc>\n") //
+                        .append("    <lastmod>2019-06-19</lastmod>\n") //
+                        .append("   </url>\n") //
+                        .append("  <url>\n") //
+                        .append("    <loc><xi:include href=\"file://" + doNotVisit.getAbsolutePath() + "\" parse=\"text\"/></loc>\n") //
+                        .append("    <lastmod>2019-06-19</lastmod>\n") //
+                        .append("  </url>\n") //
+                        .append("</urlset>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+
+        URL url = new URL("http://www.example.com/sitemap.xinclude.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+
+        // Should only return a single valid URL and ignore the URL contained in
+        // the external entity
         assertEquals(1, sm.getSiteMapUrls().size());
         assertEquals(new URL("http://www.example.com/visit-here"), sm.getSiteMapUrls().iterator().next().getUrl());
     }
