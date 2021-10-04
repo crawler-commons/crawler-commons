@@ -54,6 +54,20 @@ public class BasicURLNormalizerTest {
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf", "http://foo.com/foo.php");
     }
 
+    @Test
+    public void testHostToUnicode() {
+        normalizer = BasicURLNormalizer.newBuilder().idnNormalization(BasicURLNormalizer.IdnNormalization.UNICODE).build();
+        normalizeTest("http://xn--schne-lua.xn--bcher-kva.de/", "http://schöne.bücher.de/");
+        normalizeTest("https://xn--90ax2c.xn--p1ai/", "https://нэб.рф/");
+    }
+
+    @Test
+    public void testNoIdnNormalization() {
+        normalizer = BasicURLNormalizer.newBuilder().idnNormalization(BasicURLNormalizer.IdnNormalization.NONE).build();
+        // leave the host name as is, even if it's mixed
+        normalizeTest("http://schöne.xn--bcher-kva.de/", "http://schöne.xn--bcher-kva.de/");
+    }
+
     private void normalizeTest(String weird, String normal) {
         assertEquals(normal, normalizer.filter(weird), "normalizing: " + weird);
     }

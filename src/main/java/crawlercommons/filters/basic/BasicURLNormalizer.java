@@ -619,6 +619,8 @@ public class BasicURLNormalizer extends URLFilter {
              * cf. https://bugs.openjdk.java.net/browse/JDK-6806873
              */
             host = IDN.toASCII(host);
+        } else if (this.idnNormalization == IdnNormalization.UNICODE && host.contains("xn--")) {
+            host = IDN.toUnicode(host);
         }
 
         /* 4. trim a trailing dot */
@@ -641,6 +643,7 @@ public class BasicURLNormalizer extends URLFilter {
     public enum IdnNormalization {
         NONE,
         PUNYCODE,
+        UNICODE
     }
 
     /**
@@ -666,7 +669,8 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         /**
-         * Configures whether internationalized domain names (IDNs) should be converted to ASCII/Punycode.
+         * Configures whether internationalized domain names (IDNs) should be
+         * converted to ASCII/Punycode or Unicode.
          *
          * @param idnNormalization
          * @return this builder
