@@ -29,13 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,14 +139,17 @@ public class BasicURLNormalizer extends URLFilter {
         return true;
     }
 
-    final Set<String> queryElementsToRemove;
+    private final Set<String> queryParamsToRemove;
+    private final IdnNormalization idnNormalization;
+
 
     public BasicURLNormalizer() {
-        this(new TreeSet<>());
+        this(new Builder());
     }
 
-    public BasicURLNormalizer(Set<String> queryElementsToRemove) {
-        this.queryElementsToRemove = new TreeSet<>(queryElementsToRemove);
+    public BasicURLNormalizer(Builder builder) {
+        this.queryParamsToRemove = builder.queryParamsToRemove;
+        this.idnNormalization = builder.idnNormalization;
     }
 
     @Override
@@ -310,7 +307,7 @@ public class BasicURLNormalizer extends URLFilter {
         file = escapePath(unescapePath(file));
 
         List<NameValuePair> pairs =
-                parseQueryParameters(file, queryStartIdx, queryElementsToRemove);
+                parseQueryParameters(file, queryStartIdx, queryParamsToRemove);
 
         StringBuilder normalizedFile = new StringBuilder();
         String path = file.substring(0, endPathIdx);
@@ -612,7 +609,7 @@ public class BasicURLNormalizer extends URLFilter {
          * 3. convert between Unicode and ASCII forms for Internationalized
          * Domain Names (IDNs)
          */
-        if (!isAscii(host)) {
+        if (this.idnNormalization == IdnNormalization.PUNYCODE && !isAscii(host)) {
             /*
              * IllegalArgumentException: thrown if the input string contains
              * non-convertible Unicode codepoints
@@ -630,6 +627,63 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         return host;
+    }
+
+    /**
+     * Create a new builder object for creating a customized {@link BasicURLNormalizer} object.
+     *
+     * @return
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public enum IdnNormalization {
+        NONE,
+        PUNYCODE,
+    }
+
+    /**
+     * A builder class for the {@link BasicURLNormalizer}.
+     */
+    public static class Builder {
+
+        public IdnNormalization idnNormalization = IdnNormalization.PUNYCODE;
+        Set<String> queryParamsToRemove = new TreeSet<>();
+
+        private Builder() {
+        }
+
+        /**
+         * A collection of names of query parameters that should be removed from the URL query.
+         *
+         * @param queryParamsToRemove
+         * @return this builder
+         */
+        public Builder queryParamsToRemove(Collection<String> queryParamsToRemove) {
+            this.queryParamsToRemove = new TreeSet<>(queryParamsToRemove);
+            return this;
+        }
+
+        /**
+         * Configures whether internationalized domain names (IDNs) should be converted to ASCII/Punycode.
+         *
+         * @param idnNormalization
+         * @return this builder
+         */
+        public Builder idnNormalization(IdnNormalization idnNormalization) {
+            this.idnNormalization = idnNormalization;
+            return this;
+        }
+
+        /**
+         * Constructs the custom URL normalizer instance.
+         *
+         * @return the constructed URL normalizer
+         */
+        public BasicURLNormalizer build() {
+            return new BasicURLNormalizer(this);
+        }
     }
 
     public static void main(String args[]) throws IOException {

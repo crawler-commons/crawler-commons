@@ -16,6 +16,7 @@
 
 package crawlercommons.filters.basic;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -23,9 +24,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
 
 /** Unit tests for BasicURLNormalizer. */
 public class BasicURLNormalizerTest {
@@ -50,9 +48,7 @@ public class BasicURLNormalizerTest {
 
     @Test
     public void testRemoveSessionQueryParameters() {
-        List<String> invalidParameters = Arrays
-            .asList("sid", "phpsessid", "sessionid", "jsessionid");
-        normalizer = new BasicURLNormalizer(new TreeSet<>(invalidParameters));
+        normalizer = BasicURLNormalizer.newBuilder().queryParamsToRemove(asList("sid", "phpsessid", "sessionid", "jsessionid")).build();
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1", "http://foo.com/foo.php?a=1");
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1&b", "http://foo.com/foo.php?a=1&b");
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf", "http://foo.com/foo.php");
