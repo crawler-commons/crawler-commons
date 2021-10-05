@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+- [URLs] Provide a builder class to configure the URL normalizer (aecio) #321, #324
+- [URLs] Make normalization of IDNs configurable (to ASCII or Unicode) via builder (aecio, sebastian-nagel) #324
 - [Sitemaps] Fix XXE vulnerability in Sitemap parser (kovyrin) #323
 - [URLs] Sorting the Query Parameters (aecio) #246, #309
 - [URLs] Allows to (optionally) remove common irrelevant query parameters (aecio) #309
