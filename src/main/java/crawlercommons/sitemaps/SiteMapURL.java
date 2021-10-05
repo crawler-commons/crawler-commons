@@ -356,7 +356,7 @@ public class SiteMapURL implements Serializable {
 
         SiteMapURL that = (SiteMapURL) o;
 
-        if (!url.equals(that.url))
+        if (!url.toString().equals(that.url.toString()))
             return false;
 
         return true;
@@ -364,7 +364,7 @@ public class SiteMapURL implements Serializable {
 
     @Override
     public int hashCode() {
-        return url.hashCode();
+        return url.toString().hashCode();
     }
 
     @Override

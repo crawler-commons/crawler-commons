@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.2-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Avoid calling java.net.URL::equals in equals method of sitemaps and extensions (sebastian-nagel) #322
 - [URLs] Provide a builder class to configure the URL normalizer (aecio) #321, #324
 - [URLs] Make normalization of IDNs configurable (to ASCII or Unicode) via builder (aecio, sebastian-nagel) #324
 - [Sitemaps] Fix XXE vulnerability in Sitemap parser (kovyrin) #323

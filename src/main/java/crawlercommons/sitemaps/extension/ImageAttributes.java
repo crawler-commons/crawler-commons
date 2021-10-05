@@ -132,11 +132,11 @@ public class ImageAttributes extends ExtensionMetadata {
             return false;
         }
         ImageAttributes that = (ImageAttributes) other;
-        return Objects.equals(loc, that.loc) //
+        return urlEquals(loc, that.loc) //
                         && Objects.equals(caption, that.caption) //
                         && Objects.equals(geoLocation, that.geoLocation) //
                         && Objects.equals(title, that.title) //
-                        && Objects.equals(license, that.license);
+                        && urlEquals(license, that.license);
     }
 
     @Override

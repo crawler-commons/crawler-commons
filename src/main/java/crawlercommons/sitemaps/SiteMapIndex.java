@@ -80,8 +80,9 @@ public class SiteMapIndex extends AbstractSiteMap {
      * @return SiteMap corresponding to the URL or null
      */
     public AbstractSiteMap getSitemap(URL url) {
+        String u = url.toString();
         for (AbstractSiteMap asm : sitemaps) {
-            if (asm.getUrl().equals(url)) {
+            if (asm.getUrl().toString().equals(u)) {
                 return asm;
             }
         }
