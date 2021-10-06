@@ -18,9 +18,9 @@ package crawlercommons.sitemaps;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** Created on 13/10/2014. */
 public class SiteMapURLTest {
     private SiteMapURL siteMapURL = new SiteMapURL("http://example.com", true);
 
@@ -56,5 +56,13 @@ public class SiteMapURLTest {
         assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
         siteMapURL.setPriority(Double.NEGATIVE_INFINITY);
         assertEquals(SiteMapURL.DEFAULT_PRIORITY, siteMapURL.getPriority(), 0);
+    }
+
+    @Test
+    public void testNPE() {
+        SiteMapURL invalid = new SiteMapURL("INVALID_URL", true);
+        assertFalse(siteMapURL.equals(invalid));
+        // should not throw an exception
+        invalid.hashCode();
     }
 }

@@ -43,7 +43,7 @@ public abstract class ExtensionMetadata implements Serializable {
      * DNS lookup to resolve the host part
      */
     protected static boolean urlEquals(URL a, URL b) {
-        return (a == b) || (a != null && a.toString().equals(b.toString()));
+        return (a == b) || (a != null && b != null && a.toString().equals(b.toString()));
     }
 
 }
