@@ -1,0 +1,2 @@
+java.net.URL#equals(java.lang.Object) @ may trigger a DNS lookup to resolve the host part
+java.net.URL#hashCode()               @ may trigger a DNS lookup to resolve the host part

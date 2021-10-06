@@ -550,11 +550,11 @@ public class VideoAttributes extends ExtensionMetadata {
             return false;
         }
         VideoAttributes that = (VideoAttributes) other;
-        return Objects.equals(thumbnailLoc, that.thumbnailLoc) //
+        return urlEquals(thumbnailLoc, that.thumbnailLoc) //
                         && Objects.equals(title, that.title) //
                         && Objects.equals(description, that.description) //
-                        && Objects.equals(contentLoc, that.contentLoc) //
-                        && Objects.equals(playerLoc, that.playerLoc) //
+                        && urlEquals(contentLoc, that.contentLoc) //
+                        && urlEquals(playerLoc, that.playerLoc) //
                         && Objects.equals(duration, that.duration) //
                         && Objects.equals(expirationDate, that.expirationDate) //
                         && Objects.equals(rating, that.rating) //
@@ -565,7 +565,7 @@ public class VideoAttributes extends ExtensionMetadata {
                         && Objects.equals(category, that.category) //
                         && Objects.deepEquals(restrictedCountries, that.restrictedCountries) //
                         && Objects.deepEquals(allowedCountries, that.allowedCountries) //
-                        && Objects.equals(galleryLoc, that.galleryLoc) //
+                        && urlEquals(galleryLoc, that.galleryLoc) //
                         && Objects.equals(galleryTitle, that.galleryTitle) //
                         && Objects.deepEquals(prices, that.prices) //
                         && Objects.equals(requiresSubscription, that.requiresSubscription) //

@@ -19,6 +19,7 @@ package crawlercommons.sitemaps.extension;
 import crawlercommons.sitemaps.SiteMapURL;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -34,6 +35,15 @@ public abstract class ExtensionMetadata implements Serializable {
 
     public boolean isValid() {
         return true;
+    }
+
+    /**
+     * Compare URLs by their string representation because calling
+     * {@link URL#equals(Object)} may trigger an unwanted and potentially slow
+     * DNS lookup to resolve the host part
+     */
+    protected static boolean urlEquals(URL a, URL b) {
+        return (a == b) || (a != null && b != null && a.toString().equals(b.toString()));
     }
 
 }

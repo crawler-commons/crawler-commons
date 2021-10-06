@@ -105,7 +105,7 @@ public class LinkAttributes extends ExtensionMetadata {
             return false;
         }
         LinkAttributes that = (LinkAttributes) other;
-        return Objects.equals(href, that.href) //
+        return urlEquals(href, that.href) //
                         && Objects.equals(params, that.params);
     }
 
