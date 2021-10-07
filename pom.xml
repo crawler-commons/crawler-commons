@@ -356,7 +356,7 @@
 		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 		<maven-surfire-plugin.version>2.22.2</maven-surfire-plugin.version>
 		<maven-release-plugin.version>2.5.1</maven-release-plugin.version>
-		<maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
 		<apache-rat-plugin.version>0.8</apache-rat-plugin.version>
