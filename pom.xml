@@ -346,7 +346,7 @@
 		<slf4j-api.version>1.7.7</slf4j-api.version>
 		<junit.version>5.5.0</junit.version>
 		<slf4j-log4j12.version>1.7.7</slf4j-log4j12.version>
-		<mockito-core.version>1.8.0</mockito-core.version>
+		<mockito-core.version>3.12.4</mockito-core.version>
 		<jetty.version>5.1.10</jetty.version>
 		<servlet-api.version>2.5</servlet-api.version>
 
