@@ -29,8 +29,7 @@ There is a mailing list on [Google Groups](https://groups.google.com/forum/?from
 
 # Installation
 
-Using Maven
-Add the following dependency to your pom.xml:
+Using Maven, add the following dependency to your pom.xml:
 ~~~xml
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
@@ -38,6 +37,20 @@ Add the following dependency to your pom.xml:
     <version>1.1</version>
 </dependency>
 ~~~
+
+Using Gradle, add the folling to your build file:
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/comgithubcrawler-commons-1015/"
+    }
+}
+...
+dependencies {
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1'
+}
+```
 
 # News
 
