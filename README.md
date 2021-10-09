@@ -40,13 +40,6 @@ Using Maven, add the following dependency to your pom.xml:
 
 Using Gradle, add the folling to your build file:
 ```groovy
-repositories {
-    mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/repositories/comgithubcrawler-commons-1015/"
-    }
-}
-...
 dependencies {
     implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1'
 }
