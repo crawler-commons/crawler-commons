@@ -361,7 +361,7 @@
 		<maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
 		<apache-rat-plugin.version>0.8</apache-rat-plugin.version>
 		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
-		<maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
+		<maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
 		<checksum-maven-plugin.version>1.4</checksum-maven-plugin.version>
 		<maven.download.plugin.version>1.6.7</maven.download.plugin.version>
 
