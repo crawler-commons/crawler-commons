@@ -355,7 +355,7 @@
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
 		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 		<maven-surfire-plugin.version>2.22.2</maven-surfire-plugin.version>
-		<maven-release-plugin.version>2.5.1</maven-release-plugin.version>
+		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
