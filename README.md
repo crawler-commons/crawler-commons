@@ -15,6 +15,7 @@ These components benefit from collaboration among various existing web crawler p
 # User Documentation
 
 ## Javadocs
+* [1.2](http://crawler-commons.github.io/crawler-commons/1.2/)
 * [1.1](http://crawler-commons.github.io/crawler-commons/1.1/)
 * [1.0](http://crawler-commons.github.io/crawler-commons/1.0/)
 * [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
