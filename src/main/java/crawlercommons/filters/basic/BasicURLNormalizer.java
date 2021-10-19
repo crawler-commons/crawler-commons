@@ -332,7 +332,7 @@ public class BasicURLNormalizer extends URLFilter {
      *
      * @param s a String containing the URL file (as per java.net.URL.getFile(), i.e., the path + query +
      * fragment)
-     * @param queryStartIdx the index position of the query part in the string {@param s}.
+     * @param queryStartIdx the index position of the query part in the string {@code s}.
      * @param queryElementsToRemove a set of query parameter names to be ignored while parsing the
      * query parameters.
      */
@@ -634,7 +634,7 @@ public class BasicURLNormalizer extends URLFilter {
     /**
      * Create a new builder object for creating a customized {@link BasicURLNormalizer} object.
      *
-     * @return
+     * @return a {@link Builder} ready to use
      */
     public static Builder newBuilder() {
         return new Builder();
