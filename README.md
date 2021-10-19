@@ -35,18 +35,24 @@ Using Maven, add the following dependency to your pom.xml:
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
     <artifactId>crawler-commons</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 </dependency>
 ~~~
 
 Using Gradle, add the folling to your build file:
 ```groovy
 dependencies {
-    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1'
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.2'
 }
 ```
 
 # News
+
+## 14th October 2021  - crawler-commons 1.2 released
+
+We are glad to announce the 1.2 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.2/CHANGES.txt) file included with the release for a complete list of details.
+This version fixes an XXE vulnerability issue in the Sitemap parser and includes several improvements to the URL normalizer and the Sitemaps parser.
+
 
 ## 29th June 2020  - crawler-commons 1.1 released
 
