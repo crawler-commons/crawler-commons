@@ -16,7 +16,7 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
 
@@ -57,7 +57,7 @@
 
 	<organization>
 		<name>Crawler-Commons</name>
-		<url>http://github.com/crawler-commons</url>
+		<url>https://github.com/crawler-commons</url>
 	</organization>
 
 	<developers>
@@ -66,7 +66,7 @@
 			<name>Ken Krugler</name>
 			<email>kkrugler_lists@transpac.com</email>
 			<organization>Scale Unlimited</organization>
-			<organizationUrl>http://www.scaleunlimited.com</organizationUrl>
+			<organizationUrl>https://www.scaleunlimited.com</organizationUrl>
 		</developer>
 
 		<developer>
@@ -80,7 +80,7 @@
 			<name>Julien Nioche</name>
 			<email>julien@digitalpebble.com</email>
 			<organization>DigitalPebble Ltd</organization>
-			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
+			<organizationUrl>https://www.digitalpebble.com</organizationUrl>
 		</developer>
 
 		<developer>
@@ -159,7 +159,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
+				<version>${maven-jar-plugin.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -353,7 +353,7 @@
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
-		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 		<maven-surfire-plugin.version>2.22.2</maven-surfire-plugin.version>
 		<maven-release-plugin.version>2.5.1</maven-release-plugin.version>
 		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
