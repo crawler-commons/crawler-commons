@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
 	<version>1.3-SNAPSHOT</version>
+
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -32,8 +27,8 @@
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
-	  <tag>HEAD</tag>
-    </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<distributionManagement>
 		<repository>
@@ -188,7 +183,7 @@
 						<test.build.data>${project.basedir}/target/test-data/</test.build.data>
 					</systemPropertyVariables>
 					<argLine>-Xmx512m</argLine>
-					<forkMode>always</forkMode>
+					<forkCount>2</forkCount>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
 			</plugin>
@@ -200,34 +195,31 @@
 					<configFile>${project.basedir}/doc/eclipse-formatter.xml</configFile>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>de.thetaphi</groupId>
-                <artifactId>forbiddenapis</artifactId>
-                <version>3.2</version>
-                <configuration>
-                    <!--
-                    if the used Java version is too new,
-                    don't fail, just do nothing:
-                    -->
-                    <failOnUnsupportedJava>false</failOnUnsupportedJava>
-                    <bundledSignatures>
-                        <bundledSignature>jdk-unsafe</bundledSignature>
-                        <bundledSignature>jdk-deprecated</bundledSignature>
-                        <bundledSignature>jdk-non-portable</bundledSignature>
-                    </bundledSignatures>
-                    <signaturesFiles>
-                      <signaturesFile>src/test/resources/forbidden-apis-signatures.txt</signaturesFile>
-                    </signaturesFiles>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                            <goal>testCheck</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>de.thetaphi</groupId>
+				<artifactId>forbiddenapis</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<!-- if the used Java version is too new, don't fail, just do nothing: -->
+					<failOnUnsupportedJava>false</failOnUnsupportedJava>
+					<bundledSignatures>
+						<bundledSignature>jdk-unsafe</bundledSignature>
+						<bundledSignature>jdk-deprecated</bundledSignature>
+						<bundledSignature>jdk-non-portable</bundledSignature>
+					</bundledSignatures>
+					<signaturesFiles>
+						<signaturesFile>src/test/resources/forbidden-apis-signatures.txt</signaturesFile>
+					</signaturesFiles>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+							<goal>testCheck</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
@@ -369,6 +361,7 @@
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
 		<javac.src.version>1.8</javac.src.version>
 		<javac.target.version>1.8</javac.target.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
 		<skipTests>false</skipTests>
@@ -419,15 +412,6 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>${mockito-core.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<!-- we'd like to use 6.0.2, but the version in central is missing the 
-				pom -->
-			<version>${jetty.version}</version>
 			<scope>test</scope>
 		</dependency>
 
