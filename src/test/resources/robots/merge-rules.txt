@@ -1,0 +1,16 @@
+User-Agent: testy
+Disallow: /
+
+User-Agent: curl
+Disallow: /
+
+User-Agent: wget
+Allow: /foo/bar
+
+User-Agent: *
+User-Agent: wget
+Disallow: /foo/bar
+Disallow: /tmp/bar
+Allow: /ckh/bar
+
+

@@ -1,0 +1,15 @@
+User-Agent: testy
+Disallow: /foo
+
+User-Agent: wget
+Allow: /
+Allow: /foo
+Allow: /index.html
+Disallow: /*
+
+User-Agent: testy
+Allow: /foo/bar
+Disallow: /foo/b*
+
+
+

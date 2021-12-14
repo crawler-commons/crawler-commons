@@ -167,11 +167,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          */
         private boolean _finishedAgentFields;
 
-        // True if we're done adding rules for a matched (not wildcard) agent
-        // name. When this is true, we only consider sitemap directives, so we
-        // skip all remaining user agent blocks.
-        private boolean _skipAgents;
-
         /*
          * Counter of warnings reporting invalid rules/lines in the robots.txt
          * file. The counter is used to limit the number of logged warnings.
@@ -223,14 +218,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         public void setFinishedAgentFields(boolean finishedAgentFields) {
             _finishedAgentFields = finishedAgentFields;
-        }
-
-        public boolean isSkipAgents() {
-            return _skipAgents;
-        }
-
-        public void setSkipAgents(boolean skipAgents) {
-            _skipAgents = skipAgents;
         }
 
         public void clearRules() {
@@ -513,22 +500,27 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case DISALLOW:
+                parseState.setFinishedAgentFields(true);
                 handleDisallow(parseState, token);
                     break;
 
                 case ALLOW:
+                parseState.setFinishedAgentFields(true);
                 handleAllow(parseState, token);
                     break;
 
                 case CRAWL_DELAY:
+                parseState.setFinishedAgentFields(true);
                 handleCrawlDelay(parseState, token);
                     break;
 
                 case SITEMAP:
+                parseState.setFinishedAgentFields(true);
                 handleSitemap(parseState, token);
                     break;
 
                 case HTTP:
+                parseState.setFinishedAgentFields(true);
                 handleHttp(parseState, token);
                     break;
 
@@ -593,20 +585,15 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleUserAgent(ParseState state, RobotToken token) {
-        if (state.isMatchedRealName()) {
-            if (state.isFinishedAgentFields()) {
-                state.setSkipAgents(true);
-            }
-
-            return;
-        }
-
-        if (state.isFinishedAgentFields()) {
-            // We've got a user agent field, so we haven't yet seen anything
-            // that tells us we're done with this set of agent names.
-            state.setFinishedAgentFields(false);
+        // If we are adding rules, and had already finished reading user agent
+        // fields, then we are in a new section, hence stop adding rules
+        if (state.isAddingRules() && state.isFinishedAgentFields()) {
             state.setAddingRules(false);
         }
+
+        // Clearly we've encountered a new user agent directive, hence we need to start
+        // processing until we are finished.
+        state.setFinishedAgentFields(false);
 
         // Handle the case when there are multiple target names are passed
         // We assume we should do case-insensitive comparison of target name.
@@ -621,27 +608,41 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             // TODO KKr - catch case of multiple names, log as non-standard.
             String[] agentNames = token.getData().split("[ \t,]");
             for (String agentName : agentNames) {
-                // TODO should we do case-insensitive matching? Probably yes.
                 agentName = agentName.trim().toLowerCase(Locale.ROOT);
                 if (agentName.isEmpty()) {
                     // Ignore empty names
-                } else if (agentName.equals("*") && !state.isMatchedWildcard()) {
+                } else if (agentName.equals("*") && !state.isMatchedRealName()) {
                     state.setMatchedWildcard(true);
                     state.setAddingRules(true);
                 } else {
-                    // TODO use longest match as winner
                     for (String targetName : targetNameSplits) {
                         if (targetName.startsWith(agentName)) {
+                            // In case we previously hit a wildcard rule match
+                            // but we could also have hit our own user agent before.
+                            // only clear if wildcard was matched earlier
+                            if (state.isMatchedWildcard()) {
+                                state.clearRules();
+                            }
                             state.setMatchedRealName(true);
                             state.setAddingRules(true);
-                            // In case we previously hit a wildcard rule match
-                            state.clearRules();
+                            state.setMatchedWildcard(false);
                             break;
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Add any uniform rules to clean up path directives
+     * @param path
+     * @return clean path
+     */
+    private String normalizePathDirective(String path) {
+        path = path.trim();
+
+        return path;
     }
 
     /**
@@ -653,12 +654,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleDisallow(ParseState state, RobotToken token) {
-        if (state.isSkipAgents()) {
-            return;
-        }
-
-        state.setFinishedAgentFields(true);
-
         if (!state.isAddingRules()) {
             return;
         }
@@ -667,7 +662,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         try {
             path = URLDecoder.decode(path, "UTF-8");
-
+            path = normalizePathDirective(path);
             if (path.length() == 0) {
                 // Disallow: <nothing> => allow all.
                 state.clearRules();
@@ -688,12 +683,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleAllow(ParseState state, RobotToken token) {
-        if (state.isSkipAgents()) {
-            return;
-        }
-
-        state.setFinishedAgentFields(true);
-
         if (!state.isAddingRules()) {
             return;
         }
@@ -702,6 +691,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         try {
             path = URLDecoder.decode(path, "UTF-8");
+            path = normalizePathDirective(path);
         } catch (Exception e) {
             reportWarning(state, "Error parsing robots rules - can't decode path: {}", path);
         }
@@ -723,12 +713,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleCrawlDelay(ParseState state, RobotToken token) {
-        if (state.isSkipAgents()) {
-            return;
-        }
-
-        state.setFinishedAgentFields(true);
-
         if (!state.isAddingRules()) {
             return;
         }
