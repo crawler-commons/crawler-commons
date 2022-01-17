@@ -335,7 +335,7 @@
 		<!-- Dependencies -->
 
 		<commons-io.version>2.7</commons-io.version>
-		<slf4j-api.version>1.7.32</slf4j-api.version>
+		<slf4j-api.version>1.7.33</slf4j-api.version>
 		<junit.version>5.8.1</junit.version>
 		<slf4j-log4j12.version>1.7.32</slf4j-log4j12.version>
 		<mockito-core.version>4.0.0</mockito-core.version>
