@@ -957,6 +957,33 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.fict.com/fish"));
     }
 
+    @Test
+    void testMatchingOfUserAgentNamesIndependentFromSequentialOrder() {
+        String url = "https://example.com/foo/bar";
+
+        /*
+         * URL is allowed for "crawler" but disallowed for "crawlerbot"
+         * independent from sequential ordering of rules
+         */
+
+        String robotsTxtBlock1 = "User-agent: crawlerbot\n" //
+                        + "Disallow: /foo/bar\n";
+        String robotsTxtBlock2 = "User-agent: crawler\n" //
+                        + "Allow: /foo/bar\n";
+
+        String[] robotsTxts = new String[2];
+        robotsTxts[0] = robotsTxtBlock1 + "\n" + robotsTxtBlock2;
+        robotsTxts[1] = robotsTxtBlock2 + "\n" + robotsTxtBlock1;
+
+        for (String robotsTxt : robotsTxts) {
+            String userAgent = "crawlerbot";
+            BaseRobotRules rules = createRobotRules(userAgent, robotsTxt);
+            assertFalse(rules.isAllowed(url));
+            rules = createRobotRules("crawler", robotsTxt);
+            assertTrue(rules.isAllowed(url));
+        }
+    }
+
     // https://github.com/crawler-commons/crawler-commons/issues/112
     @Test
     void testSitemapAtEndOfFile() {
