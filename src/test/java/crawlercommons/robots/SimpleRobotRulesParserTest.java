@@ -45,11 +45,11 @@ public class SimpleRobotRulesParserTest {
         return createRobotRules(crawlerName, content.getBytes(UTF_8), true);
     }
 
-    private static BaseRobotRules createRobotRules(String crawlerName, String content, boolean exactUserAgentMatching) {
+    public static BaseRobotRules createRobotRules(String crawlerName, String content, boolean exactUserAgentMatching) {
         return createRobotRules(crawlerName, content.getBytes(UTF_8), exactUserAgentMatching);
     }
 
-    private static BaseRobotRules createRobotRules(String crawlerName, byte[] contentBytes) {
+    public static BaseRobotRules createRobotRules(String crawlerName, byte[] contentBytes) {
         return createRobotRules(crawlerName, contentBytes, true);
     }
 
@@ -59,19 +59,19 @@ public class SimpleRobotRulesParserTest {
         return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", crawlerName);
     }
 
-    private static BaseRobotRules createRobotRules(String[] crawlerNames, String content, boolean exactUserAgentMatching) {
+    public static BaseRobotRules createRobotRules(String[] crawlerNames, String content, boolean exactUserAgentMatching) {
         return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
     }
 
-    private static BaseRobotRules createRobotRules(Collection<String> crawlerNames, String content, boolean exactUserAgentMatching) {
-        return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
-    }
-
-    private static BaseRobotRules createRobotRules(String[] crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
+    public static BaseRobotRules createRobotRules(String[] crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
         return createRobotRules(Arrays.asList(crawlerNames), contentBytes, exactUserAgentMatching);
     }
 
-    private static BaseRobotRules createRobotRules(Collection<String> crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
+    public static BaseRobotRules createRobotRules(Collection<String> crawlerNames, String content, boolean exactUserAgentMatching) {
+        return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
+    }
+
+    public static BaseRobotRules createRobotRules(Collection<String> crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
         robotParser.setExactUserAgentMatching(exactUserAgentMatching);
         return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", crawlerNames);
