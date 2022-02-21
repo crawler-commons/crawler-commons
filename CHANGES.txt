@@ -2,7 +2,7 @@ Crawler-Commons Change Log
 
 Current Development 1.3-SNAPSHOT (yyyy-mm-dd)
 - Migrate Continuous Integration from Travis to GitHub Actions (Valery Yatsynovich) #333
-- Upgrade dependencies (dependabot) #334, #339, #345, #346, #347, #350
+- Upgrade dependencies (dependabot, Richard Zowalla) #334, #339, #345, #346, #347, #350, #369
 - Upgrade Maven plugins (dependabot, Richard Zowalla, sebastian-nagel) #328, #329, #330, #331, #335, #336, #337, #338, #340, #341, #343, #356, #363. #364, #366
 - Enable Dependabot (Valery Yatsynovich) #327
 - Removes test dependency towards mockito-core (Richard Zowalla) #367
