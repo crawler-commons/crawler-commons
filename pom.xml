@@ -344,7 +344,6 @@
 		<slf4j-api.version>1.7.32</slf4j-api.version>
 		<junit.version>5.8.2</junit.version>
 		<slf4j-log4j12.version>1.7.32</slf4j-log4j12.version>
-		<mockito-core.version>4.0.0</mockito-core.version>
 		<jetty.version>5.1.10</jetty.version>
 		<servlet-api.version>2.5</servlet-api.version>
 
@@ -411,13 +410,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j-log4j12.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito-core.version}</version>
 			<scope>test</scope>
 		</dependency>
 
