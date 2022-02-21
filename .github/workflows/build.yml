@@ -25,5 +25,15 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: 'maven'
 
+      - name: Set up cache for ~./m2/repository
+        uses: actions/cache@v2.1.6
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/com/github/crawler-commons
+          key: maven-${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            java${{ matrix.java }}
+
       - name: Build
         run: mvn install javadoc:aggregate
