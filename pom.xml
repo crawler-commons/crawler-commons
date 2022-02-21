@@ -95,6 +95,12 @@
 			<name>Sebastian Nagel</name>
 			<email>snagel@apache.org</email>
 		</developer>
+
+		<developer>
+			<id>rzo1</id>
+			<name>Richard Zowalla</name>
+			<email>rzo1@apache.org</email>
+		</developer>
 	</developers>
 
 	<build>
