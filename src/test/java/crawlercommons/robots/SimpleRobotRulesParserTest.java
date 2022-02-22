@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -537,11 +537,11 @@ public class SimpleRobotRulesParserTest {
         BaseRobotRules rules;
 
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
-        rules = robotParser.failedFetch(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        rules = robotParser.failedFetch(HttpURLConnection.HTTP_UNAVAILABLE);
         assertTrue(rules.isDeferVisits());
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
 
-        rules = robotParser.failedFetch(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        rules = robotParser.failedFetch(HttpURLConnection.HTTP_MOVED_PERM);
         assertTrue(rules.isDeferVisits());
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
 
@@ -558,7 +558,7 @@ public class SimpleRobotRulesParserTest {
         // Calling failedFetch with a good status code should trigger an
         // exception.
         try {
-            robotParser.failedFetch(HttpServletResponse.SC_OK);
+            robotParser.failedFetch(HttpURLConnection.HTTP_OK);
             fail("Should have thrown an exception");
         } catch (Exception e) {
             // valid

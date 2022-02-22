@@ -6,6 +6,7 @@ Current Development 1.3-SNAPSHOT (yyyy-mm-dd)
 - Upgrade Maven plugins (dependabot, Richard Zowalla, sebastian-nagel) #328, #329, #330, #331, #335, #336, #337, #338, #340, #341, #343, #356, #363. #364, #366
 - Enable Dependabot (Valery Yatsynovich) #327
 - Removes test dependency towards mockito-core (Richard Zowalla) #367
+- Drops provided dependency towards servlet-api (Richard Zowalla) #368
 
 Release 1.2 (2021-10-06)
 - [Sitemaps] Avoid calling java.net.URL::equals in equals method of sitemaps and extensions (sebastian-nagel) #322

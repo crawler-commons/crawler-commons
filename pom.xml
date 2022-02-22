@@ -345,7 +345,6 @@
 		<junit.version>5.8.2</junit.version>
 		<slf4j-log4j12.version>1.7.32</slf4j-log4j12.version>
 		<jetty.version>5.1.10</jetty.version>
-		<servlet-api.version>2.5</servlet-api.version>
 
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>3.10.0</maven-compiler-plugin.version>
@@ -411,14 +410,6 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j-log4j12.version}</version>
 			<scope>test</scope>
-		</dependency>
-
-		<!-- Provided dependencies -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>${servlet-api.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>
