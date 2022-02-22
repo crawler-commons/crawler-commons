@@ -344,7 +344,6 @@
 		<slf4j-api.version>1.7.32</slf4j-api.version>
 		<junit.version>5.8.2</junit.version>
 		<slf4j-log4j12.version>1.7.32</slf4j-log4j12.version>
-		<jetty.version>5.1.10</jetty.version>
 
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>3.10.0</maven-compiler-plugin.version>
