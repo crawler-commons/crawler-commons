@@ -138,15 +138,8 @@ public class SiteMapParserTest {
         byte[] content = scontent.toString().getBytes(UTF_8);
 
         URL url = new URL("http://www.example.com/sitemap.xxe.xml");
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
-        assertEquals(SitemapType.XML, asm.getType());
-        assertEquals(true, asm instanceof SiteMap);
-        assertEquals(true, asm.isProcessed());
-        SiteMap sm = (SiteMap) asm;
-
-        // Should only return a single valid URL and ignore the external entity
-        assertEquals(1, sm.getSiteMapUrls().size());
-        assertEquals(new URL("http://www.example.com/visit-here"), sm.getSiteMapUrls().iterator().next().getUrl());
+        Assertions.assertThrows(UnknownFormatException.class,
+            () -> parser.parseSiteMap(contentType, content, url));
     }
 
     @Test
