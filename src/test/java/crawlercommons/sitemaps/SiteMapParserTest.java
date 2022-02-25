@@ -114,6 +114,7 @@ public class SiteMapParserTest {
 
     @Test
     public void testSitemapXXE() throws UnknownFormatException, IOException {
+        System.clearProperty("crawler-commons.sitemap.allowDocTypes");
         // A file on disk that would be read if we were vulnerable to XXE
         File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
 
@@ -141,7 +142,45 @@ public class SiteMapParserTest {
         Assertions.assertThrows(UnknownFormatException.class,
             () -> parser.parseSiteMap(contentType, content, url));
     }
-
+    
+    @Test
+    public void testSitemapXXEWithDocTypeAllowed() throws UnknownFormatException, IOException {
+        System.setProperty("crawler-commons.sitemap.allowDocTypes", "true");
+        // A file on disk that would be read if we were vulnerable to XXE
+        File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
+        
+        // Create a sitemap with an external entity referring to the local file
+        SiteMapParser parser = new SiteMapParser();
+        String contentType = "text/xml";
+        StringBuilder scontent = new StringBuilder(1024);
+        scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //
+            .append("<!DOCTYPE urlset [\n") //
+            .append("  <!ENTITY test SYSTEM \"file://" + doNotVisit.getAbsolutePath() + "\">\n") //
+            .append("]>\n") //
+            .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n") //
+            .append("  <url>\n") //
+            .append("    <loc>http://www.example.com/visit-here</loc>\n") //
+            .append("    <lastmod>2019-06-19</lastmod>\n") //
+            .append("   </url>\n") //
+            .append("  <url>\n") //
+            .append("    <loc>&test;</loc>\n") //
+            .append("    <lastmod>2019-06-19</lastmod>\n") //
+            .append("  </url>\n") //
+            .append("</urlset>");
+        byte[] content = scontent.toString().getBytes(UTF_8);
+        
+        URL url = new URL("http://www.example.com/sitemap.xxe.xml");
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, content, url);
+        assertEquals(SitemapType.XML, asm.getType());
+        assertEquals(true, asm instanceof SiteMap);
+        assertEquals(true, asm.isProcessed());
+        SiteMap sm = (SiteMap) asm;
+    
+        // Should only return a single valid URL and ignore the external entity
+        assertEquals(1, sm.getSiteMapUrls().size());
+        assertEquals(new URL("http://www.example.com/visit-here"), sm.getSiteMapUrls().iterator().next().getUrl());
+    }
+    
     @Test
     public void testSitemapXIncludeDisabled() throws UnknownFormatException, IOException {
         // A file on disk that would be read if we were vulnerable to XInclude
