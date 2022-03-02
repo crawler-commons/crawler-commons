@@ -101,9 +101,9 @@ public class SiteMapParser {
     protected Map<String, Extension> extensionNamespaces = new HashMap<>();
 
     private MimeTypeDetector mimeTypeDetector;
-    
+
     /**
-     * Option to allow DTD when parsing site map
+     * Option to allow DTDs in sitemaps.
      */
     private boolean allowDocTypeDefinitions = false;
 
@@ -146,6 +146,16 @@ public class SiteMapParser {
     }
 
     /**
+     * Sets if the parser allows a DTD in sitemaps or feeds.
+     *
+     * @param allowDocTypeDefinitions
+     *            true if allowed. Default is false.
+     */
+    public void setAllowDocTypeDefinitions(boolean allowDocTypeDefinitions) {
+        this.allowDocTypeDefinitions = allowDocTypeDefinitions;
+    }
+
+    /**
      * @return whether invalid URLs will be rejected (where invalid means that
      *         the URL is not under the base URL, see <a href=
      *         "https://www.sitemaps.org/protocol.html#location">sitemap file
@@ -169,7 +179,7 @@ public class SiteMapParser {
      * specification, or any accepted namespace (see
      * {@link #addAcceptedNamespace(String)}). Note enabling strict namespace
      * checking always adds the namespace defined by the current sitemap
-     * specificiation ({@link Namespace#SITEMAP}) to the list of accepted
+     * specification ({@link Namespace#SITEMAP}) to the list of accepted
      * namespaces.
      * 
      * @param s
@@ -247,6 +257,7 @@ public class SiteMapParser {
     public void setURLFilter(URLFilter filter) {
         urlFilter = filter::filter;
     }
+
     /**
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL
      *
@@ -668,13 +679,5 @@ public class SiteMapParser {
      */
     public static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         return testUrl.startsWith(sitemapBaseUrl);
-    }
-    
-    /**
-     * Set if the parser allow DTD
-     * @param allowDocTypeDefinitions true if allowed. Default is false.
-     */
-    public void setAllowDocTypeDefinitions(boolean allowDocTypeDefinitions) {
-        this.allowDocTypeDefinitions = allowDocTypeDefinitions;
     }
 }
