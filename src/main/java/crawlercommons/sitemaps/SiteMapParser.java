@@ -102,6 +102,11 @@ public class SiteMapParser {
 
     private MimeTypeDetector mimeTypeDetector;
 
+    /**
+     * Option to allow DTDs in sitemaps.
+     */
+    private boolean allowDocTypeDefinitions = false;
+
     /* Function to normalize or filter URLs. Does nothing by default. */
     private Function<String, String> urlFilter = (String url) -> url;
 
@@ -141,6 +146,16 @@ public class SiteMapParser {
     }
 
     /**
+     * Sets if the parser allows a DTD in sitemaps or feeds.
+     *
+     * @param allowDocTypeDefinitions
+     *            true if allowed. Default is false.
+     */
+    public void setAllowDocTypeDefinitions(boolean allowDocTypeDefinitions) {
+        this.allowDocTypeDefinitions = allowDocTypeDefinitions;
+    }
+
+    /**
      * @return whether invalid URLs will be rejected (where invalid means that
      *         the URL is not under the base URL, see <a href=
      *         "https://www.sitemaps.org/protocol.html#location">sitemap file
@@ -164,7 +179,7 @@ public class SiteMapParser {
      * specification, or any accepted namespace (see
      * {@link #addAcceptedNamespace(String)}). Note enabling strict namespace
      * checking always adds the namespace defined by the current sitemap
-     * specificiation ({@link Namespace#SITEMAP}) to the list of accepted
+     * specification ({@link Namespace#SITEMAP}) to the list of accepted
      * namespaces.
      * 
      * @param s
@@ -242,6 +257,7 @@ public class SiteMapParser {
     public void setURLFilter(URLFilter filter) {
         urlFilter = filter::filter;
     }
+
     /**
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL
      *
@@ -595,6 +611,9 @@ public class SiteMapParser {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            if (!this.allowDocTypeDefinitions) {
+                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to configure XML parser: " + e.toString());
         }

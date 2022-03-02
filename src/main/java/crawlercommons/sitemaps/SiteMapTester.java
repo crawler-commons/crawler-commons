@@ -46,6 +46,8 @@ public class SiteMapTester {
             LOG.error("Java properties:");
             LOG.error("  sitemap.strictNamespace");
             LOG.error("                  if true sitemaps are required to use the standard namespace URI");
+            LOG.error("  sitemap.allow.dtd");
+            LOG.error("                  if true sitemaps are allowed to include a DTD");
             LOG.error("  sitemap.extensions");
             LOG.error("                  if true enable sitemap extension parsing");
             LOG.error("  sitemap.filter.urls");
@@ -70,6 +72,9 @@ public class SiteMapTester {
 
         boolean strictNamespace = Boolean.getBoolean("sitemap.strictNamespace");
         saxParser.setStrictNamespace(strictNamespace);
+
+        boolean allowDTD = Boolean.getBoolean("sitemap.allow.dtd");
+        saxParser.setAllowDocTypeDefinitions(allowDTD);
 
         boolean enableExtensions = Boolean.getBoolean("sitemap.extensions");
         if (enableExtensions) {
