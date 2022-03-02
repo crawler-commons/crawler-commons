@@ -113,8 +113,7 @@ public class SiteMapParserTest {
     }
 
     @Test
-    public void testSitemapXXE() throws UnknownFormatException, IOException {
-        System.clearProperty("crawler-commons.sitemap.allowDocTypes");
+    public void testSitemapXXE() throws IOException {
         // A file on disk that would be read if we were vulnerable to XXE
         File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
 
@@ -145,12 +144,12 @@ public class SiteMapParserTest {
     
     @Test
     public void testSitemapXXEWithDocTypeAllowed() throws UnknownFormatException, IOException {
-        System.setProperty("crawler-commons.sitemap.allowDocTypes", "true");
         // A file on disk that would be read if we were vulnerable to XXE
         File doNotVisit = new File("src/test/resources/sitemaps/do-not-visit.txt");
         
         // Create a sitemap with an external entity referring to the local file
         SiteMapParser parser = new SiteMapParser();
+        parser.setAllowDocTypeDefinitions(true);
         String contentType = "text/xml";
         StringBuilder scontent = new StringBuilder(1024);
         scontent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") //

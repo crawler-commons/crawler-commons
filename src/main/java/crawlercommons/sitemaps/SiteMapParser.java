@@ -101,6 +101,11 @@ public class SiteMapParser {
     protected Map<String, Extension> extensionNamespaces = new HashMap<>();
 
     private MimeTypeDetector mimeTypeDetector;
+    
+    /**
+     * Option to allow DTD when parsing site map
+     */
+    private boolean allowDocTypeDefinitions = false;
 
     /* Function to normalize or filter URLs. Does nothing by default. */
     private Function<String, String> urlFilter = (String url) -> url;
@@ -595,7 +600,7 @@ public class SiteMapParser {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            if (!"true".equalsIgnoreCase(System.getProperty("crawler-commons.sitemap.allowDocTypes"))) {
+            if (!this.allowDocTypeDefinitions) {
                 factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             }
         } catch (Exception e) {
@@ -663,5 +668,13 @@ public class SiteMapParser {
      */
     public static boolean urlIsValid(String sitemapBaseUrl, String testUrl) {
         return testUrl.startsWith(sitemapBaseUrl);
+    }
+    
+    /**
+     * Set if the parser allow DTD
+     * @param allowDocTypeDefinitions true if allowed. Default is false.
+     */
+    public void setAllowDocTypeDefinitions(boolean allowDocTypeDefinitions) {
+        this.allowDocTypeDefinitions = allowDocTypeDefinitions;
     }
 }
