@@ -49,6 +49,12 @@ dependencies {
 
 # News
 
+## 28th July 2022  - crawler-commons 1.3 released
+
+We are glad to announce the 1.3 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.3/CHANGES.txt) file included with the release for a complete list of details.
+The new release includes multiple dependency upgrades, improvements to the automatic builds, and a tighter protections against XXE vulnerability issues in the Sitemap parser.
+
+
 ## 14th October 2021  - crawler-commons 1.2 released
 
 We are glad to announce the 1.2 release of Crawler-Commons. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.2/CHANGES.txt) file included with the release for a complete list of details.
