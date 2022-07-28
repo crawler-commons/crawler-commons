@@ -15,14 +15,15 @@ These components benefit from collaboration among various existing web crawler p
 # User Documentation
 
 ## Javadocs
-* [1.2](http://crawler-commons.github.io/crawler-commons/1.2/)
-* [1.1](http://crawler-commons.github.io/crawler-commons/1.1/)
-* [1.0](http://crawler-commons.github.io/crawler-commons/1.0/)
-* [0.10](http://crawler-commons.github.io/crawler-commons/0.10/)
-* [0.9](http://crawler-commons.github.io/crawler-commons/0.9/)
-* [0.8](http://crawler-commons.github.io/crawler-commons/0.8/)
-* [0.7](http://crawler-commons.github.io/crawler-commons/0.7/)
-* [0.6](http://crawler-commons.github.io/crawler-commons/0.6/apidocs/)
+* [1.3](https://crawler-commons.github.io/crawler-commons/1.3/)
+* [1.2](https://crawler-commons.github.io/crawler-commons/1.2/)
+* [1.1](https://crawler-commons.github.io/crawler-commons/1.1/)
+* [1.0](https://crawler-commons.github.io/crawler-commons/1.0/)
+* [0.10](https://crawler-commons.github.io/crawler-commons/0.10/)
+* [0.9](https://crawler-commons.github.io/crawler-commons/0.9/)
+* [0.8](https://crawler-commons.github.io/crawler-commons/0.8/)
+* [0.7](https://crawler-commons.github.io/crawler-commons/0.7/)
+* [0.6](https://crawler-commons.github.io/crawler-commons/0.6/apidocs/)
 
 # Mailing List
 

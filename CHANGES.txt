@@ -1,6 +1,9 @@
 Crawler-Commons Change Log
 
-Current Development 1.3 (2022-07-19)
+Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+
+
+Release 1.3 (2022-07-19)
 - [Sitemaps] Disable support for DTDs in XML sitemaps and feeds by default (Kenneth Wong) #371
 - Migrate Continuous Integration from Travis to GitHub Actions (Valery Yatsynovich) #333
 - Upgrade dependencies (dependabot, Richard Zowalla) #334, #339, #345, #346, #347, #350, #354, #361, #369
