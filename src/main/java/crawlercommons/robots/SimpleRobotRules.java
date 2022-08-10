@@ -169,10 +169,13 @@ public class SimpleRobotRules extends BaseRobotRules {
                 int matchLength = ruleMatches(pathWithQuery, rule._prefix);
                 if (matchLength == -1) {
                     // See precedence-of-rules test case for an example
-                    // Some webmasters expect behavior close to google's, and this block is equivalent to:
+                    // Some webmasters expect behavior close to google's, and
+                    // this block is equivalent to:
                     // https://github.com/google/robotstxt/blob/02bc6cdfa32db50d42563180c42aeb47042b4f0c/robots.cc#L605-L618
-                    // There are example robots.txt in the wild that benefit from this.
-                    // As of 2/7/2022, https://venmo.com/robots.txt for instance.
+                    // There are example robots.txt in the wild that benefit
+                    // from this.
+                    // As of 2/7/2022, https://venmo.com/robots.txt for
+                    // instance.
                     if (rule._prefix.endsWith("index.htm") || rule._prefix.endsWith("index.html")) {
                         matchLength = ruleMatches(pathWithQuery, rule._prefix.substring(0, rule._prefix.indexOf("index.htm")) + "$");
                         if (matchLength == -1) {
@@ -189,7 +192,8 @@ public class SimpleRobotRules extends BaseRobotRules {
                 } else if (longestRuleMatch == matchLength) {
                     isAllowed |= rule.isAllow();
                 }
-                // else we've already got a more specific rule, and this match doesn't matter
+                // else we've already got a more specific rule, and this match
+                // doesn't matter
             }
 
             return isAllowed;

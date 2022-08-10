@@ -287,8 +287,7 @@ public class SimpleRobotRulesParserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "False, False, http://www.domain.com/a",//
+    @CsvSource({ "False, False, http://www.domain.com/a",//
                     "False, False, http://www.domain.com/a/",//
                     "False, False, http://www.domain.com/a/bloh/foo.html",//
                     "True, True, http://www.domain.com/b",//
@@ -318,9 +317,8 @@ public class SimpleRobotRulesParserTest {
         rules = createRobotRules("Agent1", nutchRobotsTxt);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
 
-
-
-        // Note that SimpleRobotRulesParser now merges all matching user agent rules.
+        // Note that SimpleRobotRulesParser now merges all matching user agent
+        // rules.
         rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt);
         assertEquals(isMergeAllowed, rules.isAllowed(urlStr));
     }
@@ -478,13 +476,7 @@ public class SimpleRobotRulesParserTest {
     @Test
     void testMultiWildcard() {
         // Make sure we only take the first wildcard entry.
-        final String simpleRobotsTxt =
-                "User-agent: *" + CRLF +
-                "Disallow: /index.html" + CRLF +
-                "Allow: /" + CRLF +
-                CRLF +
-                "User-agent: *" + CRLF +
-                "Disallow: /";
+        final String simpleRobotsTxt = "User-agent: *" + CRLF + "Disallow: /index.html" + CRLF + "Allow: /" + CRLF + CRLF + "User-agent: *" + CRLF + "Disallow: /";
 
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
