@@ -17,6 +17,7 @@
 package crawlercommons.robots;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 @SuppressWarnings("serial")
 public abstract class BaseRobotsParser implements Serializable {
@@ -37,6 +38,13 @@ public abstract class BaseRobotsParser implements Serializable {
      * "crawlerbot" as the agent name, because of splitting on spaces,
      * lower-casing, and the prefix match rule.
      * 
+     * @deprecated since 1.4 - replaced by {@link parseContent(String, byte[],
+     *             String, Collection)}. Passing a collection of robot names
+     *             gives users more control how user-agent and robot names are
+     *             matched. Passing a list of names is also more efficient as it
+     *             does not require to split the robot name string again and
+     *             again on every robots.txt file to be parsed.
+     * 
      * @param url
      *            URL that robots.txt content was fetched from. A complete and
      *            valid URL (e.g., https://example.com/robots.txt) is expected.
@@ -51,16 +59,40 @@ public abstract class BaseRobotsParser implements Serializable {
      *            (just the name portion, w/o version or other details)
      * @return robot rules.
      */
-
+    @Deprecated
     public abstract BaseRobotRules parseContent(String url, byte[] content, String contentType, String robotNames);
 
     /**
-     * The fetch of robots.txt failed, so return rules appropriate give the HTTP
-     * status code.
+     * Parse the robots.txt file in <i>content</i>, and return rules appropriate
+     * for processing paths by <i>userAgent</i>. Multiple agent names can be
+     * provided as collection. How agent names are matched against user-agent
+     * lines in the robots.txt depends on the implementing class.
+     * 
+     * @param url
+     *            URL that robots.txt content was fetched from. A complete and
+     *            valid URL (e.g., https://example.com/robots.txt) is expected.
+     *            Used to resolve relative sitemap URLs and for
+     *            logging/reporting purposes.
+     * @param content
+     *            raw bytes from the site's robots.txt file
+     * @param contentType
+     *            HTTP response header (mime-type)
+     * @param robotNames
+     *            name(s) of crawler, used to select rules from the robots.txt
+     *            file by matching the names against the user-agent lines in the
+     *            robots.txt file.
+     * @return robot rules.
+     */
+    public abstract BaseRobotRules parseContent(String url, byte[] content, String contentType, Collection<String> robotNames);
+
+    /**
+     * The fetch of robots.txt failed, so return rules appropriate for the given
+     * HTTP status code.
      * 
      * @param httpStatusCode
      *            a failure status code (NOT 2xx)
      * @return robot rules
      */
     public abstract BaseRobotRules failedFetch(int httpStatusCode);
+
 }

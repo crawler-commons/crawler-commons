@@ -24,7 +24,10 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -174,18 +177,18 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         private int _numWarnings;
 
         private String _url;
-        private String _targetName;
+        private Collection<String> _targetNames;
 
         private SimpleRobotRules _curRules;
 
-        public ParseState(String url, String targetName) {
+        public ParseState(String url, Collection<String> targetNames) {
             _url = url;
-            _targetName = targetName;
+            _targetNames = targetNames;
             _curRules = new SimpleRobotRules();
         }
 
-        public String getTargetName() {
-            return _targetName;
+        public Collection<String> getTargetNames() {
+            return _targetNames;
         }
 
         public boolean isMatchedRealName() {
@@ -293,6 +296,9 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     // match the rest of the directive, up until whitespace or colon
     private static final Pattern DIRECTIVE_SUFFIX_PATTERN = Pattern.compile("[^: \t]+(.*)");
 
+    // split pattern for robot names
+    private static final Pattern ROBOT_NAMES_SPLIT = Pattern.compile("\\s*,\\s*|\\s+");
+
     /**
      * Figure out directive on line of text from robots.txt file. We assume the
      * line has been lower-cased
@@ -356,6 +362,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
     private int _maxWarnings;
     private long _maxCrawlDelay;
+    private boolean _exactUserAgentMatching;
 
     public SimpleRobotRulesParser() {
         this(DEFAULT_MAX_CRAWL_DELAY, DEFAULT_MAX_WARNINGS);
@@ -370,6 +377,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     public SimpleRobotRulesParser(long maxCrawlDelay, int maxWarnings) {
         this._maxCrawlDelay = maxCrawlDelay;
         this._maxWarnings = maxWarnings;
+        this._exactUserAgentMatching = true;
     }
 
     @Override
@@ -404,8 +412,58 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String,
      * byte[], java.lang.String, java.lang.String)
      */
+    @Deprecated
     @Override
     public SimpleRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
+        return parseContent(url, content, contentType, new LinkedHashSet<>(Arrays.asList(splitRobotNames(robotNames))), false);
+    }
+
+    /**
+     * Split a string listing user-agent / robot names into tokens.
+     * 
+     * Splitting is done at comma and/or whitespace, the tokens are converted to
+     * lower-case.
+     * 
+     * @param robotNames
+     *            robot / user-agent string
+     * @return array of user-agent / robot tokens
+     */
+    protected String[] splitRobotNames(String robotNames) {
+        // lower case and trim
+        robotNames = robotNames.toLowerCase(Locale.ROOT).trim();
+        // split at commas and whitespace
+        return ROBOT_NAMES_SPLIT.split(robotNames);
+    }
+
+    /**
+     * Parse the robots.txt file in <i>content</i>, and return rules appropriate
+     * for processing paths by <i>userAgent</i>. Multiple agent names are
+     * provided as collection. See {@link #setExactUserAgentMatching(boolean)}
+     * for details how agent names are matched.
+     * 
+     * @param url
+     *            URL that robots.txt content was fetched from. A complete and
+     *            valid URL (e.g., https://example.com/robots.txt) is expected.
+     *            Used to resolve relative sitemap URLs and for
+     *            logging/reporting purposes.
+     * @param content
+     *            raw bytes from the site's robots.txt file
+     * @param contentType
+     *            HTTP response header (mime-type)
+     * @param robotNames
+     *            name(s) of crawler, used to select rules from the robots.txt
+     *            file by matching the names against the user-agent lines in the
+     *            robots.txt file. Robot names should be single token names, w/o
+     *            version or other parts. Names should be lower-case, as the
+     *            user-agent line is also converted to lower-case for matching.
+     * @return robot rules.
+     */
+    @Override
+    public SimpleRobotRules parseContent(String url, byte[] content, String contentType, Collection<String> robotNames) {
+        return parseContent(url, content, contentType, robotNames, isExactUserAgentMatching());
+    }
+
+    private SimpleRobotRules parseContent(String url, byte[] content, String contentType, Collection<String> robotNames, boolean exactUserAgentMatching) {
 
         // If there's nothing there, treat it like we have no restrictions.
         if ((content == null) || (content.length == 0)) {
@@ -467,7 +525,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // tokenizer doesn't return empty tokens, a \r\n sequence still
         // works since it looks like an empty string between the \r and \n.
         StringTokenizer lineParser = new StringTokenizer(contentAsStr, "\n\r\u0085\u2028\u2029");
-        ParseState parseState = new ParseState(url, robotNames.toLowerCase(Locale.ROOT));
+        ParseState parseState = new ParseState(url, robotNames);
 
         while (lineParser.hasMoreTokens()) {
             String line = lineParser.nextToken();
@@ -595,39 +653,55 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // processing until we are finished.
         state.setFinishedAgentFields(false);
 
-        // Handle the case when there are multiple target names are passed
-        // We assume we should do case-insensitive comparison of target name.
-        String[] targetNames = state.getTargetName().toLowerCase(Locale.ROOT).split(",");
+        // Handle the case when multiple target names are passed.
+        // We assume we should do case-insensitive comparison of every target name.
+        Collection<String> targetNames = state.getTargetNames();
 
-        for (int count = 0; count < targetNames.length; count++) {
-            // Extract possible match names from our target agent name, since it
-            // appears to be expected that "Mozilla botname 1.0" matches
-            // "botname"
-            String[] targetNameSplits = targetNames[count].trim().split(" ");
-
-            // TODO KKr - catch case of multiple names, log as non-standard.
-            String[] agentNames = token.getData().split("[ \t,]");
-            for (String agentName : agentNames) {
-                agentName = agentName.trim().toLowerCase(Locale.ROOT);
-                if (agentName.isEmpty()) {
-                    // Ignore empty names
-                } else if (agentName.equals("*") && !state.isMatchedRealName()) {
-                    state.setMatchedWildcard(true);
-                    state.setAddingRules(true);
-                } else {
-                    for (String targetName : targetNameSplits) {
-                        if (targetName.startsWith(agentName)) {
-                            // In case we previously hit a wildcard rule match
-                            // but we could also have hit our own user agent before.
-                            // only clear if wildcard was matched earlier
-                            if (state.isMatchedWildcard()) {
-                                state.clearRules();
-                            }
-                            state.setMatchedRealName(true);
-                            state.setAddingRules(true);
-                            state.setMatchedWildcard(false);
-                            break;
+        if (isExactUserAgentMatching()) {
+            String agentName = token.getData().trim().toLowerCase(Locale.ROOT);
+            if (agentName.isEmpty()) {
+                // Ignore empty names
+            } else if (agentName.equals("*") && !state.isMatchedRealName()) {
+                state.setMatchedWildcard(true);
+                state.setAddingRules(true);
+            } else if (targetNames.contains(agentName)) {
+                if (state.isMatchedWildcard()) {
+                    // Clear rules of the wildcard user-agent found
+                    // before the non-wildcard user-agent match.
+                    state.clearRules();
+                }
+                state.setMatchedRealName(true);
+                state.setAddingRules(true);
+                state.setMatchedWildcard(false);
+            }
+        } else {
+            /*
+             * prefix matching on user-agent words - backward-compatibility to
+             * the old and deprecated API if "User-Agent" HTTP request header
+             * strings are passed as param instead of single-word/token
+             * user-agent names, e.g. if the robot name is "WebCrawler/1.0" and is
+             * expected match the robots.txt directive "User-agent: mybot"
+             * or also "User-agent: my XXX
+             */
+            // TODO: even this should be fixed: the robot name butterfly should match "Butterfly/1.0" in the user-agent line
+            for (String targetName : targetNames) {
+                LOGGER.debug(targetName);
+                // TODO KKr - catch case of multiple names, log as non-standard.
+                String[] agentNames = ROBOT_NAMES_SPLIT.split(token.getData().trim().toLowerCase(Locale.ROOT));
+                for (String agentName : agentNames) {
+                    if (agentName.equals("*") && !state.isMatchedRealName()) {
+                        state.setMatchedWildcard(true);
+                        state.setAddingRules(true);
+                    } else if (targetName.startsWith(agentName)) {
+                        if (state.isMatchedWildcard()) {
+                            // Clear rules of the wildcard user-agent found
+                            // before the non-wildcard user-agent match.
+                            state.clearRules();
                         }
+                        state.setMatchedRealName(true);
+                        state.setAddingRules(true);
+                        state.setMatchedWildcard(false);
+                        break;
                     }
                 }
             }
@@ -834,6 +908,54 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      */
     public void setMaxCrawlDelay(long maxCrawlDelay) {
         _maxCrawlDelay = maxCrawlDelay;
+    }
+
+    /**
+     * Set how the user-agent names in the robots.txt (<code>User-agent:</code>
+     * lines) are matched with the provided robot names:
+     * <ul>
+     * <li>(with exact matching) follow the
+     * <a href= "https://datatracker.ietf.org/doc/rfc9309/">Robots Exclusion
+     * Protocol RFC 9309</a> and match user agent <b>literally but
+     * case-insensitive over the full string length</b>:
+     * 
+     * <blockquote>Crawlers set their own name, which is called a product token,
+     * to find relevant groups. The product token MUST contain only upper and
+     * lowercase letters ("a-z" and "A-Z"), underscores ("_"), and hyphens
+     * ("-"). [...] Crawlers MUST use case-insensitive matching to find the
+     * group that matches the product token and then obey the rules of the
+     * group.</blockquote></li>
+     * 
+     * <li>(without exact matching) split the user-agent and robot names at
+     * whitespace into words and perform a prefix match (one of the user-agent
+     * words must be a prefix of one of the robot words, eg. the robot name
+     * <code>WebCrawler/3.0</code> matches the robots.txt directive
+     * 
+     * <pre>
+     * User-agent: webcrawler
+     * </pre>
+     * 
+     * This prefix matching on words allows that crawler developers lazily use
+     * the HTTP User-Agent string also for the robots.txt parser. It does not
+     * cover the case when the HTTP User-Agent string is used in the
+     * robots.txt.</li>
+     * </ul>
+     * 
+     * @param exactMatching
+     *            if true, configure exact user-agent name matching. If false,
+     *            disable exact matching and do prefix matching on user-agent
+     *            words.
+     */
+    public void setExactUserAgentMatching(boolean exactMatching) {
+        _exactUserAgentMatching = exactMatching;
+    }
+
+    /**
+     * @return whether exact user-agent matching is configured, see
+     *         {@link #setExactUserAgentMatching(boolean)}
+     */
+    public boolean isExactUserAgentMatching() {
+        return _exactUserAgentMatching;
     }
 
     public static void main(String[] args) throws MalformedURLException, IOException {

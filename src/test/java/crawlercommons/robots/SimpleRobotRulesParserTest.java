@@ -36,12 +36,31 @@ public class SimpleRobotRulesParserTest {
     private static final String FAKE_ROBOTS_URL = "http://domain.com";
 
     private static BaseRobotRules createRobotRules(String crawlerName, String content) {
-        return createRobotRules(crawlerName, content.getBytes(UTF_8));
+        return createRobotRules(crawlerName, content.getBytes(UTF_8), false);
+    }
+
+    private static BaseRobotRules createRobotRules(String crawlerName, String content, boolean exactUserAgentMatching) {
+        return createRobotRules(crawlerName, content.getBytes(UTF_8), exactUserAgentMatching);
     }
 
     private static BaseRobotRules createRobotRules(String crawlerName, byte[] contentBytes) {
+        return createRobotRules(crawlerName, contentBytes, true);
+    }
+
+    private static BaseRobotRules createRobotRules(String crawlerName, byte[] contentBytes, boolean exactUserAgentMatching) {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.setExactUserAgentMatching(exactUserAgentMatching);
         return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", crawlerName);
+    }
+
+    private static BaseRobotRules createRobotRules(String[] crawlerNames, String content, boolean exactUserAgentMatching) {
+        return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
+    }
+
+    private static BaseRobotRules createRobotRules(String[] crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.setExactUserAgentMatching(exactUserAgentMatching);
+        return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", Arrays.asList(crawlerNames));
     }
 
     @Test
@@ -436,7 +455,8 @@ public class SimpleRobotRulesParserTest {
                         + "#Disallow: /c" + CR //
                         + "" + CR //
                         + "" + CR //
-                        + "User-Agent: Agent2 Agent3#foo" + CR + "User-Agent: Agent4" + CR //
+                        + "User-Agent: Agent2 Agent3#foo" + CR //
+                        + "User-Agent: Agent4" + CR //
                         + "Disallow: /d" + CR //
                         + "Disallow: /e/d/" + CR //
                         + "" + CR //
@@ -758,6 +778,8 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        rules = createRobotRules("googlebot", krugleRobotsTxt, true);
+        assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
     }
 
     @Test
@@ -975,13 +997,59 @@ public class SimpleRobotRulesParserTest {
         robotsTxts[0] = robotsTxtBlock1 + "\n" + robotsTxtBlock2;
         robotsTxts[1] = robotsTxtBlock2 + "\n" + robotsTxtBlock1;
 
+        BaseRobotRules rules;
         for (String robotsTxt : robotsTxts) {
-            String userAgent = "crawlerbot";
-            BaseRobotRules rules = createRobotRules(userAgent, robotsTxt);
+            rules = createRobotRules("crawlerbot", robotsTxt, true);
             assertFalse(rules.isAllowed(url));
-            rules = createRobotRules("crawler", robotsTxt);
+            rules = createRobotRules("crawler", robotsTxt, true);
             assertTrue(rules.isAllowed(url));
         }
+    }
+
+    @Test
+    void testMatchingUserAgentNamesHttpHeader() {
+        /*
+         * Tests examples from #192 - matching user-agent directives containing
+         * the strings sent by the crawler in the <i>User-Agent</i> HTTP request
+         * header.
+         */
+        String url = "http://example.org/";
+        String robotsTxt = "User-agent: Mozilla/5.0 (compatible; Butterfly/1.0; +http://labs.topsy.com/butterfly/) Gecko/2009032608 Firefox/3.0.8" + LF //
+                        + "Disallow: /";
+        BaseRobotRules rules;
+
+        // exact user-agent matching: rule does not apply
+        String robot = "butterfly";
+        rules = createRobotRules(robot, robotsTxt, true);
+        assertTrue(rules.isAllowed(url));
+
+        // prefix user-agent matching: rule does not apply anyway because
+        // "butterfly/1.0" (from robots.txt) is not a prefix of butterfly (from
+        // configuration / API call)
+        rules = createRobotRules(robot, robotsTxt, false);
+        assertTrue(rules.isAllowed(url));
+
+        // prefix user-agent matching: user-agent is matched if a token expected
+        // in the user-agent line is included literally (but lower-case)
+        String[] butterflyRobots = { "butterfly", "butterfly/1.0", "butterfly/1.0;" };
+        rules = createRobotRules(butterflyRobots, robotsTxt, false);
+        assertFalse(rules.isAllowed(url));
+
+        // exact user-agent matching: user-agent is matched if the entire
+        // user-agent line is passed as one robot name (lower-case)
+        String[] butterflyRobotsFullList = { //
+        "butterfly", //
+                        "butterfly/1.0", //
+                        "mozilla/5.0 (compatible; butterfly/1.0; +http://labs.topsy.com/butterfly/) gecko/2009032608 firefox/3.0.8" //
+        };
+        rules = createRobotRules(butterflyRobotsFullList, robotsTxt, true);
+        assertFalse(rules.isAllowed(url));
+
+        // exact user-agent matching: different user-agents which share only one
+        // token (here "mozilla/5.0" or "(compatible;" are not matched
+        String[] myRobots = { "mybot", "mybot/1.0", "mozilla/5.0 (compatible; mybot/1.0)" };
+        rules = createRobotRules(myRobots, robotsTxt, true);
+        assertTrue(rules.isAllowed(url));
     }
 
     // https://github.com/crawler-commons/crawler-commons/issues/112
