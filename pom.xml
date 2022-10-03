@@ -374,7 +374,7 @@
 
 		<commons-io.version>2.11.0</commons-io.version>
 		<slf4j-api.version>1.7.36</slf4j-api.version>
-		<junit.version>5.9.0</junit.version>
+		<junit.version>5.9.1</junit.version>
 		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
 
 		<!-- Maven Plugin Dependencies -->
