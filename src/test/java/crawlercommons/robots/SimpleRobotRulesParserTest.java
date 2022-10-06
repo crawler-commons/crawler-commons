@@ -262,15 +262,19 @@ public class SimpleRobotRulesParserTest {
                     "True, http://www.fict.org/%7Emak/mak.html" })
     void testMixedEndings2(boolean isAllowed, String urlStr) {
         final String mixedEndingsRobotsTxt = "# /robots.txt for http://www.fict.org/" + CRLF //
-                        + "# comments to webmaster@fict.org" + CR //
-                        + LF + "User-agent: unhipbot" + LF + "Disallow: /" + CR //
+                        + "# comments to webmaster@fict.org" + LF + CR //
+                        + "User-agent: unhipbot" + LF //
+                        + "Disallow: /" + CR //
                         + "" + CRLF //
-                        + "User-agent: webcrawler" + LF + "User-agent: excite" + CR //
+                        + "User-agent: webcrawler" + LF //
+                        + "User-agent: excite" + CR //
                         + "Disallow: " + "\u0085" + CR //
                         + "User-agent: *" + CRLF //
-                        + "Disallow: /org/plans.html" + LF + "Allow: /org/" + CR //
+                        + "Disallow: /org/plans.html" + LF //
+                        + "Allow: /org/" + CR //
                         + "Allow: /serv" + CRLF //
-                        + "Allow: /~mak" + LF + "Disallow: /" + CRLF;
+                        + "Allow: /~mak" + LF //
+                        + "Disallow: /" + CRLF;
 
         BaseRobotRules rules = createRobotRules("Unknown/1.0", mixedEndingsRobotsTxt);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
@@ -295,13 +299,15 @@ public class SimpleRobotRulesParserTest {
                         + "# comments to webmaster@fict.org" + CRLF //
                         + CRLF //
                         + "User-agent: unhipbot" + CRLF //
-                        + "Disallow: /" + CRLF + "" + CRLF //
+                        + "Disallow: /" + CRLF //
+                        + "" + CRLF //
                         + "User-agent: webcrawler" + CRLF //
                         + "User-agent: excite" + CRLF //
                         + "Disallow: " + CRLF //
                         + CRLF //
                         + "User-agent: *" + CRLF //
-                        + "Disallow: /org/plans.html" + CRLF + "Allow: /org/" + CRLF //
+                        + "Disallow: /org/plans.html" + CRLF //
+                        + "Allow: /org/" + CRLF //
                         + "Allow: /serv" + CRLF //
                         + "Allow: /~mak" + CRLF //
                         + "Disallow: /" + CRLF;
@@ -337,13 +343,15 @@ public class SimpleRobotRulesParserTest {
                         + "# comments to webmaster@fict.org" + CRLF //
                         + CRLF //
                         + "User-agent: unhipbot" + CRLF //
-                        + "Disallow: /" + CRLF + "" + CRLF //
+                        + "Disallow: /" + CRLF //
+                        + "" + CRLF //
                         + "User-agent: webcrawler" + CRLF //
                         + "User-agent: excite" + CRLF //
                         + "Disallow: " + CRLF //
                         + CRLF //
                         + "User-agent: *" + CRLF //
-                        + "Disallow: /org/plans.html" + CRLF + "Allow: /org/" + CRLF //
+                        + "Disallow: /org/plans.html" + CRLF //
+                        + "Allow: /org/" + CRLF //
                         + "Allow: /serv" + CRLF //
                         + "Allow: /~mak" + CRLF //
                         + "Disallow: /" + CRLF;
