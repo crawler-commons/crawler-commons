@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+- Upgrade project to use Java 11 (Avi Hayun, Richard Zowalla, aecio, sebastian-nagel) #320
 - [Robots.txt] Improve robots check draft rfc compliance (Eduardo Jimenez) #351 
 - Upgrade dependencies (dependabot) #379
 - Upgrade Maven plugins (dependabot) #377
