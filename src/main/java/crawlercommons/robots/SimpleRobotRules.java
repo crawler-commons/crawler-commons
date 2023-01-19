@@ -163,13 +163,40 @@ public class SimpleRobotRules extends BaseRobotRules {
                 return true;
             }
 
+            boolean isAllowed = true;
+            int longestRuleMatch = Integer.MIN_VALUE;
             for (RobotRule rule : _rules) {
-                if (ruleMatches(pathWithQuery, rule._prefix)) {
-                    return rule._allow;
+                int matchLength = ruleMatches(pathWithQuery, rule._prefix);
+                if (matchLength == -1) {
+                    // See precedence-of-rules test case for an example
+                    // Some webmasters expect behavior close to google's, and
+                    // this block is equivalent to:
+                    // https://github.com/google/robotstxt/blob/02bc6cdfa32db50d42563180c42aeb47042b4f0c/robots.cc#L605-L618
+                    // There are example robots.txt in the wild that benefit
+                    // from this.
+                    // As of 2/7/2022, https://venmo.com/robots.txt for
+                    // instance.
+                    if (rule._prefix.endsWith("index.htm") || rule._prefix.endsWith("index.html")) {
+                        matchLength = ruleMatches(pathWithQuery, rule._prefix.substring(0, rule._prefix.indexOf("index.htm")) + "$");
+                        if (matchLength == -1) {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
                 }
+
+                if (longestRuleMatch < matchLength) {
+                    longestRuleMatch = matchLength;
+                    isAllowed = rule.isAllow();
+                } else if (longestRuleMatch == matchLength) {
+                    isAllowed |= rule.isAllow();
+                }
+                // else we've already got a more specific rule, and this match
+                // doesn't matter
             }
 
-            return true;
+            return isAllowed;
         }
     }
 
@@ -197,7 +224,7 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
     }
 
-    private boolean ruleMatches(String text, String pattern) {
+    private int ruleMatches(String text, String pattern) {
         int patternPos = 0;
         int textPos = 0;
 
@@ -223,7 +250,7 @@ public class SimpleRobotRules extends BaseRobotRules {
                 patternPos += 1;
                 if (patternPos >= patternEnd) {
                     // Pattern ends with '*', we're all good.
-                    return true;
+                    return pattern.length();
                 }
 
                 // TODO - don't worry about having two '*' in a row?
@@ -255,14 +282,14 @@ public class SimpleRobotRules extends BaseRobotRules {
 
                 // If we matched, we're all set, otherwise we failed
                 if (!matched) {
-                    return false;
+                    return -1;
                 }
             } else {
                 // See if the pattern from patternPos to wildcardPos matches the
                 // text starting at textPos
                 while ((patternPos < wildcardPos) && (textPos < textEnd)) {
                     if (text.charAt(textPos++) != pattern.charAt(patternPos++)) {
-                        return false;
+                        return -1;
                     }
                 }
             }
@@ -277,7 +304,11 @@ public class SimpleRobotRules extends BaseRobotRules {
         // We're at the end, so we have a match if the pattern was completely
         // consumed, and either we consumed all the text or we didn't have to
         // match it all (no '$' at end of the pattern)
-        return (patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar);
+        if ((patternPos == patternEnd) && ((textPos == textEnd) || !containsEndChar)) {
+            return pattern.length();
+        } else {
+            return -1;
+        }
     }
 
     /**
