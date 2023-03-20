@@ -373,7 +373,7 @@
 		<!-- Dependencies -->
 
 		<commons-io.version>2.11.0</commons-io.version>
-		<slf4j-api.version>1.7.36</slf4j-api.version>
+		<slf4j-api.version>2.0.7</slf4j-api.version>
 		<junit.version>5.9.2</junit.version>
 		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
 
