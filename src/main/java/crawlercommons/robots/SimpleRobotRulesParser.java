@@ -346,6 +346,13 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile("(?i)user-agent:");
 
     /**
+     * Pattern to match a valid user-agent product tokens as defined in
+     * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1">RFC
+     * 9309, section 2.2.1</a>
+     */
+    protected static final Pattern USER_AGENT_PRODUCT_TOKEN_MATCHER = Pattern.compile("[a-zA-Z_-]+");
+
+    /**
      * Default max number of warnings logged during parse of any one robots.txt
      * file, see {@link #setMaxWarnings(int)}
      */
@@ -378,6 +385,19 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         this._maxCrawlDelay = maxCrawlDelay;
         this._maxWarnings = maxWarnings;
         this._exactUserAgentMatching = true;
+    }
+
+    /**
+     * Validate a user-agent product token as defined in
+     * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1">RFC
+     * 9309, section 2.2.1</a>
+     * 
+     * @param userAgent
+     *            user-agent product token
+     * @return true if the product token is valid
+     */
+    protected static boolean isValidUserAgentToObey(String userAgent) {
+        return userAgent != null && USER_AGENT_PRODUCT_TOKEN_MATCHER.matcher(userAgent).matches();
     }
 
     @Override
@@ -634,6 +654,30 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
     }
 
+    /*
+     * Check whether user-agent line starts with a valid user-agent product
+     * token, but continues with additional characters to be ignored e.g. "foo"
+     * matches "User-agent: foo/1.2" or "butterfly" matches
+     * "User-agent: Butterfly/1.0"
+     * 
+     * See https://www.rfc-editor.org/rfc/rfc9309.html#section-2.3.1.5
+     * "Crawlers MUST try to parse each line of the robots.txt file. Crawlers MUST use the parseable rules."
+     * and https://github.com/google/robotstxt/issues/56
+     * 
+     * @param agentName user-agent, found in the <a href=
+     * "https://www.rfc-editor.org/rfc/rfc9309.html#name-the-user-agent-line">
+     * robots.txt user-agent line</a>
+     * 
+     * @param targetTokens collection of user-agent product tokens we're looking
+     * for. Product tokens are expected to be lowercase.
+     * 
+     * @return true if the product token is match as token prefix
+     */
+    private boolean userAgentProductTokenPrefixMatch(String agentName, Collection<String> targetTokens) {
+        Matcher m = USER_AGENT_PRODUCT_TOKEN_MATCHER.matcher(agentName);
+        return m.lookingAt() && targetTokens.contains(m.group());
+    }
+
     /**
      * Handle the user-agent: directive
      * 
@@ -664,7 +708,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             } else if (agentName.equals("*") && !state.isMatchedRealName()) {
                 state.setMatchedWildcard(true);
                 state.setAddingRules(true);
-            } else if (targetNames.contains(agentName)) {
+            } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPrefixMatch(agentName, targetNames))) {
                 if (state.isMatchedWildcard()) {
                     // Clear rules of the wildcard user-agent found
                     // before the non-wildcard user-agent match.

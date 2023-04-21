@@ -672,6 +672,27 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
+    void testAgentTokenMatch() {
+        // The user-agent token should be matched until the first non-token
+        // character,
+        // see https://github.com/google/robotstxt/issues/56
+        final String simpleRobotsTxt1 = "User-agent: foo/1.2" + CRLF //
+                        + "Disallow: /index.html" + CRLF //
+                        + "Allow: /";
+        final String simpleRobotsTxt2 = "User-agent: foo bar" + CRLF //
+                        + "Disallow: /index.html" + CRLF //
+                        + "Allow: /";
+
+        BaseRobotRules rules = createRobotRules("foo", simpleRobotsTxt1, true);
+        assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+
+        rules = createRobotRules("foo", simpleRobotsTxt2, true);
+        assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
+        assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+    }
+
+    @Test
     void testUnsupportedFields() {
         // When we have a new field type that we don't know about.
         final String simpleRobotsTxt = "User-agent: crawler1" + CRLF //
@@ -1037,11 +1058,7 @@ public class SimpleRobotRulesParserTest {
 
         // exact user-agent matching: user-agent is matched if the entire
         // user-agent line is passed as one robot name (lower-case)
-        String[] butterflyRobotsFullList = { //
-        "butterfly", //
-                        "butterfly/1.0", //
-                        "mozilla/5.0 (compatible; butterfly/1.0; +http://labs.topsy.com/butterfly/) gecko/2009032608 firefox/3.0.8" //
-        };
+        String[] butterflyRobotsFullList = { "butterfly", "butterfly/1.0", "mozilla/5.0 (compatible; butterfly/1.0; +http://labs.topsy.com/butterfly/) gecko/2009032608 firefox/3.0.8" };
         rules = createRobotRules(butterflyRobotsFullList, robotsTxt, true);
         assertFalse(rules.isAllowed(url));
 
