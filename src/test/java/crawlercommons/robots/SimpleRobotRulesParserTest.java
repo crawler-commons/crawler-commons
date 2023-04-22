@@ -36,7 +36,7 @@ public class SimpleRobotRulesParserTest {
     private static final String FAKE_ROBOTS_URL = "http://domain.com";
 
     private static BaseRobotRules createRobotRules(String crawlerName, String content) {
-        return createRobotRules(crawlerName, content.getBytes(UTF_8), false);
+        return createRobotRules(crawlerName, content.getBytes(UTF_8), true);
     }
 
     private static BaseRobotRules createRobotRules(String crawlerName, String content, boolean exactUserAgentMatching) {
@@ -263,7 +263,7 @@ public class SimpleRobotRulesParserTest {
                         + "Allow: /~mak" + LF //
                         + "Disallow: /" + CRLF;
 
-        BaseRobotRules rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt);
+        BaseRobotRules rules = createRobotRules("WebCrawler/3.0", mixedEndingsRobotsTxt, false);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
     }
 
@@ -333,13 +333,13 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt);
+        rules = createRobotRules("UnhipBot/0.1", rfpExampleRobotsTxt, false);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
 
-        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt);
+        rules = createRobotRules("WebCrawler/3.0", rfpExampleRobotsTxt, false);
         assertTrue(rules.isAllowed(urlStr));
 
-        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt);
+        rules = createRobotRules("Excite/1.0", rfpExampleRobotsTxt, false);
         assertTrue(rules.isAllowed(urlStr));
     }
 
@@ -422,7 +422,7 @@ public class SimpleRobotRulesParserTest {
 
         // Note that SimpleRobotRulesParser now merges all matching user agent
         // rules.
-        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt);
+        rules = createRobotRules("Agent5,Agent2,Agent1,Agent3,*", nutchRobotsTxt, false);
         assertEquals(isMergeAllowed, rules.isAllowed(urlStr));
     }
 
@@ -465,13 +465,13 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules;
 
-        rules = createRobotRules("Agent2", nutchRobotsTxt);
+        rules = createRobotRules("Agent2", nutchRobotsTxt, false);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
 
-        rules = createRobotRules("Agent3", nutchRobotsTxt);
+        rules = createRobotRules("Agent3", nutchRobotsTxt, false);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
 
-        rules = createRobotRules("Agent4", nutchRobotsTxt);
+        rules = createRobotRules("Agent4", nutchRobotsTxt, false);
         assertEquals(isAllowed, rules.isAllowed(urlStr));
     }
 
@@ -654,7 +654,7 @@ public class SimpleRobotRulesParserTest {
                         + "Disallow: /index.html" + CRLF //
                         + "Allow: /";
 
-        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt);
+        BaseRobotRules rules = createRobotRules("crawler2", simpleRobotsTxt, false);
         assertFalse(rules.isAllowed("http://www.domain.com/index.html"));
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
     }
@@ -797,7 +797,7 @@ public class SimpleRobotRulesParserTest {
                         + "User-agent: qihoobot" + CR //
                         + "Disallow: /";
 
-        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt);
+        BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt, false);
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
         rules = createRobotRules("googlebot", krugleRobotsTxt, true);
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
@@ -990,10 +990,10 @@ public class SimpleRobotRulesParserTest {
         BaseRobotRules rules = createRobotRules("One", simpleRobotsTxt);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Two", simpleRobotsTxt);
+        rules = createRobotRules("Two", simpleRobotsTxt, false);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
-        rules = createRobotRules("Three", simpleRobotsTxt);
+        rules = createRobotRules("Three", simpleRobotsTxt, false);
         assertFalse(rules.isAllowed("http://www.fict.com/fish"));
 
         rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
