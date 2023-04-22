@@ -626,8 +626,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         SimpleRobotRules result = parseState.getRobotRules();
         if (result.getCrawlDelay() > _maxCrawlDelay) {
             // Some evil sites use a value like 3600 (seconds) for the crawl
-            // delay, which would
-            // cause lots of problems for us.
+            // delay, which would cause lots of problems for us.
             LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: {}", url);
             return new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
         } else {
@@ -720,34 +719,45 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
         } else {
             /*
-             * prefix matching on user-agent words - backward-compatibility to
+             * prefix matching on user-agent words - backward-compatibility with
              * the old and deprecated API if "User-Agent" HTTP request header
              * strings are passed as param instead of single-word/token
              * user-agent names, e.g. if the robot name is "WebCrawler/1.0" and is
              * expected match the robots.txt directive "User-agent: mybot"
-             * or also "User-agent: my XXX
+             * or also "User-agent: my".
              */
-            // TODO: even this should be fixed: the robot name butterfly should match "Butterfly/1.0" in the user-agent line
-            for (String targetName : targetNames) {
-                LOGGER.debug(targetName);
-                // TODO KKr - catch case of multiple names, log as non-standard.
-                String[] agentNames = ROBOT_NAMES_SPLIT.split(token.getData().trim().toLowerCase(Locale.ROOT));
+            String agentNameFull = token.getData().trim().toLowerCase(Locale.ROOT);
+            boolean matched = false;
+            if (agentNameFull.equals("*") && !state.isMatchedRealName()) {
+                state.setMatchedWildcard(true);
+                state.setAddingRules(true);
+            } else if (userAgentProductTokenPrefixMatch(agentNameFull, targetNames)) {
+                // match "butterfly" in the line "User-agent: Butterfly/1.0"
+                matched = true;
+            } else {
+                String[] agentNames = ROBOT_NAMES_SPLIT.split(agentNameFull);
+                if (agentNames.length > 1) {
+                    LOGGER.debug("Multiple agent names in user-agent line: {}", token.getData());
+                }
                 for (String agentName : agentNames) {
-                    if (agentName.equals("*") && !state.isMatchedRealName()) {
-                        state.setMatchedWildcard(true);
-                        state.setAddingRules(true);
-                    } else if (targetName.startsWith(agentName)) {
-                        if (state.isMatchedWildcard()) {
-                            // Clear rules of the wildcard user-agent found
-                            // before the non-wildcard user-agent match.
-                            state.clearRules();
+                    for (String targetName : targetNames) {
+                        LOGGER.debug(targetName);
+                        if (targetName.startsWith(agentName)) {
+                            matched = true;
+                            break;
                         }
-                        state.setMatchedRealName(true);
-                        state.setAddingRules(true);
-                        state.setMatchedWildcard(false);
-                        break;
                     }
                 }
+            }
+            if (matched) {
+                if (state.isMatchedWildcard()) {
+                    // Clear rules of the wildcard user-agent found
+                    // before the non-wildcard user-agent match.
+                    state.clearRules();
+                }
+                state.setMatchedRealName(true);
+                state.setAddingRules(true);
+                state.setMatchedWildcard(false);
             }
         }
     }
