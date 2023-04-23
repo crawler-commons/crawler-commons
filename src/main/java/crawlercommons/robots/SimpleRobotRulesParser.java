@@ -393,7 +393,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * 9309, section 2.2.1</a>
      * 
      * @param userAgent
-     *            user-agent product token
+     *            user-agent token to verify
      * @return true if the product token is valid
      */
     protected static boolean isValidUserAgentToObey(String userAgent) {
@@ -663,6 +663,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * "Crawlers MUST try to parse each line of the robots.txt file. Crawlers MUST use the parseable rules."
      * and https://github.com/google/robotstxt/issues/56
      * 
+     * This method may be overridden to implement non-standard user-agent matching.
+     * 
      * @param agentName user-agent, found in the <a href=
      * "https://www.rfc-editor.org/rfc/rfc9309.html#name-the-user-agent-line">
      * robots.txt user-agent line</a>
@@ -672,7 +674,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * 
      * @return true if the product token is match as token prefix
      */
-    private boolean userAgentProductTokenPrefixMatch(String agentName, Collection<String> targetTokens) {
+    protected boolean userAgentProductTokenPartialMatch(String agentName, Collection<String> targetTokens) {
         Matcher m = USER_AGENT_PRODUCT_TOKEN_MATCHER.matcher(agentName);
         return m.lookingAt() && targetTokens.contains(m.group());
     }
@@ -707,7 +709,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             } else if (agentName.equals("*") && !state.isMatchedRealName()) {
                 state.setMatchedWildcard(true);
                 state.setAddingRules(true);
-            } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPrefixMatch(agentName, targetNames))) {
+            } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPartialMatch(agentName, targetNames))) {
                 if (state.isMatchedWildcard()) {
                     // Clear rules of the wildcard user-agent found
                     // before the non-wildcard user-agent match.
@@ -731,7 +733,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             if (agentNameFull.equals("*") && !state.isMatchedRealName()) {
                 state.setMatchedWildcard(true);
                 state.setAddingRules(true);
-            } else if (userAgentProductTokenPrefixMatch(agentNameFull, targetNames)) {
+            } else if (userAgentProductTokenPartialMatch(agentNameFull, targetNames)) {
                 // match "butterfly" in the line "User-agent: Butterfly/1.0"
                 matched = true;
             } else {

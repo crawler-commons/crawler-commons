@@ -23,6 +23,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -1086,6 +1088,23 @@ public class SimpleRobotRulesParserTest {
         BaseRobotRules rules = createRobotRules("a", simpleRobotsTxt);
         assertEquals(1, rules.getSitemaps().size());
         assertEquals("https://wwwfoocom/sitemapxml", rules.getSitemaps().get(0));
+    }
+
+    @Test
+    void testOverrideUserAgentMatcher() {
+        @SuppressWarnings("serial")
+        BaseRobotsParser myRobotsParser = new SimpleRobotRulesParser() {
+            @Override
+            protected boolean userAgentProductTokenPartialMatch(String userAgent, Collection<String> targetTokens) {
+                return userAgent.toLowerCase(Locale.ROOT).contains("go!zilla");
+            }
+        };
+        final String robotsTxt = "User-agent: Go!zilla/2.0" + CRLF //
+                        + "Allow: /gozilla/" + CRLF //
+                        + "Disallow: /";
+        BaseRobotRules rules = myRobotsParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", List.of("go!zilla"));
+        assertTrue(rules.isAllowed("https://example.org/gozilla/page.html"));
+        assertFalse(rules.isAllowed("https://example.org/other/page.html"));
     }
 
     private byte[] readFile(String filename) throws Exception {
