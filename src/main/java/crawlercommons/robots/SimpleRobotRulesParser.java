@@ -529,11 +529,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // Decide if we need to do special HTML processing.
         boolean isHtmlType = ((contentType != null) && contentType.toLowerCase(Locale.ROOT).startsWith("text/html"));
 
-        // If it looks like it contains HTML, but doesn't have a user agent
-        // field, then
-        // assume somebody messed up and returned back to us a random HTML page
-        // instead
-        // of a robots.txt file.
+        /*
+         * If it looks like it contains HTML, but doesn't have a user agent
+         * field, then assume somebody messed up and returned back to us a
+         * random HTML page instead of a robots.txt file.
+         */
         boolean hasHTML = false;
         if (isHtmlType || SIMPLE_HTML_PATTERN.matcher(contentAsStr).find()) {
             if (!USER_AGENT_PATTERN.matcher(contentAsStr).find()) {
@@ -560,12 +560,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         while (lineParser.hasMoreTokens()) {
             String line = lineParser.nextToken();
 
-            // Get rid of HTML markup, in case some brain-dead webmaster has
-            // created an HTML
-            // page for robots.txt. We could do more sophisticated processing
-            // here to better
-            // handle bad HTML, but that's a very tiny percentage of all
-            // robots.txt files.
+            /*
+             * Get rid of HTML markup, in case some brain-dead webmaster has
+             * created an HTML page for robots.txt. We could do more
+             * sophisticated processing here to better handle bad HTML, but
+             * that's a very tiny percentage of all robots.txt files.
+             */
             if (hasHTML) {
                 line = line.replaceAll("<[^>]+>", "");
             }
@@ -865,9 +865,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     double delayValue = Double.parseDouble(delayString) * 1000.0;
                     state.setCrawlDelay(Math.round(delayValue));
                 } else {
-                    long delayValue = Integer.parseInt(delayString) * 1000L; // sec
-                                                                             // to
-                                                                             // millisec
+                    // seconds to milliseconds
+                    long delayValue = Integer.parseInt(delayString) * 1000L;
                     state.setCrawlDelay(delayValue);
                 }
             } catch (Exception e) {
