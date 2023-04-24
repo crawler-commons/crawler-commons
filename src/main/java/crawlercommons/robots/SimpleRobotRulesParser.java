@@ -492,7 +492,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         int bytesLen = content.length;
         int offset = 0;
-        Charset encoding = StandardCharsets.US_ASCII;
+
+        /*
+         * RFC 9309 requires that is "UTF-8 encoded" (<a href=
+         * "https://www.rfc-editor.org/rfc/rfc9309.html#name-access-method"> RFC
+         * 9309, section 2.3 Access Method</a>), but
+         * "Implementors MAY bridge encoding mismatches if they detect that the robots.txt file is not UTF-8 encoded."
+         * (<a href=
+         * "https://www.rfc-editor.org/rfc/rfc9309.html#name-the-allow-and-disallow-line"
+         * > RFC 9309, section 2.2.2. The "Allow" and "Disallow" Lines</a>)
+         */
+        Charset encoding = StandardCharsets.UTF_8;
 
         // Check for a UTF-8 BOM at the beginning (EF BB BF)
         if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB) && (content[2] == (byte) 0xBF)) {

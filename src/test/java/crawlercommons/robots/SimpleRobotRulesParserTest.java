@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -224,6 +225,44 @@ public class SimpleRobotRulesParserTest {
 
         BaseRobotRules rules = createRobotRules("Any-darn-crawler", simpleRobotsTxt);
         assertTrue(rules.isAllowed("http://www.domain.com/anypage.html"));
+    }
+
+    @Test
+    void testUnicodeUnescapedPaths() {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: /bücher/" + CRLF //
+                        + "Disallow: /k%C3%B6nyvek/" + CRLF //
+                        + CRLF //
+                        + "User-agent: GoodBot" + CRLF //
+                        + "Allow: /";
+
+        BaseRobotRules rules = createRobotRules("mybot", simpleRobotsTxt);
+        assertTrue(rules.isAllowed("https://www.example.com/"));
+
+        // test using escaped and unescaped URLs
+        assertFalse(rules.isAllowed("https://www.example.com/b%C3%BCcher/book1.html"));
+        assertFalse(rules.isAllowed("https://www.example.com/bücher/book2.html"));
+
+        // (for completeness) check also escaped path in robots.txt
+        assertFalse(rules.isAllowed("https://www.example.com/k%C3%B6nyvek/book1.html"));
+        assertFalse(rules.isAllowed("https://www.example.com/könyvek/book2.html"));
+
+        // test invalid encoding: invalid encoded characters should not break
+        // parsing of rules below
+        rules = createRobotRules("goodbot", simpleRobotsTxt.getBytes(StandardCharsets.ISO_8859_1));
+        assertTrue(rules.isAllowed("https://www.example.com/"));
+        assertTrue(rules.isAllowed("https://www.example.com/b%C3%BCcher/book1.html"));
+
+        // test invalid encoding: only rules with invalid characters should be
+        // ignored
+        rules = createRobotRules("mybot", simpleRobotsTxt.getBytes(StandardCharsets.ISO_8859_1));
+        assertTrue(rules.isAllowed("https://www.example.com/"));
+        assertFalse(rules.isAllowed("https://www.example.com/k%C3%B6nyvek/book1.html"));
+        assertFalse(rules.isAllowed("https://www.example.com/könyvek/book2.html"));
+        // if URL paths in disallow rules are not properly encoded, these two
+        // URLs are not matched:
+        // assertFalse(rules.isAllowed("https://www.example.com/b%C3%BCcher/book2.html"));
+        // assertFalse(rules.isAllowed("https://www.example.com/bücher/book1.html"));
     }
 
     @Test
