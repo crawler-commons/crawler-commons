@@ -204,7 +204,7 @@
 			<plugin>
 				<groupId>de.thetaphi</groupId>
 				<artifactId>forbiddenapis</artifactId>
-				<version>3.4</version>
+				<version>3.5.1</version>
 				<configuration>
 					<!-- if the used Java version is too new, don't fail, just do nothing: -->
 					<failOnUnsupportedJava>false</failOnUnsupportedJava>
