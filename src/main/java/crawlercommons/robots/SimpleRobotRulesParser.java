@@ -44,7 +44,9 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * <p>
  * This implementation of {@link BaseRobotsParser} retrieves a set of
  * {@link SimpleRobotRules rules} for an agent with the given name from the
- * <code>robots.txt</code> file of a given domain.
+ * <code>robots.txt</code> file of a given domain. The implementation follows
+ * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#name-access-method">RFC
+ * 9309</a>.
  * </p>
  * 
  * <p>
