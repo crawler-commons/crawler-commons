@@ -874,8 +874,16 @@ public class GoogleRobotsTxtTest {
          * 
          * EXPECT_FALSE(IsUserAgentAllowed(robotstxt, "FooBot",
          * "http://foo.bar/foo/bar/ツ"))
+         * 
+         * The parser encodes the 3-byte character, but the URL is not
+         * %-encoded.
+         * 
+         * Note: The expected test results were changed. Actually, it's an
+         * improvement if SimpleRobotRulesParser can handle Unicode characters
+         * in the URL which are not percent-encoded.
          */
-        assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
 
         /*
          * robots_test.cc line 428
@@ -894,8 +902,13 @@ public class GoogleRobotsTxtTest {
          * 
          * EXPECT_FALSE(IsUserAgentAllowed(robotstxt, "FooBot",
          * "http://foo.bar/foo/bar/ツ"))
+         * 
+         * Note: The expected test results were changed. Actually, it's an
+         * improvement if SimpleRobotRulesParser can handle Unicode characters
+         * in the URL which are not percent-encoded.
          */
-        assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
 
         /*
          * robots_test.cc line 441
@@ -906,11 +919,16 @@ public class GoogleRobotsTxtTest {
          * Percent encoded unreserved US-ASCII: /foo/bar/%62%61%7A -> NULL This
          * is illegal according to RFC3986 and while it may work here due to
          * simple string matching, it should not be relied on.
+         * 
+         * Note: The expected test results were changed. Actually, it's an
+         * improvement if SimpleRobotRulesParser handles percent-encoded
+         * characters without special meaning equivalently.
          */
         robotstxt = "User-agent: FooBot\n" //
                         + "Disallow: /\n" //
                         + "Allow: /foo/bar/%62%61%7A\n";
-        assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/baz"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/baz"));
+        assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/baz"));
 
         /*
          * robots_test.cc line 443
@@ -1136,7 +1154,7 @@ public class GoogleRobotsTxtTest {
         while (sb.length() < maxLength) {
             sb.append('a');
         }
-        String longline_a = sb.toString();
+        String longlineA = sb.toString();
 
         sb = new StringBuilder();
         sb.append("/x/");
@@ -1144,13 +1162,13 @@ public class GoogleRobotsTxtTest {
         while (sb.length() < maxLength) {
             sb.append('b');
         }
-        String longline_b = longline_a.replaceAll("a", "b");
+        String longlineB = longlineA.replaceAll("a", "b");
 
         sb = new StringBuilder();
         sb.append("user-agent: FooBot\n");
         sb.append("disallow: /\n");
-        sb.append(allow).append(longline_a).append("/qux\n");
-        sb.append(allow).append(longline_b).append("/qux\n");
+        sb.append(allow).append(longlineA).append("/qux\n");
+        sb.append(allow).append(longlineB).append("/qux\n");
         robotstxt = sb.toString();
 
         /*
@@ -1183,9 +1201,14 @@ public class GoogleRobotsTxtTest {
          * absl::StrCat("http://foo.bar", longline_b, "/fux")))
          * 
          * Matches cut off allow rule.
+         * 
+         * Note: The expected test results were changed because
+         * SimpleRobotRulesParser behaves differently and does not cut off the
+         * overlong line.
          */
-        url = new StringBuilder().append("http://foo.bar").append(longline_b).append("/fux").toString();
-        assertTrue(isUserAgentAllowed(robotstxt, "FooBot", url));
+        url = new StringBuilder().append("http://foo.bar").append(longlineB).append("/fux").toString();
+        // assertTrue(isUserAgentAllowed(robotstxt, "FooBot", url));
+        assertFalse(isUserAgentAllowed(robotstxt, "FooBot", url));
     }
 
     @Test
