@@ -44,7 +44,9 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * <p>
  * This implementation of {@link BaseRobotsParser} retrieves a set of
  * {@link SimpleRobotRules rules} for an agent with the given name from the
- * <code>robots.txt</code> file of a given domain.
+ * <code>robots.txt</code> file of a given domain. The implementation follows
+ * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#name-access-method">RFC
+ * 9309</a>.
  * </p>
  * 
  * <p>
@@ -492,7 +494,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         int bytesLen = content.length;
         int offset = 0;
-        Charset encoding = StandardCharsets.US_ASCII;
+
+        /*
+         * RFC 9309 requires that is "UTF-8 encoded" (<a href=
+         * "https://www.rfc-editor.org/rfc/rfc9309.html#name-access-method"> RFC
+         * 9309, section 2.3 Access Method</a>), but
+         * "Implementors MAY bridge encoding mismatches if they detect that the robots.txt file is not UTF-8 encoded."
+         * (<a href=
+         * "https://www.rfc-editor.org/rfc/rfc9309.html#name-the-allow-and-disallow-line"
+         * > RFC 9309, section 2.2.2. The "Allow" and "Disallow" Lines</a>)
+         */
+        Charset encoding = StandardCharsets.UTF_8;
 
         // Check for a UTF-8 BOM at the beginning (EF BB BF)
         if ((bytesLen >= 3) && (content[0] == (byte) 0xEF) && (content[1] == (byte) 0xBB) && (content[2] == (byte) 0xBF)) {
@@ -519,11 +531,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // Decide if we need to do special HTML processing.
         boolean isHtmlType = ((contentType != null) && contentType.toLowerCase(Locale.ROOT).startsWith("text/html"));
 
-        // If it looks like it contains HTML, but doesn't have a user agent
-        // field, then
-        // assume somebody messed up and returned back to us a random HTML page
-        // instead
-        // of a robots.txt file.
+        /*
+         * If it looks like it contains HTML, but doesn't have a user agent
+         * field, then assume somebody messed up and returned back to us a
+         * random HTML page instead of a robots.txt file.
+         */
         boolean hasHTML = false;
         if (isHtmlType || SIMPLE_HTML_PATTERN.matcher(contentAsStr).find()) {
             if (!USER_AGENT_PATTERN.matcher(contentAsStr).find()) {
@@ -550,12 +562,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         while (lineParser.hasMoreTokens()) {
             String line = lineParser.nextToken();
 
-            // Get rid of HTML markup, in case some brain-dead webmaster has
-            // created an HTML
-            // page for robots.txt. We could do more sophisticated processing
-            // here to better
-            // handle bad HTML, but that's a very tiny percentage of all
-            // robots.txt files.
+            /*
+             * Get rid of HTML markup, in case some brain-dead webmaster has
+             * created an HTML page for robots.txt. We could do more
+             * sophisticated processing here to better handle bad HTML, but
+             * that's a very tiny percentage of all robots.txt files.
+             */
             if (hasHTML) {
                 line = line.replaceAll("<[^>]+>", "");
             }
@@ -855,9 +867,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     double delayValue = Double.parseDouble(delayString) * 1000.0;
                     state.setCrawlDelay(Math.round(delayValue));
                 } else {
-                    long delayValue = Integer.parseInt(delayString) * 1000L; // sec
-                                                                             // to
-                                                                             // millisec
+                    // seconds to milliseconds
+                    long delayValue = Integer.parseInt(delayString) * 1000L;
                     state.setCrawlDelay(delayValue);
                 }
             } catch (Exception e) {
