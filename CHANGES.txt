@@ -1,10 +1,14 @@
 Crawler-Commons Change Log
 
 Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+- [Robots.txt] Handle allow/disallow directives containing unescaped Unicode characters (sebastian-nagel, Richard Zowalla, aecio) #389
+- Improve readability of robots.txt unit tests (sebastian-nagel, Richard Zowalla) #383
 - Upgrade project to use Java 11 (Avi Hayun, Richard Zowalla, aecio, sebastian-nagel) #320
+- [Robots.txt] RFC compliance: matching user-agent names when selecting rule blocks (sebastian-nagel, Richard Zowalla) #362
+- [Robots.txt] Matching user-agent names does not conform to robots.txt RFC (YossiTamari, sebastian-nagel) #192
 - [Robots.txt] Improve robots check draft rfc compliance (Eduardo Jimenez) #351 
-- Upgrade dependencies (dependabot) #379
-- Upgrade Maven plugins (dependabot) #377
+- Upgrade dependencies (dependabot) #379, #384, #394, #399, #404
+- Upgrade Maven plugins (dependabot) #377, #381, #386, #396, #397, #398, #400, #402, #403, #405, #406, #407
 - Javadoc: ensure Javascript search is working (sebastian-nagel, Richard Zowalla, aecio) #378
 
 Release 1.3 (2022-07-19)
