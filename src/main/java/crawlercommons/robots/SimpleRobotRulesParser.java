@@ -21,7 +21,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -778,13 +777,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
     /**
      * Add any uniform rules to clean up path directives
+     * <ul>
+     * <li>trim leading and trailing white space and control characters not
+     * handled by the tokenizer</li>
+     * <li>properly percent-encode all characters where necessary</li>
+     * <li>but make sure that characters with special semantics for path
+     * matching (asterisk <code>*</code>, slash <code>/</code>, dollar
+     * <code>$</code>, etc.) are left as is (do not decode if percent-encoded).
+     * </ul>
+     * 
+     * This method uses {@link SimpleRobotRules#escapePath(String)} which is
+     * used to normalize the URL path before matching against allow/disallow
+     * rules.
+     * 
      * @param path
-     * @return clean path
+     * @return clean and encoded path
      */
     private String normalizePathDirective(String path) {
-        path = path.trim();
-
-        return path;
+        return SimpleRobotRules.escapePath(path.trim());
     }
 
     /**
@@ -803,7 +813,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         String path = token.getData();
 
         try {
-            path = URLDecoder.decode(path, "UTF-8");
             path = normalizePathDirective(path);
             if (path.length() == 0) {
                 // Disallow: <nothing> => allow all.
@@ -832,7 +841,6 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         String path = token.getData();
 
         try {
-            path = URLDecoder.decode(path, "UTF-8");
             path = normalizePathDirective(path);
         } catch (Exception e) {
             reportWarning(state, "Error parsing robots rules - can't decode path: {}", path);

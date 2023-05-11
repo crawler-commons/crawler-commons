@@ -18,10 +18,11 @@ package crawlercommons.robots;
 
 import java.io.Serializable;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import crawlercommons.filters.basic.BasicURLNormalizer;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
@@ -200,6 +201,10 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
     }
 
+    static String escapePath(String urlPath) {
+        return BasicURLNormalizer.escapePath(BasicURLNormalizer.unescapePath(urlPath));
+    }
+
     private String getPath(String url, boolean getWithQuery) {
 
         try {
@@ -214,9 +219,16 @@ public class SimpleRobotRules extends BaseRobotRules {
                 path += "?" + query;
             }
 
-            // We used to lower-case the path, but Google says we need to do
-            // case-sensitive matching.
-            return URLDecoder.decode(path, "UTF-8");
+            /*
+             * We used to lower-case the path, but Google says we need to do
+             * case-sensitive matching.
+             * 
+             * However, we need to properly decode percent-encoded characters,
+             * but preserve those escaped characters which have special
+             * semantics in path matching (asterisk `*`, slash `/`, dollar `$`,
+             * etc.)
+             */
+            return escapePath(path);
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
             // will fail, so return the root.

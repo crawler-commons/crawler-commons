@@ -540,7 +540,7 @@ public class BasicURLNormalizer extends URLFilter {
      * characters which should be escaped according to <a
      * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
-    private static String escapePath(String path) {
+    public static String escapePath(String path) {
         StringBuilder sb = new StringBuilder(path.length());
 
         // Traverse over all bytes in this URL

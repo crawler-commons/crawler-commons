@@ -18,6 +18,8 @@ http://foo.com/%66oo.htm%1A, http://foo.com/foo.htm%1A
 
 # check that % decoder converts to upper case letters
 http://foo.com/%66oo.htm%c0, http://foo.com/foo.htm%C0
+https://www.example.com/search/%2a/, https://www.example.com/search/%2A/
+https://www.example.com/topic/9%2f11/, https://www.example.com/topic/9%2F11/
 
 # check that % decoder leaves encoded spaces alone
 http://foo.com/you%20too.html, http://foo.com/you%20too.html
