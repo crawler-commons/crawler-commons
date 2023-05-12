@@ -284,11 +284,20 @@ public class SimpleRobotRulesParserTest {
                     "True, /$, https://www.example.com/foobar", //
                     "True, /%24, https://www.example.com/", //
                     "False, /%24, https://www.example.com/%24100", //
+                    "False, /%24, https://www.example.com/$100", //
                     "True, /search/%2A/, https://www.example.com/search/foobar/", //
                     "False, /search/%2A/, https://www.example.com/search/%2A/", //
                     "False, /search/%2A/, https://www.example.com/search/%2a/", //
                     "False, /search/%2a/, https://www.example.com/search/%2a/", //
+                    "False, /search/%2a/, https://www.example.com/search/*/", //
                     "False, /search/*/, https://www.example.com/search/foobar/", //
+                    // examples from RFC 9309
+                    "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-*.html", //
+                    "True, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-foo.html", //
+                    "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-%2A.html", //
+                    "False, /path/foo-%24, https://www.example.com/path/foo-$", //
+                    "True, /path/foo-%24, https://www.example.com/path/foo-", //
+                    "False, /path/foo-%24, https://www.example.com/path/foo-%24", //
     })
     void testEscapedPaths(boolean isAllowed, String disallowPath, String urlStr) {
         final String simpleRobotsTxt = "User-agent: *" + CRLF //

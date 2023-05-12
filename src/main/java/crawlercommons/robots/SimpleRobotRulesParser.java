@@ -786,15 +786,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      * <code>$</code>, etc.) are left as is (do not decode if percent-encoded).
      * </ul>
      * 
-     * This method uses {@link SimpleRobotRules#escapePath(String)} which is
-     * used to normalize the URL path before matching against allow/disallow
-     * rules.
+     * This method uses {@link SimpleRobotRules#escapePath(String, boolean[])}
+     * to normalize the URL path before matching against allow/disallow rules.
      * 
      * @param path
      * @return clean and encoded path
      */
     private String normalizePathDirective(String path) {
-        return SimpleRobotRules.escapePath(path.trim());
+        return SimpleRobotRules.escapePath(path.trim(), null);
     }
 
     /**

@@ -213,3 +213,7 @@ http://example.com/?, http://example.com/
 # Should not decode URL query data
 https://foo.com/?one/valid_query/without_%2F_params, https://foo.com/?one/valid_query/without_%2F_params
 http://foo.com/asdf/page.php?article%2F1234, http://foo.com/asdf/page.php?article%2F1234
+
+# examples from the robots.txt RFC 9309 - * and $ should be unchanged
+https://www.example.com/path/file-with-a-*.html, https://www.example.com/path/file-with-a-*.html
+https://www.example.com/path/foo-$, https://www.example.com/path/foo-$

@@ -541,6 +541,10 @@ public class BasicURLNormalizer extends URLFilter {
      * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
      */
     public static String escapePath(String path) {
+        return escapePath(path, null);
+    }
+
+    public static String escapePath(String path, boolean[] extraEscapedBytes) {
         StringBuilder sb = new StringBuilder(path.length());
 
         // Traverse over all bytes in this URL
@@ -548,7 +552,7 @@ public class BasicURLNormalizer extends URLFilter {
         for (int i = 0; i < bytes.length; i++) {
             byte b = bytes[i];
             // Is this a control character?
-            if (b < 0 || escapedCharacters[b]) {
+            if (b < 0 || escapedCharacters[b] || (extraEscapedBytes != null && extraEscapedBytes[b])) {
                 // Start escape sequence
                 sb.append('%');
 
