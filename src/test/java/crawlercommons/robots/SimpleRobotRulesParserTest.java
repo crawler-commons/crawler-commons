@@ -265,6 +265,49 @@ public class SimpleRobotRulesParserTest {
         // assertFalse(rules.isAllowed("https://www.example.com/bücher/book1.html"));
     }
 
+    @ParameterizedTest
+    @CsvSource({ // Tests for percent-encoded characters with special semantics
+                 // in allow/disallow statements:
+                 // (a) must not trim percent-encoded white space
+                    "True, /*%20, https://www.example.com/", //
+                    "False, /*%20, https://www.example.com/foobar%20/", //
+                    "True, /*%20, https://www.example.com/foobar/", //
+                    // (b) match literal %2F in URL path, but do not match a
+                    // slash
+                    "True, /*%2F*, https://www.example.com/path/index.html", //
+                    "False, /*%2F*, https://www.example.com/topic/9%2F11/index.html", //
+                    "False, /topic/9%2F11/, https://www.example.com/topic/9%2F11/index.html", //
+                    "False, /topic/9%2F11/, https://www.example.com/topic/9%2f11/index.html", //
+                    "False, /q?*mime=application%2Fpdf, https://www.example.com/q?mime=application%2Fpdf", //
+                    // (c) percent-encoded dollar and asterisk (*)
+                    "False, /$, https://www.example.com/", //
+                    "True, /$, https://www.example.com/foobar", //
+                    "True, /%24, https://www.example.com/", //
+                    "False, /%24, https://www.example.com/%24100", //
+                    "False, /%24, https://www.example.com/$100", //
+                    "True, /search/%2A/, https://www.example.com/search/foobar/", //
+                    "False, /search/%2A/, https://www.example.com/search/%2A/", //
+                    "False, /search/%2A/, https://www.example.com/search/%2a/", //
+                    "False, /search/%2a/, https://www.example.com/search/%2a/", //
+                    "False, /search/%2a/, https://www.example.com/search/*/", //
+                    "False, /search/*/, https://www.example.com/search/foobar/", //
+                    // examples from RFC 9309
+                    "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-*.html", //
+                    "True, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-foo.html", //
+                    "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-%2A.html", //
+                    "False, /path/foo-%24, https://www.example.com/path/foo-$", //
+                    "True, /path/foo-%24, https://www.example.com/path/foo-", //
+                    "False, /path/foo-%24, https://www.example.com/path/foo-%24", //
+    })
+    void testEscapedPaths(boolean isAllowed, String disallowPath, String urlStr) {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: " + disallowPath + CRLF //
+                        + "Allow: /";
+        BaseRobotRules rules = createRobotRules("mybot", simpleRobotsTxt);
+        String msg = urlStr + " should " + (isAllowed ? "not" : "") + " be disallowed by rule Disallow: " + disallowPath;
+        assertEquals(isAllowed, rules.isAllowed(urlStr), msg);
+    }
+
     @Test
     void testSimplestAllowAll() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF //

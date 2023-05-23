@@ -18,10 +18,11 @@ package crawlercommons.robots;
 
 import java.io.Serializable;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import crawlercommons.filters.basic.BasicURLNormalizer;
 
 /**
  * Result from parsing a single robots.txt file - which means we get a set of
@@ -121,6 +122,13 @@ public class SimpleRobotRules extends BaseRobotRules {
     protected ArrayList<RobotRule> _rules;
     protected RobotRulesMode _mode;
 
+    /** Special characters which require percent-encoding for path matching */
+    protected final static boolean[] specialCharactersPathMatching = new boolean[128];
+    static {
+        specialCharactersPathMatching['*'] = true;
+        specialCharactersPathMatching['$'] = true;
+    }
+
     public SimpleRobotRules() {
         this(RobotRulesMode.ALLOW_SOME);
     }
@@ -200,6 +208,24 @@ public class SimpleRobotRules extends BaseRobotRules {
         }
     }
 
+    /**
+     * Encode/decode (using percent-encoding) all characters where necessary:
+     * encode Unicode/non-ASCII characters) and decode printable ASCII
+     * characters without special semantics.
+     * 
+     * @param urlPathQuery
+     *            path and query component of the URL
+     * @param additionalEncodedBytes
+     *            boolean array to request bytes (ASCII characters) to be
+     *            percent-encoded in addition to other characters requiring
+     *            encoding (Unicode/non-ASCII and characters not allowed in
+     *            URLs).
+     * @return properly percent-encoded URL path and query
+     */
+    public static String escapePath(String urlPathQuery, boolean[] additionalEncodedBytes) {
+        return BasicURLNormalizer.escapePath(BasicURLNormalizer.unescapePath(urlPathQuery), additionalEncodedBytes);
+    }
+
     private String getPath(String url, boolean getWithQuery) {
 
         try {
@@ -214,9 +240,17 @@ public class SimpleRobotRules extends BaseRobotRules {
                 path += "?" + query;
             }
 
-            // We used to lower-case the path, but Google says we need to do
-            // case-sensitive matching.
-            return URLDecoder.decode(path, "UTF-8");
+            /*
+             * We used to lower-case the path, but Google says we need to do
+             * case-sensitive matching.
+             * 
+             * However, we need to properly decode percent-encoded characters,
+             * but preserve those escaped characters which have special
+             * semantics in path matching, e.g. slash `/`. However, for the
+             * implementation of the path matching requires that asterisk `*`
+             * and dollar `$` are exceptionally percent-encoded.
+             */
+            return escapePath(path, specialCharactersPathMatching);
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
             // will fail, so return the root.
