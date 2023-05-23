@@ -1,5 +1,6 @@
 [![Build Status](https://github.com/crawler-commons/crawler-commons/workflows/crawler-commons%20build/badge.svg)](https://github.com/crawler-commons/crawler-commons/actions?query=workflow%3A%22crawler-commons+build%22)
 [![license](https://img.shields.io/github/license/crawler-commons/crawler-commons.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Coverage Status](https://coveralls.io/repos/github/crawler-commons/crawler-commons/badge.svg?branch=master)](https://coveralls.io/github/crawler-commons/crawler-commons?branch=master)
 
 # Overview
 
