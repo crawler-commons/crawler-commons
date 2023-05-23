@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1040,7 +1041,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             System.err.println("  <robots.txt>\tURL pointing to robots.txt file.");
             System.err.println("              \tTo read a local file use a file:// URL");
             System.err.println("              \t(parsed as http://example.com/robots.txt)");
-            System.err.println("  <agentname> \tuser agent name to check for exclusion rules.");
+            System.err.println("  <agentname> \tuser agent name to check for exclusion rules,");
+            System.err.println("              \ta single 'product token' as per RFC 9309.");
             System.err.println("              \tIf not defined check with '*'");
             System.err.println("  <URL>       \tcheck URL whether allowed or forbidden.");
             System.err.println("              \tIf no URL is given show robots.txt rules");
@@ -1063,7 +1065,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 // sitemap paths for file:/ URLs
                 url = "http://example.com/robots.txt";
             }
-            rules = parser.parseContent(url, content, "text/plain", agentName);
+            rules = parser.parseContent(url, content, "text/plain", Set.of(agentName));
         } catch (IOException e) {
             if (connection instanceof HttpURLConnection) {
                 int code = ((HttpURLConnection) connection).getResponseCode();
