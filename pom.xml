@@ -158,6 +158,26 @@
 
 		<plugins>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.10</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>${maven-jar-plugin.version}</version>
@@ -188,7 +208,7 @@
 					<systemPropertyVariables>
 						<test.build.data>${project.basedir}/target/test-data/</test.build.data>
 					</systemPropertyVariables>
-					<argLine>-Xmx512m</argLine>
+					<argLine>@{argLine} -Xmx512m</argLine>
 					<forkCount>2</forkCount>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
