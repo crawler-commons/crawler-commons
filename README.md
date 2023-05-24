@@ -37,14 +37,14 @@ Using Maven, add the following dependency to your pom.xml:
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
     <artifactId>crawler-commons</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
 </dependency>
 ~~~
 
 Using Gradle, add the folling to your build file:
 ```groovy
 dependencies {
-    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.2'
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.3'
 }
 ```
 
