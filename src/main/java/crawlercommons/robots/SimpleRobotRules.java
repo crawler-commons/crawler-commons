@@ -19,8 +19,8 @@ package crawlercommons.robots;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
 
@@ -368,7 +368,9 @@ public class SimpleRobotRules extends BaseRobotRules {
      * MAY be deduplicated.</blockquote>
      */
     public void sortRules() {
-        Collections.sort(_rules);
+        if (_rules.size() > 1) {
+            _rules = new ArrayList<>(_rules.stream().sorted().distinct().collect(Collectors.toList()));
+        }
     }
 
     /**
