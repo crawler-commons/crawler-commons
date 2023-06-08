@@ -167,6 +167,7 @@ public class SimpleRobotRules extends BaseRobotRules {
         return this._rules;
     }
 
+    @Override
     public boolean isAllowed(String url) {
         if (_mode == RobotRulesMode.ALLOW_NONE) {
             return false;
