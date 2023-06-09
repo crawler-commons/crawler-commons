@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:content="http://www.google.com/schemas/sitemap-content/1.0">
+  <!-- source: Google's Programmable Search Engine documentation - PageMaps
+       https://support.google.com/programmable-search/answer/1628213
+       and Providing Structured Data
+       https://developers.google.com/custom-search/docs/structured_data
+  -->
+  <url>
+    <loc>http://www.example.com/foo</loc>
+    <PageMap xmlns="http://www.google.com/schemas/sitemap-pagemap/1.0">
+      <DataObject type="document" id="one">
+        <Attribute name="name">Doc One</Attribute>
+        <Attribute name="review">3.5</Attribute>
+      </DataObject>
+      <DataObject type="image">
+        <Attribute name="image_src">http://www.example.com/foo.gif</Attribute>
+      </DataObject>
+    </PageMap>
+  </url>
+  <url>
+    <loc>http://www.example.com/bar</loc>
+    <PageMap xmlns="http://www.google.com/schemas/sitemap-pagemap/1.0">
+      <DataObject type="document" id="two">
+        <Attribute name="name">Doc Two</Attribute>
+        <Attribute name="review">4.0</Attribute>
+      </DataObject>
+    </PageMap>
+  </url>
+</urlset>

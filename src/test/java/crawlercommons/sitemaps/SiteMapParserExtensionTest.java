@@ -16,17 +16,32 @@
 
 package crawlercommons.sitemaps;
 
-import crawlercommons.sitemaps.extension.*;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import crawlercommons.sitemaps.extension.Extension;
+import crawlercommons.sitemaps.extension.ExtensionMetadata;
+import crawlercommons.sitemaps.extension.ImageAttributes;
+import crawlercommons.sitemaps.extension.LinkAttributes;
+import crawlercommons.sitemaps.extension.MobileAttributes;
+import crawlercommons.sitemaps.extension.NewsAttributes;
+import crawlercommons.sitemaps.extension.PageMap;
+import crawlercommons.sitemaps.extension.PageMapDataObject;
+import crawlercommons.sitemaps.extension.VideoAttributes;
 
 public class SiteMapParserExtensionTest {
 
@@ -256,5 +271,57 @@ public class SiteMapParserExtensionTest {
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(74, sm.getSiteMapUrls().size());
+    }
+
+    @Test
+    public void testPageMapSitemap() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setStrictNamespace(true);
+        parser.enableExtension(Extension.PAGEMAPS);
+
+        String urlStr = "http://www.example.com/pagemaps-sitemap.xml";
+        URL url = new URL(urlStr);
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/pagemaps-sitemap.xml", url);
+
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(2, sm.getSiteMapUrls().size());
+        assertEquals(urlStr, sm.getUrl().toString());
+        // System.out.println(sm.toString());
+        for (SiteMapURL u : sm.getSiteMapUrls()) {
+            System.out.println(u.toString());
+            for (Entry<Extension, ExtensionMetadata[]> x : u.getAttributes().entrySet()) {
+                assertEquals(Extension.PAGEMAPS, x.getKey());
+                System.out.println(x.getValue().getClass());
+                PageMap pageMap = (PageMap) x.getValue()[0];
+                List<PageMapDataObject> dataObjects = pageMap.getPageMapDataObjects();
+                PageMapDataObject dataObject;
+                switch (u.getUrl().toString()) {
+                    case "http://www.example.com/foo":
+                    assertEquals(2, dataObjects.size());
+                    dataObject = dataObjects.get(0);
+                    assertEquals("document", dataObject.getType());
+                    assertEquals("one", dataObject.getId());
+                    assertEquals("Doc One", dataObject.getAttribute("name"));
+                    assertEquals("3.5", dataObject.getAttribute("review"));
+                    dataObject = dataObjects.get(1);
+                    assertEquals("image", dataObject.getType());
+                    assertNull(dataObject.getId());
+                    assertEquals("http://www.example.com/foo.gif", dataObject.getAttribute("image_src"));
+                        break;
+                    case "http://www.example.com/bar":
+                    assertEquals(1, dataObjects.size());
+                    dataObject = dataObjects.get(0);
+                    assertEquals("document", dataObject.getType());
+                    assertEquals("two", dataObject.getId());
+                    assertEquals("Doc Two", dataObject.getAttribute("name"));
+                    assertEquals("4.0", dataObject.getAttribute("review"));
+                        break;
+                }
+                System.out.println(x.getKey() + ": " + Arrays.toString(x.getValue()));
+                System.out.println(x.getValue().length);
+            }
+        }
     }
 }
