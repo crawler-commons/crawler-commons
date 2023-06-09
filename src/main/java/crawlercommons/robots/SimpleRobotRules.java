@@ -19,19 +19,28 @@ package crawlercommons.robots;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
 
 /**
- * Result from parsing a single robots.txt file - which means we get a set of
- * rules, and an optional crawl-delay, and an optional sitemap URL. Note that we
- * support Google's extensions (Allow directive and '$'/'*' special chars) plus
- * the more widely used Sitemap directive.
+ * Result from parsing a single robots.txt file - set of rules, and optionally a
+ * <a href=
+ * "https://en.wikipedia.org/wiki/Robots.txt#Crawl-delay_directive">crawl
+ * -delay</a> and <a
+ * href="https://www.sitemaps.org/protocol.html#submit_robots">sitemap</a> URLs.
+ * The <a href="https://www.rfc-editor.org/rfc/rfc9309.html">Robots Exclusion
+ * Protocol RFC 9309</a> is fully supported. This includes <a href=
+ * "https://developers.google.com/search/reference/robots_txt">Google's
+ * robots.txt extensions</a> to the <a
+ * href="http://www.robotstxt.org/robotstxt.html">original RFC draft</a> are
+ * covered: the <code>Allow</code> directive, <code>$</code>/<code>*</code>
+ * special characters and precedence of more specific patterns
  * 
- * See https://en.wikipedia.org/wiki/Robots_exclusion_standard See
- * https://developers.google.com/search/reference/robots_txt
+ * See also: <a
+ * href="https://en.wikipedia.org/wiki/Robots_exclusion_standard">Robots
+ * Exclusion on Wikipedia</a>
  */
 
 @SuppressWarnings("serial")
@@ -62,9 +71,9 @@ public class SimpleRobotRules extends BaseRobotRules {
             return this._prefix;
         }
 
-        // Sort from longest to shortest rules.
         @Override
         public int compareTo(RobotRule o) {
+            // order from longest to shortest path prefixes/patterns
             if (_prefix.length() < o._prefix.length()) {
                 return 1;
             } else if (_prefix.length() > o._prefix.length()) {
@@ -158,6 +167,7 @@ public class SimpleRobotRules extends BaseRobotRules {
         return this._rules;
     }
 
+    @Override
     public boolean isAllowed(String url) {
         if (_mode == RobotRulesMode.ALLOW_NONE) {
             return false;
@@ -241,7 +251,7 @@ public class SimpleRobotRules extends BaseRobotRules {
             }
 
             /*
-             * We used to lower-case the path, but Google says we need to do
+             * We used to lower-case the path, but Google and RFC 9309 require
              * case-sensitive matching.
              * 
              * However, we need to properly decode percent-encoded characters,
@@ -346,11 +356,22 @@ public class SimpleRobotRules extends BaseRobotRules {
     }
 
     /**
-     * In order to match up with Google's convention, we want to match rules
-     * from longest to shortest. So sort the rules.
+     * Sort and deduplicate robot rules. This method must be called after the
+     * robots.txt has been processed and before rule matching.
+     * 
+     * The ordering is implemented in {@link RobotRule#compareTo(RobotRule)} and
+     * defined by <a
+     * href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.2">RFC
+     * 9309, section 2.2.2</a>:
+     * 
+     * <blockquote>The most specific match found MUST be used. The most specific
+     * match is the match that has the most octets. Duplicate rules in a group
+     * MAY be deduplicated.</blockquote>
      */
     public void sortRules() {
-        Collections.sort(_rules);
+        if (_rules.size() > 1) {
+            _rules = new ArrayList<>(_rules.stream().sorted().distinct().collect(Collectors.toList()));
+        }
     }
 
     /**
