@@ -1,0 +1,18 @@
+# RFC 9309, section 5.1. Simple Example
+# https://www.rfc-editor.org/rfc/rfc9309.html#section-5.1
+
+User-Agent: *
+Disallow: *.gif$
+Disallow: /example/
+Allow: /publications/
+
+User-Agent: foobot
+Disallow:/
+Allow:/example/page.html
+Allow:/example/allowed.gif
+
+User-Agent: barbot
+User-Agent: bazbot
+Disallow: /example/page.html
+
+User-Agent: quxbot
