@@ -1,0 +1,6 @@
+# RFC 9309, section 5.2. Longest Match
+# https://www.rfc-editor.org/rfc/rfc9309.html#section-5.2
+
+User-Agent: foobot
+Allow: /example/page/
+Disallow: /example/page/disallowed.gif

@@ -291,7 +291,19 @@ public class SimpleRobotRulesParserTest {
                     "False, /search/%2a/, https://www.example.com/search/%2a/", //
                     "False, /search/%2a/, https://www.example.com/search/*/", //
                     "False, /search/*/, https://www.example.com/search/foobar/", //
-                    // examples from RFC 9309
+                    // examples from RFC 9309,  2.2.2. The "Allow" and "Disallow" Lines
+                    // https://www.rfc-editor.org/rfc/rfc9309.html#name-the-allow-and-disallow-line
+                    "False, /foo/bar?baz=quz, https://www.example.com/foo/bar?baz=quz", //
+                    // See the comment in https://github.com/google/robotstxt/blob/master/robots_test.cc
+                    // "Percent encoding URIs in the rules is unnecessary."
+                    // and "/foo/bar?baz=http://foo.bar stays unencoded."
+                    "False, /foo/bar?baz=https://foo.bar, https://www.example.com/foo/bar?baz=https://foo.bar", //
+                    "False, /foo/bar?baz=https%3A%2F%2Ffoo.bar, https://www.example.com/foo/bar?baz=https%3A%2F%2Ffoo.bar", //
+                    "False, /foo/bar/\u30C4, https://www.example.com/foo/bar/%E3%83%84", //
+                    "False, /foo/bar/%E3%83%84, https://www.example.com/foo/bar/%E3%83%84", //
+                    "False, /foo/bar/%62%61%7A, https://www.example.com/foo/bar/baz", //
+                    // examples from RFC 9309, 2.2.3. Special Characters
+                    // https://www.rfc-editor.org/rfc/rfc9309.html#name-special-characters
                     "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-*.html", //
                     "True, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-foo.html", //
                     "False, /path/file-with-a-%2A.html, https://www.example.com/path/file-with-a-%2A.html", //
@@ -1188,6 +1200,69 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("https://example.org/gozilla/page.html"));
         assertFalse(rules.isAllowed("https://example.org/other/page.html"));
     }
+
+    @Test
+    void testExamplesRobotsTxtRFC9309() throws Exception {
+        byte[] robotstxt = readFile("/robots/rfc9309-example-simple-robots.txt");
+
+        BaseRobotRules rules = createRobotRules("foobot", robotstxt);
+        assertEquals(3, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/example/page.html"));
+        assertTrue(rules.isAllowed("https://example.org/example/allowed.gif"));
+        assertFalse(rules.isAllowed("https://example.org/"));
+        assertFalse(rules.isAllowed("https://example.org/path/index.html"));
+
+        rules = createRobotRules("barbot", robotstxt);
+        assertEquals(1, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/"));
+        assertFalse(rules.isAllowed("https://example.org/example/page.html"));
+        rules = createRobotRules("bazbot", robotstxt);
+        assertEquals(1, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/"));
+        assertFalse(rules.isAllowed("https://example.org/example/page.html"));
+
+        rules = createRobotRules("quxbot", robotstxt);
+        assertEquals(0, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/"));
+        assertTrue(rules.isAllowed("https://example.org/example/page.html"));
+
+        rules = createRobotRules("anyotherbot", robotstxt);
+        assertEquals(3, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/publications/doc1.html"));
+        assertFalse(rules.isAllowed("https://example.org/example/page.html"));
+        assertFalse(rules.isAllowed("https://example.org/example.gif"));
+        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+
+        robotstxt = readFile("/robots/rfc9309-example-longest-match-robots.txt");
+        rules = createRobotRules("foobot", robotstxt);
+        assertTrue(rules.isAllowed("https://example.org/example/page/"));
+        assertTrue(rules.isAllowed("https://example.org/example/page/index.html"));
+        assertFalse(rules.isAllowed("https://example.org/example/page/disallowed.gif"));
+        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+
+        robotstxt = readFile("/robots/rfc9309-example-rule-group-merging.txt");
+        rules = createRobotRules("examplebot", robotstxt);
+        assertEquals(3, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertFalse(rules.isAllowed("https://example.org/foo"));
+        assertFalse(rules.isAllowed("https://example.org/bar"));
+        assertFalse(rules.isAllowed("https://example.org/baz"));
+        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+
+        rules = createRobotRules("anyotherbot", robotstxt);
+        assertEquals(2, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertFalse(rules.isAllowed("https://example.org/foo"));
+        assertFalse(rules.isAllowed("https://example.org/bar"));
+        assertTrue(rules.isAllowed("https://example.org/baz"));
+        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+
+        rules = createRobotRules("bazbot", robotstxt);
+        assertEquals(1, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/foo"));
+        assertTrue(rules.isAllowed("https://example.org/bar"));
+        assertFalse(rules.isAllowed("https://example.org/baz"));
+        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+    }
+
 
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];

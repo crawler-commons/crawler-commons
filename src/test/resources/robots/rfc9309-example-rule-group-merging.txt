@@ -1,0 +1,16 @@
+# RFC 9309, section 2.2.1. The User-Agent Line
+# https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1
+
+user-agent: ExampleBot
+disallow: /foo
+disallow: /bar
+
+user-agent: ExampleBot
+disallow: /baz
+
+user-agent: *
+disallow: /foo
+disallow: /bar
+
+user-agent: BazBot
+disallow: /baz
