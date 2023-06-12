@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+- [BasicNormalizer] Query parameters normalization in BasicURLNormalizer (aecio, sebastian-nagel) #308
 - [Robots.txt] Handle allow/disallow directives containing unescaped Unicode characters (sebastian-nagel, Richard Zowalla, aecio) #389
 - Improve readability of robots.txt unit tests (sebastian-nagel, Richard Zowalla) #383
 - Upgrade project to use Java 11 (Avi Hayun, Richard Zowalla, aecio, sebastian-nagel) #320

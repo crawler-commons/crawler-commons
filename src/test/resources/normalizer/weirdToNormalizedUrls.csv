@@ -142,6 +142,9 @@ http:///////, http:/
 http://example.com?,http://example.com/
 http://example.com?a=1,http://example.com/?a=1
 
+# empty query #308
+http://example.com/?,http://example.com/
+
 # normalizing percent escapes #263
 https://www.last.fm/music/Prefuse+73/_/90%+of+My+Mind+Is+With+You,https://www.last.fm/music/Prefuse+73/_/90%25+of+My+Mind+Is+With+You
 
