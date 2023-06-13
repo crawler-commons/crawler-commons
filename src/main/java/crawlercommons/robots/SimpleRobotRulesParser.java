@@ -106,18 +106,26 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         ALLOW, CRAWL_DELAY, SITEMAP,
 
-        // Russian-specific directive for mirror site?
-        // Used by the zerkalschik robot?
-        // See http://wataro.ur/en/web/robot.html
+        /**
+         * The &quot;Host&quot; directive was used by Yandex to indicate the
+         * main or canonical host of a set of mirrored web sites, see <a href=
+         * "https://web.archive.org/web/20130509230548/http://help.yandex.com/webmaster/?id=1113851#1113856">Yandex'
+         * Using robots.txt (archived version)</a>
+         */
         HOST,
 
         // Google extension
         NO_INDEX,
 
-        // ACAP directives all start with ACAP-
+        /**
+         * <a href=
+         * "https://en.wikipedia.org/wiki/Automated_Content_Access_Protocol">Automated
+         * Content Access Protocol</a> directives all start with
+         * <code>ACAP-</code>.
+         */
         ACAP_(true, false),
 
-        // Extended standard
+        // Extensions to the standard
         REQUEST_RATE, VISIT_TIME, ROBOT_VERSION, COMMENT,
 
         // Line starts with http:, which we treat as sitemap directive.
