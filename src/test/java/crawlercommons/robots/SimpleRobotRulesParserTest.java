@@ -714,6 +714,33 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
+    void testEmptyDisallowLowestPrecedence() {
+        String robotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: /disallowed/" + CRLF //
+                        + "Allow: /allowed/" + CRLF //
+                        + "Disallow: ";
+
+        BaseRobotRules rules = createRobotRules("anybot", robotsTxt);
+        assertTrue(rules.isAllowed("http://www.example.com/"));
+        assertTrue(rules.isAllowed("http://www.example.com/anypage.html"));
+        assertFalse(rules.isAllowed("http://www.example.com/disallowed/index.html"));
+        assertTrue(rules.isAllowed("http://www.example.com/allowed/index.html"));
+
+        // with merged groups
+        robotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: /disallowed/" + CRLF //
+                        + "Allow: /allowed/" + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow: ";
+
+        rules = createRobotRules("anybot", robotsTxt);
+        assertTrue(rules.isAllowed("http://www.example.com/"));
+        assertTrue(rules.isAllowed("http://www.example.com/anypage.html"));
+        assertFalse(rules.isAllowed("http://www.example.com/disallowed/index.html"));
+        assertTrue(rules.isAllowed("http://www.example.com/allowed/index.html"));
+    }
+
+    @Test
     void testMultiWildcard() {
         // Make sure we only take the first wildcard entry.
         final String simpleRobotsTxt = "User-agent: *" + CRLF //
