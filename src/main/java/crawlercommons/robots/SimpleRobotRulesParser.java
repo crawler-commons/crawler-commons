@@ -282,13 +282,31 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         DIRECTIVE_PREFIX.put("useragent", RobotDirective.USER_AGENT);
         DIRECTIVE_PREFIX.put("useg-agent", RobotDirective.USER_AGENT);
         DIRECTIVE_PREFIX.put("ser-agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("users-agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user-agnet", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user-agents", RobotDirective.USER_AGENT);
 
         DIRECTIVE_PREFIX.put("desallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("dissallow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dissalow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disalow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dssalow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dsallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("diasllow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disallaw", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("diallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disallows", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disllow", RobotDirective.DISALLOW);
 
         DIRECTIVE_PREFIX.put("crawl delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("clawl-delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("craw-delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("crawl-deley", RobotDirective.CRAWL_DELAY);
+
+        DIRECTIVE_PREFIX.put("sitemaps", RobotDirective.SITEMAP);
+
+        DIRECTIVE_PREFIX.put("https", RobotDirective.HTTP);
     }
 
     // separator is either one or more spaces/tabs, or a colon
