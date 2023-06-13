@@ -204,6 +204,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          * something else has been found.
          */
         private boolean _finishedAgentFields;
+        /**
+         * Flag indicating whether the Crawl-delay was set for the given agent
+         * name (false means either not set at all or set for the wildcard
+         * agent).
+         */
+        private boolean _crawlDelaySetRealName;
 
         /*
          * Counter of warnings reporting invalid rules/lines in the robots.txt
@@ -266,8 +272,64 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             _curRules.addRule(prefix, allow);
         }
 
+        /**
+         * Set the Crawl-delay given the current parse state.
+         * 
+         * <p>
+         * The <a href=
+         * "https://en.wikipedia.org/wiki/Robots.txt#Crawl-delay_directive">Crawl
+         * -delay</a> is not part of RFC 9309 treating it (same as the Sitemap
+         * directive) as <a href=
+         * "https://www.rfc-editor.org/rfc/rfc9309.html#name-other-records">other
+         * records</a> and specifies: <cite>Parsing of other records MUST NOT
+         * interfere with the parsing of explicitly defined records</cite>.
+         * </p>
+         * 
+         * This methods sets the Crawl-delay in the robots rules
+         * ({@link BaseRobotRules#setCrawlDelay(long)})
+         * <ul>
+         * <li>always if the given agent name was matched in the current
+         * group</li>
+         * <li>for wildcard agent groups, only if the crawl-delay wasn't already
+         * defined for the given agent</li>
+         * </ul>
+         * 
+         * <p>
+         * In case of a multiple defined crawl-delay, resolve the conflict and
+         * override the current value if the value is shorter than the already
+         * defined one. But do not override a Crawl-delay defined for a specific
+         * agent by a value defined for the wildcard agent.
+         * </p>
+         */
         public void setCrawlDelay(long delay) {
-            _curRules.setCrawlDelay(delay);
+            if (_matchedRealName) {
+                // set crawl-delay for the given agent name
+                if (_crawlDelaySetRealName) {
+                    /*
+                     * Crawl-delay defined twice for the same agent or defined
+                     * for more than one of multiple agent names.
+                     * 
+                     * Resolve conflict and select shortest Crawl-delay.
+                     */
+                    if (_curRules.getCrawlDelay() > delay) {
+                        _curRules.setCrawlDelay(delay);
+                    }
+                } else {
+                    _curRules.setCrawlDelay(delay);
+                }
+                _crawlDelaySetRealName = true;
+            } else if (_curRules.getCrawlDelay() == BaseRobotRules.UNSET_CRAWL_DELAY) {
+                // not set yet
+                _curRules.setCrawlDelay(delay);
+            } else if (_curRules.getCrawlDelay() > delay) {
+                // Crawl-delay defined twice for the wildcard agent.
+                // Resolve conflict and select shortest Crawl-delay.
+                _curRules.setCrawlDelay(delay);
+            }
+        }
+
+        public void clearCrawlDelay() {
+            _curRules.setCrawlDelay(BaseRobotRules.UNSET_CRAWL_DELAY);
         }
 
         public SimpleRobotRules getRobotRules() {
@@ -662,36 +724,27 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case CRAWL_DELAY:
-                parseState.setFinishedAgentFields(true);
                 handleCrawlDelay(parseState, token);
                     break;
 
                 case SITEMAP:
-                parseState.setFinishedAgentFields(true);
                 handleSitemap(parseState, token);
                     break;
 
                 case HTTP:
-                parseState.setFinishedAgentFields(true);
                 handleHttp(parseState, token);
                     break;
 
                 case UNKNOWN:
                 reportWarning(parseState, "Unknown directive in robots.txt file: {}", line);
-                parseState.setFinishedAgentFields(true);
                     break;
 
                 case MISSING:
                 reportWarning(parseState, "Unknown line in robots.txt file (size {}): {}", content.length, line);
-                parseState.setFinishedAgentFields(true);
                     break;
 
                 default:
                     // All others we just ignore
-                    // TODO KKr - which of these should be setting
-                    // finishedAgentFields to true?
-                    // TODO KKr - handle no-index
-                    // TODO KKr - handle request-rate and visit-time
                     break;
             }
         }
@@ -763,7 +816,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      */
     private void handleUserAgent(ParseState state, RobotToken token) {
         // If we are adding rules, and had already finished reading user agent
-        // fields, then we are in a new section, hence stop adding rules
+        // fields, then we are in a new section, hence stop adding rules.
         if (state.isAddingRules() && state.isFinishedAgentFields()) {
             state.setAddingRules(false);
         }
@@ -785,9 +838,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 state.setAddingRules(true);
             } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPartialMatch(agentName, targetNames))) {
                 if (state.isMatchedWildcard()) {
-                    // Clear rules of the wildcard user-agent found
-                    // before the non-wildcard user-agent match.
+                    // Clear rules and Crawl-delay of the wildcard user-agent
+                    // found before the non-wildcard user-agent match.
                     state.clearRules();
+                    state.clearCrawlDelay();
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);
@@ -827,9 +881,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
             if (matched) {
                 if (state.isMatchedWildcard()) {
-                    // Clear rules of the wildcard user-agent found
-                    // before the non-wildcard user-agent match.
+                    // Clear rules and Crawl-delay of the wildcard user-agent
+                    // found before the non-wildcard user-agent match.
                     state.clearRules();
+                    state.clearCrawlDelay();
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);
