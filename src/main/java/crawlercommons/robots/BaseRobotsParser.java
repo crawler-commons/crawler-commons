@@ -19,15 +19,16 @@ package crawlercommons.robots;
 import java.io.Serializable;
 import java.util.Collection;
 
+/** Robots.txt parser definition. */
 @SuppressWarnings("serial")
 public abstract class BaseRobotsParser implements Serializable {
 
     /**
      * Parse the robots.txt file in <i>content</i>, and return rules appropriate
      * for processing paths by <i>userAgent</i>. Note that multiple agent names
-     * may be provided as comma-separated values; the order of these shouldn't
-     * matter, as the file is parsed in order, and each agent name found in the
-     * file will be compared to every agent name found in robotNames.
+     * may be provided as comma-separated values. How agent names are matched
+     * against user-agent lines in the robots.txt depends on the implementing
+     * class.
      * 
      * Also note that names are lower-cased before comparison, and that any
      * robot name you pass shouldn't contain commas or spaces; if the name has
@@ -76,7 +77,7 @@ public abstract class BaseRobotsParser implements Serializable {
      * @param content
      *            raw bytes from the site's robots.txt file
      * @param contentType
-     *            HTTP response header (mime-type)
+     *            content type (MIME type) from HTTP response header
      * @param robotNames
      *            name(s) of crawler, used to select rules from the robots.txt
      *            file by matching the names against the user-agent lines in the

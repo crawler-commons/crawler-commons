@@ -41,37 +41,62 @@ import org.slf4j.LoggerFactory;
 import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
 /**
+ * Robots.txt parser following RFC 9309, supporting the Sitemap and Crawl-delay
+ * extensions.
+ * 
  * <p>
  * This implementation of {@link BaseRobotsParser} retrieves a set of
  * {@link SimpleRobotRules rules} for an agent with the given name from the
  * <code>robots.txt</code> file of a given domain. The implementation follows
  * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#name-access-method">RFC
- * 9309</a>.
- * </p>
+ * 9309</a>. The following robots.txt extensions are supported:</p>
+ * <ul>
+ * <li>the <a href=
+ * "https://en.wikipedia.org/wiki/Robots.txt#Crawl-delay_directive">Crawl-delay</a>
+ * directive</li>
+ * <li>the
+ * <a href="https://www.sitemaps.org/protocol.html#submit_robots">Sitemap
+ * directive</a></li>
+ * </ul>
  * 
  * <p>
  * The class fulfills two tasks. The first one is the parsing of the
- * <code>robots.txt</code> file done in
- * {@link #parseContent(String, byte[], String, String)}. During the parsing
+ * <code>robots.txt</code> file, done in
+ * {@link #parseContent(String, byte[], String, Collection)}. During the parsing
  * process the parser searches for the provided agent name(s). If the parser
- * finds a matching name, the set of rules for this name is parsed and returned
- * as the result. <b>Note</b> that if more than one agent name is given to the
- * parser, it parses the rules for the first matching agent name inside the file
- * and skips all following user agent groups. It doesn't matter which of the
- * other given agent names would match additional rules inside the file. Thus,
- * if more than one agent name is given to the parser, the result can be
- * influenced by the order of rule sets inside the <code>robots.txt</code> file.
+ * finds a matching name, the set of rules for this name is parsed and added to
+ * the list of rules returned later. If another group of rules is matched in the
+ * robots.txt file, also the rules of this group are added to the returned list
+ * of rules. See
+ * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1">RFC 9309,
+ * section 2.2.1</a> about the merging of groups of rules.
  * </p>
  * 
  * <p>
- * Note that the parser always parses the entire file, even if a matching agent
- * name group has been found, as it needs to collect all of the sitemap
- * directives.
+ * By default and following
+ * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1">RFC 9309,
+ * section 2.2.1</a>, the user-agent name (&quot;product token&quot;) is matched
+ * literally but case-insensitive over the full name. See
+ * {@link #setExactUserAgentMatching(boolean)} for details of agent name
+ * matching and a legacy substring prefix matching mode.
  * </p>
  * 
  * <p>
- * If no rule set matches any of the provided agent names, the rule set for the
- * <code>'*'</code> agent is returned. If there is no such rule set inside the
+ * {@link SimpleRobotRulesParser} allows to pass multiple agent names as a
+ * collection. All rule groups matching any of the agent names are followed and
+ * merged into one set of rules. The order of the agent names in the collection
+ * does not affect the selection of rules.
+ * </p>
+ * 
+ * <p>
+ * The parser always parses the entire file to select all matching rule groups,
+ * and also to collect all of the sitemap directives.
+ * </p>
+ * 
+ * <p>
+ * If no rule set matches any of the provided user-agent names, or if an empty
+ * collection of agent names is passed, the rule set for the <code>'*'</code>
+ * agent is returned. If there is no such rule set inside the
  * <code>robots.txt</code> file, a rule set allowing all resource to be crawled
  * is returned.
  * </p>
@@ -95,6 +120,14 @@ import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
  * resources is allowed. If the status code equals a different error code (3xx
  * or 5xx) the parser assumes a temporary error and a set of rules prohibiting
  * any crawling is returned.
+ * </p>
+ * 
+ * <p>
+ * Note that fetching of the robots.txt file is outside the scope of this class.
+ * It must be implemented in the calling code, including the following of
+ * &quot;at least five consecutive redirects&quot; as required by
+ * <a href="https://www.rfc-editor.org/rfc/rfc9309.html#name-redirects">RFC
+ * 9309, section 2.3.1.2</a>.
  * </p>
  */
 @SuppressWarnings("serial")
@@ -402,6 +435,23 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return userAgent != null && USER_AGENT_PRODUCT_TOKEN_MATCHER.matcher(userAgent).matches();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>
+     * Set rules for response status codes following <a href=
+     * "https://www.rfc-editor.org/rfc/rfc9309.html#name-access-results">RFC
+     * 9309, section 2.3.1</a></p>:
+     * <ul>
+     * <li>Success (HTTP 200-299): throws {@link IllegalStateException} because
+     * the response content needs to be parsed</li>
+     * <li>"Unavailable" Status (HTTP 400-499): allow all</li>
+     * <li>"Unreachable" Status (HTTP 500-599): disallow all</li>
+     * <li>every other HTTP status code is treated as "allow all", but further
+     * visits on the server are deferred (see
+     * {@link SimpleRobotRules#setDeferVisits(boolean)})</li>
+     * </ul>
+     */
     @Override
     public SimpleRobotRules failedFetch(int httpStatusCode) {
         SimpleRobotRules result;
@@ -459,25 +509,37 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
     /**
      * Parse the robots.txt file in <i>content</i>, and return rules appropriate
-     * for processing paths by <i>userAgent</i>. Multiple agent names are
-     * provided as collection. See {@link #setExactUserAgentMatching(boolean)}
-     * for details how agent names are matched.
+     * for processing paths by <i>userAgent</i>.
+     * 
+     * <p>
+     * Multiple agent names can be passed as a collection. See
+     * {@link #setExactUserAgentMatching(boolean)} for details how agent names
+     * are matched. If multiple agent names are passed, all matching rule groups
+     * are followed and merged into one set of rules. The order of the agent
+     * names in the collection does not affect the selection of rules.
+     * </p>
+     * 
+     * <p>
+     * If none of the provided agent names is matched, rules addressed to the
+     * wildcard user-agent (<code>*</code>) are selected.
+     * </p>
      * 
      * @param url
-     *            URL that robots.txt content was fetched from. A complete and
-     *            valid URL (e.g., https://example.com/robots.txt) is expected.
-     *            Used to resolve relative sitemap URLs and for
-     *            logging/reporting purposes.
+     *            {@inheritDoc}
      * @param content
-     *            raw bytes from the site's robots.txt file
+     *            {@inheritDoc}
      * @param contentType
-     *            HTTP response header (mime-type)
+     *            {@inheritDoc}
      * @param robotNames
-     *            name(s) of crawler, used to select rules from the robots.txt
-     *            file by matching the names against the user-agent lines in the
-     *            robots.txt file. Robot names should be single token names, w/o
-     *            version or other parts. Names should be lower-case, as the
-     *            user-agent line is also converted to lower-case for matching.
+     *            crawler (user-agent) name(s), used to select rules from the
+     *            robots.txt file by matching the names against the user-agent
+     *            lines in the robots.txt file. Robot names should be single
+     *            token names, without version or other parts. Names must be
+     *            lower-case, as the user-agent line is also converted to
+     *            lower-case for matching. If the collection is empty, the rules
+     *            for the wildcard user-agent (<code>*</code>) are selected. The
+     *            wildcard user-agent name should not be contained in
+     *            <i>robotNames</i>.
      * @return robot rules.
      */
     @Override

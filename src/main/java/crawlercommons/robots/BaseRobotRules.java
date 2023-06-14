@@ -22,8 +22,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * Result from parsing a single robots.txt file - which means we get a set of
- * rules, and a crawl-delay.
+ * Result from parsing a single robots.txt file – a set of allow/disallow rules
+ * to check whether a given URL is allowed, and optionally a <a href=
+ * "https://en.wikipedia.org/wiki/Robots.txt#Crawl-delay_directive"
+ * >Crawl-delay</a> and <a
+ * href="https://www.sitemaps.org/protocol.html#submit_robots">Sitemap</a> URLs.
  */
 @SuppressWarnings("serial")
 public abstract class BaseRobotRules implements Serializable {
@@ -52,10 +55,17 @@ public abstract class BaseRobotRules implements Serializable {
         _crawlDelay = crawlDelay;
     }
 
+    /**
+     * @return whether to defer visits to the server
+     */
     public boolean isDeferVisits() {
         return _deferVisits;
     }
 
+    /**
+     * Indicate to defer visits to the server, e.g. to wait until the robots.txt
+     * becomes available.
+     */
     public void setDeferVisits(boolean deferVisits) {
         _deferVisits = deferVisits;
     }
@@ -103,7 +113,7 @@ public abstract class BaseRobotRules implements Serializable {
 
     /**
      * Returns a string with the crawl delay as well as a list of sitemaps if
-     * they exist (and aren't more than 10)
+     * they exist (and aren't more than 10).
      */
     @Override
     public String toString() {
