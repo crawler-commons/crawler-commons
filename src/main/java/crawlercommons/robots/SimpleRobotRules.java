@@ -25,22 +25,24 @@ import java.util.stream.Collectors;
 import crawlercommons.filters.basic.BasicURLNormalizer;
 
 /**
- * Result from parsing a single robots.txt file - set of rules, and optionally a
- * <a href=
- * "https://en.wikipedia.org/wiki/Robots.txt#Crawl-delay_directive">crawl
- * -delay</a> and <a
- * href="https://www.sitemaps.org/protocol.html#submit_robots">sitemap</a> URLs.
- * The <a href="https://www.rfc-editor.org/rfc/rfc9309.html">Robots Exclusion
- * Protocol RFC 9309</a> is fully supported. This includes <a href=
+ * {@inheritDoc}
+ * 
+ * <p>
+ * Allow/disallow rules are matched following the <a
+ * href="https://www.rfc-editor.org/rfc/rfc9309.html">Robots Exclusion Protocol
+ * RFC 9309</a>. This includes <a href=
  * "https://developers.google.com/search/reference/robots_txt">Google's
  * robots.txt extensions</a> to the <a
- * href="http://www.robotstxt.org/robotstxt.html">original RFC draft</a> are
- * covered: the <code>Allow</code> directive, <code>$</code>/<code>*</code>
- * special characters and precedence of more specific patterns
+ * href="http://www.robotstxt.org/robotstxt.html">original RFC draft</a>: the
+ * <code>Allow</code> directive, <code>$</code>/<code>*</code> special
+ * characters and precedence of longer (more specific) patterns.
+ * </p>
  * 
+ * <p>
  * See also: <a
  * href="https://en.wikipedia.org/wiki/Robots_exclusion_standard">Robots
  * Exclusion on Wikipedia</a>
+ * </p>
  */
 
 @SuppressWarnings("serial")
@@ -58,6 +60,10 @@ public class SimpleRobotRules extends BaseRobotRules {
         String _prefix;
         boolean _allow;
 
+        /**
+         * A allow/disallow rule: a path prefix or pattern and whether it is
+         * allowed or disallowed.
+         */
         public RobotRule(String prefix, boolean allow) {
             _prefix = prefix;
             _allow = allow;
@@ -88,11 +94,6 @@ public class SimpleRobotRules extends BaseRobotRules {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -102,11 +103,6 @@ public class SimpleRobotRules extends BaseRobotRules {
             return result;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -163,6 +159,9 @@ public class SimpleRobotRules extends BaseRobotRules {
         _rules.add(new RobotRule(prefix, allow));
     }
 
+    /**
+     * @return the list of allow/disallow rules
+     */
     public List<RobotRule> getRobotRules() {
         return this._rules;
     }
@@ -377,6 +376,11 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Is our ruleset set up to allow all access?
      * 
+     * <p>
+     * Note: This is decided only based on the {@link RobotRulesMode} without
+     * inspecting the set of allow/disallow rules.
+     * </p>
+     * 
      * @return true if all URLs are allowed.
      */
     @Override
@@ -387,6 +391,11 @@ public class SimpleRobotRules extends BaseRobotRules {
     /**
      * Is our ruleset set up to disallow all access?
      * 
+     * <p>
+     * Note: This is decided only based on the {@link RobotRulesMode} without
+     * inspecting the set of allow/disallow rules.
+     * </p>
+     * 
      * @return true if no URLs are allowed.
      */
     @Override
@@ -394,11 +403,6 @@ public class SimpleRobotRules extends BaseRobotRules {
         return _mode == RobotRulesMode.ALLOW_NONE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -408,11 +412,6 @@ public class SimpleRobotRules extends BaseRobotRules {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -433,9 +432,10 @@ public class SimpleRobotRules extends BaseRobotRules {
     }
 
     /*
-     * (non-Javadoc)
+     * {@inheritDoc}
      * 
-     * @see java.lang.Object#equals(java.lang.Object)
+     * In addition, the number of allow/disallow rules and the most specific
+     * rules by pattern length are shown (ten rules, at maximum).
      */
     @Override
     public String toString() {
