@@ -1107,14 +1107,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             System.err.println("              \ta single 'product token' as per RFC 9309.");
             System.err.println("              \tIf not defined check with '*'");
             System.err.println("  <URL>       \tcheck URL whether allowed or forbidden.");
-            System.err.println("              \tIf no URL is given show robots.txt rules");
+            System.err.println("              \tIf no URL is given show the robots.txt rules.");
             System.exit(1);
         }
 
         String url = args[0];
-        String agentName = "*";
+        // empty collection to select rules for wildcard user-agent (*)
+        Collection<String> agentNames = Set.of();
+        String agentName = "*"; // for logging
         if (args.length >= 2) {
-            agentName = args[1];
+            agentName = args[1].trim().toLowerCase(Locale.ROOT);
+            agentNames = Set.of(agentName);
         }
 
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
@@ -1127,7 +1130,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 // sitemap paths for file:/ URLs
                 url = "http://example.com/robots.txt";
             }
-            rules = parser.parseContent(url, content, "text/plain", Set.of(agentName));
+            rules = parser.parseContent(url, content, "text/plain", agentNames);
         } catch (IOException e) {
             if (connection instanceof HttpURLConnection) {
                 int code = ((HttpURLConnection) connection).getResponseCode();
