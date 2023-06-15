@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -1101,6 +1102,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             System.err.println();
             System.err.println("Parse a robots.txt file");
             System.err.println("  <robots.txt>\tURL pointing to robots.txt file.");
+            System.err.println("              \tMax. five HTTP redirects are followed.");
             System.err.println("              \tTo read a local file use a file:// URL");
             System.err.println("              \t(parsed as http://example.com/robots.txt)");
             System.err.println("  <agentname> \tuser agent name to check for exclusion rules,");
@@ -1121,24 +1123,68 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
-        BaseRobotRules rules;
-        URLConnection connection = new URL(url).openConnection();
+        BaseRobotRules rules = null;
+        URL u = new URL(url);
+        URLConnection connection = u.openConnection();
+        if (!agentNames.isEmpty()) {
+            connection.setRequestProperty("User-Agent", agentName);
+        }
+
         try {
-            byte[] content = IOUtils.toByteArray(connection);
-            if (!url.matches("^https?://")) {
+            if (connection instanceof HttpURLConnection) {
+                HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                int redirects = 0;
+                int maxRedirects = 5; // "five consecutive redirects" (RFC 9309)
+                while (redirects <= maxRedirects) {
+                    httpConnection.setInstanceFollowRedirects(false);
+                    int code = httpConnection.getResponseCode();
+                    switch (code) {
+                        case HttpURLConnection.HTTP_OK:
+                        System.out.println("Successfully fetched robots.txt");
+                        byte[] content = IOUtils.toByteArray(httpConnection);
+                        rules = parser.parseContent(url, content, httpConnection.getContentType(), agentNames);
+                            break;
+                        case HttpURLConnection.HTTP_MOVED_PERM:
+                        case HttpURLConnection.HTTP_MOVED_TEMP:
+                        case HttpURLConnection.HTTP_SEE_OTHER:
+                        redirects++;
+                        String location = httpConnection.getHeaderField("Location");
+                        if (location == null) {
+                            System.out.println("Redirect without Location header");
+                            rules = parser.failedFetch(code);
+                            break;
+                        }
+                        location = URLDecoder.decode(location, "UTF-8");
+                        u = new URL(u, location);
+                        if (redirects == maxRedirects) {
+                            System.out.println("Reached maximum of " + maxRedirects + " redirects, not following redirect to " + u.toString());
+                            rules = parser.failedFetch(code);
+                            break;
+                        }
+                        System.out.println("Following redirect to " + u.toString());
+                        httpConnection = (HttpURLConnection) u.openConnection();
+                        if (!agentNames.isEmpty()) {
+                            httpConnection.setRequestProperty("User-Agent", agentName);
+                        }
+                        continue; // continue redirecting
+                        default:
+                        System.out.println("Fetch of " + url + " failed with HTTP status code " + code);
+                        rules = parser.failedFetch(code);
+                            break;
+                    }
+                    break;
+                }
+            } else {
+                // not a HTTP URL, maybe file://
+                byte[] content = IOUtils.toByteArray(connection);
+                rules = parser.parseContent(url, content, "text/plain", agentNames);
                 // use artificial URL to avoid problems resolving relative
                 // sitemap paths for file:/ URLs
                 url = "http://example.com/robots.txt";
             }
-            rules = parser.parseContent(url, content, "text/plain", agentNames);
         } catch (IOException e) {
-            if (connection instanceof HttpURLConnection) {
-                int code = ((HttpURLConnection) connection).getResponseCode();
-                rules = parser.failedFetch(code);
-                System.out.println("Fetch of " + url + " failed with HTTP status code " + code);
-            } else {
-                throw e;
-            }
+            System.out.println("Fetch of " + url + " failed with: " + e.getMessage());
+            throw e;
         }
 
         if (args.length < 3) {
