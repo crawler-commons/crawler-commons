@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -60,10 +61,18 @@ public class SimpleRobotRulesParserTest {
         return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
     }
 
+    private static BaseRobotRules createRobotRules(Collection<String> crawlerNames, String content, boolean exactUserAgentMatching) {
+        return createRobotRules(crawlerNames, content.getBytes(UTF_8), exactUserAgentMatching);
+    }
+
     private static BaseRobotRules createRobotRules(String[] crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
+        return createRobotRules(Arrays.asList(crawlerNames), contentBytes, exactUserAgentMatching);
+    }
+
+    private static BaseRobotRules createRobotRules(Collection<String> crawlerNames, byte[] contentBytes, boolean exactUserAgentMatching) {
         SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
         robotParser.setExactUserAgentMatching(exactUserAgentMatching);
-        return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", Arrays.asList(crawlerNames));
+        return robotParser.parseContent(FAKE_ROBOTS_URL, contentBytes, "text/plain", crawlerNames);
     }
 
     @Test
@@ -291,10 +300,12 @@ public class SimpleRobotRulesParserTest {
                     "False, /search/%2a/, https://www.example.com/search/%2a/", //
                     "False, /search/%2a/, https://www.example.com/search/*/", //
                     "False, /search/*/, https://www.example.com/search/foobar/", //
-                    // examples from RFC 9309,  2.2.2. The "Allow" and "Disallow" Lines
+                    // examples from RFC 9309, 2.2.2. The "Allow" and "Disallow"
+                    // Lines
                     // https://www.rfc-editor.org/rfc/rfc9309.html#name-the-allow-and-disallow-line
                     "False, /foo/bar?baz=quz, https://www.example.com/foo/bar?baz=quz", //
-                    // See the comment in https://github.com/google/robotstxt/blob/master/robots_test.cc
+                    // See the comment in
+                    // https://github.com/google/robotstxt/blob/master/robots_test.cc
                     // "Percent encoding URIs in the rules is unnecessary."
                     // and "/foo/bar?baz=http://foo.bar stays unencoded."
                     "False, /foo/bar?baz=https://foo.bar, https://www.example.com/foo/bar?baz=https://foo.bar", //
@@ -1231,14 +1242,14 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("https://example.org/publications/doc1.html"));
         assertFalse(rules.isAllowed("https://example.org/example/page.html"));
         assertFalse(rules.isAllowed("https://example.org/example.gif"));
-        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+        assertTrue(rules.isAllowed("https://example.org/"), "implicitly allowed");
 
         robotstxt = readFile("/robots/rfc9309-example-longest-match-robots.txt");
         rules = createRobotRules("foobot", robotstxt);
         assertTrue(rules.isAllowed("https://example.org/example/page/"));
         assertTrue(rules.isAllowed("https://example.org/example/page/index.html"));
         assertFalse(rules.isAllowed("https://example.org/example/page/disallowed.gif"));
-        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+        assertTrue(rules.isAllowed("https://example.org/"), "implicitly allowed");
 
         robotstxt = readFile("/robots/rfc9309-example-rule-group-merging.txt");
         rules = createRobotRules("examplebot", robotstxt);
@@ -1246,23 +1257,46 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("https://example.org/foo"));
         assertFalse(rules.isAllowed("https://example.org/bar"));
         assertFalse(rules.isAllowed("https://example.org/baz"));
-        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+        assertTrue(rules.isAllowed("https://example.org/"), "implicitly allowed");
 
         rules = createRobotRules("anyotherbot", robotstxt);
         assertEquals(2, ((SimpleRobotRules) rules).getRobotRules().size());
         assertFalse(rules.isAllowed("https://example.org/foo"));
         assertFalse(rules.isAllowed("https://example.org/bar"));
         assertTrue(rules.isAllowed("https://example.org/baz"));
-        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+        assertTrue(rules.isAllowed("https://example.org/"), "implicitly allowed");
 
         rules = createRobotRules("bazbot", robotstxt);
         assertEquals(1, ((SimpleRobotRules) rules).getRobotRules().size());
         assertTrue(rules.isAllowed("https://example.org/foo"));
         assertTrue(rules.isAllowed("https://example.org/bar"));
         assertFalse(rules.isAllowed("https://example.org/baz"));
-        assertTrue(rules.isAllowed("https://example.org/")); // implicitly allowed
+        assertTrue(rules.isAllowed("https://example.org/"), "implicitly allowed");
     }
 
+    @Test
+    void testAPIemptyUserAgentList() {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /allowed/" + CRLF //
+                        + "Disallow: /" + CRLF //
+                        + "User-agent: allowedbot" + CRLF //
+                        + "Allow: /";
+
+        /*
+         * verify that the wildcard user-agent rules are selected if an empty
+         * list of user-agents is passed
+         */
+        BaseRobotRules rules = createRobotRules(Set.of(), simpleRobotsTxt, true);
+        assertTrue(rules.isAllowed("https://www.example.com/allowed/page.html"));
+        assertFalse(rules.isAllowed("https://www.example.com/"));
+
+        rules = createRobotRules(Set.of("anybot"), simpleRobotsTxt, true);
+        assertTrue(rules.isAllowed("https://www.example.com/allowed/page.html"));
+        assertFalse(rules.isAllowed("https://www.example.com/"));
+
+        rules = createRobotRules(Set.of("allowedbot"), simpleRobotsTxt, true);
+        assertTrue(rules.isAllowed("https://www.example.com/"));
+    }
 
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
