@@ -47,10 +47,20 @@ public abstract class BaseRobotRules implements Serializable {
         _sitemaps = new LinkedHashSet<>();
     }
 
+    /**
+     * Get Crawl-delay (in milliseconds)
+     * 
+     * @return Crawl-delay defined in the robots.txt for the given agent name,
+     *         or {@link UNSET_CRAWL_DELAY} if not defined.
+     */
     public long getCrawlDelay() {
         return _crawlDelay;
     }
 
+    /**
+     * @param crawlDelay
+     *            Crawl-Delay in milliseconds
+     */
     public void setCrawlDelay(long crawlDelay) {
         _crawlDelay = crawlDelay;
     }
