@@ -917,10 +917,28 @@ public class SimpleRobotRulesParserTest {
                         + "User-agent: qihoobot" + CR //
                         + "Disallow: /";
 
+        // Note: In compliance with RFC 9309, for Googlebot a specific
+        // Crawl-delay is set. However, Googlebot is not allowed to crawl any
+        // page (same as qihoobot).
         BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt, false);
-        assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertEquals(1000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
         rules = createRobotRules("googlebot", krugleRobotsTxt, true);
-        assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertEquals(1000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
+        rules = createRobotRules("qihoobot", krugleRobotsTxt, true);
+        assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
+        rules = createRobotRules("anybot", krugleRobotsTxt, true);
+        assertEquals(3000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertTrue(rules.isAllowed("http://www.krugle.com/"));
     }
 
     /** Test selection of Crawl-delay directives in robots.txt (see #114) */
