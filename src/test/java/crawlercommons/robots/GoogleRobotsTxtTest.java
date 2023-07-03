@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Port of the unit tests of
@@ -39,7 +40,7 @@ public class GoogleRobotsTxtTest {
 
     boolean isUserAgentAllowed(String robotstxt, String userAgent, String url) {
         Collection<String> agentNames = new ArrayList<>();
-        agentNames.add(userAgent.toLowerCase());
+        agentNames.add(userAgent.toLowerCase(Locale.ROOT));
         BaseRobotRules rules = SimpleRobotRulesParserTest.createRobotRules(agentNames, robotstxt, true);
         return rules.isAllowed(url);
     }
