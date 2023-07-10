@@ -199,6 +199,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          */
         private boolean _addingRules;
         /**
+         * Flag that is true as it is allowed to add a Crawl-delay for the given
+         * agent.
+         */
+        private boolean _addingCrawlDelay;
+        /**
          * Flag indicating whether all consecutive agent fields has been seen.
          * It is set to false if an agent field is found and back to true if
          * something else has been found.
@@ -256,6 +261,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             _addingRules = addingRules;
         }
 
+        public boolean isAddingCrawlDelay() {
+            return _addingCrawlDelay;
+        }
+
+        public void setAddingCrawlDelay(boolean addingCrawlDelay) {
+            _addingCrawlDelay = addingCrawlDelay;
+        }
+
         public boolean isFinishedAgentFields() {
             return _finishedAgentFields;
         }
@@ -304,7 +317,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         public void setCrawlDelay(long delay) {
             if (_matchedRealName) {
                 // set crawl-delay for the given agent name
-                if (_crawlDelaySetRealName) {
+                if (_crawlDelaySetRealName && _addingCrawlDelay) {
                     /*
                      * Crawl-delay defined twice for the same agent or defined
                      * for more than one of multiple agent names.
@@ -725,6 +738,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
                 case CRAWL_DELAY:
                 handleCrawlDelay(parseState, token);
+                parseState.setAddingCrawlDelay(false);
                     break;
 
                 case SITEMAP:
@@ -819,6 +833,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // fields, then we are in a new section, hence stop adding rules.
         if (state.isAddingRules() && state.isFinishedAgentFields()) {
             state.setAddingRules(false);
+            state.setAddingCrawlDelay(false);
         }
 
         // Clearly we've encountered a new user agent directive, hence we need to start
@@ -836,6 +851,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             } else if (agentName.equals("*") && !state.isMatchedRealName()) {
                 state.setMatchedWildcard(true);
                 state.setAddingRules(true);
+                state.setAddingCrawlDelay(true);
             } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPartialMatch(agentName, targetNames))) {
                 if (state.isMatchedWildcard()) {
                     // Clear rules and Crawl-delay of the wildcard user-agent
@@ -845,6 +861,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);
+                state.setAddingCrawlDelay(true);
                 state.setMatchedWildcard(false);
             }
         } else {
@@ -861,6 +878,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             if (agentNameFull.equals("*") && !state.isMatchedRealName()) {
                 state.setMatchedWildcard(true);
                 state.setAddingRules(true);
+                state.setAddingCrawlDelay(true);
             } else if (userAgentProductTokenPartialMatch(agentNameFull, targetNames)) {
                 // match "butterfly" in the line "User-agent: Butterfly/1.0"
                 matched = true;
@@ -888,6 +906,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);
+                state.setAddingCrawlDelay(true);
                 state.setMatchedWildcard(false);
             }
         }
@@ -980,7 +999,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            data for directive
      */
     private void handleCrawlDelay(ParseState state, RobotToken token) {
-        if (!state.isAddingRules()) {
+        if (!state.isAddingCrawlDelay()) {
             return;
         }
 
@@ -1000,6 +1019,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 reportWarning(state, "Error parsing robots rules - can't decode crawl delay: {}", delayString);
             }
         }
+
+        state.setAddingCrawlDelay(false);
     }
 
     /**

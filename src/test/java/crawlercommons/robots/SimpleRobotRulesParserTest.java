@@ -945,9 +945,11 @@ public class SimpleRobotRulesParserTest {
     @Test
     void testSelectCrawlDelayGroup() {
         final String robotsTxt = "User-Agent: bingbot" + CRLF //
-                        + "Crawl-delay: 1" + CRLF //
+                        + "Crawl-delay: 1" + CRLF + CRLF //
                         + "User-Agent: msnbot" + CRLF //
-                        + "Crawl-delay: 2" + CRLF //
+                        + "Crawl-delay: 2" + CRLF + CRLF //
+                        + "User-Agent: pinterestbot" + CRLF //
+                        + "Crawl-delay: 0.2" + CRLF + CRLF //
                         + "User-agent: *" + CRLF //
                         + "Disallow: /login" + CRLF //
                         + "Sitemap: http://www.example.com/sitemap.xml" + CRLF //
@@ -958,9 +960,9 @@ public class SimpleRobotRulesParserTest {
         List<String> sitemaps = List.of("http://www.example.com/sitemap.xml");
         for (Entry<String, Long> e : expectedCrawlDelays.entrySet()) {
             BaseRobotRules rules = createRobotRules(e.getKey(), robotsTxt);
-            assertEquals(e.getValue(), rules.getCrawlDelay());
+            assertEquals(e.getValue(), rules.getCrawlDelay(), "Crawl-delay for " + e.getKey() + " = " + e.getValue());
             assertFalse(rules.isAllowed("http://www.example.com/login"), "Disallow path /login for all agents");
-            assertFalse(rules.isAllowed("http://www.example.com/assets/"), "Disallow path /login for all agents");
+            assertFalse(rules.isAllowed("http://www.example.com/assets/"), "Disallow path /assets for all agents");
             assertTrue(rules.isAllowed("http://www.example.com/"), "Implicitly allowed");
             assertEquals(sitemaps, rules.getSitemaps());
         }
