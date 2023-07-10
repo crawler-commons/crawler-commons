@@ -1,6 +1,9 @@
 Crawler-Commons Change Log
 
 Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+- [Robots.txt] Document effect of rules merging in combination with multiple agent names (sebastian-nagel, Richard Zowalla) #423, #426
+- [Robots.txt] Pass empty collection of agent names to select rules for any robot (wildcard user-agent name) (sebastian-nagel, Richard Zowalla) #427
+- [Robots.txt] Rename default user-agent / robot name in unit tests (sebastian-nagel, Richard Zowalla) #429
 - [Robots.txt] Add units test based on examples in RFC 9309 (sebastian-nagel, Richard Zowalla) #420
 - [BasicNormalizer] Query parameters normalization in BasicURLNormalizer (aecio, sebastian-nagel, Richard Zowalla) #308, #421
 - [Robots.txt] Deduplicate robots rules before matching (sebastian-nagel, jnioche) #416
