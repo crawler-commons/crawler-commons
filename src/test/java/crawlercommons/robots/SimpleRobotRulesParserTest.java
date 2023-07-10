@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -919,6 +921,31 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
         rules = createRobotRules("googlebot", krugleRobotsTxt, true);
         assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+    }
+
+    /** Test selection of Crawl-delay directives in robots.txt (see #114) */
+    @Test
+    void testSelectCrawlDelayGroup() {
+        final String robotsTxt = "User-Agent: bingbot" + CRLF //
+                        + "Crawl-delay: 1" + CRLF //
+                        + "User-Agent: msnbot" + CRLF //
+                        + "Crawl-delay: 2" + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow: /login" + CRLF //
+                        + "Sitemap: http://www.example.com/sitemap.xml" + CRLF //
+                        + "Disallow: /assets/";
+
+        // test for specific Crawl-delay values but same set of rules
+        Map<String, Long> expectedCrawlDelays = Map.of("bingbot", 1000L, "msnbot", 2000L, "anybot", BaseRobotRules.UNSET_CRAWL_DELAY);
+        List<String> sitemaps = List.of("http://www.example.com/sitemap.xml");
+        for (Entry<String, Long> e : expectedCrawlDelays.entrySet()) {
+            BaseRobotRules rules = createRobotRules(e.getKey(), robotsTxt);
+            assertEquals(e.getValue(), rules.getCrawlDelay());
+            assertFalse(rules.isAllowed("http://www.example.com/login"), "Disallow path /login for all agents");
+            assertFalse(rules.isAllowed("http://www.example.com/assets/"), "Disallow path /login for all agents");
+            assertTrue(rules.isAllowed("http://www.example.com/"), "Implicitly allowed");
+            assertEquals(sitemaps, rules.getSitemaps());
+        }
     }
 
     @Test
