@@ -903,8 +903,20 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         try {
             path = normalizePathDirective(path);
             if (path.length() == 0) {
-                // Disallow: <nothing> => allow all.
-                state.clearRules();
+                /*
+                 * "Disallow: <nothing>" meant "allow all" in the 1996 REP RFC
+                 * draft because there was no "Allow" directive.
+                 * 
+                 * RFC 9309 allows empty patterns in the formal syntax
+                 * (https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2). No
+                 * specific handling of empty patterns is defined, as shortest
+                 * pattern they are matched with lowest priority.
+                 * 
+                 * Adding an extra rule with an empty pattern would have no
+                 * effect, because an "allow all" with lowest priority means
+                 * "allow everything else" which is the default anyway. So, we
+                 * ignore the empty disallow statement.
+                 */
             } else {
                 state.addRule(path, false);
             }
@@ -935,8 +947,11 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
 
         if (path.length() == 0) {
-            // Allow: <nothing> => allow all.
-            state.clearRules();
+            /*
+             * Allow: <nothing> => allow all.
+             * 
+             * See handleDisallow(...): We ignore the empty allow statement.
+             */
         } else {
             state.addRule(path, true);
         }
