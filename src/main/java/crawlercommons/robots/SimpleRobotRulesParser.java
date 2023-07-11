@@ -139,18 +139,26 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         ALLOW, CRAWL_DELAY, SITEMAP,
 
-        // Russian-specific directive for mirror site?
-        // Used by the zerkalschik robot?
-        // See http://wataro.ur/en/web/robot.html
+        /**
+         * The &quot;Host&quot; directive was used by Yandex to indicate the
+         * main or canonical host of a set of mirrored web sites, see <a href=
+         * "https://web.archive.org/web/20130509230548/http://help.yandex.com/webmaster/?id=1113851#1113856">Yandex'
+         * Using robots.txt (archived version)</a>
+         */
         HOST,
 
         // Google extension
         NO_INDEX,
 
-        // ACAP directives all start with ACAP-
+        /**
+         * <a href=
+         * "https://en.wikipedia.org/wiki/Automated_Content_Access_Protocol">Automated
+         * Content Access Protocol</a> directives all start with
+         * <code>ACAP-</code>.
+         */
         ACAP_(true, false),
 
-        // Extended standard
+        // Extensions to the standard
         REQUEST_RATE, VISIT_TIME, ROBOT_VERSION, COMMENT,
 
         // Line starts with http:, which we treat as sitemap directive.
@@ -315,13 +323,31 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         DIRECTIVE_PREFIX.put("useragent", RobotDirective.USER_AGENT);
         DIRECTIVE_PREFIX.put("useg-agent", RobotDirective.USER_AGENT);
         DIRECTIVE_PREFIX.put("ser-agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("users-agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user agent", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user-agnet", RobotDirective.USER_AGENT);
+        DIRECTIVE_PREFIX.put("user-agents", RobotDirective.USER_AGENT);
 
         DIRECTIVE_PREFIX.put("desallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("dissallow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dissalow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disalow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dssalow", RobotDirective.DISALLOW);
         DIRECTIVE_PREFIX.put("dsallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("diasllow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disallaw", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("diallow", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disallows", RobotDirective.DISALLOW);
+        DIRECTIVE_PREFIX.put("disllow", RobotDirective.DISALLOW);
 
         DIRECTIVE_PREFIX.put("crawl delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("clawl-delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("craw-delay", RobotDirective.CRAWL_DELAY);
+        DIRECTIVE_PREFIX.put("crawl-deley", RobotDirective.CRAWL_DELAY);
+
+        DIRECTIVE_PREFIX.put("sitemaps", RobotDirective.SITEMAP);
+
+        DIRECTIVE_PREFIX.put("https", RobotDirective.HTTP);
     }
 
     // separator is either one or more spaces/tabs, or a colon
