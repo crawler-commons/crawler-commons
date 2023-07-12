@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -942,10 +944,55 @@ public class SimpleRobotRulesParserTest {
                         + "User-agent: qihoobot" + CR //
                         + "Disallow: /";
 
+        // Note: In compliance with RFC 9309, for Googlebot a specific
+        // Crawl-delay is set. However, Googlebot is not allowed to crawl any
+        // page (same as qihoobot).
         BaseRobotRules rules = createRobotRules("googlebot/2.1", krugleRobotsTxt, false);
-        assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertEquals(1000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
         rules = createRobotRules("googlebot", krugleRobotsTxt, true);
-        assertTrue(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertEquals(1000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
+        rules = createRobotRules("qihoobot", krugleRobotsTxt, true);
+        assertEquals(BaseRobotRules.UNSET_CRAWL_DELAY, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertFalse(rules.isAllowed("http://www.krugle.com/"));
+
+        rules = createRobotRules("anybot", krugleRobotsTxt, true);
+        assertEquals(3000L, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("http://www.krugle.com/examples/index.html"));
+        assertTrue(rules.isAllowed("http://www.krugle.com/"));
+    }
+
+    /** Test selection of Crawl-delay directives in robots.txt (see #114) */
+    @Test
+    void testSelectCrawlDelayGroup() {
+        final String robotsTxt = "User-Agent: bingbot" + CRLF //
+                        + "Crawl-delay: 1" + CRLF + CRLF //
+                        + "User-Agent: msnbot" + CRLF //
+                        + "Crawl-delay: 2" + CRLF + CRLF //
+                        + "User-Agent: pinterestbot" + CRLF //
+                        + "Crawl-delay: 0.2" + CRLF + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow: /login" + CRLF //
+                        + "Sitemap: http://www.example.com/sitemap.xml" + CRLF //
+                        + "Disallow: /assets/";
+
+        // test for specific Crawl-delay values but same set of rules
+        Map<String, Long> expectedCrawlDelays = Map.of("bingbot", 1000L, "msnbot", 2000L, "anybot", BaseRobotRules.UNSET_CRAWL_DELAY);
+        List<String> sitemaps = List.of("http://www.example.com/sitemap.xml");
+        for (Entry<String, Long> e : expectedCrawlDelays.entrySet()) {
+            BaseRobotRules rules = createRobotRules(e.getKey(), robotsTxt);
+            assertEquals(e.getValue(), rules.getCrawlDelay(), "Crawl-delay for " + e.getKey() + " = " + e.getValue());
+            assertFalse(rules.isAllowed("http://www.example.com/login"), "Disallow path /login for all agents");
+            assertFalse(rules.isAllowed("http://www.example.com/assets/"), "Disallow path /assets for all agents");
+            assertTrue(rules.isAllowed("http://www.example.com/"), "Implicitly allowed");
+            assertEquals(sitemaps, rules.getSitemaps());
+        }
     }
 
     @Test
