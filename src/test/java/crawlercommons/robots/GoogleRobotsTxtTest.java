@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Port of the unit tests of
- * <a href="https://github.com/google/robotstxt">Google Robots.txt Parser and
+ * Port of the unit tests of <a
+ * href="https://github.com/google/robotstxt">Google Robots.txt Parser and
  * Matcher Library</a>
  * 
  * <blockquote> This file tests the robots.txt parsing and matching code found
@@ -102,9 +102,8 @@ public class GoogleRobotsTxtTest {
      * disallow: <value>
      * </pre>
      * 
-     * See <a
-     * href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.1">REP RFC
-     * section "Protocol Definition".</a>
+     * See <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.1">REP
+     * RFC section "Protocol Definition".</a>
      * 
      * Google specific: webmasters sometimes miss the colon separator, but it's
      * obvious what they mean by "disallow /", so we assume the colon if it's
@@ -239,9 +238,8 @@ public class GoogleRobotsTxtTest {
 
     /**
      * Group must not be closed by rules not explicitly defined in the REP RFC.
-     * See <a
-     * href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.1">REP RFC
-     * section "Protocol Definition".</a>
+     * See <a href="https://www.rfc-editor.org/rfc/rfc9309.html#section-2.1">REP
+     * RFC section "Protocol Definition".</a>
      */
     @Test
     void ID_LineSyntax_Groups_OtherRules() {
@@ -883,7 +881,8 @@ public class GoogleRobotsTxtTest {
          * improvement if SimpleRobotRulesParser can handle Unicode characters
          * in the URL which are not percent-encoded.
          */
-        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot",
+        // "http://foo.bar/foo/bar/ツ"));
         assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
 
         /*
@@ -908,7 +907,8 @@ public class GoogleRobotsTxtTest {
          * improvement if SimpleRobotRulesParser can handle Unicode characters
          * in the URL which are not percent-encoded.
          */
-        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot",
+        // "http://foo.bar/foo/bar/ツ"));
         assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/ツ"));
 
         /*
@@ -928,7 +928,8 @@ public class GoogleRobotsTxtTest {
         robotstxt = "User-agent: FooBot\n" //
                         + "Disallow: /\n" //
                         + "Allow: /foo/bar/%62%61%7A\n";
-        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/baz"));
+        // assertFalse(isUserAgentAllowed(robotstxt, "FooBot",
+        // "http://foo.bar/foo/bar/baz"));
         assertTrue(isUserAgentAllowed(robotstxt, "FooBot", "http://foo.bar/foo/bar/baz"));
 
         /*
