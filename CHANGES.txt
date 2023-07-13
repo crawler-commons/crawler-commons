@@ -1,6 +1,6 @@
 Crawler-Commons Change Log
 
-Current Development 1.4-SNAPSHOT (yyyy-mm-dd)
+Release 1.4 (2023-07-13)
 - [Robots.txt] Implement Robots Exclusion Protocol (REP) IETF Draft: port unit tests (sebastian-nagel, Richard Zowalla) #245, #360
 - [Robots.txt] Close groups of rules as defined in RFC 9309 (kkrugler, garyillyes, jnioche, sebastian-nagel) #114, #390, #430
 - [Robots.txt] Empty disallow statement not to clear other rules (sebastian-nagel, jnioche) #422, #424
