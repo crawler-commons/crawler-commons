@@ -6,7 +6,7 @@
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
-	<version>1.4</version>
+	<version>1.5-SNAPSHOT</version>
 
 	<licenses>
 		<license>
@@ -27,7 +27,7 @@
 		<url>https://github.com/crawler-commons/crawler-commons</url>
 		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
-		<tag>crawler-commons-1.4</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>
