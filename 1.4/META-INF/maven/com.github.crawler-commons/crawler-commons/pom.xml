@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.github.crawler-commons</groupId>
+	<artifactId>crawler-commons</artifactId>
+	<name>Crawler-commons</name>
+	<packaging>jar</packaging>
+	<version>1.4</version>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<url>https://github.com/crawler-commons/crawler-commons</url>
+
+	<description>crawler-commons is a set of reusable Java components that implement 
+	functionality common to any web crawler.
+	</description>
+
+	<inceptionYear>2009</inceptionYear>
+
+	<scm>
+		<url>https://github.com/crawler-commons/crawler-commons</url>
+		<connection>scm:git:git://github.com/crawler-commons/crawler-commons.git</connection>
+		<developerConnection>scm:git:git@github.com:crawler-commons/crawler-commons.git</developerConnection>
+		<tag>crawler-commons-1.4</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Staging Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/crawler-commons/crawler-commons/issues</url>
+	</issueManagement>
+
+	<mailingLists>
+		<mailingList>
+			<name>Project Mailing List</name>
+			<post>crawler-commons [at] googlegroups [dot] com</post>
+		</mailingList>
+	</mailingLists>
+
+	<organization>
+		<name>Crawler-Commons</name>
+		<url>https://github.com/crawler-commons</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>KKrugler</id>
+			<name>Ken Krugler</name>
+			<email>kkrugler_lists@transpac.com</email>
+			<organization>Scale Unlimited</organization>
+			<organizationUrl>https://www.scaleunlimited.com</organizationUrl>
+		</developer>
+
+		<developer>
+			<id>ab</id>
+			<name>Andrzej Bialecki</name>
+			<email>ab@apache.org</email>
+		</developer>
+
+		<developer>
+			<id>jnioche</id>
+			<name>Julien Nioche</name>
+			<email>julien@digitalpebble.com</email>
+			<organization>DigitalPebble Ltd</organization>
+			<organizationUrl>https://www.digitalpebble.com</organizationUrl>
+		</developer>
+
+		<developer>
+			<id>lewismc</id>
+			<name>Lewis John McGibbney</name>
+			<email>lewismc [at] apache [dot] org</email>
+		</developer>
+
+		<developer>
+			<id>avi_hayun</id>
+			<name>Avi Hayun</name>
+			<email>avraham2@gmail.com</email>
+		</developer>
+
+		<developer>
+			<id>snagel</id>
+			<name>Sebastian Nagel</name>
+			<email>snagel@apache.org</email>
+		</developer>
+
+		<developer>
+			<id>rzo1</id>
+			<name>Richard Zowalla</name>
+			<email>rzo1@apache.org</email>
+		</developer>
+	</developers>
+
+	<build>
+		<defaultGoal>install</defaultGoal>
+		<directory>target</directory>
+		<outputDirectory>${basedir}/target/classes</outputDirectory>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+		<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources/</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+			</testResource>
+		</testResources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.prop</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.prop</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>${maven-deploy-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>${maven-release-plugin.version}</version>
+					<configuration>
+						<mavenExecutorId>forked-path</mavenExecutorId>
+						<useReleaseProfile>false</useReleaseProfile>
+						<arguments>-Prelease</arguments>
+						<!--autoVersionSubmodules>true</autoVersionSubmodules -->
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.10</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>${maven-jar-plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<inherited>true</inherited>
+				<configuration>
+					<source>${javac.src.version}</source>
+					<target>${javac.target.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surfire-plugin.version}</version>
+				<inherited>true</inherited>
+				<configuration>
+					<systemPropertyVariables>
+						<test.build.data>${project.basedir}/target/test-data/</test.build.data>
+					</systemPropertyVariables>
+					<argLine>@{argLine} -Xmx512m</argLine>
+					<forkCount>2</forkCount>
+					<testFailureIgnore>false</testFailureIgnore>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+				<artifactId>maven-java-formatter-plugin</artifactId>
+				<version>0.4</version>
+				<configuration>
+					<configFile>${project.basedir}/doc/eclipse-formatter.xml</configFile>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>de.thetaphi</groupId>
+				<artifactId>forbiddenapis</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<!-- if the used Java version is too new, don't fail, just do nothing: -->
+					<failOnUnsupportedJava>false</failOnUnsupportedJava>
+					<bundledSignatures>
+						<bundledSignature>jdk-unsafe</bundledSignature>
+						<bundledSignature>jdk-deprecated</bundledSignature>
+						<bundledSignature>jdk-non-portable</bundledSignature>
+					</bundledSignatures>
+					<signaturesFiles>
+						<signaturesFile>src/test/resources/forbidden-apis-signatures.txt</signaturesFile>
+					</signaturesFiles>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+							<goal>testCheck</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>${maven.download.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>download-public-suffix-list.dat</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://publicsuffix.org/list/effective_tld_names.dat</url>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<failOnError>true</failOnError>
+							<overwrite>false</overwrite>
+							<skipCache>${skip.download.cache}</skipCache>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<configuration>
+					<links>
+						<link>https://docs.oracle.com/javase/8/docs/api/</link>
+					</links>
+					<source>${javac.src.version}</source>
+					<additionalJOptions>
+						<additionalJOption>${additionalJavadocOpts}</additionalJOption>
+					</additionalJOptions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<properties>
+				<skip.download.cache>true</skip.download.cache>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven-source-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+								<configuration>
+									<archive>
+										<manifest>
+											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+										</manifest>
+										<manifestEntries>
+											<Implementation-Build>${implementation.build}</Implementation-Build>
+											<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+											<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+											<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+										</manifestEntries>
+									</archive>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven-javadoc-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<quiet>true</quiet>
+									<additionalJOption>${additionalJavadocOpts}</additionalJOption>
+									<archive>
+										<manifest>
+											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+											<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+										</manifest>
+										<manifestEntries>
+											<Implementation-Build>${implementation.build}</Implementation-Build>
+											<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+											<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+											<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+										</manifestEntries>
+									</archive>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.ju-n.maven.plugins</groupId>
+						<artifactId>checksum-maven-plugin</artifactId>
+						<version>${checksum-maven-plugin.version}</version>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>javadoc-no-module-directories</id>
+			<activation>
+				<jdk>[11,12)</jdk>
+			</activation>
+			<properties>
+				<additionalJavadocOpts>--no-module-directories</additionalJavadocOpts>
+			</properties>
+		</profile>
+	</profiles>
+
+	<properties>
+		<!-- Dependencies -->
+
+		<commons-io.version>2.13.0</commons-io.version>
+		<slf4j-api.version>2.0.7</slf4j-api.version>
+		<junit.version>5.9.3</junit.version>
+		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
+
+		<!-- Maven Plugin Dependencies -->
+		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
+		<maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+		<maven-surfire-plugin.version>3.1.2</maven-surfire-plugin.version>
+		<maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
+		<maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+		<apache-rat-plugin.version>0.8</apache-rat-plugin.version>
+		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
+		<maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+		<checksum-maven-plugin.version>1.4</checksum-maven-plugin.version>
+		<maven.download.plugin.version>1.7.0</maven.download.plugin.version>
+
+		<!-- General Properties -->
+		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
+		<javac.src.version>1.11</javac.src.version>
+		<javac.target.version>1.11</javac.target.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>11</maven.compiler.release>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
+		<skipTests>false</skipTests>
+		<skip.download.cache>false</skip.download.cache>
+		<assembly.finalName>${project.build.finalName}</assembly.finalName>
+	</properties>
+
+	<dependencies>
+
+		<!-- Compile time dependencies -->
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+		</dependency>
+
+		<!-- Test dependencies -->
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j-log4j12.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>
