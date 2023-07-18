@@ -16,6 +16,7 @@ These components benefit from collaboration among various existing web crawler p
 # User Documentation
 
 ## Javadocs
+* [1.4](https://crawler-commons.github.io/crawler-commons/1.4/)
 * [1.3](https://crawler-commons.github.io/crawler-commons/1.3/)
 * [1.2](https://crawler-commons.github.io/crawler-commons/1.2/)
 * [1.1](https://crawler-commons.github.io/crawler-commons/1.1/)
@@ -37,18 +38,29 @@ Using Maven, add the following dependency to your pom.xml:
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
     <artifactId>crawler-commons</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
 </dependency>
 ~~~
 
 Using Gradle, add the folling to your build file:
 ```groovy
 dependencies {
-    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.3'
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4'
 }
 ```
 
 # News
+
+## 18th July 2022  - crawler-commons 1.4 released
+
+We are pleased to announce the 1.4 release of Crawler-Commons.
+
+The new release includes many improvements and bug fixes, several dependency upgrades and improvements to the automatic build system. The following are the most notable improvements and changes:
+- Java 11 is now required to run or build crawler-commons
+- the robots.txt parser (SimpleRobotRulesParser) is now compliant with [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html) and provides a new [API entry point](https://crawler-commons.github.io/crawler-commons/1.4/crawlercommons/robots/SimpleRobotRulesParser.html#parseContent(java.lang.String,byte%5B%5D,java.lang.String,java.util.Collection)) accepting a collection of single-word user-agent product tokens which allows for faster and RFC-compliant matching of robots.txt user-agent lines.
+
+See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.4/CHANGES.txt) file included with the release for the detailed list of changes.
+
 
 ## 28th July 2022  - crawler-commons 1.3 released
 
