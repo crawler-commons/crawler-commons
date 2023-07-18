@@ -51,13 +51,13 @@ dependencies {
 
 # News
 
-## 18th July 2022  - crawler-commons 1.4 released
+## 18th July 2023  - crawler-commons 1.4 released
 
 We are pleased to announce the 1.4 release of Crawler-Commons.
 
 The new release includes many improvements and bug fixes, several dependency upgrades and improvements to the automatic build system. The following are the most notable improvements and changes:
 - Java 11 is now required to run or build crawler-commons
-- the robots.txt parser (SimpleRobotRulesParser) is now compliant with [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html) and provides a new [API entry point](https://crawler-commons.github.io/crawler-commons/1.4/crawlercommons/robots/SimpleRobotRulesParser.html#parseContent(java.lang.String,byte%5B%5D,java.lang.String,java.util.Collection)) accepting a collection of single-word user-agent product tokens which allows for faster and RFC-compliant matching of robots.txt user-agent lines.
+- the robots.txt parser (SimpleRobotRulesParser) is now compliant with [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html) and provides a new [API entry point](https://crawler-commons.github.io/crawler-commons/1.4/crawlercommons/robots/SimpleRobotRulesParser.html#parseContent(java.lang.String,byte%5B%5D,java.lang.String,java.util.Collection)) accepting a collection of single-word user-agent product tokens which allows for faster and RFC-compliant matching of robots.txt user-agent lines. Please note that user-agent product tokens must be lower-case.
 
 See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.4/CHANGES.txt) file included with the release for the detailed list of changes.
 
