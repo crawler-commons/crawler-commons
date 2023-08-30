@@ -138,7 +138,7 @@ We suggest all users to upgrade to this version. The Crawler Commons project art
 
 ## 11th April 2014 - crawler-commons 0.4 is released
 
-We are glad to announce the 0.4 release of Crawler Commons. Amongst other improvements, this release includes support for Googlebot-compatible regular expressions in URL specifications, further imprvements to robots.txt parsing and an upgrade of httpclient to v4.2.6\.
+We are glad to announce the 0.4 release of Crawler Commons. Amongst other improvements, this release includes support for Googlebot-compatible regular expressions in URL specifications, further improvements to robots.txt parsing and an upgrade of httpclient to v4.2.6\.
 
 See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/master/CHANGES.txt) file included with the release for a full list of details.
 
