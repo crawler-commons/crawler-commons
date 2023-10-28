@@ -44,5 +44,11 @@ public enum Extension {
      * URL as having mobile content</cite>, cf.
      * http://www.google.com/schemas/sitemap-mobile/1.0
      */
-    MOBILE
+    MOBILE,
+    /**
+     * <cite>PageMaps is a structured data format that Google created to enable
+     * website creators to embed data and notes in their webpages.</cite>, cf.
+     * https://support.google.com/programmable-search/answer/1628213
+     */
+    PAGEMAPS
 }

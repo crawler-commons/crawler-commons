@@ -72,6 +72,8 @@ public class Namespace {
 
     public static final String LINKS = "http://www.w3.org/1999/xhtml";
 
+    public static final String PAGEMAPS = "http://www.google.com/schemas/sitemap-pagemap/1.0";
+
     /**
      * In contradiction to the protocol specification ("The Sitemap must ...
      * [s]pecify the namespace (protocol standard) within the &lt;urlset&gt;
@@ -101,6 +103,7 @@ public class Namespace {
         SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(VIDEO));
         SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(NEWS));
         SITEMAP_SUPPORTED_NAMESPACES.add(LINKS);
+        SITEMAP_SUPPORTED_NAMESPACES.add(PAGEMAPS);
     }
 
     /**
@@ -120,5 +123,6 @@ public class Namespace {
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.VIDEO, Arrays.asList(VIDEO));
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.MOBILE, Arrays.asList(MOBILE));
         SITEMAP_EXTENSION_NAMESPACES.put(Extension.LINKS, Arrays.asList(LINKS));
+        SITEMAP_EXTENSION_NAMESPACES.put(Extension.PAGEMAPS, Arrays.asList(PAGEMAPS));
     }
 }
