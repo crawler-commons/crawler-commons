@@ -412,7 +412,7 @@ public class SiteMapParser {
      */
     public void walkSiteMap(URL onlineSitemapUrl, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
         if (onlineSitemapUrl == null || action == null) {
-            LOG.debug("Got null sitemap URL and/or action, stopping traversal");
+            LOG.info("Got null sitemap URL and/or action, stopping traversal");
             return;
         }
         walkSiteMap(parseSiteMap(onlineSitemapUrl), action);
@@ -441,7 +441,7 @@ public class SiteMapParser {
      */
     public void walkSiteMap(AbstractSiteMap sitemap, Consumer<SiteMapURL> action) throws UnknownFormatException, IOException {
         if (sitemap == null || action == null) {
-            LOG.debug("Got null sitemap and/or action, stopping traversal");
+            LOG.info("Got null sitemap and/or action, stopping traversal");
             return;
         }
         if (sitemap.isIndex()) {
@@ -530,7 +530,7 @@ public class SiteMapParser {
             }
             String urlFiltered = urlFilter.apply(line);
             if (urlFiltered == null) {
-                LOG.debug("Filtered url: [{}]", line.substring(0, Math.min(1024, line.length())));
+                LOG.info("Filtered url: [{}]", line.substring(0, Math.min(1024, line.length())));
                 continue;
             }
             try {
@@ -541,10 +541,10 @@ public class SiteMapParser {
                     textSiteMap.addSiteMapUrl(sUrl);
                     LOG.debug("  {}. {}", i, sUrl);
                 } else {
-                    LOG.debug("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
+                    LOG.info("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
                 }
             } catch (MalformedURLException e) {
-                LOG.debug("Bad url: [{}]", line.substring(0, Math.min(1024, line.length())));
+                LOG.warn("Bad url: [{}]", line.substring(0, Math.min(1024, line.length())));
             }
         }
         textSiteMap.setProcessed(true);
@@ -654,7 +654,7 @@ public class SiteMapParser {
             LOG.warn("Error parsing sitemap {}: {}", sitemapUrl, e.getMessage());
             AbstractSiteMap sitemap = handler.getSiteMap();
             if (allowPartial && sitemap != null) {
-                LOG.warn("Processed broken/partial sitemap for '" + sitemapUrl + "'");
+                LOG.warn("Processed broken/partial sitemap for '{}'", sitemapUrl);
                 sitemap.setProcessed(true);
                 return sitemap;
             } else {
