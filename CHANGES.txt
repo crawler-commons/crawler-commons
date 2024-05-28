@@ -1,10 +1,11 @@
 Crawler-Commons Change Log
 
 Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Improve logging done by SiteMapParser (Valery Yatsynovich, sebastian-nagel) #457
 - [Sitemaps] Google Sitemap PageMap extensions (josepowera, sebastian-nagel, Richard Zowalla, jnioche) #388, #442
 - [Domains] Installation of a gzip-compressed public suffix list from Maven cache breaks EffectiveTldFinder to address (sebastian-nagel, Richard Zowalla) #441, #443
-- Upgrade dependencies (dependabot) #437, #444
-- Upgrade Maven plugins (dependabot) #434, #438, #439
+- Upgrade dependencies (dependabot) #437, #444, #448, #451
+- Upgrade Maven plugins (dependabot) #434, #438, #439, #449, #445, #452, #455
 
 Release 1.4 (2023-07-13)
 - [Robots.txt] Implement Robots Exclusion Protocol (REP) IETF Draft: port unit tests (sebastian-nagel, Richard Zowalla) #245, #360
