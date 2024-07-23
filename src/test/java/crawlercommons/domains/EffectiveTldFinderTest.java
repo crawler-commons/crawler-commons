@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Crawler-Commons
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,7 +52,7 @@ public class EffectiveTldFinderTest {
         EffectiveTLD etld = null;
         etld = EffectiveTldFinder.getEffectiveTLD("blogs.yahoo.co.jp");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         assertEquals("co.jp", etld.getDomain());
     }
 
@@ -61,23 +61,29 @@ public class EffectiveTldFinderTest {
         EffectiveTLD etld = null;
         etld = EffectiveTldFinder.getEffectiveTLD("uk");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         etld = EffectiveTldFinder.getEffectiveTLD("bbc.co.uk");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         assertEquals("co.uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("www.bbc.co.uk");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         assertEquals("co.uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("anything.uk");
         assertEquals("uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("northleamingtonschool.warwickshire.sch.uk");
         assertEquals("warwickshire.sch.uk", etld.getDomain());
-        assertFalse(etld.isWild());
+        assertTrue(etld.isWildcard());
+        assertEquals("*.sch.uk", etld.getSuffix());
         etld = EffectiveTldFinder.getEffectiveTLD("sch.uk");
         assertEquals("sch.uk", etld.getDomain());
-        assertTrue(etld.isWild());
+        assertTrue(etld.isWildcard());
+        assertEquals("*.sch.uk", etld.getSuffix());
+        etld = EffectiveTldFinder.getEffectiveTLD("abc.def.bd");
+        assertEquals("def.bd", etld.getDomain());
+        assertTrue(etld.isWildcard());
+        assertEquals("*.bd", etld.getSuffix());
     }
 
     @Test
@@ -85,23 +91,24 @@ public class EffectiveTldFinderTest {
         EffectiveTLD etld = null;
         etld = EffectiveTldFinder.getEffectiveTLD("parliament.uk");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         // should be parliament.uk
         assertEquals("uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("www.parliament.uk");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         // should be parliament.uk
         assertEquals("uk", etld.getDomain());
         etld = EffectiveTldFinder.getEffectiveTLD("hokkaido.jp");
         assertFalse(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         assertEquals("hokkaido.jp", etld.getDomain());
         // test a Japanese city
         etld = EffectiveTldFinder.getEffectiveTLD("www.city.kawasaki.jp");
         assertTrue(etld.isException());
-        assertFalse(etld.isWild());
+        assertFalse(etld.isWildcard());
         assertEquals("city.kawasaki.jp", etld.getDomain());
+        assertEquals("!city.kawasaki.jp", etld.getSuffix());
         assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("www.city.kawasaki.jp"));
         assertEquals(".kawasaki.jp", EffectiveTldFinder.getAssignedDomain(".kawasaki.jp"));
         assertNull(EffectiveTldFinder.getAssignedDomain(".kawasaki.jp", true));
@@ -183,11 +190,36 @@ public class EffectiveTldFinderTest {
         assertEquals("бесплатныеобъявления.рф", ad);
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", true);
         assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", ad);
-        // rare but possible mixed use of UTF-8 and Punycode
+        // rare but possible mixed use of Unicode and ASCII/Punycode
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.бесплатныеобъявления.рф", true);
         assertEquals("бесплатныеобъявления.рф", ad);
         ad = EffectiveTldFinder.getAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.рф", true);
         assertEquals("xn--80abbembcyvesfij3at4loa4ff.рф", ad);
+    }
+
+    @Test
+    public final void testIDNEtld() throws Exception {
+        EffectiveTLD etld = null;
+        etld = EffectiveTldFinder.getEffectiveTLD("спб.бесплатныеобъявления.рф", true);
+        assertEquals("рф", etld.getDomain());
+        assertEquals("рф", etld.getUnicodeDomain());
+        etld = EffectiveTldFinder.getEffectiveTLD("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", true);
+        assertEquals("xn--p1ai", etld.getDomain());
+        assertEquals("рф", etld.getUnicodeDomain());
+        // rare but possible mixed use of Unicode and ASCII/Punycode
+        etld = EffectiveTldFinder.getEffectiveTLD("xn--90a1af.бесплатныеобъявления.рф", true);
+        assertEquals("рф", etld.getDomain());
+        assertEquals("рф", etld.getUnicodeDomain());
+        etld = EffectiveTldFinder.getEffectiveTLD("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.рф", true);
+        assertEquals("рф", etld.getDomain());
+        assertEquals("рф", etld.getUnicodeDomain());
+
+        etld = EffectiveTldFinder.getEffectiveTLD("中国政府网.政务", true);
+        assertEquals("政务", etld.getDomain());
+        assertEquals("政务", etld.getUnicodeDomain());
+        etld = EffectiveTldFinder.getEffectiveTLD("xn--fiqs8sirgfmhq98a.xn--zfr164b", true);
+        assertEquals("xn--zfr164b", etld.getDomain());
+        assertEquals("政务", etld.getUnicodeDomain());
     }
 
     @Test
