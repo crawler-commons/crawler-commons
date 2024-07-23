@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Crawler-Commons
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * class implements the
  * <a href="https://publicsuffix.org/list/">publicsuffix.org ruleset</a> and
  * uses a copy of the public suffix list.
- * 
+ *
  * For more information, see
  * <ul>
  * <li><a href="https://www.publicsuffix.org/">publicsuffix.org</a></li>
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * Service</a>: for historic reasons the class name stems from the term
  * &quot;effective top-level domain&quot; (eTLD)</li>
  * </ul>
- * 
+ *
  * EffectiveTldFinder loads the public suffix list as file
  * "effective_tld_names.dat" from the Java classpath. Make sure your classpath
  * does not contain any other file with the same name, eg. an outdated list
@@ -75,9 +75,9 @@ import org.slf4j.LoggerFactory;
  * >https://raw.githubusercontent.com/publicsuffix/list/master/
  * public_suffix_list.dat</a></li>
  * </ul>
- * 
+ *
  * <h2>ICANN vs. Private Domains</h2>
- * 
+ *
  * The <a href="https://publicsuffix.org/list/">public suffix list (see section
  * &quot;divisions&quot;)</a> is subdivided into &quot;ICANN&quot; and
  * &quot;PRIVATE&quot; domains. To restrict the EffectiveTldFinder to
@@ -87,7 +87,7 @@ import org.slf4j.LoggerFactory;
  * {@link EffectiveTldFinder#getEffectiveTLD(String, boolean)}. This will
  * exclude the eTLDs from the PRIVATE domain section of the public suffix list
  * while a domain or eTLD is matched.
- * 
+ *
  */
 public class EffectiveTldFinder {
     private static final Logger LOGGER = LoggerFactory.getLogger(EffectiveTldFinder.class);
@@ -104,7 +104,7 @@ public class EffectiveTldFinder {
      * (applies to domain names as well), cf.
      * https://tools.ietf.org/html/rfc1034#section-3.1 and
      * https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames
-     * 
+     *
      * Note: We only have to validate domain names and not the host names passed
      * as input. For domain names a verification of the segment length also
      * implies that the entire domain names stays in the limit of 253
@@ -134,7 +134,7 @@ public class EffectiveTldFinder {
 
     /**
      * Get singleton instance of EffectiveTldFinder with default configuration.
-     * 
+     *
      * @return singleton instance of EffectiveTldFinder
      */
     public static EffectiveTldFinder getInstance() {
@@ -146,7 +146,7 @@ public class EffectiveTldFinder {
 
     /**
      * (Re)initialize EffectiveTldFinder with custom public suffix list.
-     * 
+     *
      * @param effectiveTldDataStream
      *            content of public suffix list as input stream
      * @return true if (re)initialization was successful
@@ -194,7 +194,7 @@ public class EffectiveTldFinder {
     /**
      * Get EffectiveTLD for host name using the singleton instance of
      * EffectiveTldFinder.
-     * 
+     *
      * @param hostname
      *            the hostname for which to find the {@link EffectiveTLD}
      * @return the {@link EffectiveTLD}
@@ -206,7 +206,7 @@ public class EffectiveTldFinder {
     /**
      * Get EffectiveTLD for host name using the singleton instance of
      * EffectiveTldFinder.
-     * 
+     *
      * @param hostname
      *            the hostname for which to find the {@link EffectiveTLD}
      * @param excludePrivate
@@ -225,7 +225,7 @@ public class EffectiveTldFinder {
     /**
      * Find EffectiveTLD and offset in host name using the singleton instance of
      * EffectiveTldFinder.
-     * 
+     *
      * @param hostname
      *            the hostname for which to find the {@link EffectiveTLD}
      * @param excludePrivate
@@ -243,11 +243,15 @@ public class EffectiveTldFinder {
                 if (excludePrivate && foundTld.isPrivate) {
                     continue;
                 }
-                if (offset == 0 || foundTld.isException() || !foundTld.isWild()) {
+                if (offset == 0 || foundTld.isException() || !foundTld.isWildcard()) {
+                    if (foundTld.idn != null) {
+                        foundTld = new EffectiveTLD(hostname.substring(offset), foundTld);
+                        return new SuffixTrie.LookupResult<EffectiveTLD>(offset, foundTld);
+                    }
                     return res;
                 }
 
-                // wildcards create an open ETLD namespace
+                // wildcard suffixes create an open ETLD namespace
                 int wildcardOffset = hostname.lastIndexOf(DOT, offset - 2);
                 String retryTld;
                 if (wildcardOffset == -1) {
@@ -259,7 +263,7 @@ public class EffectiveTldFinder {
                 }
 
                 try {
-                    foundTld = new EffectiveTLD(retryTld, foundTld.isPrivate);
+                    foundTld = new EffectiveTLD(retryTld, foundTld);
                 } catch (IllegalArgumentException e) {
                     // retryTld contains forbidden characters
                     return null;
@@ -274,7 +278,7 @@ public class EffectiveTldFinder {
     /**
      * This method uses the effective TLD to determine which component of a FQDN
      * is the NIC-assigned domain name (aka "Paid Level Domain").
-     * 
+     *
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
      * @return the NIC-assigned domain name or as fall-back the hostname if no
@@ -287,7 +291,7 @@ public class EffectiveTldFinder {
     /**
      * This method uses the effective TLD to determine which component of a FQDN
      * is the NIC-assigned domain name (aka "Paid Level Domain").
-     * 
+     *
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
      * @param strict
@@ -303,7 +307,7 @@ public class EffectiveTldFinder {
     /**
      * This method uses the effective TLD to determine which component of a FQDN
      * is the NIC-assigned domain name.
-     * 
+     *
      * @param hostname
      *            a string for which to obtain a NIC-assigned domain name
      * @param strict
@@ -382,7 +386,7 @@ public class EffectiveTldFinder {
         return sb.toString();
     }
 
-    public static void help() {
+    private static void help() {
         LOGGER.error("EffectiveTldFinder [-etld] [-strict] [-excludePrivate]");
         LOGGER.error("  get domains or public suffixes for host names");
         LOGGER.error("Options:");
@@ -448,22 +452,38 @@ public class EffectiveTldFinder {
      * <li>for IDN suffixes: both the ASCII and IDN variant
      * (<code>xn--p1ai</code> and <code>рф</code>)</li>
      * <li>and the properties required to parse host/domain names given in the
-     * public suffix list (wildcard suffix, exception, in private domain
-     * section)</li>
+     * public suffix list:
+     * <ul>
+     * <li>whether it's a wildcard suffix (<code>*.kawasaki.jp</code>),</li>
+     * <li>or an exception to a wildcard rule
+     * (<code>!city.kawasaki.jp</code>,</li>
+     * <li>or whether the suffix is in the private domain section</li>
      * </ul>
+     * </li>
+     * <li>for Internationalized Domain Names (IDNs) both the Unicode and ASCII
+     * representation</li>
+     * </ul>
+     *
+     * In addition, EffectiveTLD is used to hold the result of a public suffix
+     * match returned by
+     * {@link EffectiveTldFinder#getEffectiveTLD(String, boolean)}. A match
+     * result also includes the literally matched suffix which is distinct from
+     * the public suffix in case of wildcard suffixes or, eventually, for
+     * Internationalized Domain Names (IDNs).
      */
     public static class EffectiveTLD {
 
         private boolean exception = false;
-        private boolean wild = false;
+        private boolean wildcard = false;
         private boolean isPrivate = false;
         private String domain = null;
         private String idn = null;
+        private String suffix = null; // same as domain except for matched wildcard suffixes
 
         /**
          * Parse one non-empty, non-comment line in the public suffix list and
          * hold the public suffix and its properties in the created object.
-         * 
+         *
          * @param line
          *            non-empty, non-comment line in the public suffix list
          * @param isPrivateDomain
@@ -478,7 +498,7 @@ public class EffectiveTldFinder {
                 exception = true;
                 domain = line.substring(EXCEPTION.length(), line.length());
             } else if (line.startsWith(WILD_CARD)) {
-                wild = true;
+                wildcard = true;
                 domain = line.substring(WILD_CARD.length(), line.length());
             } else {
                 domain = line;
@@ -489,15 +509,33 @@ public class EffectiveTldFinder {
                 idn = domain;
                 domain = norm;
             }
+            suffix = domain;
             isPrivate = isPrivateDomain;
         }
 
         /**
-         * Normalize a domain name: convert characters into to lowercase and
-         * encode dot-separated segments containing non-ASCII characters. Cf.
+         * Constructor for a matched public suffix.
+         *
+         * @param representation
+         *            the matched public suffix part in the host or domain name
+         * @param from
+         *            the {@link EffectiveTLD} representing the public suffix
+         */
+        private EffectiveTLD(String representation, EffectiveTLD from) {
+            domain = representation;
+            suffix = from.domain;
+            wildcard = from.wildcard;
+            exception = from.exception;
+            isPrivate = from.isPrivate;
+            idn = from.idn;
+        }
+
+        /**
+         * Normalize a domain name: convert characters to lowercase and encode
+         * dot-separated segments containing non-ASCII characters. Cf.
          * {@link #asciiConvert(String)} and {@link IDN#toASCII(String)}
-         * 
-         * @param str
+         *
+         * @param name
          *            domain name segment
          * @return normalized domain name containing only ASCII characters
          * @throws IllegalArgumentException
@@ -516,7 +554,7 @@ public class EffectiveTldFinder {
          * Generate name variants caused by Internationalized Domain Names:
          * every IDN part of a eTLD can be replaced by its punycoded ASCII
          * variant. For two-part IDN eTLDs this will generate 4 variants.
-         * 
+         *
          * @return set of variant names
          */
         public Set<String> getNameVariants() {
@@ -558,7 +596,7 @@ public class EffectiveTldFinder {
         /**
          * Converts a single domain name segment (separated by dots) to ASCII if
          * it contains non-ASCII character, cf. {@link IDN#toASCII(String)}.
-         * 
+         *
          * @param str
          *            domain name segment
          * @return ASCII "Punycode" representation of the domain name segment
@@ -582,14 +620,63 @@ public class EffectiveTldFinder {
             return true;
         }
 
+        /**
+         * @return the public suffix (effective TLD) or for match results
+         *         returned by
+         *         {@link EffectiveTldFinder#getEffectiveTLD(String, boolean)}
+         *         the literally matched suffix which can be different from the
+         *         suffix string in the public suffix list in case of wildcard
+         *         or Unicode (IDN) suffixes.
+         * @see #getSuffix()
+         * @see #getUnicodeDomain()
+         */
         public String getDomain() {
             return domain;
         }
 
-        public boolean isWild() {
-            return wild;
+        /**
+         * @return the public suffix string from the public suffix list, for
+         *         Unicode suffixes the ASCII (Punycode) representation
+         */
+        public String getSuffix() {
+            if (wildcard) {
+                return "*." + suffix;
+            } else if (exception) {
+                return "!" + suffix;
+            }
+            return suffix;
         }
 
+        /**
+         * @return the Unicode version of a public suffix or <code>null</code>
+         *         if it's not an IDN suffix
+         */
+        public String getUnicodeDomain() {
+            return idn;
+        }
+
+        /**
+         * @return true if the public suffix (effective TLD) is a wildcard
+         *         suffix (e.g., <code>*.kawasaki.jp</code>)
+         * @deprecated since 1.6 - replaced by {@link #isWildcard()}
+         */
+        @Deprecated
+        public boolean isWild() {
+            return wildcard;
+        }
+
+        /**
+         * @return true if the public suffix (effective TLD) is a wildcard
+         *         suffix (e.g., <code>*.kawasaki.jp</code>)
+         */
+        public boolean isWildcard() {
+            return wildcard;
+        }
+
+        /**
+         * @return true if the public suffix (effective TLD) is an exception to
+         *         a wildcard suffix (e.g., <code>!city.kawasaki.jp</code>)
+         */
         public boolean isException() {
             return exception;
         }
@@ -598,7 +685,9 @@ public class EffectiveTldFinder {
         public String toString() {
             StringBuffer sb = new StringBuffer("[");
             sb.append("domain=").append(domain).append(",");
-            sb.append("wild=").append(wild).append(",");
+            sb.append("suffix=").append(getSuffix()).append(",");
+            sb.append("idn=").append(idn).append(",");
+            sb.append("wildcard=").append(wildcard).append(",");
             sb.append("exception=").append(exception).append(",");
             sb.append("private=").append(isPrivate).append("]");
             return sb.toString();
