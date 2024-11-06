@@ -272,13 +272,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>${maven-javadoc-plugin.version}</version>
 				<configuration>
-					<links>
-						<link>https://docs.oracle.com/javase/8/docs/api/</link>
-					</links>
 					<source>${javac.src.version}</source>
-					<additionalJOptions>
-						<additionalJOption>${additionalJavadocOpts}</additionalJOption>
-					</additionalJOptions>
 				</configuration>
 				<executions>
 					<execution>
@@ -339,7 +333,6 @@
 								</goals>
 								<configuration>
 									<quiet>true</quiet>
-									<additionalJOption>${additionalJavadocOpts}</additionalJOption>
 									<archive>
 										<manifest>
 											<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -377,15 +370,6 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
-		<profile>
-			<id>javadoc-no-module-directories</id>
-			<activation>
-				<jdk>[11,12)</jdk>
-			</activation>
-			<properties>
-				<additionalJavadocOpts>--no-module-directories</additionalJavadocOpts>
-			</properties>
 		</profile>
 	</profiles>
 
