@@ -22,16 +22,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.IDN;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Locale;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +106,7 @@ public class EffectiveTldFinder {
     public static final String EXCEPTION = "!";
     public static final String WILD_CARD = "*.";
     public static final char DOT = '.';
+    public static Pattern VERSION_PATTERN = Pattern.compile("^//\\s*(COMMIT|VERSION):\\s*(\\S+)");
 
     /**
      * Max. length in ASCII characters of a dot-separated segment in host names
@@ -156,9 +165,24 @@ public class EffectiveTldFinder {
         domainTrie = new SuffixTrie<>();
         boolean inPrivateDomainSection = false;
         try {
-            BufferedReader input = new BufferedReader(new InputStreamReader(effectiveTldDataStream, StandardCharsets.UTF_8));
+            int linesRead = 0, rulesRead = 0;
+            BoundedInputStream isCounting = BoundedInputStream.builder().setInputStream(effectiveTldDataStream).get();
+            InputStream is = isCounting;
+            List<MessageDigest> digests = new ArrayList<>();
+            try {
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                is = new DigestInputStream(is, md5);
+                digests.add(md5);
+                MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+                is = new DigestInputStream(is, sha512);
+                digests.add(sha512);
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.warn("Failed to initialize digesting input streams", e);
+            }
+            BufferedReader input = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String line = null;
             while (null != (line = input.readLine())) {
+                linesRead++;
                 if (line.trim().isEmpty()) {
                     continue;
                 } else if (line.startsWith(COMMENT)) {
@@ -166,17 +190,32 @@ public class EffectiveTldFinder {
                         inPrivateDomainSection = true;
                     } else if (line.contains("===END PRIVATE DOMAINS===")) {
                         inPrivateDomainSection = false;
+                    } else {
+                        Matcher m = VERSION_PATTERN.matcher(line);
+                        if (m.matches()) {
+                            LOGGER.info("Public suffix list {}: {}", m.group(1), m.group(2));
+                        }
                     }
                     continue;
-                } else {
-                    EffectiveTLD entry = new EffectiveTLD(line, inPrivateDomainSection);
-                    for (String var : entry.getNameVariants()) {
-                        domains.put(var, entry);
-                        domainTrie.put(var, entry);
-                    }
+                }
+                rulesRead++;
+                EffectiveTLD entry = new EffectiveTLD(line, inPrivateDomainSection);
+                for (String var : entry.getNameVariants()) {
+                    domains.put(var, entry);
+                    domainTrie.put(var, entry);
                 }
             }
             configured = true;
+
+            is.close();
+            long bytesRead = isCounting.getCount();
+            LOGGER.info("Successfully read public suffix list: {} bytes, {} lines, {} rules", bytesRead, linesRead, rulesRead);
+            for (MessageDigest digest : digests) {
+                byte[] d = digest.digest();
+                BigInteger bi = new BigInteger(1, d);
+                String hexDigest = String.format(Locale.ROOT, "%0" + (d.length << 1) + "X", bi);
+                LOGGER.info("Digest of public suffix list: {} = {}", digest.getAlgorithm(), hexDigest);
+            }
         } catch (IOException e) {
             LOGGER.error("EffectiveTldFinder configuration failed: ", e);
             configured = false;
