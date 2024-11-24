@@ -62,7 +62,8 @@ public class Namespace {
     public static final String[] NEWS = { //
                     "http://www.google.com/schemas/sitemap-news/0.9", //
                     "https://www.google.com/schemas/sitemap-news/0.9", //
-                    "http://www.google.com/schemas/sitemap-news/0.84" //
+                    "http://www.google.com/schemas/sitemap-news/0.84", //
+                    "https://www.google.com/schemas/sitemap-news/0.84" //
     };
 
     public static final String[] MOBILE = { //
@@ -70,9 +71,15 @@ public class Namespace {
                     "https://www.google.com/schemas/sitemap-mobile/1.0" //
     };
 
-    public static final String LINKS = "http://www.w3.org/1999/xhtml";
+    public static final String[] LINKS = {
+                    "http://www.w3.org/1999/xhtml",
+                    "https://www.w3.org/1999/xhtml"
+    };
 
-    public static final String PAGEMAPS = "http://www.google.com/schemas/sitemap-pagemap/1.0";
+    public static final String[] PAGEMAPS = {
+                    "http://www.google.com/schemas/sitemap-pagemap/1.0",
+                    "https://www.google.com/schemas/sitemap-pagemap/1.0"
+    };
 
     /**
      * In contradiction to the protocol specification ("The Sitemap must ...
@@ -102,8 +109,8 @@ public class Namespace {
         SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(IMAGE));
         SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(VIDEO));
         SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(NEWS));
-        SITEMAP_SUPPORTED_NAMESPACES.add(LINKS);
-        SITEMAP_SUPPORTED_NAMESPACES.add(PAGEMAPS);
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(LINKS));
+        SITEMAP_SUPPORTED_NAMESPACES.addAll(Arrays.asList(PAGEMAPS));
     }
 
     /**

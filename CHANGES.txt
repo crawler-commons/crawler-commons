@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Added https variants of namespaces (jnioche) #487
 - [Domains] Add version of public suffix list shipped with release packages enhancement (sebastian-nagel, Richard Zowalla) #433, #484
 - [Domains] Improve representation of public suffix match results by class EffectiveTLD (sebastian-nagel, Richard Zowalla) #478
 - Javadoc: fix links to Java core classes (sebastian-nagel, Richard Zowalla) #417, #483
