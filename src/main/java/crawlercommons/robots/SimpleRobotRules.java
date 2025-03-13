@@ -149,6 +149,14 @@ public class SimpleRobotRules extends BaseRobotRules {
         _rules.clear();
     }
 
+    /**
+     * Add an allow/disallow rule to the ruleset
+     * 
+     * @param prefix
+     *            path prefix or pattern
+     * @param allow
+     *            whether to allow the URLs matching the prefix or pattern
+     */
     public void addRule(String prefix, boolean allow) {
         // Convert old-style case of disallow: <nothing>
         // into new allow: <nothing>.
@@ -166,6 +174,24 @@ public class SimpleRobotRules extends BaseRobotRules {
         return this._rules;
     }
 
+    /**
+     * Check whether a URL is allowed to be fetched according to the robots
+     * rules.
+     * 
+     * Note that the URL must be properly <a
+     * href="https://en.wikipedia.org/wiki/URI_normalization">normalized</a>,
+     * otherwise the URL path may not be matched against the robots rules. In
+     * order to normalize the URL, {@link BasicURLNormalizer} can be used:
+     * 
+     * <pre>
+     * BasicURLNormalizer normalizer = new BasicURLNormalizer();
+     * String urlNormalized = normalizer.filter(urlNotNormalized);
+     * </pre>
+     * 
+     * @param url
+     *            URL string to be checked
+     * @return true if the URL is allowed
+     */
     @Override
     public boolean isAllowed(String url) {
         if (_mode == RobotRulesMode.ALLOW_NONE) {
