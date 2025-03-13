@@ -17,12 +17,19 @@
 package crawlercommons.robots;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import crawlercommons.filters.basic.BasicURLNormalizer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SimpleRobotRulesTest {
@@ -42,5 +49,23 @@ public class SimpleRobotRulesTest {
         SimpleRobotRules actualRules = (SimpleRobotRules) iis.readObject();
 
         assertTrue(expectedRules.equals(actualRules));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "https://www.example.com/foo/../disallowed/bar.html", //
+                    "https://www.example.com////disallowed/bar.html" })
+    public void testUrlsNotNormalized(String urlNotNormalized) throws MalformedURLException {
+        SimpleRobotRules rules = new SimpleRobotRules();
+        rules.addRule("/", true);
+        rules.addRule("/disallowed/", false);
+        // URL would be disallowed if normalized
+        assertTrue(rules.isAllowed(urlNotNormalized));
+        BasicURLNormalizer normalizer = new BasicURLNormalizer();
+        String urlNormalized = normalizer.filter(urlNotNormalized);
+        // URL disallowed if properly normalized
+        assertFalse(rules.isAllowed(urlNormalized));
+        // base URL (path = "/") is allowed
+        String baseURL = new URL(new URL(urlNormalized), "/").toString();
+        assertTrue(rules.isAllowed(baseURL));
     }
 }
