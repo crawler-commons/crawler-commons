@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Unit tests for BasicURLNormalizer. */
 public class BasicURLNormalizerTest {
@@ -52,6 +53,25 @@ public class BasicURLNormalizerTest {
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1", "http://foo.com/foo.php?a=1");
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf&a=1&b", "http://foo.com/foo.php?a=1&b");
         normalizeTest("http://foo.com/foo.php?phpsessid=2Aa3ASdfasfdadf", "http://foo.com/foo.php");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+                    // sort query parameters lexicographically
+                    "https://example.com/path/query.php?foo=bar&hello=world,", //
+                    "https://example.com/path/query.php?hello=world&foo=bar,https://example.com/path/query.php?foo=bar&hello=world", //
+                    // not a query param
+                    "https://example.com/path/show.php?article300,", //
+                    // not a query param, slash must remain
+                    "https://example.com/path/show.php?/category/3,", //
+                    // not a query param, slash and %2F have distinct semantics
+                    "https://example.com/?categoryA/categoryB/this_%2F_that," })
+    public void testQueryParameters(String url, String urlNorm) {
+        normalizer = new BasicURLNormalizer();
+        if (urlNorm == null) {
+            urlNorm = url;
+        }
+        normalizeTest(url, urlNorm);
     }
 
     @Test
