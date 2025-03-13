@@ -39,13 +39,24 @@ import org.slf4j.LoggerFactory;
 import crawlercommons.filters.URLFilter;
 
 /**
- * Code borrowed from Apache Nutch. Converts URLs to a normal form:
+ * Converts URLs to a
+ * <a href="https://en.wikipedia.org/wiki/URI_normalization">normal form</a>.
+ * 
  * <ul>
  * <li>remove dot segments in path: <code>/./</code> or <code>/../</code></li>
  * <li>remove default ports, e.g. 80 for protocol <code>http://</code></li>
  * <li>normalize <a href=
  * "https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_in_a_URI">
  * percent-encoding</a> in URL paths</li>
+ * <li>sort URL query parameters</li>
+ * <li>optionally:
+ * <ul>
+ * <li>remove a configured set of URL query parameters, see
+ * {@link Builder#queryParamsToRemove}
+ * <li>normalize internationalized domain names (IDNs), see
+ * {@link Builder#idnNormalization(IdnNormalization)}</li>
+ * </ul>
+ * </li>
  * </ul>
  */
 public class BasicURLNormalizer extends URLFilter {
@@ -58,7 +69,7 @@ public class BasicURLNormalizer extends URLFilter {
     private final static Pattern hasNormalizablePathPattern = Pattern.compile("/[./]|[.]/");
 
     /**
-     * Nutch 1098 - finds URL encoded parts of the URL
+     * find URL encoded parts of the URL
      */
     private final static Pattern unescapeRulePattern = Pattern.compile("%([0-9A-Fa-f]{2})");
 
@@ -673,8 +684,10 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         /**
-         * Configures whether internationalized domain names (IDNs) should be
-         * converted to ASCII/Punycode or Unicode.
+         * Configures whether <a href=
+         * "https://en.wikipedia.org/wiki/Internationalized_domain_name">internationalized
+         * domain names (IDNs)</a> should be converted to ASCII/Punycode or
+         * Unicode.
          *
          * @param idnNormalization
          * @return this builder
