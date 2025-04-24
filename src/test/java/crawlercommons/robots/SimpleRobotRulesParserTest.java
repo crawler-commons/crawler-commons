@@ -1383,6 +1383,24 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("https://www.example.com/"));
     }
 
+    @Test
+    void testAPIsanitizeUserAgentList() throws Exception {
+        byte[] robotstxt = readFile("/robots/rfc9309-example-simple-robots.txt");
+
+        // verify that an exception is thrown if the provided user-agent tokens
+        // include a invalid elements
+        assertThrows(IllegalArgumentException.class, () -> createRobotRules(Set.of("FOOBOT"), robotstxt, true));
+        assertThrows(IllegalArgumentException.class, () -> createRobotRules(Set.of("*"), robotstxt, true));
+
+        Collection<String> robotNames = SimpleRobotRulesParser.sanitizeRobotNames(Set.of("FOOBOT", "*"));
+        BaseRobotRules rules = createRobotRules(robotNames, robotstxt, true);
+        assertEquals(3, ((SimpleRobotRules) rules).getRobotRules().size());
+        assertTrue(rules.isAllowed("https://example.org/example/page.html"));
+        assertTrue(rules.isAllowed("https://example.org/example/allowed.gif"));
+        assertFalse(rules.isAllowed("https://example.org/"));
+        assertFalse(rules.isAllowed("https://example.org/path/index.html"));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);
