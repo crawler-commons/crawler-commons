@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -610,6 +611,37 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     }
 
     /**
+     * Sanitize user-agent names for exact user-agent matching according to RFC
+     * 9309 (see {@link #setExactUserAgentMatching(boolean)}) to be used in
+     * {@link #parseContent(String, byte[], String, Collection)}.
+     * 
+     * @param robotNames
+     *            crawler (user-agent) name(s)
+     * @return the sanitized collection
+     * @see #userAgentProductTokenPartialMatch(String, Collection)
+     */
+    public static Collection<String> sanitizeRobotNames(Collection<String> robotNames) {
+        boolean needsReplacement = false;
+        for (String robotName: robotNames) {
+            if (!isValidUserAgentToObey(robotName)) {
+                LOGGER.warn("User-agent product token sanitization: '{}' is not a valid user-agent token following RFC 9309, matching the user-agent may fail", robotName);
+            }
+            if (robotName.chars().anyMatch(c -> c >= 'A' && c <= 'Z')) {
+                LOGGER.warn("User-agent product token sanitization: lower-casing {}", robotName);
+                needsReplacement = true;
+            }
+            if (robotName.equals("*")) {
+                LOGGER.warn("User-agent product token sanitization: removing wildcard user-agent");
+                needsReplacement = true;
+            }
+        }
+        if (needsReplacement) {
+            return robotNames.stream().filter(n -> !n.equals("*")).map(n -> n.toLowerCase(Locale.ROOT)).collect(Collectors.toSet());
+        }
+        return robotNames;
+    }
+
+    /**
      * Parse the robots.txt file in <i>content</i>, and return rules appropriate
      * for processing paths by <i>userAgent</i>.
      * 
@@ -641,11 +673,30 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            lower-case for matching. If the collection is empty, the rules
      *            for the wildcard user-agent (<code>*</code>) are selected. The
      *            wildcard user-agent name should not be contained in
-     *            <i>robotNames</i>.
+     *            <i>robotNames</i>. See {@link #sanitizeRobotNames(Collection)}
+     *            how to sanitize the collection of user-agent names beforehand.
      * @return robot rules.
+     * @throws IllegalArgumentException
+     *             if the parameter {@code robotNames} contains the wildcard
+     *             user-agent or a user-agent token not in lower-case and exact
+     *             user-agent matching is configured
+     *             ({@link #setExactUserAgentMatching(boolean)})
      */
     @Override
     public SimpleRobotRules parseContent(String url, byte[] content, String contentType, Collection<String> robotNames) {
+        if (isExactUserAgentMatching()) {
+            for (String robotName : robotNames) {
+                if (!isValidUserAgentToObey(robotName)) {
+                    LOGGER.warn("User-agent product token sanitization: '{}' is not a valid user-agent token following RFC 9309", robotName);
+                }
+                if (robotName.chars().anyMatch(c -> c >= 'A' && c <= 'Z')) {
+                    throw new IllegalArgumentException("Parameter 'robotNames': user-agent tokens must be lower-case");
+                }
+                if (robotName.equals("*")) {
+                    throw new IllegalArgumentException("Parameter 'robotNames': the wildcard user-agent ('*') should not be included");
+                }
+            }
+        }
         return parseContent(url, content, contentType, robotNames, isExactUserAgentMatching());
     }
 
@@ -703,14 +754,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         boolean hasHTML = false;
         if (isHtmlType || SIMPLE_HTML_PATTERN.matcher(contentAsStr).find()) {
             if (!USER_AGENT_PATTERN.matcher(contentAsStr).find()) {
-                LOGGER.trace("Found non-robots.txt HTML file: " + url);
+                LOGGER.trace("Found non-robots.txt HTML file: {}", url);
                 return new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
             } else {
                 // We'll try to strip out HTML tags below.
                 if (isHtmlType) {
-                    LOGGER.debug("HTML content type returned for robots.txt file: " + url);
+                    LOGGER.debug("HTML content type returned for robots.txt file: {}", url);
                 } else {
-                    LOGGER.debug("Found HTML in robots.txt file: " + url);
+                    LOGGER.debug("Found HTML in robots.txt file: {}", url);
                 }
 
                 hasHTML = true;
@@ -821,7 +872,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         }
     }
 
-    /*
+    /**
      * Check whether user-agent line starts with a valid user-agent product
      * token, but continues with additional characters to be ignored e.g. "foo"
      * matches "User-agent: foo/1.2" or "butterfly" matches
@@ -1200,6 +1251,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            if true, configure exact user-agent name matching. If false,
      *            disable exact matching and do prefix matching on user-agent
      *            words.
+     * @see #userAgentProductTokenPartialMatch(String, Collection)
      */
     public void setExactUserAgentMatching(boolean exactMatching) {
         _exactUserAgentMatching = exactMatching;
