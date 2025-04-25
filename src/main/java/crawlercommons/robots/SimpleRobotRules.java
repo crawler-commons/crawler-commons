@@ -198,49 +198,80 @@ public class SimpleRobotRules extends BaseRobotRules {
             return false;
         } else if (_mode == RobotRulesMode.ALLOW_ALL) {
             return true;
-        } else {
-            String pathWithQuery = getPath(url, true);
+        }
+        return isAllowedPath(getPath(url, true));
+    }
 
-            // Always allow robots.txt
-            if (pathWithQuery.equals("/robots.txt")) {
-                return true;
-            }
+    /**
+     * Check whether a URL is allowed to be fetched according to the robots
+     * rules.
+     * 
+     * @see #isAllowed(String)
+     * 
+     * @param url
+     *            URL to be checked
+     * @return true if the URL is allowed
+     */
+    @Override
+    public boolean isAllowed(URL url) {
+        if (_mode == RobotRulesMode.ALLOW_NONE) {
+            return false;
+        } else if (_mode == RobotRulesMode.ALLOW_ALL) {
+            return true;
+        }
+        return isAllowedPath(getPath(url, true));
+    }
 
-            boolean isAllowed = true;
-            int longestRuleMatch = Integer.MIN_VALUE;
-            for (RobotRule rule : _rules) {
-                int matchLength = ruleMatches(pathWithQuery, rule._prefix);
-                if (matchLength == -1) {
-                    // See precedence-of-rules test case for an example
-                    // Some webmasters expect behavior close to google's, and
-                    // this block is equivalent to:
-                    // https://github.com/google/robotstxt/blob/02bc6cdfa32db50d42563180c42aeb47042b4f0c/robots.cc#L605-L618
-                    // There are example robots.txt in the wild that benefit
-                    // from this.
-                    // As of 2/7/2022, https://venmo.com/robots.txt for
-                    // instance.
-                    if (rule._prefix.endsWith("index.htm") || rule._prefix.endsWith("index.html")) {
-                        matchLength = ruleMatches(pathWithQuery, rule._prefix.substring(0, rule._prefix.indexOf("index.htm")) + "$");
-                        if (matchLength == -1) {
-                            continue;
-                        }
-                    } else {
+    private boolean isAllowedPath(String pathWithQuery) {
+        // Always allow robots.txt
+        if (pathWithQuery.equals("/robots.txt")) {
+            return true;
+        }
+
+        boolean isAllowed = true;
+        int longestRuleMatch = Integer.MIN_VALUE;
+        for (RobotRule rule : _rules) {
+            int matchLength = ruleMatches(pathWithQuery, rule._prefix);
+            if (matchLength == -1) {
+                /*
+                 * See precedence-of-rules test case for an example
+                 * 
+                 * Some webmasters expect behavior close to Google's, and this
+                 * block is equivalent to:
+                 * https://github.com/google/robotstxt/blob/
+                 * 02bc6cdfa32db50d42563180c42aeb47042b4f0c/robots.cc#L605-L618
+                 * 
+                 * There are example robots.txt in the wild that benefit from
+                 * this. As of 2/7/2022, https://venmo.com/robots.txt for
+                 * instance.
+                 * 
+                 * RFC 9309
+                 * (https://www.rfc-editor.org/rfc/rfc9309.html#name-the-allow-
+                 * and-disallow-line) requires that "The most specific match
+                 * found MUST be used. The most specific match is the match that
+                 * has the most octets."
+                 */
+                if (rule._prefix.endsWith("index.htm") || rule._prefix.endsWith("index.html")) {
+                    matchLength = ruleMatches(pathWithQuery, rule._prefix.substring(0, rule._prefix.indexOf("index.htm")) + "$");
+                    if (matchLength == -1) {
                         continue;
                     }
+                } else {
+                    continue;
                 }
-
-                if (longestRuleMatch < matchLength) {
-                    longestRuleMatch = matchLength;
-                    isAllowed = rule.isAllow();
-                } else if (longestRuleMatch == matchLength) {
-                    isAllowed |= rule.isAllow();
-                }
-                // else we've already got a more specific rule, and this match
-                // doesn't matter
             }
 
-            return isAllowed;
+            if (longestRuleMatch < matchLength) {
+                longestRuleMatch = matchLength;
+                isAllowed = rule.isAllow();
+            } else if (longestRuleMatch == matchLength) {
+                isAllowed |= rule.isAllow();
+            }
+            // else we've already got a more specific rule, and this match
+            // doesn't matter
         }
+
+        return isAllowed;
     }
 
     /**
@@ -262,35 +293,39 @@ public class SimpleRobotRules extends BaseRobotRules {
     }
 
     private String getPath(String url, boolean getWithQuery) {
-
         try {
             URL urlObj = new URL(url);
-            String path = urlObj.getPath();
-            if ((path == null) || (path.equals(""))) {
-                path = "/";
-            }
 
-            String query = urlObj.getQuery();
-            if (getWithQuery && query != null) {
-                path += "?" + query;
-            }
-
-            /*
-             * We used to lower-case the path, but Google and RFC 9309 require
-             * case-sensitive matching.
-             * 
-             * However, we need to properly decode percent-encoded characters,
-             * but preserve those escaped characters which have special
-             * semantics in path matching, e.g. slash `/`. However, for the
-             * implementation of the path matching requires that asterisk `*`
-             * and dollar `$` are exceptionally percent-encoded.
-             */
-            return escapePath(path, specialCharactersPathMatching);
+            return getPath(urlObj, getWithQuery);
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
             // will fail, so return the root.
             return "/";
         }
+    }
+
+    private String getPath(URL url, boolean getWithQuery) {
+        String path = url.getPath();
+        if ((path == null) || (path.equals(""))) {
+            path = "/";
+        }
+
+        String query = url.getQuery();
+        if (getWithQuery && query != null) {
+            path += "?" + query;
+        }
+
+        /*
+         * We used to lower-case the path, but Google and RFC 9309 require
+         * case-sensitive matching.
+         * 
+         * However, we need to properly decode percent-encoded characters, but
+         * preserve those escaped characters which have special semantics in
+         * path matching, e.g. slash `/`. However, for the implementation of the
+         * path matching requires that asterisk `*` and dollar `$` are
+         * exceptionally percent-encoded.
+         */
+        return escapePath(path, specialCharactersPathMatching);
     }
 
     private int ruleMatches(String text, String pattern) {
