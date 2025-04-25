@@ -17,6 +17,7 @@
 package crawlercommons.robots;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +35,8 @@ public abstract class BaseRobotRules implements Serializable {
     public static final long UNSET_CRAWL_DELAY = Long.MIN_VALUE;
 
     public abstract boolean isAllowed(String url);
+
+    public abstract boolean isAllowed(URL url);
 
     public abstract boolean isAllowAll();
 
