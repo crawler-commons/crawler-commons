@@ -18,8 +18,6 @@ package crawlercommons.filters.basic;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import crawlercommons.utils.Strings;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -322,7 +320,7 @@ public class BasicURLNormalizer extends URLFilter {
 
         StringBuilder normalizedFile = new StringBuilder();
         String path = file.substring(0, endPathIdx);
-        if (!Strings.isBlank(path)) {
+        if (!path.isBlank()) {
             normalizedFile.append(path);
         }
 
