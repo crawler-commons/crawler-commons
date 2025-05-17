@@ -20,6 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Crawler-Commons is a set of reusable Java components that implement
+ * functionality common to web crawlers: robots.txt and sitemap parsing, or URL
+ * normalization.
+ */
 public class CrawlerCommons {
 
     public static String getVersion() {
