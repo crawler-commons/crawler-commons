@@ -21,6 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
+import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,6 +50,42 @@ public class SimpleRobotRulesTest {
         SimpleRobotRules actualRules = (SimpleRobotRules) iis.readObject();
 
         assertTrue(expectedRules.equals(actualRules));
+    }
+
+    @Test
+    public void testIsAllowed() throws MalformedURLException {
+        SimpleRobotRules rules = new SimpleRobotRules();
+        rules.addRule("/", true);
+        rules.addRule("/disallowed/", false);
+        rules.addRule("*?isallowed=false", false);
+        rules.sortRules();
+        URL url1 = new URL("https", "example.org", "index.html");
+        URL url2 = new URL("https", "example.org", "/disallowed/file.html");
+        URL url3 = new URL("https", "example.org", "");
+        URL url4 = new URL("https", "example.org", "?isallowed=false");
+        URL url5 = new URL("https", "example.org", "?isallowed=true");
+        URL url6 = new URL("https", "example.org", "/?isallowed=false");
+        assertTrue(rules.isAllowed(url1));
+        assertFalse(rules.isAllowed(url2));
+        assertTrue(rules.isAllowed(url3));
+        assertFalse(rules.isAllowed(url4));
+        assertTrue(rules.isAllowed(url5));
+        assertFalse(rules.isAllowed(url6));
+        assertTrue(rules.isAllowed(url1.toString()));
+        assertFalse(rules.isAllowed(url2.toString()));
+        assertTrue(rules.isAllowed(url3.toString()));
+        assertFalse(rules.isAllowed(url4.toString()));
+        assertTrue(rules.isAllowed(url5.toString()));
+        assertFalse(rules.isAllowed(url6.toString()));
+        // test rules mode "allow all" or "allow none"
+        rules = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
+        assertTrue(rules.isAllowAll());
+        assertTrue(rules.isAllowed(url4));
+        assertTrue(rules.isAllowed(url4.toString()));
+        rules = new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
+        assertTrue(rules.isAllowNone());
+        assertFalse(rules.isAllowed(url1));
+        assertFalse(rules.isAllowed(url1.toString()));
     }
 
     @ParameterizedTest
