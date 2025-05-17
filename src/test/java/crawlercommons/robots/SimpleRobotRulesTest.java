@@ -21,6 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
+import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,6 +77,15 @@ public class SimpleRobotRulesTest {
         assertFalse(rules.isAllowed(url4.toString()));
         assertTrue(rules.isAllowed(url5.toString()));
         assertFalse(rules.isAllowed(url6.toString()));
+        // test rules mode "allow all" or "allow none"
+        rules = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
+        assertTrue(rules.isAllowAll());
+        assertTrue(rules.isAllowed(url4));
+        assertTrue(rules.isAllowed(url4.toString()));
+        rules = new SimpleRobotRules(RobotRulesMode.ALLOW_NONE);
+        assertTrue(rules.isAllowNone());
+        assertFalse(rules.isAllowed(url1));
+        assertFalse(rules.isAllowed(url1.toString()));
     }
 
     @ParameterizedTest
