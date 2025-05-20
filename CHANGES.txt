@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
+- Remove class utils.Strings (sebastian-nagel, Richard Zowalla) #503
 - [BasicNormalizer] Complete normalization feature list of BasicURLNormalizer (sebastian-nagel, kkrugler) #494
 - [Robots] Document that URLs not properly normalized may not be matched by robots.txt parser (sebastian-nagel, kkrugler) #492, #493
 - [Sitemaps] Added https variants of namespaces (jnioche) #487
@@ -11,7 +12,8 @@ Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
 - [Sitemaps] Google Sitemap PageMap extensions (josepowera, sebastian-nagel, Richard Zowalla, jnioche) #388, #442
 - [Domains] Installation of a gzip-compressed public suffix list from Maven cache breaks EffectiveTldFinder to address (sebastian-nagel, Richard Zowalla) #441, #443
 - Upgrade dependencies (dependabot) #437, #444, #448, #451, #473, #465, #466, #468, #488, #491
-- Upgrade Maven plugins (dependabot) #434, #438, #439, #449, #445, #452, #455, #459, #460, #464, #469, #467, #470, #471, #472, #474, #475, #476, #477, #480, #481, #482, #489, #490
+- Upgrade Maven plugins (dependabot) #434, #438, #439, #449, #445, #452, #455, #459, #460, #464, #469, #467, #470, #471, #472, #474, #475, #476, #477, #480, #481, #482, #489, #490, #495, #496, #497, #498, #499
+- Upgrade GitHub workflow actions v2 -> v4 (sebastian-nagel, Richard Zowalla) #501
 
 Release 1.4 (2023-07-13)
 - [Robots.txt] Implement Robots Exclusion Protocol (REP) IETF Draft: port unit tests (sebastian-nagel, Richard Zowalla) #245, #360
