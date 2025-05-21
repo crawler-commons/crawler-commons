@@ -18,6 +18,8 @@ package crawlercommons.domains;
 
 import crawlercommons.domains.EffectiveTldFinder.EffectiveTLD;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,9 +79,9 @@ public class EffectiveTldFinderTest {
         assertTrue(etld.isWildcard());
         assertEquals("*.sch.uk", etld.getSuffix());
         etld = EffectiveTldFinder.getEffectiveTLD("sch.uk");
-        assertEquals("sch.uk", etld.getDomain());
-        assertTrue(etld.isWildcard());
-        assertEquals("*.sch.uk", etld.getSuffix());
+        assertEquals("uk", etld.getDomain());
+        assertFalse(etld.isWildcard());
+        assertEquals("uk", etld.getSuffix());
         etld = EffectiveTldFinder.getEffectiveTLD("abc.def.bd");
         assertEquals("def.bd", etld.getDomain());
         assertTrue(etld.isWildcard());
@@ -114,7 +116,7 @@ public class EffectiveTldFinderTest {
         assertNull(EffectiveTldFinder.getAssignedDomain(".kawasaki.jp", true));
         assertEquals("city.kawasaki.jp", EffectiveTldFinder.getAssignedDomain("city.kawasaki.jp", true));
         // a wildcard eTLD itself is not a valid domain
-        assertNull(EffectiveTldFinder.getAssignedDomain("kawasaki.jp", true));
+        assertNull(EffectiveTldFinder.getAssignedDomain("jp", true));
         // and also items below (matching *.kawasaki.jp) are not valid domains
         assertNull(EffectiveTldFinder.getAssignedDomain("nakahara.kawasaki.jp", true));
         // valid domains are two levels below a wildcard eTLD
@@ -281,5 +283,57 @@ public class EffectiveTldFinderTest {
         domain.setCharAt(4, '\u00e0'); // replace `1` by `à`
         domain.append(".com");
         assertNull(EffectiveTldFinder.getAssignedDomain(domain.toString(), true, false));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ //
+        // = eTLD expected to be equal to hostname
+        // * eTLD is wildcard public suffix
+        // . eTLD is a public suffix (not wildcard)
+        //   (empty / null, but not a public suffix)
+        // test wildcard suffixes
+        "=, foo.bar.uberspace.de", //
+        "*, bar.uberspace.de", //
+        "=, uberspace.de", //
+        "., de", //
+        "=, myspace.nyc3.digitaloceanspaces.com", //
+        "*, nyc3.digitaloceanspaces.com", //
+        "=, digitaloceanspaces.com", //
+        "., com", //
+        "=, foo.us-3.platformsh.site", //
+        "*, us-3.platformsh.site", //
+        "=, platformsh.site", //
+        "., site", //
+        // non-wildcard suffixes
+        "=, nt.global.ssl.fastly.net", //
+        "., global.ssl.fastly.net", //
+        "fastly.net, ssl.fastly.net", //
+        "=, fastly.net", //
+        "., net", //
+        // double-checking counter-examples with only a single domain under public suffix
+        "=, oneproject.vercel.app", //
+        "=, anotherproject.vercel.app", //
+        "oneproject.vercel.app, subdomain.oneproject.vercel.app", //
+        "., vercel.app", //
+        "., app", //
+        })
+    public final void testMatchAllSuffixes(String expectedDomain, String hostName) throws Exception {
+        String ad = EffectiveTldFinder.getAssignedDomain(hostName, true, false);
+        if (expectedDomain == null) {
+            assertNull(ad, "Expected null (not a valid domain name under public suffix)");
+        } else if ("=".equals(expectedDomain)) {
+            assertEquals(hostName, ad, "Domain under public suffix is expected to be same as host");
+        } else if (".".equals(expectedDomain)) {
+            assertNull(ad, "Host name is a public suffix");
+            EffectiveTLD etld = EffectiveTldFinder.getEffectiveTLD(hostName);
+            assertEquals(hostName, etld.getSuffix());
+        } else if ("*".equals(expectedDomain)) {
+            assertNull(ad, "Host name is a wildcard public suffix");
+            EffectiveTLD etld = EffectiveTldFinder.getEffectiveTLD(hostName);
+            assertTrue(etld.isWildcard());
+            assertEquals(hostName, etld.getDomain());
+        } else {
+            assertEquals(expectedDomain, ad, "Domain under public suffix does not match");
+        }
     }
 }

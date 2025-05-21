@@ -282,6 +282,13 @@ public class EffectiveTldFinder {
                 if (excludePrivate && foundTld.isPrivate) {
                     continue;
                 }
+                if (offset == 0 && foundTld.isWildcard()) {
+                    /*
+                     * a wildcard suffix cannot match at the beginning of the
+                     * string because the `*` must match one host name segment
+                     */
+                    continue;
+                }
                 if (offset == 0 || foundTld.isException() || !foundTld.isWildcard()) {
                     if (foundTld.idn != null) {
                         foundTld = new EffectiveTLD(hostname.substring(offset), foundTld);
