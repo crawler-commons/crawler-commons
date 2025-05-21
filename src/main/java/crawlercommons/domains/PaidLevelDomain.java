@@ -24,10 +24,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Routines to extract the PLD (paid-level domain, as per the IRLbot paper) from
- * a hostname or URL.
- * 
+ * a hostname or URL. This class uses the {@link EffectiveTldFinder} based on
+ * the <a href="https://publicsuffix.org/list/">public suffix list</a>.
  */
-
 public class PaidLevelDomain {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaidLevelDomain.class);
 
@@ -38,10 +37,9 @@ public class PaidLevelDomain {
      * isn't recognized, the original hostname is returned.
      * 
      * @param hostname
-     *            - hostname from URL, e.g. www.domain.com.it
-     * @return - PLD, e.g. domain.com.it
+     *            hostname from URL, e.g. <code>www.example.co.uk</code>
+     * @return PLD, e.g. <code>example.co.uk</code>
      */
-
     public static String getPLD(String hostname) {
         // First, check for weird [HHHH:HH::H] IPv6 format.
         if (hostname.startsWith("[") && hostname.endsWith("]")) {
@@ -67,11 +65,10 @@ public class PaidLevelDomain {
      * Extract the PLD (paid-level domain) from the URL.
      * 
      * @param url
-     *            - Valid URL, e.g. http://www.domain.com.it
-     * @return - PLD e.g. domain.com.it
+     *            valid URL, e.g. <code>https://www.example.co.uk/</code>
+     * @return PLD, e.g. <code>example.co.uk</code>
      */
-
     public static String getPLD(URL url) {
         return getPLD(url.getHost());
-    } // getPLD
+    }
 }

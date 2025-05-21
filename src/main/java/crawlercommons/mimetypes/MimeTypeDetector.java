@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Light-weight content type detector, supporting a restricted set of MIME types
+ * relevant to parsing sitemaps.
+ */
 public class MimeTypeDetector {
 
     private static String[] XML_MIMETYPES = new String[] { "application/xml", "application/x-xml", "text/xml", "application/atom+xml", "application/rss+xml", "text/rss", "application/rdf+xml" };
