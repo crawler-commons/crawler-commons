@@ -24,23 +24,32 @@ import java.util.Objects;
 
 /**
  * Data model for Google's extension to the sitemap protocol regarding news
- * indexing, as per <a
- * href="http://www.google.com/schemas/sitemap-news/0.9">http
+ * indexing, as per <a href=
+ * "http://www.google.com/schemas/sitemap-news/0.9">http
  * ://www.google.com/schemas/sitemap-news/0.9</a>.
  */
 @SuppressWarnings("serial")
 public class NewsAttributes extends ExtensionMetadata {
 
+    /** Name of the news publication in which the article appears. */
     public static final String NAME = "name";
+    /** Language of the news publication in which the article appears. */
     public static final String LANGUAGE = "language";
     public static final String GENRES = "genres";
     public static final String PUBLICATION_DATE = "publication_date";
+    /** Title of the news article. */
     public static final String TITLE = "title";
+    /** Accessibility of the news article. */
+    public static final String ACCESS = "access";
     public static final String KEYWORDS = "keywords";
     public static final String STOCK_TICKERS = "stock_tickers";
 
     public static enum NewsGenre {
         Blog, OpEd, Opinion, PressRelease, Satire, UserGenerated
+    }
+
+    public static enum AccessOption {
+        Subscription, Registration
     }
 
     /**
@@ -81,6 +90,9 @@ public class NewsAttributes extends ExtensionMetadata {
      */
     private String[] stockTickers;
 
+    /** Accessibility of the news article. */
+    private AccessOption access;
+
     public NewsAttributes() {
     }
 
@@ -91,6 +103,7 @@ public class NewsAttributes extends ExtensionMetadata {
         this.title = title;
     }
 
+    /** @return name of the news publication */
     public String getName() {
         return name;
     }
@@ -99,6 +112,7 @@ public class NewsAttributes extends ExtensionMetadata {
         this.name = name;
     }
 
+    /** @return language of the news publication */
     public String getLanguage() {
         return language;
     }
@@ -154,6 +168,14 @@ public class NewsAttributes extends ExtensionMetadata {
         this.stockTickers = stockTickers;
     }
 
+    public AccessOption getAccess() {
+        return access;
+    }
+
+    public void setAccess(String access) {
+        this.access = AccessOption.valueOf(access);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null || !(other instanceof NewsAttributes)) {
@@ -164,6 +186,7 @@ public class NewsAttributes extends ExtensionMetadata {
                         && Objects.equals(language, that.language) //
                         && Objects.equals(title, that.title) //
                         && Objects.equals(publicationDate, that.publicationDate) //
+                        && Objects.equals(access, that.access) //
                         && Objects.deepEquals(keywords, that.keywords) //
                         && Objects.deepEquals(genres, that.genres) //
                         && Objects.deepEquals(stockTickers, that.stockTickers);
@@ -195,7 +218,10 @@ public class NewsAttributes extends ExtensionMetadata {
             }
         }
         if (stockTickers != null) {
-            sb.append(", keywords: ").append(String.join(", ", stockTickers));
+            sb.append(", stock_tickers: ").append(String.join(", ", stockTickers));
+        }
+        if (access != null) {
+            sb.append(", access: ").append(access);
         }
         return sb.toString();
     }

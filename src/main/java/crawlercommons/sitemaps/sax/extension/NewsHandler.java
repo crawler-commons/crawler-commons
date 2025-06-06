@@ -76,11 +76,13 @@ public class NewsHandler extends ExtensionHandler {
         }
         if (value.isEmpty()) {
             // skip value but reset StringBuilder
-        } else if ("name".equals(localName)) {
-            currAttr.setName(value);
         } else if ("title".equals(localName)) {
             currAttr.setTitle(value);
+        } else if ("name".equals(localName)) {
+            // inside element "publication"
+            currAttr.setName(value);
         } else if ("language".equals(localName)) {
+            // inside element "publication"
             currAttr.setLanguage(value);
         } else if ("publication_date".equals(localName)) {
             currAttr.setPublicationDate(getDateValue(value));
@@ -103,6 +105,8 @@ public class NewsHandler extends ExtensionHandler {
                 stockTickers = Arrays.copyOfRange(stockTickers, 0, 5);
             }
             currAttr.setStockTickers(stockTickers);
+        } else if ("access".equals(localName)) {
+            currAttr.setAccess(value);
         }
         // reset StringBuilder
         currVal = new StringBuilder();

@@ -202,10 +202,13 @@ public class SiteMapParserExtensionTest {
         expectedNewsAttributes.setKeywords(new String[] { "business", "merger", "acquisition", "A", "B" });
         expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.PressRelease, NewsAttributes.NewsGenre.Blog });
         expectedNewsAttributes.setStockTickers(new String[] { "NASDAQ:A", "NASDAQ:B" });
+        expectedNewsAttributes.setAccess("Subscription");
         for (SiteMapURL su : sm.getSiteMapUrls()) {
             assertNotNull(su.getAttributesForExtension(Extension.NEWS));
             NewsAttributes attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
             assertEquals(expectedNewsAttributes, attr);
+            assertEquals("Subscription", attr.getAccess().toString());
+            assertEquals(expectedNewsAttributes.toString(), attr.toString());
         }
     }
 
