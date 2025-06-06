@@ -70,6 +70,11 @@ public class LinkAttributes extends ExtensionMetadata {
         this.href = href;
     }
 
+    @Override
+    public boolean isValid() {
+        return href != null;
+    }
+
     public Map<String, String> getParams() {
         return params;
     }
