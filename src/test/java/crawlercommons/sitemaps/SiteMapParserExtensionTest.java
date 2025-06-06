@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -108,6 +108,44 @@ public class SiteMapParserExtensionTest {
         attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
         assertEquals(expectedVideoAttributes, attr);
+    }
+
+    @Test
+    public void testVideosSitemapTVShow() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.enableExtension(Extension.VIDEO);
+
+        URL url = new URL("https://example.org/sitemap.xml");
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-videos-tvshow.xml", url);
+
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        Iterator<SiteMapURL> siter = sm.getSiteMapUrls().iterator();
+        ExtensionMetadata[] attrs = siter.next().getAttributesForExtension(Extension.VIDEO);
+        assertEquals(1, attrs.length);
+        VideoAttributes attr = (VideoAttributes) attrs[0];
+        assertNotNull(attr);
+
+        VideoAttributes expectedVideoAttributes = new VideoAttributes( //
+                        new URL("https://example.org/my-tv-show.jpg"), //
+                        "My TV Show! - Thu, Jun 05, 2025", //
+                        "Dummy description", null, null);
+        // expectedVideoAttributes.setDuration(2459.1); // 2459.1 isn't valid
+        ZonedDateTime dt = ZonedDateTime.parse("2025-06-13T09:00:00+00:00");
+        expectedVideoAttributes.setExpirationDate(dt);
+        dt = ZonedDateTime.parse("2025-06-06T09:00:00+00:00");
+        expectedVideoAttributes.setPublicationDate(dt);
+        expectedVideoAttributes.setTags(new String[] { "talkshow", "interview", "example" });
+        expectedVideoAttributes.setCategory("My TV Show!");
+        expectedVideoAttributes.setRequiresSubscription(true);
+
+        // not valid because content_loc and player_loc are missing
+        assertFalse(expectedVideoAttributes.isValid());
+        assertFalse(attr.isValid());
+        assertEquals(expectedVideoAttributes, attr);
+        assertEquals(expectedVideoAttributes.toString(), attr.toString());
     }
 
     @Test
@@ -202,10 +240,13 @@ public class SiteMapParserExtensionTest {
         expectedNewsAttributes.setKeywords(new String[] { "business", "merger", "acquisition", "A", "B" });
         expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.PressRelease, NewsAttributes.NewsGenre.Blog });
         expectedNewsAttributes.setStockTickers(new String[] { "NASDAQ:A", "NASDAQ:B" });
+        expectedNewsAttributes.setAccess("Subscription");
         for (SiteMapURL su : sm.getSiteMapUrls()) {
             assertNotNull(su.getAttributesForExtension(Extension.NEWS));
             NewsAttributes attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
             assertEquals(expectedNewsAttributes, attr);
+            assertEquals("Subscription", attr.getAccess().toString());
+            assertEquals(expectedNewsAttributes.toString(), attr.toString());
         }
     }
 
@@ -290,10 +331,8 @@ public class SiteMapParserExtensionTest {
         assertEquals(urlStr, sm.getUrl().toString());
         // System.out.println(sm.toString());
         for (SiteMapURL u : sm.getSiteMapUrls()) {
-            System.out.println(u.toString());
             for (Entry<Extension, ExtensionMetadata[]> x : u.getAttributes().entrySet()) {
                 assertEquals(Extension.PAGEMAPS, x.getKey());
-                System.out.println(x.getValue().getClass());
                 PageMap pageMap = (PageMap) x.getValue()[0];
                 List<PageMapDataObject> dataObjects = pageMap.getPageMapDataObjects();
                 PageMapDataObject dataObject;
@@ -319,8 +358,6 @@ public class SiteMapParserExtensionTest {
                     assertEquals("4.0", dataObject.getAttribute("review"));
                         break;
                 }
-                System.out.println(x.getKey() + ": " + Arrays.toString(x.getValue()));
-                System.out.println(x.getValue().length);
             }
         }
     }
