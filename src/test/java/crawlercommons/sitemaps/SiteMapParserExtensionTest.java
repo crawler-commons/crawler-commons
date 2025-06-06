@@ -331,10 +331,8 @@ public class SiteMapParserExtensionTest {
         assertEquals(urlStr, sm.getUrl().toString());
         // System.out.println(sm.toString());
         for (SiteMapURL u : sm.getSiteMapUrls()) {
-            System.out.println(u.toString());
             for (Entry<Extension, ExtensionMetadata[]> x : u.getAttributes().entrySet()) {
                 assertEquals(Extension.PAGEMAPS, x.getKey());
-                System.out.println(x.getValue().getClass());
                 PageMap pageMap = (PageMap) x.getValue()[0];
                 List<PageMapDataObject> dataObjects = pageMap.getPageMapDataObjects();
                 PageMapDataObject dataObject;
@@ -360,8 +358,6 @@ public class SiteMapParserExtensionTest {
                     assertEquals("4.0", dataObject.getAttribute("review"));
                         break;
                 }
-                System.out.println(x.getKey() + ": " + Arrays.toString(x.getValue()));
-                System.out.println(x.getValue().length);
             }
         }
     }
