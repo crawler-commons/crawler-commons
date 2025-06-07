@@ -16,7 +16,19 @@
 
 package crawlercommons.sitemaps.extension;
 
-/** Sitemap extensions supported by the parser. */
+/**
+ * Sitemap extensions supported by the parser.
+ * 
+ * See
+ * <ul>
+ * <li><a href=
+ * "https://en.wikipedia.org/wiki/Sitemaps#Additional_sitemap_types">Wikipedia:
+ * Additional sitemap types</a></li>
+ * <li><a href=
+ * "https://developers.google.com/search/docs/crawling-indexing/sitemaps/combine-sitemap-extensions"
+ * >How to combine sitemap extensions</a></li>
+ * </ul>
+ */
 public enum Extension {
     /**
      * Google News sitemaps, see

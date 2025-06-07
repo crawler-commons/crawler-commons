@@ -33,6 +33,15 @@ public abstract class ExtensionMetadata implements Serializable {
 
     public abstract Map<String, String[]> asMap();
 
+    /**
+     * Validate extension metadata.
+     * 
+     * Extensions should override this method in order to validate the
+     * extension-specific set of metadata attributes.
+     * 
+     * @return true if all required extension attributes are present and
+     *         attributes are valid.
+     */
     public boolean isValid() {
         return true;
     }

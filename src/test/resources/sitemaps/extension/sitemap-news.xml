@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
-  <!-- example from https://support.google.com/news/publisher-center/answer/74288 -->
+  <!--
+      example from https://support.google.com/news/publisher-center/answer/74288
+      updated link: https://developers.google.com/search/docs/crawling-indexing/sitemaps/news-sitemap
+  -->
   <url>
     <loc>http://www.example.org/business/article55.html</loc>
     <news:news>
@@ -14,6 +17,22 @@
       <news:title>Companies A, B in Merger Talks</news:title>
       <news:keywords>business, merger, acquisition, A, B</news:keywords>
       <news:stock_tickers>NASDAQ:A, NASDAQ:B</news:stock_tickers>
+    </news:news>
+  </url>
+  <url>
+    <!--
+        test for
+        - missing / empty news attributes
+        - access attribute (see sitemap-news schema)
+    -->
+    <loc>http://www.example.org/empty_news_name.html</loc>
+    <news:news>
+      <news:publication>
+        <news:name></news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-05-27</news:publication_date>
+      <news:title>Test empty news attributes</news:title>
     </news:news>
   </url>
 </urlset>
