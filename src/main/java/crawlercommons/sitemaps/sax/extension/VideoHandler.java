@@ -36,6 +36,8 @@ public class VideoHandler extends ExtensionHandler {
     private VideoAttributes currAttr;
     private StringBuilder currVal;
     private String relationAttr;
+    private Integer contentSegmentLocDuration;
+    private VideoAttributes.TVShow tvShow;
     private Map<String, String> priceAttr;
     private static String[] PRICE_ATTRIBUTES = { "currency", "type", "resolution" };
 
@@ -52,6 +54,15 @@ public class VideoHandler extends ExtensionHandler {
     private void resetCurrent() {
         currAttr = null;
         currVal = new StringBuilder();
+    }
+
+    private Integer validateDuration(String value) {
+        Integer duration = getIntegerValue(value);
+        if (duration != null && (duration < 0 || duration > 28800)) {
+            LOG.debug("Invalid value for specified duration: {}", duration);
+            return null;
+        }
+        return duration;
     }
 
     @Override
@@ -82,6 +93,10 @@ public class VideoHandler extends ExtensionHandler {
                     priceAttr.put(a, v);
                 }
             }
+        } else if ("content_segment_loc".equals(localName)) {
+            contentSegmentLocDuration = validateDuration(attributes.getValue("duration"));
+        } else if ("tvshow".equals(localName)) {
+            tvShow = new VideoAttributes.TVShow();
         }
     }
 
@@ -128,6 +143,9 @@ public class VideoHandler extends ExtensionHandler {
             VideoPrice price = new VideoPrice(currency, fvalue, type, resolution);
             currAttr.addPrice(price);
             priceAttr = null;
+        } else if ("tvshow".equals(localName)) {
+            currAttr.setTVShow(tvShow);
+            tvShow = null;
         } else if (value.isEmpty()) {
             // skip value but reset StringBuilder
         } else if ("thumbnail_loc".equals(localName)) {
@@ -141,12 +159,10 @@ public class VideoHandler extends ExtensionHandler {
         } else if ("player_loc".equals(localName)) {
             currAttr.setPlayerLoc(getURLValue(value));
         } else if ("duration".equals(localName)) {
-            Integer duration = getIntegerValue(value);
-            if (duration != null && (duration < 0 || duration > 28800)) {
-                LOG.debug("Invalid value for specified duration: {}", duration);
-                duration = null;
-            }
-            currAttr.setDuration(duration);
+            currAttr.setDuration(validateDuration(value));
+        } else if ("content_segment_loc".equals(localName)) {
+            currAttr.addContentSegment(contentSegmentLocDuration, getURLValue(value));
+            contentSegmentLocDuration = null;
         } else if ("expiration_date".equals(localName)) {
             currAttr.setExpirationDate(getDateValue(value));
         } else if ("rating".equals(localName)) {
@@ -189,6 +205,48 @@ public class VideoHandler extends ExtensionHandler {
             relationAttr = null;
         } else if ("live".equals(localName)) {
             currAttr.setLive(getYesNoBooleanValue(value, localName));
+        } else if ("show_title".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setShowTitle(value);
+            } else {
+                LOG.debug("Element <show_title> outside enclosing element <tvshow>!");
+            }
+        } else if ("video_type".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setVideoType(value);
+            } else {
+                LOG.debug("Element <video_type> outside enclosing element <tvshow>!");
+            }
+        } else if ("episode_title".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setEpisodeTitle(value);
+            } else {
+                LOG.debug("Element <episode_title> outside enclosing element <tvshow>!");
+            }
+        } else if ("".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setVideoType(value);
+            } else {
+                LOG.debug("Element <> outside enclosing element <tvshow>!");
+            }
+        } else if ("season_number".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setSeasonNumber(getIntegerValue(value));
+            } else {
+                LOG.debug("Element <season_number> outside enclosing element <tvshow>!");
+            }
+        } else if ("episode_number".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setEpisodeNumber(getIntegerValue(value));
+            } else {
+                LOG.debug("Element <episode_number> outside enclosing element <tvshow>!");
+            }
+        } else if ("premier_date".equals(localName)) {
+            if (tvShow != null) {
+                tvShow.setPremierDate(getDateValue(value));
+            } else {
+                LOG.debug("Element <premier_date> outside enclosing element <tvshow>!");
+            }
         }
         // reset StringBuilder
         currVal = new StringBuilder();

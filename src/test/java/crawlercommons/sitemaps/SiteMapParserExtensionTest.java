@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -132,7 +131,7 @@ public class SiteMapParserExtensionTest {
                         new URL("https://example.org/my-tv-show.jpg"), //
                         "My TV Show! - Thu, Jun 05, 2025", //
                         "Dummy description", null, null);
-        // expectedVideoAttributes.setDuration(2459.1); // 2459.1 isn't valid
+        expectedVideoAttributes.setDuration(2459);
         ZonedDateTime dt = ZonedDateTime.parse("2025-06-13T09:00:00+00:00");
         expectedVideoAttributes.setExpirationDate(dt);
         dt = ZonedDateTime.parse("2025-06-06T09:00:00+00:00");
@@ -140,10 +139,22 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes.setTags(new String[] { "talkshow", "interview", "example" });
         expectedVideoAttributes.setCategory("My TV Show!");
         expectedVideoAttributes.setRequiresSubscription(true);
+        expectedVideoAttributes.setContentLoc(new URL("https://example.org/video/video/23-13.mp4"));
+        expectedVideoAttributes.setPlayerLoc(new URL("https://example.org/video/embed/23-13"));
+        expectedVideoAttributes.addContentSegment(1287, new URL("https://example.org/video/video/23-13-1.mp4"));
+        expectedVideoAttributes.addContentSegment(1172, new URL("https://example.org/video/video/23-13-2.mp4"));
+        VideoAttributes.TVShow tvShow = new VideoAttributes.TVShow();
+        tvShow.setShowTitle("My TV Show!");
+        tvShow.setVideoType("full");
+        tvShow.setEpisodeTitle("Thu, Jun 05, 2025");
+        tvShow.setSeasonNumber(23);
+        tvShow.setEpisodeNumber(13);
+        dt = ZonedDateTime.parse("2025-06-05T21:00Z");
+        tvShow.setPremierDate(dt);
+        expectedVideoAttributes.setTVShow(tvShow);
 
-        // not valid because content_loc and player_loc are missing
-        assertFalse(expectedVideoAttributes.isValid());
-        assertFalse(attr.isValid());
+        assertTrue(expectedVideoAttributes.isValid());
+        assertTrue(attr.isValid());
         assertEquals(expectedVideoAttributes, attr);
         assertEquals(expectedVideoAttributes.toString(), attr.toString());
     }

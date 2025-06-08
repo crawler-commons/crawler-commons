@@ -6,7 +6,11 @@
       <video:title>My TV Show! - Thu, Jun 05, 2025</video:title>
       <video:requires_subscription>yes</video:requires_subscription>
       <video:description>Dummy description</video:description>
-      <video:duration>2459.1</video:duration>
+      <video:duration>2459</video:duration>
+      <video:player_loc>https://example.org/video/embed/23-13</video:player_loc>
+      <video:content_loc>https://example.org/video/video/23-13.mp4</video:content_loc>
+      <video:content_segment_loc duration="1287">https://example.org/video/video/23-13-1.mp4</video:content_segment_loc>
+      <video:content_segment_loc duration="1172">https://example.org/video/video/23-13-2.mp4</video:content_segment_loc>
       <video:category>My TV Show!</video:category>
       <video:publication_date>2025-06-06T09:00:00+00:00</video:publication_date>
       <video:expiration_date>2025-06-13T09:00:00+00:00</video:expiration_date>
@@ -20,6 +24,7 @@
         <video:episode_title>Thu, Jun 05, 2025</video:episode_title>
         <video:season_number>23</video:season_number>
         <video:episode_number>13</video:episode_number>
+        <video:premier_date>2025-06-05T21:00Z</video:premier_date>
       </video:tvshow>
     </video:video>
     <loc>https://example.org/my-tv-show/23/13/</loc>
