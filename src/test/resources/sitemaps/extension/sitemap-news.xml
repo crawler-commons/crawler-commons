@@ -21,9 +21,7 @@
   </url>
   <url>
     <!--
-        test for
-        - missing / empty news attributes
-        - access attribute (see sitemap-news schema)
+        test for missing / empty news attributes
     -->
     <loc>http://www.example.org/empty_news_name.html</loc>
     <news:news>
