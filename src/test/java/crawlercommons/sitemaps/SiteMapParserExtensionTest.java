@@ -17,6 +17,7 @@
 package crawlercommons.sitemaps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,8 +86,10 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes.setUploader("GrillyMcGrillerson");
         expectedVideoAttributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
         expectedVideoAttributes.setLive(false);
+        assertTrue(expectedVideoAttributes.isValid());
         VideoAttributes attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
+        assertTrue(attr.isValid());
         assertEquals(expectedVideoAttributes, attr);
 
         // locale-specific number format in <video:price>, test #220
@@ -182,8 +185,10 @@ public class SiteMapParserExtensionTest {
             assertNotNull(su.getAttributesForExtension(Extension.IMAGE));
             ExtensionMetadata[] attrs = su.getAttributesForExtension(Extension.IMAGE);
             ImageAttributes attr = (ImageAttributes) attrs[0];
+            assertTrue(attr.isValid());
             assertEquals(imageAttributes1, attr);
             attr = (ImageAttributes) attrs[1];
+            assertTrue(attr.isValid());
             assertEquals(imageAttributes2, attr);
         }
     }
@@ -230,6 +235,7 @@ public class SiteMapParserExtensionTest {
             for (int i = 0; i < linkAttributes.length; i++) {
                 LinkAttributes attr = (LinkAttributes) attrs[i];
                 assertEquals(linkAttributes[i], attr);
+                assertTrue(linkAttributes[i].isValid());
             }
         }
     }
@@ -245,20 +251,35 @@ public class SiteMapParserExtensionTest {
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
-        assertEquals(1, sm.getSiteMapUrls().size());
+        assertEquals(2, sm.getSiteMapUrls().size());
         ZonedDateTime dt = ZonedDateTime.parse("2008-12-23T00:00:00+00:00");
         NewsAttributes expectedNewsAttributes = new NewsAttributes("The Example Times", "en", dt, "Companies A, B in Merger Talks");
         expectedNewsAttributes.setKeywords(new String[] { "business", "merger", "acquisition", "A", "B" });
         expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.PressRelease, NewsAttributes.NewsGenre.Blog });
         expectedNewsAttributes.setStockTickers(new String[] { "NASDAQ:A", "NASDAQ:B" });
         expectedNewsAttributes.setAccess("Subscription");
-        for (SiteMapURL su : sm.getSiteMapUrls()) {
-            assertNotNull(su.getAttributesForExtension(Extension.NEWS));
-            NewsAttributes attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
-            assertEquals(expectedNewsAttributes, attr);
-            assertEquals("Subscription", attr.getAccess().toString());
-            assertEquals(expectedNewsAttributes.toString(), attr.toString());
-        }
+        Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
+        SiteMapURL su = it.next();
+        assertNotNull(su.getAttributesForExtension(Extension.NEWS));
+        assertEquals(1, su.getAttributesForExtension(Extension.NEWS).length);
+        NewsAttributes attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
+        assertEquals(expectedNewsAttributes, attr);
+        assertNotNull(su.getAttributesForExtension(Extension.NEWS));
+        assertEquals("Subscription", attr.getAccess().toString());
+        assertEquals(expectedNewsAttributes.toString(), attr.toString());
+
+        // second sitemap record with missing / empty attributes
+        su = it.next();
+        dt = ZonedDateTime.parse("2025-05-27T00:00:00+00:00");
+        expectedNewsAttributes = new NewsAttributes(null, "en", dt, "Test empty news attributes");
+        assertFalse(expectedNewsAttributes.isValid());
+        assertNotNull(su.getAttributesForExtension(Extension.NEWS));
+        assertEquals(1, su.getAttributesForExtension(Extension.NEWS).length);
+
+        attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
+        assertFalse(attr.isValid());
+        assertEquals(expectedNewsAttributes, attr);
+        assertEquals(expectedNewsAttributes.toString(), attr.toString());
     }
 
     @Test
@@ -279,6 +300,7 @@ public class SiteMapParserExtensionTest {
                 assertNotNull(attrs);
                 MobileAttributes attr = (MobileAttributes) attrs[0];
                 assertNotNull(attr);
+                assertTrue(attr.isValid());
             } else {
                 assertTrue(attrs == null || attrs.length == 0);
             }

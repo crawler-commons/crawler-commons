@@ -160,7 +160,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.13</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -224,7 +224,7 @@
 			<plugin>
 				<groupId>de.thetaphi</groupId>
 				<artifactId>forbiddenapis</artifactId>
-				<version>3.8</version>
+				<version>3.9</version>
 				<configuration>
 					<!-- if the used Java version is too new, don't fail, just do nothing: -->
 					<failOnUnsupportedJava>false</failOnUnsupportedJava>
@@ -376,9 +376,9 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<commons-io.version>2.18.0</commons-io.version>
+		<commons-io.version>2.19.0</commons-io.version>
 		<slf4j-api.version>2.0.17</slf4j-api.version>
-		<junit.version>5.12.1</junit.version>
+		<junit.version>5.13.0</junit.version>
 		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
 
 		<!-- Maven Plugin Dependencies -->
