@@ -526,13 +526,25 @@ public class VideoAttributes extends ExtensionMetadata {
     }
 
     /**
-     * <blockquote>If you publish your video as a series of raw videos (for
-     * example, if you submit a full movie as a continuous series of shorter
-     * clips), you can use the &lt;video:content_segment_loc&gt; to supply us
-     * with a series of URLs, in the order in which they should be concatenated
-     * to recreate the video in its entirety. Each URL should point to a .mpg,
-     * .mpeg, .mp4, .m4v, .mov, .wmv, .asf, .avi, .ra, .ram, .rm, .flv, or other
-     * video file format. It should not point to any Flash content.</blockquote>
+     * <blockquote>
+     * <p>
+     * Use &lt;video:content_segment_loc&gt; only in conjunction with
+     * &lt;video:player_loc&gt;.
+     * </p>
+     * 
+     * <p>
+     * If you publish your video as a series of raw videos (for example, if you
+     * submit a full movie as a continuous series of shorter clips), you can use
+     * the &lt;video:content_segment_loc&gt; to supply us with a series of URLs,
+     * in the order in which they should be concatenated to recreate the video
+     * in its entirety. Each URL should point to a .mpg, .mpeg, .mp4, .m4v,
+     * .mov, .wmv, .asf, .avi, .ra, .ram, .rm, .flv, or other video file format.
+     * It should not point to any Flash content.
+     * </p>
+     * </blockquote>
+     * 
+     * (Source: <a href=
+     * "https://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd">sitemap-video.xsd</a>)
      */
     public static final class ContentSegment implements Serializable {
         private Integer duration;
