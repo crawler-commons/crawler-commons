@@ -54,7 +54,7 @@ public class NewsHandler extends ExtensionHandler {
         if ("news".equals(localName)) {
             // add last attribute and reset in case of unclosed
             // elements
-            if (currAttr != null && currAttr.isValid()) {
+            if (currAttr != null) {
                 this.attributes.add(currAttr);
             }
             resetCurrent();
@@ -65,7 +65,7 @@ public class NewsHandler extends ExtensionHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         String value = currVal.toString().trim();
         if ("news".equals(localName)) {
-            if (currAttr != null && currAttr.isValid()) {
+            if (currAttr != null) {
                 attributes.add(currAttr);
             }
             resetCurrent();
@@ -115,7 +115,7 @@ public class NewsHandler extends ExtensionHandler {
 
     @Override
     public ExtensionMetadata[] getAttributes() {
-        if (currAttr != null && currAttr.isValid()) {
+        if (currAttr != null) {
             /*
              * add current element to attribute list, do not reset in case
              * getAttributes is called during parsing of a sitemap <url> element
