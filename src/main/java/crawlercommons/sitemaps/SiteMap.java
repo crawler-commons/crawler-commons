@@ -26,7 +26,9 @@ public class SiteMap extends AbstractSiteMap {
     /**
      * The base URL for the Sitemap is where the Sitemap was found If found at
      * http://foo.org/abc/sitemap.xml then baseUrl is http://foo.org/abc/
-     * Sitemaps can only contain URLs that are under the base URL.
+     * Sitemaps can only contain URLs that are under the base URL, see <a
+     * href="https://www.sitemaps.org/protocol.html#location">sitemap file
+     * location</a>.
      */
     private String baseUrl;
 

@@ -73,7 +73,7 @@ public class SiteMapParser {
 
     /**
      * True (by default) meaning that invalid URLs should be rejected, as the
-     * official docs allow the siteMapURLs to be only under the base url:
+     * official docs allow the siteMapURLs to be only under the base URL:
      * https://www.sitemaps.org/protocol.html#location
      */
     protected boolean strict = true;
@@ -159,7 +159,7 @@ public class SiteMapParser {
      * @return whether invalid URLs will be rejected (where invalid means that
      *         the URL is not under the base URL, see <a href=
      *         "https://www.sitemaps.org/protocol.html#location">sitemap file
-     *         location</a>)
+     *         location</a>). See also {@link #urlIsValid(String, String)}.
      */
     public boolean isStrict() {
         return strict;
@@ -668,8 +668,18 @@ public class SiteMapParser {
     }
 
     /**
-     * See if testUrl is under sitemapBaseUrl. Only URLs under sitemapBaseUrl
-     * are valid.
+     * Verify whether the <code>testUrl</code> is under the
+     * <code>sitemapBaseUrl</code>. Only URLs under sitemapBaseUrl are valid,
+     * see <a href="https://www.sitemaps.org/protocol.html#location">sitemap
+     * file location</a>. This is method is used when the parser is configured
+     * with <b>strict</b> checking, see {@link #isStrict()}.
+     * 
+     * Note that this method does not allow to check for <a href=
+     * "https://www.sitemaps.org/protocol.html#sitemaps_cross_submits">cross
+     * submits</a>: if a sitemap, located on host A, is referenced in the
+     * robots.txt file of host B, then this is considered as
+     * <q>prove of ownership</q> and the sitemap is allowed to list URLs on host
+     * B. For cross-submit validation, see {@link SiteMapCrossSubmitValidator}.
      * 
      * @param sitemapBaseUrl
      *            the base URL of the sitemap
