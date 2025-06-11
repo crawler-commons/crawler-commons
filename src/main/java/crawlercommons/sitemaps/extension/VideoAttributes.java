@@ -196,6 +196,12 @@ public class VideoAttributes extends ExtensionMetadata {
      */
     private Boolean isLive;
 
+    /** If video is published as a series of raw videos */
+    private ContentSegment[] contentSegments;
+
+    /** Information about a single TV video */
+    private TVShow tvShow;
+
     public URL getThumbnailLoc() {
         return thumbnailLoc;
     }
@@ -519,6 +525,171 @@ public class VideoAttributes extends ExtensionMetadata {
 
     }
 
+    /**
+     * <blockquote>
+     * <p>
+     * Use &lt;video:content_segment_loc&gt; only in conjunction with
+     * &lt;video:player_loc&gt;.
+     * </p>
+     * 
+     * <p>
+     * If you publish your video as a series of raw videos (for example, if you
+     * submit a full movie as a continuous series of shorter clips), you can use
+     * the &lt;video:content_segment_loc&gt; to supply us with a series of URLs,
+     * in the order in which they should be concatenated to recreate the video
+     * in its entirety. Each URL should point to a .mpg, .mpeg, .mp4, .m4v,
+     * .mov, .wmv, .asf, .avi, .ra, .ram, .rm, .flv, or other video file format.
+     * It should not point to any Flash content.
+     * </p>
+     * </blockquote>
+     * 
+     * (Source: <a href=
+     * "https://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd">sitemap-video.xsd</a>)
+     */
+    public static final class ContentSegment implements Serializable {
+        private Integer duration;
+        private URL loc;
+
+        public ContentSegment(Integer duration, URL loc) {
+            this.duration = duration;
+            this.loc = loc;
+        }
+
+        public Integer getDuration() {
+            return duration;
+        }
+
+        public URL getLocation() {
+            return loc;
+        }
+
+        @Override
+        public String toString() {
+            return "segment: " + loc.toString() + " (" + duration + ")";
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) {
+                return false;
+            }
+            if (!(other instanceof ContentSegment)) {
+                return false;
+            }
+            return urlEquals(loc, ((ContentSegment) other).loc) && Objects.equals(duration, ((ContentSegment) other).duration);
+        }
+    }
+
+    public ContentSegment[] getContentSegmentLocs() {
+        return contentSegments;
+    }
+
+    public void setContentSegmentLocs(ContentSegment[] segments) {
+        contentSegments = segments;
+    }
+
+    public void addContentSegment(Integer duration, URL loc) {
+        ContentSegment segment = new ContentSegment(duration, loc);
+        if (contentSegments == null) {
+            contentSegments = new ContentSegment[1];
+            contentSegments[0] = segment;
+        } else {
+            ContentSegment[] arr = Arrays.copyOf(contentSegments, contentSegments.length + 1);
+            arr[contentSegments.length] = segment;
+            contentSegments = arr;
+        }
+    }
+
+    public static final class TVShow implements Serializable {
+        public enum VideoType {
+            full, preview, clip, interview, news, other;
+        }
+
+        private String showTitle;
+        private VideoType videoType;
+        private String episodeTitle;
+        private Integer seasonNumber;
+        private Integer episodeNumber;
+        private ZonedDateTime premierDate;
+
+        public String getShowTitle() {
+            return showTitle;
+        }
+
+        public void setShowTitle(String title) {
+            showTitle = title;
+        }
+
+        public VideoType getVideoType() {
+            return videoType;
+        }
+
+        public void setVideoType(VideoType videoType) {
+            this.videoType = videoType;
+        }
+
+        public void setVideoType(String videoType) {
+            this.videoType = VideoType.valueOf(videoType);
+        }
+
+        public String getEpisodeTitle() {
+            return episodeTitle;
+        }
+
+        public void setEpisodeTitle(String title) {
+            episodeTitle = title;
+        }
+
+        public Integer getSeasonNumber() {
+            return seasonNumber;
+        }
+
+        public void setSeasonNumber(Integer num) {
+            this.seasonNumber = num;
+        }
+
+        public Integer getEpisodeNumber() {
+            return episodeNumber;
+        }
+
+        public void setEpisodeNumber(Integer num) {
+            this.episodeNumber = num;
+        }
+
+        public ZonedDateTime getPremierDate() {
+            return premierDate;
+        }
+
+        public void setPremierDate(ZonedDateTime premierDate) {
+            this.premierDate = premierDate;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) {
+                return false;
+            }
+            if (!(other instanceof TVShow)) {
+                return false;
+            }
+            TVShow o = (TVShow) other;
+            return showTitle.equals(o.showTitle) //
+                            && videoType.equals(o.videoType) //
+                            && episodeTitle.equals(o.episodeTitle) //
+                            && seasonNumber.equals(o.seasonNumber) //
+                            && episodeNumber.equals(o.episodeNumber) //
+                            && premierDate.equals(o.premierDate);
+        }
+    }
+
+    public TVShow getTVShow() {
+        return tvShow;
+    }
+
+    public void setTVShow(TVShow show) {
+        tvShow = show;
+    }
+
     public VideoAttributes() {
     }
 
@@ -573,7 +744,9 @@ public class VideoAttributes extends ExtensionMetadata {
                         && Objects.equals(uploaderInfo, that.uploaderInfo) //
                         && Objects.deepEquals(allowedPlatforms, that.allowedPlatforms) //
                         && Objects.deepEquals(restrictedPlatforms, that.restrictedPlatforms) //
-                        && Objects.equals(isLive, that.isLive);
+                        && Objects.equals(isLive, that.isLive) //
+                        && Objects.deepEquals(contentSegments, that.contentSegments) //
+                        && Objects.equals(tvShow, that.tvShow);
     }
 
     @Override

@@ -17,6 +17,7 @@
       <news:title>Companies A, B in Merger Talks</news:title>
       <news:keywords>business, merger, acquisition, A, B</news:keywords>
       <news:stock_tickers>NASDAQ:A, NASDAQ:B</news:stock_tickers>
+      <news:access>Subscription</news:access>
     </news:news>
   </url>
   <url>

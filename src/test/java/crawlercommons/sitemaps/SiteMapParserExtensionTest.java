@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -111,6 +110,56 @@ public class SiteMapParserExtensionTest {
         attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
         assertEquals(expectedVideoAttributes, attr);
+    }
+
+    @Test
+    public void testVideosSitemapTVShow() throws UnknownFormatException, IOException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.enableExtension(Extension.VIDEO);
+
+        URL url = new URL("https://example.org/sitemap.xml");
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-videos-tvshow.xml", url);
+
+        assertEquals(false, asm.isIndex());
+        assertEquals(true, asm instanceof SiteMap);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+        Iterator<SiteMapURL> siter = sm.getSiteMapUrls().iterator();
+        ExtensionMetadata[] attrs = siter.next().getAttributesForExtension(Extension.VIDEO);
+        assertEquals(1, attrs.length);
+        VideoAttributes attr = (VideoAttributes) attrs[0];
+        assertNotNull(attr);
+
+        VideoAttributes expectedVideoAttributes = new VideoAttributes( //
+                        new URL("https://example.org/my-tv-show.jpg"), //
+                        "My TV Show! - Thu, Jun 05, 2025", //
+                        "Dummy description", null, null);
+        expectedVideoAttributes.setDuration(2459);
+        ZonedDateTime dt = ZonedDateTime.parse("2025-06-13T09:00:00+00:00");
+        expectedVideoAttributes.setExpirationDate(dt);
+        dt = ZonedDateTime.parse("2025-06-06T09:00:00+00:00");
+        expectedVideoAttributes.setPublicationDate(dt);
+        expectedVideoAttributes.setTags(new String[] { "talkshow", "interview", "example" });
+        expectedVideoAttributes.setCategory("My TV Show!");
+        expectedVideoAttributes.setRequiresSubscription(true);
+        expectedVideoAttributes.setContentLoc(new URL("https://example.org/video/video/23-13.mp4"));
+        expectedVideoAttributes.setPlayerLoc(new URL("https://example.org/video/embed/23-13"));
+        expectedVideoAttributes.addContentSegment(1287, new URL("https://example.org/video/video/23-13-1.mp4"));
+        expectedVideoAttributes.addContentSegment(1172, new URL("https://example.org/video/video/23-13-2.mp4"));
+        VideoAttributes.TVShow tvShow = new VideoAttributes.TVShow();
+        tvShow.setShowTitle("My TV Show!");
+        tvShow.setVideoType("full");
+        tvShow.setEpisodeTitle("Thu, Jun 05, 2025");
+        tvShow.setSeasonNumber(23);
+        tvShow.setEpisodeNumber(13);
+        dt = ZonedDateTime.parse("2025-06-05T21:00Z");
+        tvShow.setPremierDate(dt);
+        expectedVideoAttributes.setTVShow(tvShow);
+
+        assertTrue(expectedVideoAttributes.isValid());
+        assertTrue(attr.isValid());
+        assertEquals(expectedVideoAttributes, attr);
+        assertEquals(expectedVideoAttributes.toString(), attr.toString());
     }
 
     @Test
@@ -208,12 +257,16 @@ public class SiteMapParserExtensionTest {
         expectedNewsAttributes.setKeywords(new String[] { "business", "merger", "acquisition", "A", "B" });
         expectedNewsAttributes.setGenres(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.PressRelease, NewsAttributes.NewsGenre.Blog });
         expectedNewsAttributes.setStockTickers(new String[] { "NASDAQ:A", "NASDAQ:B" });
+        expectedNewsAttributes.setAccess("Subscription");
         Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
         SiteMapURL su = it.next();
         assertNotNull(su.getAttributesForExtension(Extension.NEWS));
         assertEquals(1, su.getAttributesForExtension(Extension.NEWS).length);
         NewsAttributes attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
         assertEquals(expectedNewsAttributes, attr);
+        assertNotNull(su.getAttributesForExtension(Extension.NEWS));
+        assertEquals("Subscription", attr.getAccess().toString());
+        assertEquals(expectedNewsAttributes.toString(), attr.toString());
 
         // second sitemap record with missing / empty attributes
         su = it.next();
@@ -226,6 +279,7 @@ public class SiteMapParserExtensionTest {
         attr = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
         assertFalse(attr.isValid());
         assertEquals(expectedNewsAttributes, attr);
+        assertEquals(expectedNewsAttributes.toString(), attr.toString());
     }
 
     @Test
@@ -310,10 +364,8 @@ public class SiteMapParserExtensionTest {
         assertEquals(urlStr, sm.getUrl().toString());
         // System.out.println(sm.toString());
         for (SiteMapURL u : sm.getSiteMapUrls()) {
-            System.out.println(u.toString());
             for (Entry<Extension, ExtensionMetadata[]> x : u.getAttributes().entrySet()) {
                 assertEquals(Extension.PAGEMAPS, x.getKey());
-                System.out.println(x.getValue().getClass());
                 PageMap pageMap = (PageMap) x.getValue()[0];
                 List<PageMapDataObject> dataObjects = pageMap.getPageMapDataObjects();
                 PageMapDataObject dataObject;
@@ -339,8 +391,6 @@ public class SiteMapParserExtensionTest {
                     assertEquals("4.0", dataObject.getAttribute("review"));
                         break;
                 }
-                System.out.println(x.getKey() + ": " + Arrays.toString(x.getValue()));
-                System.out.println(x.getValue().length);
             }
         }
     }
