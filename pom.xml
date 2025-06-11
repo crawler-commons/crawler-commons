@@ -368,6 +368,15 @@
 						<artifactId>checksum-maven-plugin</artifactId>
 						<version>${checksum-maven-plugin.version}</version>
 					</plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>${central-publishing-plugin.version}</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -395,6 +404,7 @@
 		<maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
 		<checksum-maven-plugin.version>1.4</checksum-maven-plugin.version>
 		<maven.download.plugin.version>1.13.0</maven.download.plugin.version>
+		<central-publishing-plugin.version>0.7.0</central-publishing-plugin.version>
 
 		<!-- General Properties -->
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
