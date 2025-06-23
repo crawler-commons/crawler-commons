@@ -544,7 +544,8 @@ public class VideoAttributes extends ExtensionMetadata {
      * </blockquote>
      * 
      * (Source: <a href=
-     * "https://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd">sitemap-video.xsd</a>)
+     * "https://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd"
+     * >sitemap-video.xsd</a>)
      */
     public static final class ContentSegment implements Serializable {
         private Integer duration;

@@ -286,37 +286,43 @@ public class EffectiveTldFinderTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ //
-        // = eTLD expected to be equal to hostname
-        // * eTLD is wildcard public suffix
-        // . eTLD is a public suffix (not wildcard)
-        //   (empty / null, but not a public suffix)
-        // test wildcard suffixes
-        "=, foo.bar.uberspace.de", //
-        "*, bar.uberspace.de", //
-        "=, uberspace.de", //
-        "., de", //
-        "=, myspace.nyc3.digitaloceanspaces.com", //
-        "*, nyc3.digitaloceanspaces.com", //
-        "=, digitaloceanspaces.com", //
-        "., com", //
-        "=, foo.us-3.platformsh.site", //
-        "*, us-3.platformsh.site", //
-        "=, platformsh.site", //
-        "., site", //
-        // non-wildcard suffixes
-        "=, nt.global.ssl.fastly.net", //
-        "., global.ssl.fastly.net", //
-        "fastly.net, ssl.fastly.net", //
-        "=, fastly.net", //
-        "., net", //
-        // double-checking counter-examples with only a single domain under public suffix
-        "=, oneproject.vercel.app", //
-        "=, anotherproject.vercel.app", //
-        "oneproject.vercel.app, subdomain.oneproject.vercel.app", //
-        "., vercel.app", //
-        "., app", //
-        })
+    @CsvSource({ /*
+                  * Semantics of first column, in case it's not a a spelled-out
+                  * domain name:
+                  * 
+                  * - `=` the domain name is expected to be equal to hostname
+                  * 
+                  * - `*` hostname is a wildcard public suffix
+                  * 
+                  * - `.` hostname is a public suffix (not wildcard)
+                  */
+                    // test wildcard suffixes
+                    "=, foo.bar.uberspace.de", //
+                    "*, bar.uberspace.de", //
+                    "=, uberspace.de", //
+                    "., de", //
+                    "=, myspace.nyc3.digitaloceanspaces.com", //
+                    "*, nyc3.digitaloceanspaces.com", //
+                    "=, digitaloceanspaces.com", //
+                    "., com", //
+                    "=, foo.us-3.platformsh.site", //
+                    "*, us-3.platformsh.site", //
+                    "=, platformsh.site", //
+                    "., site", //
+                    // non-wildcard suffixes
+                    "=, nt.global.ssl.fastly.net", //
+                    "., global.ssl.fastly.net", //
+                    "fastly.net, ssl.fastly.net", //
+                    "=, fastly.net", //
+                    "., net", //
+                    // double-checking counter-examples with only a single
+                    // domain under public suffix
+                    "=, oneproject.vercel.app", //
+                    "=, anotherproject.vercel.app", //
+                    "oneproject.vercel.app, subdomain.oneproject.vercel.app", //
+                    "., vercel.app", //
+                    "., app", //
+    })
     public final void testMatchAllSuffixes(String expectedDomain, String hostName) throws Exception {
         String ad = EffectiveTldFinder.getAssignedDomain(hostName, true, false);
         if (expectedDomain == null) {
