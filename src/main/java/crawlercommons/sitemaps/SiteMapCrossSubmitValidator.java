@@ -31,8 +31,8 @@ import crawlercommons.domains.EffectiveTldFinder;
  * "https://www.sitemaps.org/protocol.html#sitemaps_cross_submits">cross
  * submits</a>.
  * 
- * The sitemap protocol defines strict requirements regarding the
- * <a href="https://www.sitemaps.org/protocol.html#location">location of a
+ * The sitemap protocol defines strict requirements regarding the <a
+ * href="https://www.sitemaps.org/protocol.html#location">location of a
  * sitemap</a>:
  * 
  * <blockquote>
@@ -51,9 +51,9 @@ import crawlercommons.domains.EffectiveTldFinder;
  * </blockquote>
  * 
  * However, when the sitemap location (on host A) is specified in the robots.txt
- * file of host B, this
- * <q>proves the ownership</q> and the sitemap is allowed to
- * <q><a href= "https://www.sitemaps.org/protocol.html#sitemaps_cross_submits"
+ * file of host B, this <q>proves the ownership</q> and the sitemap is allowed
+ * to <q><a href=
+ * "https://www.sitemaps.org/protocol.html#sitemaps_cross_submits"
  * >cross-submit</a></q> URLs on host B.
  * 
  * Note: in order to use the validator, you need to create a sitemap parser
