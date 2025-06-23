@@ -1,6 +1,14 @@
 Crawler-Commons Change Log
 
 Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
+- Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio)   #510, #516 
+- [Sitemaps] Add cross-submit feature (Avi Hayun, kkrugler, sebastian-nagel, Richard Zowalla) #85, #515
+- [Sitemaps] Complete sitemap extension attributes (sebastian-nagel, Richard Zowalla) #513, #514
+- [Sitemaps] Allow partial extension metadata (adriabonetmrf, sebastian-nagel, Richard Zowalla) #456, #458, #512
+- [Domains] EffectiveTldFinder to also take shorter suffix matches into account (sebastian-nagel, Richard Zowalla) #479, #505
+- Add package-info.java to all packages (sebastian-nagel, Richard Zowalla) #432, #504
+- [Robots.txt] Extend API to allow to check java.net.URL objects (sebastian-nagel, aecio, Richard Zowalla) #502
+- [Robots.txt] Incorrect robots.txt result for uppercase user agents (teammakdi, sebastian-nagel, aecio, Richard Zowalla) #453, #500
 - Remove class utils.Strings (sebastian-nagel, Richard Zowalla) #503
 - [BasicNormalizer] Complete normalization feature list of BasicURLNormalizer (sebastian-nagel, kkrugler) #494
 - [Robots] Document that URLs not properly normalized may not be matched by robots.txt parser (sebastian-nagel, kkrugler) #492, #493
@@ -11,7 +19,7 @@ Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
 - [Sitemaps] Improve logging done by SiteMapParser (Valery Yatsynovich, sebastian-nagel) #457
 - [Sitemaps] Google Sitemap PageMap extensions (josepowera, sebastian-nagel, Richard Zowalla, jnioche) #388, #442
 - [Domains] Installation of a gzip-compressed public suffix list from Maven cache breaks EffectiveTldFinder to address (sebastian-nagel, Richard Zowalla) #441, #443
-- Upgrade dependencies (dependabot) #437, #444, #448, #451, #473, #465, #466, #468, #488, #491, #506, #511
+- Upgrade dependencies (dependabot) #437, #444, #448, #451, #473, #465, #466, #468, #488, #491, #506, #511, #517
 - Upgrade Maven plugins (dependabot) #434, #438, #439, #449, #445, #452, #455, #459, #460, #464, #469, #467, #470, #471, #472, #474, #475, #476, #477, #480, #481, #482, #489, #490, #495, #496, #497, #498, #499, #508, #509
 - Upgrade GitHub workflow actions v2 -> v4 (sebastian-nagel, Richard Zowalla) #501
 
