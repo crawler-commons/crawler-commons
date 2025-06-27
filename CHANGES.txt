@@ -1,7 +1,7 @@
 Crawler-Commons Change Log
 
-Current Development 1.5-SNAPSHOT (yyyy-mm-dd)
-- Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio)   #510, #516 
+Release 1.5 (2025-06-27)
+- Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio) #510, #516
 - [Sitemaps] Add cross-submit feature (Avi Hayun, kkrugler, sebastian-nagel, Richard Zowalla) #85, #515
 - [Sitemaps] Complete sitemap extension attributes (sebastian-nagel, Richard Zowalla) #513, #514
 - [Sitemaps] Allow partial extension metadata (adriabonetmrf, sebastian-nagel, Richard Zowalla) #456, #458, #512
