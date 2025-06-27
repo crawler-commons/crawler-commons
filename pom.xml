@@ -6,7 +6,7 @@
 	<artifactId>crawler-commons</artifactId>
 	<name>Crawler-commons</name>
 	<packaging>jar</packaging>
-	<version>1.5</version>
+	<version>1.5-SNAPSHOT</version>
 
 	<licenses>
 		<license>
