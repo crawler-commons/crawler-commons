@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Created-By: Maven Javadoc Plugin 3.11.2
+Build-Jdk-Spec: 11
+Specification-Title: Crawler-commons
+Specification-Version: 1.5
+Specification-Vendor: Crawler-Commons
+Implementation-Title: Crawler-commons
+Implementation-Version: 1.5
+Implementation-Vendor: Crawler-Commons
+Implementation-Build: ${scmBranch}@r${buildNumber}
+Implementation-Build-Date: 2025-06-27 12:32:35+0000
+X-Compile-Source-JDK: 1.11
+X-Compile-Target-JDK: 1.11
+
