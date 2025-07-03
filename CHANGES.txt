@@ -1,5 +1,8 @@
 Crawler-Commons Change Log
 
+Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
+
+
 Release 1.5 (2025-06-27)
 - Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio) #510, #516
 - [Sitemaps] Add cross-submit feature (Avi Hayun, kkrugler, sebastian-nagel, Richard Zowalla) #85, #515
