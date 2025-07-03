@@ -16,6 +16,7 @@ These components benefit from collaboration among various existing web crawler p
 # User Documentation
 
 ## Javadocs
+* [1.5](https://crawler-commons.github.io/crawler-commons/1.5/)
 * [1.4](https://crawler-commons.github.io/crawler-commons/1.4/)
 * [1.3](https://crawler-commons.github.io/crawler-commons/1.3/)
 * [1.2](https://crawler-commons.github.io/crawler-commons/1.2/)
@@ -38,18 +39,29 @@ Using Maven, add the following dependency to your pom.xml:
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
     <artifactId>crawler-commons</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
 </dependency>
 ~~~
 
 Using Gradle, add the folling to your build file:
 ```groovy
 dependencies {
-    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4'
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.5'
 }
 ```
 
 # News
+
+## 2nd July 2025 – crawler-commons 1.5 released
+
+We are pleased to announce the release of version 1.5 of Crawler-Commons!
+
+The new release includes multiple dependency upgrades, several improvements and bug fixes. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.5/CHANGES.txt) file for the complete list of changes.
+
+**Breaking changes**:
+
+- The robots.txt parser is now pedantic regarding the user-agent names passed to the [parseContent() method](https://crawler-commons.github.io/crawler-commons/1.5/crawlercommons/robots/SimpleRobotRulesParser.html#parseContent(java.lang.String,byte[],java.lang.String,java.util.Collection)). The names in the `robotNames` parameter must be lower-case and the wildcard agent name "`*`" must not be included. An exception is thrown if these conditions are not met. Please see the Javadoc and [issue report #453](https://github.com/crawler-commons/crawler-commons/issues/453) for more information.
+
 
 ## 18th July 2023  - crawler-commons 1.4 released
 
