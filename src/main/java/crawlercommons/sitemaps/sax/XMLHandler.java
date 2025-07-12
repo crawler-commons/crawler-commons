@@ -20,6 +20,8 @@ import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -175,7 +177,7 @@ class XMLHandler extends DelegatorHandler {
         }
         try {
             // check that the value is a valid URL
-            URL locURL = new URL(urlFiltered);
+            URL locURL = new URI(urlFiltered).toURL();
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (valid || !isStrict()) {
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
@@ -190,7 +192,7 @@ class XMLHandler extends DelegatorHandler {
                     }
                 }
             }
-        } catch (MalformedURLException e) {
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             LOG.debug("Bad url: [{}]", value);
             LOG.trace("Can't create an entry with a bad URL", e);
         } finally {

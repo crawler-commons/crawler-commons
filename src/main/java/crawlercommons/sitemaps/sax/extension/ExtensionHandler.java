@@ -19,6 +19,8 @@ package crawlercommons.sitemaps.sax.extension;
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -77,8 +79,8 @@ public abstract class ExtensionHandler extends DefaultHandler {
     protected static URL getURLValue(final String value) {
         if (value != null) {
             try {
-                return new URL(value);
-            } catch (MalformedURLException e) {
+                return new URI(value).toURL();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                 LOG.debug("Invalid URL value: {}", value);
             }
         }
