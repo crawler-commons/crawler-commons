@@ -19,6 +19,8 @@ package crawlercommons.sitemaps.sax;
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.LinkedList;
@@ -139,11 +141,11 @@ class XMLIndexHandler extends DelegatorHandler {
         }
         try {
             // check that the value is a valid URL
-            URL locURL = new URL(urlFiltered);
+            URL locURL = new URI(urlFiltered).toURL();
             SiteMap s = new SiteMap(locURL, lastMod);
             sitemap.addSitemap(s);
             LOG.debug("  {}. {}", (i + 1), s);
-        } catch (MalformedURLException e) {
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             LOG.trace("Don't create an entry with a bad URL", e);
             LOG.debug("Bad url: [{}]", value);
         }

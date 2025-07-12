@@ -20,6 +20,8 @@ import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -160,14 +162,14 @@ class RSSHandler extends DelegatorHandler {
         }
         try {
             // check that the value is a valid URL
-            locURL = new URL(sitemap.getUrl(), value);
+            locURL = sitemap.getUrl().toURI().resolve(value).toURL();
             String urlFiltered = urlFilter.apply(locURL.toString());
             if (urlFiltered == null) {
                 LOG.debug("Filtered URL {}", value);
                 return;
             }
-            locURL = new URL(urlFiltered);
-        } catch (MalformedURLException e) {
+            locURL = new URI(urlFiltered).toURL();
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             LOG.debug("Bad url: [{}]", value);
             LOG.trace("Can't create an entry with a bad URL", e);
         }

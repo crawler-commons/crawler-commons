@@ -19,6 +19,8 @@ package crawlercommons.sitemaps.sax;
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Map;
@@ -157,9 +159,8 @@ public class DelegatorHandler extends DefaultHandler {
                 // first, try to resolve relative namespace URI (deprecated but
                 // not forbidden), e.g., //www.sitemaps.org/schemas/sitemap/0.9
                 try {
-                    URL u = new URL(url, uri);
-                    uri = u.toString();
-                } catch (MalformedURLException e) {
+                    uri = url.toURI().resolve(uri).toString();
+                } catch (IllegalArgumentException | URISyntaxException e) {
                     LOG.warn("Failed to resolve relative namespace URI {} in sitemap {}", uri, url);
                 }
             }
