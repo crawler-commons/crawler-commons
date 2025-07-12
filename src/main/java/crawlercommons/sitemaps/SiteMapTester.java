@@ -17,6 +17,8 @@
 package crawlercommons.sitemaps;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 
@@ -35,7 +37,7 @@ public class SiteMapTester {
     private static final Logger LOG = LoggerFactory.getLogger(SiteMapTester.class);
     private static SiteMapParser saxParser = new SiteMapParser(false, true);
 
-    public static void main(String[] args) throws IOException, UnknownFormatException {
+    public static void main(String[] args) throws IOException, UnknownFormatException, URISyntaxException {
         if (args.length < 1) {
             LOG.error("Fetch and process a sitemap (recursively if a sitemap index)");
             LOG.error("Usage: SiteMapTester <URL_TO_TEST> [MIME_TYPE]");
@@ -54,7 +56,7 @@ public class SiteMapTester {
             LOG.error("                  if true filter and normalize all URLs found in the sitemap");
             LOG.error("                  using crawlercommons.filters.basic.BasicURLNormalizer");
         } else {
-            URL url = new URL(args[0]);
+            URL url = new URI(args[0]).toURL();
             String mt = (args.length > 1) ? args[1] : null;
 
             parse(url, mt);

@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
@@ -534,7 +536,7 @@ public class SiteMapParser {
                 continue;
             }
             try {
-                URL url = new URL(urlFiltered);
+                URL url = new URI(urlFiltered).toURL();
                 boolean valid = urlIsValid(textSiteMap.getBaseUrl(), url.toString());
                 if (valid || !strict) {
                     SiteMapURL sUrl = new SiteMapURL(url, valid);
@@ -543,7 +545,7 @@ public class SiteMapParser {
                 } else {
                     LOG.info("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
                 }
-            } catch (MalformedURLException e) {
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                 LOG.warn("Bad url: [{}]", line.substring(0, Math.min(1024, line.length())));
             }
         }

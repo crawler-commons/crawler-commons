@@ -17,6 +17,7 @@
 package crawlercommons.robots;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -294,7 +295,7 @@ public class SimpleRobotRules extends BaseRobotRules {
 
     private String getPath(String url, boolean getWithQuery) {
         try {
-            URL urlObj = new URL(url);
+            URL urlObj = new URI(url).toURL();
 
             return getPath(urlObj, getWithQuery);
         } catch (Exception e) {
