@@ -44,6 +44,7 @@ public abstract class BaseRobotRules implements Serializable {
 
     private long _crawlDelay = UNSET_CRAWL_DELAY;
     private boolean _deferVisits = false;
+    protected boolean _matchedWildcard = false;
     private LinkedHashSet<String> _sitemaps;
 
     public BaseRobotRules() {
@@ -81,6 +82,25 @@ public abstract class BaseRobotRules implements Serializable {
      */
     public void setDeferVisits(boolean deferVisits) {
         _deferVisits = deferVisits;
+    }
+
+    /**
+     * Returns whether the wildcard user agent (*) was matched.
+     *
+     * @return true if the wildcard user agent was matched; false otherwise.
+     */
+
+    public boolean isMatchedWildcard() {
+        return _matchedWildcard;
+    }
+
+    /**
+     * Sets whether the wildcard user agent (*) was matched.
+     *
+     * @param matchedWildcard true if the wildcard user agent was matched; false otherwise.
+     */
+    public void setMatchedWildcard(boolean matchedWildcard) {
+        this._matchedWildcard = matchedWildcard;
     }
 
     /** Add sitemap URL to rules if not a duplicate */

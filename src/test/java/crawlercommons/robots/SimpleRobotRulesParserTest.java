@@ -1401,6 +1401,25 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("https://example.org/path/index.html"));
     }
 
+    @Test
+    void testMatchedWildcard() {
+        final String robotsTxt =
+                "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "User-agent: anybot" + CRLF //
+                        + "Disallow: /search";
+
+        BaseRobotRules rules1 = createRobotRules("foobot", robotsTxt);
+        BaseRobotRules rules2 = createRobotRules("anybot", robotsTxt);
+
+        assertTrue(rules1.isMatchedWildcard());
+        assertFalse(rules2.isMatchedWildcard());
+        assertTrue(rules1.isAllowed("https://www.example.com/search"));
+        assertFalse(rules2.isAllowed("https://www.example.com/search"));
+        assertTrue(rules1.isAllowed("https://www.example.com/home"));
+        assertTrue(rules2.isAllowed("https://www.example.com/home"));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);
