@@ -17,7 +17,7 @@ public class URLUtils {
         try {
             return base.toURI().resolve(spec).toURL();
         } catch (Exception e) {
-            throw new MalformedURLException(e.getMessage());
+            throw (MalformedURLException) new MalformedURLException(e.getMessage()).initCause(e);
         }
     }
 }
