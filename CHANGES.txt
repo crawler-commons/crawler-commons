@@ -1,7 +1,9 @@
 Crawler-Commons Change Log
 
 Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
-
+- Partial replacement of deprecated URL constructors (HamzaElzarw-2022, kkrugler, sebastian-nagel) #522, #524
+- Upgrade dependencies (dependabot) #521
+- Upgrade Maven plugins (dependabot) #520
 
 Release 1.5 (2025-06-27)
 - Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio) #510, #516
