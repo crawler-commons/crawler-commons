@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -138,8 +140,8 @@ public class SiteMapURL implements Serializable {
      */
     public void setUrl(String url) {
         try {
-            this.url = new URL(url);
-        } catch (MalformedURLException e) {
+            this.url = new URI(url).toURL();
+        } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             LOG.error("Bad url: [{}], Exception: {}", url, e.toString());
             this.url = null;
         }

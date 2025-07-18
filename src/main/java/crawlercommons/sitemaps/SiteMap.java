@@ -17,6 +17,8 @@
 package crawlercommons.sitemaps;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -85,10 +87,10 @@ public class SiteMap extends AbstractSiteMap {
      */
     private void setUrl(String url) {
         try {
-            this.url = new URL(url);
+            this.url = new URI(url).toURL();
 
             setBaseUrl(this.url);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             this.url = null;
         }
     }
@@ -131,8 +133,9 @@ public class SiteMap extends AbstractSiteMap {
             path = path.substring(0, lastPathDelimPos + 1);
         }
         try {
-            baseUrl = new URL(sitemapUrl.getProtocol(), sitemapUrl.getHost(), sitemapUrl.getPort(), path).toString();
-        } catch (MalformedURLException e) {
+            baseUrl = new URI(sitemapUrl.getProtocol(), null, sitemapUrl.getHost(),
+                    sitemapUrl.getPort(), path, null, null).toURL().toString();
+        } catch (MalformedURLException | URISyntaxException e) {
             baseUrl = sitemapUrl.toString();
         }
     }

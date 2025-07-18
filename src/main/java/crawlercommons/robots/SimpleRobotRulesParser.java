@@ -19,7 +19,9 @@ package crawlercommons.robots;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URI;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -1131,14 +1133,14 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             URL sitemapUrl;
             URL base = null;
             try {
-                base = new URL(state.getUrl());
-            } catch (MalformedURLException e) {
+                base = new URI(state.getUrl()).toURL();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                 // must try without base URL
             }
             if (base != null) {
-                sitemapUrl = new URL(base, sitemap);
+                sitemapUrl = base.toURI().resolve(sitemap).toURL();
             } else {
-                sitemapUrl = new URL(sitemap);
+                sitemapUrl = new URI(sitemap).toURL();
             }
             String hostname = sitemapUrl.getHost();
             if ((hostname != null) && (hostname.length() > 0)) {
@@ -1265,7 +1267,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return _exactUserAgentMatching;
     }
 
-    public static void main(String[] args) throws MalformedURLException, IOException {
+    public static void main(String[] args) throws IOException, URISyntaxException {
         if (args.length < 1) {
             System.err.println("SimpleRobotRulesParser <robots.txt> [[<agentname>] <URL>...]");
             System.err.println();
@@ -1293,7 +1295,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         SimpleRobotRulesParser parser = new SimpleRobotRulesParser();
         BaseRobotRules rules = null;
-        URL u = new URL(url);
+        URL u = new URI(url).toURL();
         URLConnection connection = u.openConnection();
         if (!agentNames.isEmpty()) {
             connection.setRequestProperty("User-Agent", agentName);
@@ -1324,7 +1326,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                             break;
                         }
                         location = URLDecoder.decode(location, "UTF-8");
-                        u = new URL(u, location);
+                        u = u.toURI().resolve(location).toURL();
                         if (redirects == maxRedirects) {
                             System.out.println("Reached maximum of " + maxRedirects + " redirects, not following redirect to " + u.toString());
                             rules = parser.failedFetch(code);

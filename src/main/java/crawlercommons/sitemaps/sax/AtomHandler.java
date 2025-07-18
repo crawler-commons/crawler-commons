@@ -20,6 +20,8 @@ import static crawlercommons.sitemaps.SiteMapParser.LOG;
 import static crawlercommons.sitemaps.SiteMapParser.urlIsValid;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
 
@@ -97,10 +99,10 @@ class AtomHandler extends DelegatorHandler {
                 // - has no rel attribute while the first one does (e.g.,
                 // rel="edit", rel="alternate")
                 try {
-                    loc = new URL(href);
+                    loc = new URI(href).toURL();
                     rel = r;
                     valid = v;
-                } catch (MalformedURLException e) {
+                } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                     LOG.trace("Can't create an entry with a bad URL", e);
                     LOG.debug("Bad url: [{}]", href);
                 }
