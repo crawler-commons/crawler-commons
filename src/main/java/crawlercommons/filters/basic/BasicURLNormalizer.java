@@ -27,7 +27,15 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,6 +84,20 @@ public class BasicURLNormalizer extends URLFilter {
      * https://tools.ietf.org/html/rfc2396#section-3.1
      */
     private final static Pattern hasSchemePattern = Pattern.compile("^[A-Za-z][A-Za-z0-9+.-]*:/");
+
+    /**
+     * Deconstruct the URL string manually to prevent early parsing errors
+     * from strict URI constructor.
+     * Regex breakdown:
+     * ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?
+     * Group 2: Protocol/Scheme
+     * Group 4: Authority
+     * Group 5: Path
+     * Group 7: Query
+     * Group 9: Fragment (ignored)
+     */
+    private final static Pattern urlDeconstructionPattern = Pattern.compile("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
+
 
     /** look-up table for characters which should not be escaped in URL paths */
     private final static boolean[] unescapedCharacters = new boolean[128];
@@ -169,125 +191,141 @@ public class BasicURLNormalizer extends URLFilter {
 
         urlString = urlString.trim(); // remove extra spaces
 
-        URL url = parseStringToURL(urlString);
-        if (url == null) {
-            LOG.debug("Malformed URL {}", urlString);
-            return null;
+        String[] urlParts = deconstructUrl(urlString);
+
+        // fallback to http:// if couldn't deconstruct or no protocol is specified
+        if (urlParts == null || urlParts[0] == null) {
+            return filter("http://" + urlString);
         }
 
-        String protocol = url.getProtocol();
-        String host = url.getHost();
-        int port = url.getPort();
-        String file = url.getFile();
+        String protocol = urlParts[0];
+        String authority = urlParts[1];
+        String host = urlParts[2];
+        int port = Integer.parseInt(urlParts[3]);
+        String file = urlParts[4];
 
-        boolean changed = false;
         boolean normalizePath = false;
-
-        if (!urlString.startsWith(protocol)) // protocol was lowercased
-            changed = true;
-
         if ("http".equals(protocol) || "https".equals(protocol) || "ftp".equals(protocol)) {
 
-            if (host != null && url.getAuthority() != null) {
-                String newHost;
+            if (host != null && authority != null) {
                 try {
-                    newHost = normalizeHostName(host);
+                    host = normalizeHostName(host);
                 } catch (IllegalArgumentException | IndexOutOfBoundsException | UnsupportedEncodingException e) {
                     LOG.info("Invalid hostname: {}", host, e);
                     return null;
                 }
-                if (!host.equals(newHost)) {
-                    host = newHost;
-                    changed = true;
-                } else if (!url.getAuthority().equals(newHost)) {
-                    // authority (http://<...>/) contains other elements (port,
-                    // user, etc.) which will likely cause a change if left away
-                    changed = true;
-                }
-            } else {
-                // no host or authority: recompose the URL from components
-                changed = true;
-            }
-
-            if (port == url.getDefaultPort()) { // uses default port
-                port = -1; // so don't specify it
-                changed = true;
             }
 
             normalizePath = true;
             if (file == null || "".equals(file)) { // add a slash
                 file = "/";
-                changed = true;
                 normalizePath = false; // no further path normalization required
             } else if (!file.startsWith("/")) {
                 file = "/" + file;
-                changed = true;
                 normalizePath = false; // no further path normalization required
-            }
-
-            if (url.getRef() != null) { // remove the ref
-                changed = true;
             }
         } else if (protocol.equals("file")) {
             normalizePath = true;
         }
 
         // properly encode characters in path/file using percent-encoding
-        String file2 = normalizeUrlFile(file);
+        file = normalizeUrlFile(file);
 
-        if (!file.equals(file2)) {
+        URL url;
+        try {
+            String tempUrl = protocol + "://" + (host == null ? "" : host) + (port == -1 ? "" : ":" + port) + file;
+            System.out.println("file: " + file);
+            url = new URI(tempUrl).toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
+            return null;
+        }
+
+        boolean changed = false;
+
+        if (port == url.getDefaultPort()) { // uses default port
+            port = -1; // so don't specify it
             changed = true;
-            file = file2;
         }
 
         if (normalizePath) {
             // check for unnecessary use of "/../", "/./", and "//"
             try {
-                if (changed) {
-                    url = new URL(protocol, host, port, file);
-                }
-                file2 = getFileWithNormalizedPath(url);
+                String file2 = getFileWithNormalizedPath(url);
                 if (!file.equals(file2)) {
                     changed = true;
                     file = file2;
                 }
-            } catch (MalformedURLException e) {
+            } catch(MalformedURLException e) {
                 LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
                 return null;
             }
         }
 
-        if (changed)
+        if(changed) {
             try {
-                urlString = new URL(protocol, host, port, file).toString();
-            } catch (MalformedURLException e) {
+                String tempUrl = protocol + "://" + (host == null ? "" : host) + (port == -1 ? "" : ":" + port) + file;
+                urlString = new URI(tempUrl).toURL().toString();
+            } catch (MalformedURLException | URISyntaxException e) {
                 LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
                 return null;
             }
+        } else {
+            urlString = url.toString();
+        }
 
         return urlString;
     }
 
     /**
-     * Tries to parse the given string into a java.net.URL object.
-     *
-     * @param urlString a string which possibly contains a URL
-     * @return a URL object or null if an exception occurs.
+     * Deconstructs a URL string into its primary components.
+     * @param urlString The URL string to deconstruct.
+     * @return A String array containing protocol, authority, host, port, and file, or null if the string cannot be matched.
      */
-    private static URL parseStringToURL(String urlString) {
-        URL url = null;
-        try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            if (!hasSchemePattern.matcher(urlString).find()) {
-                // no protocol/scheme : try to prefix http://
+    private static String[] deconstructUrl(String urlString) {
+        Matcher matcher = urlDeconstructionPattern.matcher(urlString);
+
+        if (!matcher.matches()) {
+            return null;
+        }
+
+        String protocol = matcher.group(2);
+        String authority = matcher.group(4);
+        String path = matcher.group(5);
+        String query = matcher.group(7);
+
+        String host = authority;
+        String port = "-1";
+        if (authority != null) {
+            // Strip user info
+            int atSign = authority.indexOf('@');
+            if (atSign != -1) {
+                host = authority.substring(atSign + 1);
+            }
+            // Extract port
+            int portColon = host.lastIndexOf(':');
+            int closingBracket = host.lastIndexOf(']'); // IPv6
+            if (portColon > closingBracket) {
                 try {
-                    url = new URL("http://" + urlString);
-                } catch (MalformedURLException e1) {
+                    port = host.substring(portColon + 1);
+                    if(port.isEmpty())
+                        port = "-1";
+                    host = host.substring(0, portColon);
+                } catch (NumberFormatException e) {
+                    // Invalid port, treat as part of the host
                 }
             }
         }
-        return url;
+
+        String file = (path == null ? "" : path) + (query == null ? "" : "?" + query);
+
+        return new String[]{
+                protocol,
+                authority,
+                host,
+                port,
+                file
+        };
     }
 
     /**
