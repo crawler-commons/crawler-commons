@@ -297,9 +297,9 @@ public class EffectiveTldFinderTest {
                   * - `.` hostname is a public suffix (not wildcard)
                   */
                     // test wildcard suffixes
-                    "=, foo.bar.uberspace.de", //
-                    "*, bar.uberspace.de", //
-                    "=, uberspace.de", //
+                    "=, foo.bar.gateway.dev", //
+                    "*, bar.gateway.dev", //
+                    "=, gateway.dev", //
                     "., de", //
                     "=, myspace.nyc3.digitaloceanspaces.com", //
                     "*, nyc3.digitaloceanspaces.com", //
