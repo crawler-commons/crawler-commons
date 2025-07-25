@@ -263,6 +263,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         public void setMatchedWildcard(boolean matchedWildcard) {
             _matchedWildcard = matchedWildcard;
+            _curRules.setMatchedWildcard(matchedWildcard);
         }
 
         public boolean isAddingRules() {
