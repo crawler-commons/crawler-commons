@@ -1403,8 +1403,7 @@ public class SimpleRobotRulesParserTest {
 
     @Test
     void testMatchedWildcard() {
-        final String robotsTxt =
-                "User-agent: *" + CRLF //
+        final String robotsTxt = "User-agent: *" + CRLF //
                         + "Allow: /" + CRLF //
                         + "User-agent: anybot" + CRLF //
                         + "Disallow: /search";
