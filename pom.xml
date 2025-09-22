@@ -391,7 +391,7 @@
 		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
 
 		<!-- Maven Plugin Dependencies -->
-		<maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
 		<maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
 		<maven-surfire-plugin.version>3.5.4</maven-surfire-plugin.version>
