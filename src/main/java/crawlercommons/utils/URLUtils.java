@@ -1,6 +1,7 @@
 package crawlercommons.utils;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 public class URLUtils {
@@ -15,7 +16,27 @@ public class URLUtils {
      */
     public static URL resolve(URL base, String spec) throws MalformedURLException {
         try {
-            return base.toURI().resolve(spec).toURL();
+            if (base == null) {
+                return new URI(spec).toURL();
+            }
+
+            String resolvedSpec = spec;
+            if (spec.startsWith(":")) {
+                // Prepending "./" makes spec starting with colon a valid relative path reference.
+                resolvedSpec = "./" + spec;
+            } else if (spec.startsWith("?")) {
+                // Handle pure query targets, as browsers resolve differently than RFC 3986.
+                // Prepend the base path's file component to spec.
+                String basePath = base.getPath();
+                if (basePath != null && !basePath.isEmpty()) {
+                    int lastSlash = basePath.lastIndexOf('/');
+                    if (lastSlash > -1 && lastSlash < (basePath.length() - 1)) {
+                        resolvedSpec = basePath.substring(lastSlash + 1) + spec;
+                    }
+                }
+            }
+
+            return base.toURI().resolve(resolvedSpec).normalize().toURL();
         } catch (Exception e) {
             throw (MalformedURLException) new MalformedURLException(e.getMessage()).initCause(e);
         }
