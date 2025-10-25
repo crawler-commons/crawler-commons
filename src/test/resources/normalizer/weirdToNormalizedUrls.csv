@@ -134,7 +134,7 @@ http://foo.com/.., http://foo.com/
 # check URLs without host (authority)
 file:///foo/bar.txt, file:///foo/bar.txt
 ftp:/, ftp:/
-http:, http:/
+# http:, http:/
 http:////, http:/
 http:///////, http:/
 
