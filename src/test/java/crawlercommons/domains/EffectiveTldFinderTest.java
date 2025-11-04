@@ -82,10 +82,10 @@ public class EffectiveTldFinderTest {
         assertEquals("uk", etld.getDomain());
         assertFalse(etld.isWildcard());
         assertEquals("uk", etld.getSuffix());
-        etld = EffectiveTldFinder.getEffectiveTLD("abc.def.bd");
-        assertEquals("def.bd", etld.getDomain());
+        etld = EffectiveTldFinder.getEffectiveTLD("justice.gov.ck");
+        assertEquals("gov.ck", etld.getDomain());
         assertTrue(etld.isWildcard());
-        assertEquals("*.bd", etld.getSuffix());
+        assertEquals("*.ck", etld.getSuffix());
     }
 
     @Test
