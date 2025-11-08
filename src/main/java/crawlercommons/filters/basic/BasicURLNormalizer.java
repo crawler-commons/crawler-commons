@@ -262,14 +262,15 @@ public class BasicURLNormalizer extends URLFilter {
             try {
                 if (changed) {
                     String tempUrl = protocol + "://" + (host == null ? "" : host) + (port == -1 ? "" : ":" + port) + file;
-                    url = new URI(tempUrl).toURL();
+                    file2 = getFileWithNormalizedPath(new URI(tempUrl));
+                } else {
+                    file2 = getFileWithNormalizedPath(new URI(urlString));
                 }
-                file2 = getFileWithNormalizedPath(url);
                 if (!file.equals(file2)) {
                     changed = true;
                     file = file2;
                 }
-            } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
+            } catch (URISyntaxException | IllegalArgumentException e) {
                 LOG.info("Malformed URL {}://{}{}{}", protocol, host, (port == -1 ? "" : ":" + port), file);
                 return null;
             }
@@ -486,38 +487,34 @@ public class BasicURLNormalizer extends URLFilter {
 
     }
 
-    private String getFileWithNormalizedPath(URL url) throws MalformedURLException {
-        String file;
+    private String getFileWithNormalizedPath(URI uri) {
+        String path = uri.getRawPath();
 
-        if (hasNormalizablePathPattern.matcher(url.getPath()).find()) {
+        if (hasNormalizablePathPattern.matcher(path).find()) {
             // only normalize the path if there is something to normalize
             // to avoid needless work
-            try {
-                file = url.toURI().normalize().toURL().getFile();
-                // URI.normalize() does not normalize leading dot segments,
-                // see also http://tools.ietf.org/html/rfc3986#section-5.2.4
-                int start = 0;
-                while (file.startsWith("/..", start) && ((start + 3) == file.length() || file.charAt(3) == '/')) {
-                    start += 3;
-                }
-                if (start > 0) {
-                    file = file.substring(start);
-                }
-            } catch (URISyntaxException e) {
-                file = url.getFile();
+            path = uri.normalize().getRawPath();
+            // URI.normalize() does not normalize leading dot segments,
+            // see also http://tools.ietf.org/html/rfc3986#section-5.2.4
+            int start = 0;
+            while (path.startsWith("/..", start) && ((start + 3) == path.length() || path.charAt(3) == '/')) {
+                start += 3;
             }
-        } else {
-            file = url.getFile();
+            if (start > 0) {
+                path = path.substring(start);
+            }
         }
 
         // if path is empty return a single slash
-        if (file.isEmpty()) {
-            file = "/";
-        } else if (!file.startsWith("/")) {
-            file = "/" + file;
+        if (path.isEmpty()) {
+            path = "/";
         }
 
-        return file;
+        if (uri.getRawQuery() == null) {
+            return path;
+        }
+
+        return path + '?' + uri.getRawQuery();
     }
 
     /**
