@@ -1,0 +1,39 @@
+# Tests for resolving URLs or URIs
+# Fields / columns:
+# 1. input (spec): an absolute or relative URL (path, query, etc.)
+# 2. the base URL (possibly empty)
+# 3. expected result for URL/URI resolution
+
+# test for empty (null) base URL
+https://example.org/, "", https://example.org/
+
+# taken from https://issues.apache.org/jira/browse/NUTCH-797
+?co=0&sk=0&pg=1, http://careers3.accenture.com/Careers/ASPX/Search.aspx?co=0&sk=0, http://careers3.accenture.com/Careers/ASPX/Search.aspx?co=0&sk=0&pg=1
+
+# selected tests from https://github.com/web-platform-tests/wpt/blob/master/url/resources/urltestdata.json
+# (license: BSD 3-clause)
+# Note: most of the wpt tests additionally require normalization of the URL
+# which is out-of-scope here: percent encoding, `/../` in path component, etc.
+#
+"http://user:pass@foo:21/bar;par?b#c", http://example.org/foo/bar, "http://user:pass@foo:21/bar;par?b#c"
+https://example.com/, http://example.org/foo/bar, https://example.com/
+/, http://example.org/foo/bar, http://example.org/
+:23, http://example.org/foo/bar, http://example.org/foo/:23
+/:23, http://example.org/foo/bar, http://example.org/:23
+//foo/bar, http://example.org/foo/bar, http://foo/bar
+/a/b/c, http://example.org/foo/bar, http://example.org/a/b/c
+/a%2fc, http://example.org/foo/bar, http://example.org/a%2fc
+/a/%2f/c, http://example.org/foo/bar, http://example.org/a/%2f/c
+?a=b&c=d, http://example.org/foo/bar, http://example.org/foo/bar?a=b&c=d
+??a=b&c=d, http://example.org/foo/bar, http://example.org/foo/bar??a=b&c=d
+http://1.2.3.4/, http://other.com/, http://1.2.3.4/
+//server/file, file:///tmp/mock/path, file://server/file
+
+# real-world examples
+/news.html, https://example.org/search?q=23&n=10, https://example.org/news.html
+black-table, https://example.org/product/red-table, https://example.org/product/black-table
+?add_to_wishlist=23, https://example.org/product/red-table, https://example.org/product/red-table?add_to_wishlist=23
+"#right-menu", https://example.org/product/red-table, "https://example.org/product/red-table#right-menu"
+//video.example.com/watch?product=23, https://example.org/product/red-table, https://video.example.com/watch?product=23
+https://video.example.com/watch?product=23, https://example.org/product/red-table, https://video.example.com/watch?product=23
+./list.php, https://example.org/product/red-table, https://example.org/product/list.php
