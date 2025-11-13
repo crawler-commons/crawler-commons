@@ -1282,7 +1282,6 @@ public class SimpleRobotRulesParserTest {
 
     @Test
     void testOverrideUserAgentMatcher() {
-        @SuppressWarnings("serial")
         BaseRobotsParser myRobotsParser = new SimpleRobotRulesParser() {
             @Override
             protected boolean userAgentProductTokenPartialMatch(String userAgent, Collection<String> targetTokens) {

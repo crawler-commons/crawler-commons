@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -53,11 +55,11 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testVideosSitemap() throws UnknownFormatException, IOException {
+    public void testVideosSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.VIDEO);
 
-        URL url = new URL("http://www.example.com/sitemap-video.xml");
+        URL url = new URI("http://www.example.com/sitemap-video.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-videos.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -67,8 +69,9 @@ public class SiteMapParserExtensionTest {
         Iterator<SiteMapURL> siter = sm.getSiteMapUrls().iterator();
 
         // first <loc> element: nearly all video attributes
-        VideoAttributes expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123.jpg"), "Grilling steaks for summer",
-                        "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123.flv"), new URL("http://www.example.com/videoplayer.swf?video=123"));
+        VideoAttributes expectedVideoAttributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123.jpg").toURL(), "Grilling steaks for summer",
+                        "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123.flv").toURL(), new URI(
+                                        "http://www.example.com/videoplayer.swf?video=123").toURL());
         expectedVideoAttributes.setDuration(600);
         ZonedDateTime dt = ZonedDateTime.parse("2009-11-05T19:20:30+08:00");
         expectedVideoAttributes.setExpirationDate(dt);
@@ -79,12 +82,12 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes.setFamilyFriendly(true);
         expectedVideoAttributes.setTags(new String[] { "sample_tag1", "sample_tag2" });
         expectedVideoAttributes.setAllowedCountries(new String[] { "IE", "GB", "US", "CA" });
-        expectedVideoAttributes.setGalleryLoc(new URL("http://cooking.example.com"));
+        expectedVideoAttributes.setGalleryLoc(new URI("http://cooking.example.com").toURL());
         expectedVideoAttributes.setGalleryTitle("Cooking Videos");
         expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", 1.99f, VideoAttributes.VideoPriceType.own) });
         expectedVideoAttributes.setRequiresSubscription(true);
         expectedVideoAttributes.setUploader("GrillyMcGrillerson");
-        expectedVideoAttributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
+        expectedVideoAttributes.setUploaderInfo(new URI("http://www.example.com/users/grillymcgrillerson").toURL());
         expectedVideoAttributes.setLive(false);
         assertTrue(expectedVideoAttributes.isValid());
         VideoAttributes attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
@@ -96,16 +99,16 @@ public class SiteMapParserExtensionTest {
         // The current expected behavior is to not handle non-US locale price
         // values and set the price value to null if parsing as float value
         // fails.
-        expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123-2.jpg"), "Grilling steaks for summer, episode 2",
-                        "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123-2.flv"), null);
+        expectedVideoAttributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123-2.jpg").toURL(), "Grilling steaks for summer, episode 2",
+                        "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123-2.flv").toURL(), null);
         expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", null, VideoAttributes.VideoPriceType.own) });
         attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
         assertEquals(expectedVideoAttributes, attr);
 
         // empty price, only type (purchase or rent) is indicated, see #221
-        expectedVideoAttributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123-3.jpg"), "Grilling steaks for summer, episode 3",
-                        "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123-3.flv"), null);
+        expectedVideoAttributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123-3.jpg").toURL(), "Grilling steaks for summer, episode 3",
+                        "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123-3.flv").toURL(), null);
         expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice(null, null, VideoAttributes.VideoPriceType.rent) });
         attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
@@ -113,11 +116,11 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testVideosSitemapTVShow() throws UnknownFormatException, IOException {
+    public void testVideosSitemapTVShow() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.VIDEO);
 
-        URL url = new URL("https://example.org/sitemap.xml");
+        URL url = new URI("https://example.org/sitemap.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-videos-tvshow.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -131,7 +134,7 @@ public class SiteMapParserExtensionTest {
         assertNotNull(attr);
 
         VideoAttributes expectedVideoAttributes = new VideoAttributes( //
-                        new URL("https://example.org/my-tv-show.jpg"), //
+                        new URI("https://example.org/my-tv-show.jpg").toURL(), //
                         "My TV Show! - Thu, Jun 05, 2025", //
                         "Dummy description", null, null);
         expectedVideoAttributes.setDuration(2459);
@@ -142,10 +145,10 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes.setTags(new String[] { "talkshow", "interview", "example" });
         expectedVideoAttributes.setCategory("My TV Show!");
         expectedVideoAttributes.setRequiresSubscription(true);
-        expectedVideoAttributes.setContentLoc(new URL("https://example.org/video/video/23-13.mp4"));
-        expectedVideoAttributes.setPlayerLoc(new URL("https://example.org/video/embed/23-13"));
-        expectedVideoAttributes.addContentSegment(1287, new URL("https://example.org/video/video/23-13-1.mp4"));
-        expectedVideoAttributes.addContentSegment(1172, new URL("https://example.org/video/video/23-13-2.mp4"));
+        expectedVideoAttributes.setContentLoc(new URI("https://example.org/video/video/23-13.mp4").toURL());
+        expectedVideoAttributes.setPlayerLoc(new URI("https://example.org/video/embed/23-13").toURL());
+        expectedVideoAttributes.addContentSegment(1287, new URI("https://example.org/video/video/23-13-1.mp4").toURL());
+        expectedVideoAttributes.addContentSegment(1172, new URI("https://example.org/video/video/23-13-2.mp4").toURL());
         VideoAttributes.TVShow tvShow = new VideoAttributes.TVShow();
         tvShow.setShowTitle("My TV Show!");
         tvShow.setVideoType("full");
@@ -163,23 +166,23 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testImageSitemap() throws UnknownFormatException, IOException {
+    public void testImageSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.IMAGE);
 
-        URL url = new URL("http://www.example.com/sitemap-images.xml");
+        URL url = new URI("http://www.example.com/sitemap-images.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-images.xml", url);
 
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
         assertEquals(1, sm.getSiteMapUrls().size());
-        ImageAttributes imageAttributes1 = new ImageAttributes(new URL("http://example.com/image.jpg"));
-        ImageAttributes imageAttributes2 = new ImageAttributes(new URL("http://example.com/photo.jpg"));
+        ImageAttributes imageAttributes1 = new ImageAttributes(new URI("http://example.com/image.jpg").toURL());
+        ImageAttributes imageAttributes2 = new ImageAttributes(new URI("http://example.com/photo.jpg").toURL());
         imageAttributes2.setCaption("This is the caption.");
         imageAttributes2.setGeoLocation("Limerick, Ireland");
         imageAttributes2.setTitle("Example photo shot in Limerick, Ireland");
-        imageAttributes2.setLicense(new URL("https://creativecommons.org/licenses/by/4.0/legalcode"));
+        imageAttributes2.setLicense(new URI("https://creativecommons.org/licenses/by/4.0/legalcode").toURL());
 
         for (SiteMapURL su : sm.getSiteMapUrls()) {
             assertNotNull(su.getAttributesForExtension(Extension.IMAGE));
@@ -193,13 +196,12 @@ public class SiteMapParserExtensionTest {
         }
     }
 
-    @SuppressWarnings("serial")
     @Test
-    public void testXHTMLLinksSitemap() throws UnknownFormatException, IOException, MalformedURLException {
+    public void testXHTMLLinksSitemap() throws UnknownFormatException, IOException, MalformedURLException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.LINKS);
 
-        URL url = new URL("http://www.example.com/sitemap-links.xml");
+        URL url = new URI("http://www.example.com/sitemap-links.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-links.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -207,8 +209,8 @@ public class SiteMapParserExtensionTest {
         SiteMap sm = (SiteMap) asm;
         assertEquals(3, sm.getSiteMapUrls().size());
         // all three pages share the same links attributes
-        LinkAttributes[] linkAttributes = new LinkAttributes[] { new LinkAttributes(new URL("http://www.example.com/deutsch/")),
-                        new LinkAttributes(new URL("http://www.example.com/schweiz-deutsch/")), new LinkAttributes(new URL("http://www.example.com/english/")) };
+        LinkAttributes[] linkAttributes = new LinkAttributes[] { new LinkAttributes(new URI("http://www.example.com/deutsch/").toURL()),
+                        new LinkAttributes(new URI("http://www.example.com/schweiz-deutsch/").toURL()), new LinkAttributes(new URI("http://www.example.com/english/").toURL()) };
         linkAttributes[0].setParams(new HashMap<String, String>() {
             {
                 put("rel", "alternate");
@@ -241,11 +243,11 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testNewsSitemap() throws UnknownFormatException, IOException {
+    public void testNewsSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.NEWS);
 
-        URL url = new URL("http://www.example.org/sitemap-news.xml");
+        URL url = new URI("http://www.example.org/sitemap-news.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-news.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -283,11 +285,11 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testMobileSitemap() throws UnknownFormatException, IOException {
+    public void testMobileSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.enableExtension(Extension.MOBILE);
 
-        URL url = new URL("http://www.example.org/sitemap-mobile.xml");
+        URL url = new URI("http://www.example.org/sitemap-mobile.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-mobile.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -308,12 +310,12 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testShinpaideshuNewsSitemap() throws UnknownFormatException, IOException {
+    public void testShinpaideshuNewsSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.setStrictNamespace(true);
         parser.enableExtension(Extension.NEWS);
 
-        URL url = new URL("https://shinpaideshou.wordpress.com/news-sitemap.xml");
+        URL url = new URI("https://shinpaideshou.wordpress.com/news-sitemap.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/shinpaideshou-news-sitemap.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -330,7 +332,7 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testHebdenbridgetimesArticlesSitemap() throws UnknownFormatException, IOException {
+    public void testHebdenbridgetimesArticlesSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.setStrictNamespace(true);
         parser.enableExtension(Extension.NEWS);
@@ -338,7 +340,7 @@ public class SiteMapParserExtensionTest {
         parser.enableExtension(Extension.VIDEO);
         parser.enableExtension(Extension.MOBILE);
 
-        URL url = new URL("http://www.hebdenbridgetimes.co.uk/sitemap-article-2015-18.xml");
+        URL url = new URI("http://www.hebdenbridgetimes.co.uk/sitemap-article-2015-18.xml").toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/hebdenbridgetimes-articles-sitemap.xml", url);
 
         assertEquals(false, asm.isIndex());
@@ -348,13 +350,13 @@ public class SiteMapParserExtensionTest {
     }
 
     @Test
-    public void testPageMapSitemap() throws UnknownFormatException, IOException {
+    public void testPageMapSitemap() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser();
         parser.setStrictNamespace(true);
         parser.enableExtension(Extension.PAGEMAPS);
 
         String urlStr = "http://www.example.com/pagemaps-sitemap.xml";
-        URL url = new URL(urlStr);
+        URL url = new URI(urlStr).toURL();
         AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/pagemaps-sitemap.xml", url);
 
         assertEquals(false, asm.isIndex());

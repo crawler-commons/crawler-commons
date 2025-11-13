@@ -3,7 +3,8 @@ package crawlercommons.sitemaps.extension;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Map;
@@ -15,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class VideoAttributesTest {
 
     @Test
-    public void testVideoAttributesAsMap() throws MalformedURLException {
-        VideoAttributes attributes = new VideoAttributes(new URL("http://www.example.com/thumbs/123.jpg"), "Grilling steaks for summer",
-                "Alkis shows you how to get perfectly done steaks every time", new URL("http://www.example.com/video123.flv"), new URL("http://www.example.com/videoplayer.swf?video=123"));
+    public void testVideoAttributesAsMap() throws MalformedURLException, URISyntaxException {
+        VideoAttributes attributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123.jpg").toURL(), "Grilling steaks for summer",
+                "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123.flv").toURL(), new URI("http://www.example.com/videoplayer.swf?video=123").toURL());
         attributes.setDuration(600);
         ZonedDateTime dt = ZonedDateTime.parse("2009-11-05T19:20:30+08:00");
         attributes.setExpirationDate(dt);
@@ -29,12 +30,12 @@ public class VideoAttributesTest {
         attributes.setFamilyFriendly(true);
         attributes.setTags(new String[] { "sample_tag1", "sample_tag2" });
         attributes.setAllowedCountries(new String[] { "IE", "GB", "US", "CA" });
-        attributes.setGalleryLoc(new URL("http://cooking.example.com"));
+        attributes.setGalleryLoc(new URI("http://cooking.example.com").toURL());
         attributes.setGalleryTitle("Cooking Videos");
         attributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", 1.99f, VideoAttributes.VideoPriceType.own) });
         attributes.setRequiresSubscription(true);
         attributes.setUploader("GrillyMcGrillerson");
-        attributes.setUploaderInfo(new URL("http://www.example.com/users/grillymcgrillerson"));
+        attributes.setUploaderInfo(new URI("http://www.example.com/users/grillymcgrillerson").toURL());
         attributes.setLive(false);
         attributes.setDuration(54321);
         Map<String, String[]> map = attributes.asMap();
