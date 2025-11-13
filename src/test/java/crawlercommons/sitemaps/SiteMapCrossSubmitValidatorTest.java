@@ -19,7 +19,8 @@ package crawlercommons.sitemaps;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
@@ -27,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SiteMapCrossSubmitValidatorTest {
 
-    protected static SiteMap getSiteMap(String url, String content) throws UnknownFormatException, IOException {
+    protected static SiteMap getSiteMap(String url, String content) throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser(false);
         String contentType = "text/plain";
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
-        AbstractSiteMap asm = parser.parseSiteMap(contentType, bytes, new URL(url));
+        AbstractSiteMap asm = parser.parseSiteMap(contentType, bytes, new URI(url).toURL());
         AbstractSiteMapTest.testSerializable(asm);
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);

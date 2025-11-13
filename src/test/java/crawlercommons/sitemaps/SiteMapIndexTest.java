@@ -17,8 +17,8 @@
 package crawlercommons.sitemaps;
 
 import java.net.MalformedURLException;
-import java.net.URL;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,12 +39,12 @@ public class SiteMapIndexTest {
     }
 
     @Test
-    public void testNPE() {
+    public void testNPE() throws URISyntaxException {
         SiteMapIndex index = new SiteMapIndex();
         index.addSitemap(new SiteMap("INVALID", "2020-06-18"));
         index.addSitemap(new SiteMap("https://example.com/sitemap1.xml", "2020-06-18"));
         try {
-            assertNotNull(index.getSitemap(new URL("https://example.com/sitemap1.xml")));
+            assertNotNull(index.getSitemap(new URI("https://example.com/sitemap1.xml").toURL()));
         } catch (MalformedURLException e) {
             // URL is valid
         }

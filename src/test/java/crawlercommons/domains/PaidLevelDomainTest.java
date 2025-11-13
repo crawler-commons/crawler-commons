@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
@@ -28,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class PaidLevelDomainTest {
 
     @Test
-    public final void testIPv4() throws MalformedURLException {
+    public final void testIPv4() throws MalformedURLException, URISyntaxException {
         assertEquals("1.2.3.4", PaidLevelDomain.getPLD("1.2.3.4"));
 
-        URL url = new URL("http://1.2.3.4:8080/a/b/c?_queue=1");
+        URL url = new URI("http://1.2.3.4:8080/a/b/c?_queue=1").toURL();
         assertEquals("1.2.3.4", PaidLevelDomain.getPLD(url));
     }
 
@@ -43,18 +45,18 @@ public class PaidLevelDomainTest {
     }
 
     @Test
-    public final void testIPv6() throws MalformedURLException, UnknownHostException {
+    public final void testIPv6() throws MalformedURLException, UnknownHostException, URISyntaxException {
         InetAddress inet = InetAddress.getByName("1080:0:0:0:8:800:200c:417a");
-        URL url = new URL("http", inet.getHostAddress(), 8080, "a/b/c");
+        URL url = new URI("http", null, inet.getHostAddress(), 8080, "/a/b/c", null, null).toURL();
         assertEquals("[1080:0:0:0:8:800:200c:417a]", PaidLevelDomain.getPLD(url));
     }
 
     @Test
-    public final void testStandardDomains() throws MalformedURLException {
+    public final void testStandardDomains() throws MalformedURLException, URISyntaxException {
         assertEquals("domain.com", PaidLevelDomain.getPLD("domain.com"));
         assertEquals("domain.com", PaidLevelDomain.getPLD("www.domain.com"));
         assertEquals("domain.com", PaidLevelDomain.getPLD("www.zzz.domain.com"));
-        assertEquals("domain.com", PaidLevelDomain.getPLD(new URL("https://www.zzz.domain.com:9000/a/b?c=d")));
+        assertEquals("domain.com", PaidLevelDomain.getPLD(new URI("https://www.zzz.domain.com:9000/a/b?c=d").toURL()));
     }
 
     @Test

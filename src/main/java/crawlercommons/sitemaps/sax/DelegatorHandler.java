@@ -18,8 +18,6 @@ package crawlercommons.sitemaps.sax;
 
 import static crawlercommons.sitemaps.SiteMapParser.LOG;
 
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
