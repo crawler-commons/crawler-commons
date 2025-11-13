@@ -3,7 +3,8 @@ package crawlercommons.sitemaps.extension;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LinkAttributesTest {
 
     @Test
-    public void testLinkAttributesAsMap() throws MalformedURLException {
-        LinkAttributes attributes = new LinkAttributes(new URL("http://www.example.com/deutsch/"));
+    public void testLinkAttributesAsMap() throws MalformedURLException, URISyntaxException {
+        LinkAttributes attributes = new LinkAttributes(new URI("http://www.example.com/deutsch/").toURL());
         attributes.setParams(new HashMap<String, String>() {
             {
                 put("rel", "alternate");

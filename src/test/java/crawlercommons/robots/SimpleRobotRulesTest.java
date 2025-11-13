@@ -28,6 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,18 +55,18 @@ public class SimpleRobotRulesTest {
     }
 
     @Test
-    public void testIsAllowed() throws MalformedURLException {
+    public void testIsAllowed() throws MalformedURLException, URISyntaxException {
         SimpleRobotRules rules = new SimpleRobotRules();
         rules.addRule("/", true);
         rules.addRule("/disallowed/", false);
         rules.addRule("*?isallowed=false", false);
         rules.sortRules();
-        URL url1 = new URL("https", "example.org", "index.html");
-        URL url2 = new URL("https", "example.org", "/disallowed/file.html");
-        URL url3 = new URL("https", "example.org", "");
-        URL url4 = new URL("https", "example.org", "?isallowed=false");
-        URL url5 = new URL("https", "example.org", "?isallowed=true");
-        URL url6 = new URL("https", "example.org", "/?isallowed=false");
+        URL url1 = new URI("https://example.org/index.html").toURL();
+        URL url2 = new URI("https://example.org/disallowed/file.html").toURL();
+        URL url3 = new URI("https://example.org/").toURL();
+        URL url4 = new URI("https://example.org?isallowed=false").toURL();
+        URL url5 = new URI("https://example.org?isallowed=true").toURL();
+        URL url6 = new URI("https://example.org/?isallowed=false").toURL();
         assertTrue(rules.isAllowed(url1));
         assertFalse(rules.isAllowed(url2));
         assertTrue(rules.isAllowed(url3));
@@ -91,7 +93,7 @@ public class SimpleRobotRulesTest {
     @ParameterizedTest
     @CsvSource({ "https://www.example.com/foo/../disallowed/bar.html", //
                     "https://www.example.com////disallowed/bar.html" })
-    public void testUrlsNotNormalized(String urlNotNormalized) throws MalformedURLException {
+    public void testUrlsNotNormalized(String urlNotNormalized) throws URISyntaxException {
         SimpleRobotRules rules = new SimpleRobotRules();
         rules.addRule("/", true);
         rules.addRule("/disallowed/", false);
@@ -102,7 +104,7 @@ public class SimpleRobotRulesTest {
         // URL disallowed if properly normalized
         assertFalse(rules.isAllowed(urlNormalized));
         // base URL (path = "/") is allowed
-        String baseURL = new URL(new URL(urlNormalized), "/").toString();
+        String baseURL = (new URI(urlNormalized)).resolve("/").toString();
         assertTrue(rules.isAllowed(baseURL));
     }
 }
