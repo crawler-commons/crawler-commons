@@ -6,9 +6,9 @@ Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
 - Add matchedWildcard flag to BaseRobotRules (CoGiang, sebastian-nagel) #530
 - [Domains] Update unit tests after change in public suffix list (sebastian-nagel, Richard Zowalla) #544
 - [Domains] Replace deleted *.uberspace.de with a wildcard from Google (Richard Zowalla) #532
-- Partial replacement of deprecated URL constructors (HamzaElzarw-2022, kkrugler, sebastian-nagel) #522, #524
-- Upgrade dependencies (dependabot) #521, #533, #534
-- Upgrade Maven plugins (dependabot) #520, #538, #539, #540
+- Partial replacement of deprecated URL constructors (HamzaElzarw-2022, kkrugler, sebastian-nagel) #522, #524, #545
+- Upgrade dependencies (dependabot) #521, #533, #534, #547, #549,
+- Upgrade Maven plugins (dependabot) #520, #538, #539, #540, #546, #550
 
 Release 1.5 (2025-06-27)
 - Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio) #510, #516
