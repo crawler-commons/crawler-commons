@@ -16,6 +16,7 @@
 
 package crawlercommons.filters.basic;
 
+import static java.net.IDN.ALLOW_UNASSIGNED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -647,9 +648,9 @@ public class BasicURLNormalizer extends URLFilter {
              * (non-ASCII dot-separated segment) is longer than 256 characters,
              * cf. https://bugs.openjdk.java.net/browse/JDK-6806873
              */
-            host = IDN.toASCII(host);
+            host = IDN.toASCII(host, ALLOW_UNASSIGNED);
         } else if (this.idnNormalization == IdnNormalization.UNICODE && host.contains("xn--")) {
-            host = IDN.toUnicode(host);
+            host = IDN.toUnicode(host, ALLOW_UNASSIGNED);
         }
 
         /* 4. trim a trailing dot */
