@@ -16,6 +16,7 @@
 
 package crawlercommons.domains;
 
+import static java.net.IDN.ALLOW_UNASSIGNED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -404,7 +405,7 @@ public class EffectiveTldFinder {
         String domainSegment = hostname.substring(start, etldStartPos);
         if (!EffectiveTLD.isAscii(domainSegment)) {
             try {
-                IDN.toASCII(domainSegment);
+                IDN.toASCII(domainSegment, ALLOW_UNASSIGNED);
             } catch (IllegalArgumentException e) {
                 // not a valid IDN segment,
                 // includes check for max. length (63 chars)
@@ -613,7 +614,7 @@ public class EffectiveTldFinder {
             String[] var = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 if (!isAscii(parts[i])) {
-                    var[i] = IDN.toASCII(parts[i]);
+                    var[i] = IDN.toASCII(parts[i], ALLOW_UNASSIGNED);
                 }
             }
             for (int i = 0; i < parts.length; i++) {
@@ -653,7 +654,7 @@ public class EffectiveTldFinder {
             if (isAscii(str)) {
                 return str.toLowerCase(Locale.ROOT);
             }
-            return IDN.toASCII(str);
+            return IDN.toASCII(str, ALLOW_UNASSIGNED);
         }
 
         private static boolean isAscii(String str) {
