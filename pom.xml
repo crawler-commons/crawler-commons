@@ -393,7 +393,7 @@
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.5</maven-resources-plugin.version>
-		<maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+		<maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
 		<maven-surfire-plugin.version>3.5.4</maven-surfire-plugin.version>
 		<maven-release-plugin.version>3.2.0</maven-release-plugin.version>
 		<maven-source-plugin.version>3.3.1</maven-source-plugin.version>
