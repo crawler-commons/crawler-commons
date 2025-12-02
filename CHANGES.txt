@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
+- Support IDNA2008 Unicode domains by using ALLOW_UNASSIGNED in IDN methods within TldFinder / Normalizer. (Richard Zowalla, sebastian-nagel) #551
 - Add URLUtils class for URL resolution functionality (HamzaElzarw-2022, Richard Zowalla, sebastian-nagel) #526
 - Replace deprecated URL constructor in BasicURLNormalizer (HamzaElzarw-2022, Richard Zowalla, sebastian-nagel) #531
 - Add matchedWildcard flag to BaseRobotRules (CoGiang, sebastian-nagel) #530
