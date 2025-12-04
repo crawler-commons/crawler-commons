@@ -1,5 +1,7 @@
 Crawler-Commons Change Log
 
+Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+
 Release 1.6 (2025-12-04)
 - Support IDNA2008 Unicode domains by using ALLOW_UNASSIGNED in IDN methods within TldFinder / Normalizer. (Richard Zowalla, sebastian-nagel) #551, #552
 - Add URLUtils class for URL resolution functionality (HamzaElzarw-2022, Richard Zowalla, sebastian-nagel) #526

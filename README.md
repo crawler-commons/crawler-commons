@@ -16,6 +16,7 @@ These components benefit from collaboration among various existing web crawler p
 # User Documentation
 
 ## Javadocs
+* [1.6](https://crawler-commons.github.io/crawler-commons/1.6/)
 * [1.5](https://crawler-commons.github.io/crawler-commons/1.5/)
 * [1.4](https://crawler-commons.github.io/crawler-commons/1.4/)
 * [1.3](https://crawler-commons.github.io/crawler-commons/1.3/)
@@ -39,18 +40,29 @@ Using Maven, add the following dependency to your pom.xml:
 <dependency>
     <groupId>com.github.crawler-commons</groupId>
     <artifactId>crawler-commons</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
 </dependency>
 ~~~
 
 Using Gradle, add the folling to your build file:
 ```groovy
 dependencies {
-    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.5'
+    implementation group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.6'
 }
 ```
 
 # News
+
+## 4th December 2025 – crawler-commons 1.6 released
+
+We are pleased to announce the release of version 1.6 of Crawler-Commons!
+
+The new release includes multiple dependency upgrades, several improvements and bug fixes. See the [CHANGES.txt](https://github.com/crawler-commons/crawler-commons/blob/crawler-commons-1.6/CHANGES.txt) file for the complete list of changes.
+
+**Important**:
+
+- This release adds support for IDN2008 domain names and public suffixes in EffectiveTldFinder. If you rely on a recent version of the public suffix list, please upgrade to release 1.6! See [issue report #551](https://github.com/crawler-commons/crawler-commons/issues/551) for more information.
+
 
 ## 2nd July 2025 – crawler-commons 1.5 released
 
