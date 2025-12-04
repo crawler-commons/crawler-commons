@@ -1,7 +1,7 @@
 Crawler-Commons Change Log
 
-Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
-- Support IDNA2008 Unicode domains by using ALLOW_UNASSIGNED in IDN methods within TldFinder / Normalizer. (Richard Zowalla, sebastian-nagel) #551
+Release 1.6 (2025-12-04)
+- Support IDNA2008 Unicode domains by using ALLOW_UNASSIGNED in IDN methods within TldFinder / Normalizer. (Richard Zowalla, sebastian-nagel) #551, #552
 - Add URLUtils class for URL resolution functionality (HamzaElzarw-2022, Richard Zowalla, sebastian-nagel) #526
 - Replace deprecated URL constructor in BasicURLNormalizer (HamzaElzarw-2022, Richard Zowalla, sebastian-nagel) #531
 - Add matchedWildcard flag to BaseRobotRules (CoGiang, sebastian-nagel) #530
@@ -9,7 +9,7 @@ Current Development 1.6-SNAPSHOT (yyyy-mm-dd)
 - [Domains] Replace deleted *.uberspace.de with a wildcard from Google (Richard Zowalla) #532
 - Partial replacement of deprecated URL constructors (HamzaElzarw-2022, kkrugler, sebastian-nagel) #522, #524, #545, #536
 - Upgrade dependencies (dependabot) #521, #533, #534, #547, #549,
-- Upgrade Maven plugins (dependabot) #520, #538, #539, #540, #546, #550
+- Upgrade Maven plugins (dependabot) #520, #538, #539, #540, #546, #550, #553, #554, #555
 
 Release 1.5 (2025-06-27)
 - Migrate publishing from OSSRH to Central Portal (jnioche, sebastian-nagel, Richard Zowalla, aecio) #510, #516
