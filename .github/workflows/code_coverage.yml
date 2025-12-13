@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Coveralls
-    runs-on: ubuntu-latest
+    runs-on: carbonrunner-4vcpu-ubuntu-latest
 
     steps:
       - name: Checkout
