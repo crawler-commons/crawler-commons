@@ -86,6 +86,10 @@ public final class RobotsTagParser {
         this(Collections.emptySet());
     }
 
+    public static ParserBuilder<RobotsTagParser> builder() {
+        return new ParserBuilder<>(RobotsTagParser::new);
+    }
+
     /**
      * Parses an {@code X-Robots-Tag} HTTP response header.
      * <p>

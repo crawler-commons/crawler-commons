@@ -104,6 +104,10 @@ public final class RobotsMetaParser {
         this(Collections.emptySet());
     }
 
+    public static ParserBuilder<RobotsMetaParser> builder() {
+        return new ParserBuilder<>(RobotsMetaParser::new);
+    }
+
     /**
      * Parses a {@code <meta name="robots" content="...">} HTML element.
      * <p>
