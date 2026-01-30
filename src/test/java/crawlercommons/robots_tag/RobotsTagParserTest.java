@@ -159,7 +159,10 @@ class RobotsTagParserTest {
         "max-snippet: <invalid value>, follow"
     })
     void throwExceptions(String input) {
-        var parser = new RobotsTagParser(Collections.emptySet(), KnownDirectiveParsers.PARSERS_BY_NAME, ExceptionHandlers::throwing);
+        var parser = RobotsTagParser.builder()
+            .withExceptionHandler(ExceptionHandlers::throwing)
+            .build();
+
         assertThrows(ParserException.class, () -> parser.parse(input));
         assertTrue(parser.getCollectedDirectives().isEmpty()); //The "index" and "follow" directives were not parsed because the exception handler threw the exceptions.
     }
