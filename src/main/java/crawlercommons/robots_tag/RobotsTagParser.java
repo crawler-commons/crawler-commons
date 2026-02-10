@@ -97,7 +97,7 @@ public final class RobotsTagParser {
      * <p>
      * Nothing is done to ensure that the input is an {@code X-Robots-Tag} header.
      * <p>
-     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
+     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      *
      * @param robotsHeader a single {@code X-Robots-Tag} header (not prefixed with {@code X-Robots-Tag:})
      */
@@ -121,7 +121,7 @@ public final class RobotsTagParser {
      * <p>
      * An ambiguous string can not be treated as a string of comma-separated directives. Instead, it has to be parsed token by token.
      * <p>
-     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
+     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String robotsHeader) {
         String stringToParse = ParserUtils.removeUnnecessaryLeadingCharacters(robotsHeader);
