@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: carbonrunner-4vcpu-ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         java: [ 11, 17 ]
