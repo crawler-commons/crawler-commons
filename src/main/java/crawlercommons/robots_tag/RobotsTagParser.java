@@ -96,9 +96,10 @@ public final class RobotsTagParser {
      * This method can handle empty strings.
      * <p>
      * Nothing is done to ensure that the input is an {@code X-Robots-Tag} header.
+     * <p>
+     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      *
      * @param robotsHeader a single {@code X-Robots-Tag} header (not prefixed with {@code X-Robots-Tag:})
-     * @throws Exception if the {@link #exceptionHandler} throws an exception
      */
     public void parse(String robotsHeader) {
         if (robotsHeader.contains(":")) {
@@ -119,8 +120,8 @@ public final class RobotsTagParser {
      * </ol>
      * <p>
      * An ambiguous string can not be treated as a string of comma-separated directives. Instead, it has to be parsed token by token.
-     *
-     * @throws Exception if the {@link #exceptionHandler} throws an exception
+     * <p>
+     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String robotsHeader) {
         String stringToParse = ParserUtils.removeUnnecessaryLeadingCharacters(robotsHeader);

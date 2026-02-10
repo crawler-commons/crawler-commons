@@ -116,9 +116,10 @@ public final class RobotsMetaParser {
      * This method can handle empty strings, empty {@code <meta>} elements, {@code <meta>} elements that lack the required attributes, and {@code <meta>} elements that have unrelated attributes.
      * <p>
      * Nothing is done to ensure that the input is a {@code <meta>} element.
+     * <p>
+     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      *
      * @param metaElement a single {@code <meta>} element
-     * @throws Exception if the {@link #exceptionHandler} throws an exception
      */
     public void parse(String metaElement) {
         Optional<String> nameOption = getNameAttribute(metaElement).map(ParserUtils::normalizeUserAgent);
@@ -147,8 +148,8 @@ public final class RobotsMetaParser {
      * </ol>
      * <p>
      * An ambiguous string can not be treated as a string of comma-separated directives. Instead, it has to be parsed directive by directive.
-     *
-     * @throws Exception if the {@link #exceptionHandler} throws an exception
+     * <p>
+     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String name, String content) {
         String stringToParse = ParserUtils.removeUnnecessaryLeadingCharacters(content);
