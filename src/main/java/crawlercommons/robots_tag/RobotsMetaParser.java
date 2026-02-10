@@ -117,7 +117,7 @@ public final class RobotsMetaParser {
      * <p>
      * Nothing is done to ensure that the input is a {@code <meta>} element.
      * <p>
-     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
+     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      *
      * @param metaElement a single {@code <meta>} element
      */
@@ -149,7 +149,7 @@ public final class RobotsMetaParser {
      * <p>
      * An ambiguous string can not be treated as a string of comma-separated directives. Instead, it has to be parsed directive by directive.
      * <p>
-     * This method may throw a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
+     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String name, String content) {
         String stringToParse = ParserUtils.removeUnnecessaryLeadingCharacters(content);
