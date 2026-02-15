@@ -11,18 +11,20 @@ public interface DirectiveCollection {
     AllDirectives all();
 
     /**
-     * Returns directives that only apply to specific user agents.
+     * Returns directives that only apply to specific robots (such as directive {@code foo} in {@code <meta name="SomeBot" content="foo">} or {@code X-Robots-Tag: SomeBot: foo}).
      * <p>
-     * Directives that apply to all user agents (see {@link DirectiveCollection#withoutUserAgent()}) are not included.
+     * Directives that apply to all robots (see {@link DirectiveCollection#withoutProductToken()}) are not included.
      *
-     * @apiNote If this {@link DirectiveCollection} was populated by a {@link RobotsMetaParser} or a {@link RobotsTagParser}, then every directive returned by this method applies to one of the target user agents of the parser.
+     * @apiNote If this {@link DirectiveCollection} was populated by a {@link RobotsMetaParser} or a {@link RobotsTagParser}, then every directive returned by this method applies to one of the target product tokens of the parser.
      */
-    DirectivesWithUserAgent withUserAgent();
+    DirectivesWithProductToken withProductToken();
 
     /**
-     * Returns directives that apply to all user agents.
+     * Returns directives that apply to all robots (such as directive {@code foo} in {@code <meta name="robots" content="foo">} or {@code X-Robots-Tag: foo}).
+     * <p>
+     * Directives that only apply to specific robots (see {@link DirectiveCollection#withProductToken()}) are not included.
      */
-    DirectivesWithoutUserAgent withoutUserAgent();
+    DirectivesWithoutProductToken withoutProductToken();
 
     boolean isEmpty();
 
@@ -35,22 +37,22 @@ public interface DirectiveCollection {
         Stream<Directive<?>> stream();
     }
 
-    interface DirectivesWithUserAgent {
+    interface DirectivesWithProductToken {
         /**
          * @implSpec The returned set should be unmodifiable.
          */
         Set<Directive<?>> toSet();
 
         /**
-         * <strong>Key:</strong> The trimmed and lowercased user agent.<br>
-         * <strong>Value:</strong> Directives that only apply to the user agent.
+         * <strong>Key:</strong> The trimmed and lowercased product token <i>p</i>.<br>
+         * <strong>Value:</strong> Directives that only apply to robots with the product token <i>p</i>.
          *
          * @implSpec The returned map should be unmodifiable.
          */
         Map<String, Set<Directive<?>>> toMap();
     }
 
-    interface DirectivesWithoutUserAgent {
+    interface DirectivesWithoutProductToken {
         /**
          * @implSpec The returned set should be unmodifiable.
          */

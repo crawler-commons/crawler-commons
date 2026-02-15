@@ -16,19 +16,19 @@ import java.util.function.Consumer;
 public final class ParserBuilder<T> {
     private final ParserConstructor<T> parserConstructor;
 
-    private Set<String> targetUserAgents;
+    private Set<String> targetProductTokens;
     private Map<String, DirectiveParser<?>> directiveParsersByName;
     private Consumer<ParserException> exceptionHandler;
 
     ParserBuilder(ParserConstructor<T> parserConstructor) {
         this.parserConstructor = parserConstructor;
-        this.targetUserAgents = Collections.emptySet();
+        this.targetProductTokens = Collections.emptySet();
         this.directiveParsersByName = KnownDirectiveParsers.PARSERS_BY_NAME;
         this.exceptionHandler = ExceptionHandlers::ignoring;
     }
 
-    public ParserBuilder<T> withTargetUserAgents(Set<String> targetUserAgents) {
-        this.targetUserAgents = targetUserAgents;
+    public ParserBuilder<T> withTargetProductTokens(Set<String> targetProductTokens) {
+        this.targetProductTokens = targetProductTokens;
         return this;
     }
 
@@ -43,11 +43,11 @@ public final class ParserBuilder<T> {
     }
 
     public T build() {
-        return parserConstructor.apply(targetUserAgents, directiveParsersByName, exceptionHandler);
+        return parserConstructor.apply(targetProductTokens, directiveParsersByName, exceptionHandler);
     }
 
     @FunctionalInterface
     interface ParserConstructor<T> {
-        T apply(Set<String> targetUserAgents, Map<String, DirectiveParser<?>> directiveParsersByName, Consumer<ParserException> exceptionHandler);
+        T apply(Set<String> targetProductTokens, Map<String, DirectiveParser<?>> directiveParsersByName, Consumer<ParserException> exceptionHandler);
     }
 }

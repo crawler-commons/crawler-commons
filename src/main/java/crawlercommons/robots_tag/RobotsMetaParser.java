@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * <p>
  * This parser is not thread-safe.
  *
- * @apiNote Creating a new {@link RobotsMetaParser} instance incurs some overhead (normalizing user agents, compiling regular expressions).
+ * @apiNote Creating a new {@link RobotsMetaParser} instance incurs some overhead (normalizing product tokens, compiling regular expressions).
  *          It is therefore recommended to reuse existing parser instances (with {@link #reset()}) if possible.
  * @implNote There is no official standard or specification for {@code <meta name="robots">} elements.
  *           In some cases, their syntax is ambiguous, which makes parsing difficult.
@@ -49,9 +49,9 @@ public final class RobotsMetaParser {
     }
 
     /**
-     * The target user agents configured by the user, normalized.
+     * The target product tokens configured by the user, normalized.
      */
-    private final Set<String> normalizedTargetUserAgents;
+    private final Set<String> normalizedTargetProductTokens;
 
     private final Map<String, DirectiveParser<?>> directiveParsersByName;
 
@@ -68,7 +68,7 @@ public final class RobotsMetaParser {
     private final Consumer<ParserException> exceptionHandler;
 
     /**
-     * @param targetUserAgents       Directives that apply to all user agents (e.g. {@code foo} in {@code <meta name="robots" content="foo">}) are always collected by the parser, but directives from user agent groups (e.g. {@code bar} in {@code <meta name="SomeBot" content="bar">}) are only collected if the user agent (in this case {@code SomeBot}) is one of the target user agents.<br>
+     * @param targetProductTokens    Directives that apply to all robots (e.g. {@code foo} in {@code <meta name="robots" content="foo">}) are always collected by the parser, but directives that only apply to specific robots (e.g. {@code bar} in {@code <meta name="SomeBot" content="bar">}) are only collected if the product token (in this case {@code SomeBot}) is one of the target product tokens.<br>
      *                               The default value is {@link Collections#emptySet()}.
      * @param directiveParsersByName Trimmed and lowercased directive names mapped to {@link DirectiveParser}s that can parse the corresponding directives.
      *                               The parser uses these {@link DirectiveParser}s to parse directives (especially key-value directives).<br>
@@ -76,12 +76,12 @@ public final class RobotsMetaParser {
      * @param exceptionHandler       The parser invokes this function when it encounters a {@link ParserException} while parsing.
      *                               Use this function to ignore, throw, log, count or collect exceptions.
      *                               If this function throws the encountered exception, the parser stops parsing the current input.
-     *                               If the exception is not thrown, the parser advances to the next known directive or user agent and continues to parse the rest of the current input.<br>
+     *                               If the exception is not thrown, the parser advances to the next known directive or product token and continues to parse the rest of the current input.<br>
      *                               The default value is {@link ExceptionHandlers#ignoring(RuntimeException)}.
      */
-    public RobotsMetaParser(Set<String> targetUserAgents, Map<String, DirectiveParser<?>> directiveParsersByName, Consumer<ParserException> exceptionHandler) {
-        this.normalizedTargetUserAgents = targetUserAgents.stream()
-            .map(ParserUtils::normalizeUserAgent)
+    public RobotsMetaParser(Set<String> targetProductTokens, Map<String, DirectiveParser<?>> directiveParsersByName, Consumer<ParserException> exceptionHandler) {
+        this.normalizedTargetProductTokens = targetProductTokens.stream()
+            .map(ParserUtils::normalizeProductToken)
             .collect(Collectors.toSet());
 
         this.directiveParsersByName = Map.copyOf(directiveParsersByName); //Defensive copy.
@@ -93,8 +93,8 @@ public final class RobotsMetaParser {
     /**
      * @see RobotsMetaParser#RobotsMetaParser(Set, Map, Consumer)
      */
-    public RobotsMetaParser(Set<String> targetUserAgents) {
-        this(targetUserAgents, KnownDirectiveParsers.PARSERS_BY_NAME, ExceptionHandlers::ignoring);
+    public RobotsMetaParser(Set<String> targetProductTokens) {
+        this(targetProductTokens, KnownDirectiveParsers.PARSERS_BY_NAME, ExceptionHandlers::ignoring);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class RobotsMetaParser {
     /**
      * Parses a {@code <meta name="robots" content="...">} HTML element.
      * <p>
-     * If the element has a {@code name} and a {@code content} attribute and if the value of the {@code name} attribute is equal to "robots" or one of the target user agents, then the directives from the {@code content} attribute are parsed and collected.
+     * If the element has a {@code name} and a {@code content} attribute and if the value of the {@code name} attribute is equal to "robots" or one of the target product tokens, then the directives from the {@code content} attribute are parsed and collected.
      * <p>
      * This method can handle empty strings, empty {@code <meta>} elements, {@code <meta>} elements that lack the required attributes, and {@code <meta>} elements that have unrelated attributes.
      * <p>
@@ -122,8 +122,8 @@ public final class RobotsMetaParser {
      * @param metaElement a single {@code <meta>} element
      */
     public void parse(String metaElement) {
-        Optional<String> nameOption = getNameAttribute(metaElement).map(ParserUtils::normalizeUserAgent);
-        boolean shouldCollect = nameOption.stream().anyMatch(name -> name.equals("robots") || normalizedTargetUserAgents.contains(name));
+        Optional<String> nameOption = getNameAttribute(metaElement).map(ParserUtils::normalizeProductToken);
+        boolean shouldCollect = nameOption.stream().anyMatch(name -> name.equals("robots") || normalizedTargetProductTokens.contains(name));
 
         if (shouldCollect) {
             getContentAttribute(metaElement).ifPresent(content -> {
