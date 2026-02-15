@@ -55,10 +55,10 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
 
         parser.parse("index");
-        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         parser.parse("max-image-preview: large");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
     }
 
     @Test
@@ -67,14 +67,14 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
 
         parser.parse("index, follow");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         parser.parse("max-image-preview: large, unavailable_after: 2025-12-31");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         parser.reset();
         parser.parse("max-image-preview: large, index, unavailable_after: 2025-12-31, follow");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
     }
 
     @ParameterizedTest
@@ -93,7 +93,7 @@ class RobotsTagParserTest {
     void parseSimpleDirectives(String input) {
         var parser = new RobotsTagParser();
         parser.parse(input);
-        assertTrue(parser.getCollectedDirectives().withoutUserAgent().toSet().contains(new Directive<>("foo-123")));
+        assertTrue(parser.getCollectedDirectives().withoutProductToken().toSet().contains(new Directive<>("foo-123")));
     }
 
     @Test
@@ -102,7 +102,7 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
         parser.parse(" INDEX, FOLLOW "); //Unambiguous directive string
         parser.parse(" Max-Image-Preview : large "); //Ambiguous directive string
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
     }
 
     @Test
@@ -112,18 +112,18 @@ class RobotsTagParserTest {
 
         //Unambiguous directive strings:
         parser.parse("index, follow, index");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         parser.parse("follow");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         //Ambiguous directive strings:
         parser.reset();
         parser.parse("index, max-image-preview: large, index");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
 
         parser.parse("max-image-preview: large");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutUserAgent().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
     }
 
     @ParameterizedTest
@@ -132,8 +132,8 @@ class RobotsTagParserTest {
     void excessCommas(String input, Set<Directive<?>> expected) {
         var parser = new RobotsTagParser();
         parser.parse(input);
-        assertEquals(expected, parser.getCollectedDirectives().withoutUserAgent().toSet());
-        assertTrue(parser.getCollectedDirectives().withUserAgent().toMap().isEmpty());
+        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertTrue(parser.getCollectedDirectives().withProductToken().toMap().isEmpty());
     }
 
     static Stream<Arguments> excessCommasArgs() {
@@ -155,7 +155,7 @@ class RobotsTagParserTest {
     @ParameterizedTest
     @DisplayName("should throw exceptions if configured to do so")
     @ValueSource(strings = {
-        "foo: bar, index", //It is unclear whether "foo" is a directive name or a user agent.
+        "foo: bar, index", //It is unclear whether "foo" is a directive name or a product token.
         "max-snippet: <invalid value>, follow"
     })
     void throwExceptions(String input) {
@@ -170,17 +170,17 @@ class RobotsTagParserTest {
     @ParameterizedTest
     @DisplayName("should recover from parsing failures")
     @MethodSource("recoverFromParsingFailuresArgs")
-    void recoverFromParsingFailures(String input, Set<Directive<?>> expectedWithoutUserAgent, Set<Directive<?>> expectedWithUserAgent) {
+    void recoverFromParsingFailures(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
         var parser = new RobotsTagParser(Set.of("MyBot"));
         parser.parse(input);
-        assertEquals(expectedWithoutUserAgent, parser.getCollectedDirectives().withoutUserAgent().toSet());
-        assertEquals(expectedWithUserAgent, parser.getCollectedDirectives().withUserAgent().toSet());
+        assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
     }
 
     static Stream<Arguments> recoverFromParsingFailuresArgs() {
         return Stream.of(
-            //The first token is part of an unknown key-value pair (skip to the next known user agent):
-            arguments("foo: bar, index", Collections.emptySet(), Collections.emptySet()), //It is unclear whether "foo" is a directive name or a user agent.
+            //The first token is part of an unknown key-value pair (skip to the next known product token):
+            arguments("foo: bar, index", Collections.emptySet(), Collections.emptySet()), //It is unclear whether "foo" is a directive name or a product token.
             arguments("foo: bar, max-image-preview: large", Collections.emptySet(), Collections.emptySet()),
             arguments("foo: bar, MyBot: index", Collections.emptySet(), Set.of(INDEX)),
             arguments("foo: bar, MyBot: max-image-preview: large", Collections.emptySet(), Set.of(MAX_IMAGE_PREVIEW)),
@@ -189,7 +189,7 @@ class RobotsTagParserTest {
             arguments("max-snippet: <invalid value>, max-image-preview: large", Set.of(MAX_IMAGE_PREVIEW), Collections.emptySet()),
             arguments("max-snippet: <invalid value>, index, UnknownBot: max-image-preview: large", Set.of(INDEX), Collections.emptySet()),
             arguments("max-snippet: <invalid value>, max-image-preview: large, UnknownBot: index", Set.of(MAX_IMAGE_PREVIEW), Collections.emptySet()),
-            //A DirectiveParser throws (skip to the next known user agent):
+            //A DirectiveParser throws (skip to the next known product token):
             arguments("max-snippet: <invalid value>, UnknownBot: follow", Collections.emptySet(), Collections.emptySet()),
             arguments("max-snippet: <invalid value>, UnknownBot: max-image-preview: large", Collections.emptySet(), Collections.emptySet()),
             arguments("max-snippet: <invalid value>, UnknownBot: follow, MyBot: index", Collections.emptySet(), Set.of(INDEX)),
@@ -200,28 +200,28 @@ class RobotsTagParserTest {
     }
 
     @Nested
-    @DisplayName("without target user agents")
-    class WithoutTargetUserAgents {
+    @DisplayName("without target product tokens")
+    class WithoutTargetProductTokens {
         @ParameterizedTest
-        @DisplayName("should collect directives that apply to all user agents")
+        @DisplayName("should collect directives that apply to all robots")
         @ValueSource(strings = {
             "index",
             "index, UnknownBot: follow",
             "index, UnknownBot: follow, nocache"
         })
-        void collectForAllUserAgents(String input) {
+        void collectForAllRobots(String input) {
             var parser = new RobotsTagParser();
             parser.parse(input);
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutUserAgent().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
         }
 
         @ParameterizedTest
-        @DisplayName("should not collect directives that only apply to specific user agents")
+        @DisplayName("should not collect directives that only apply to specific robots")
         @ValueSource(strings = {
             "UnknownBot: index",
             "UnknownBot-1: index, UnknownBot-2: index"
         })
-        void ignoreForSpecificUserAgents(String input) {
+        void ignoreForSpecificRobots(String input) {
             var parser = new RobotsTagParser();
             parser.parse(input);
             assertTrue(parser.getCollectedDirectives().isEmpty());
@@ -229,40 +229,40 @@ class RobotsTagParserTest {
     }
 
     @Nested
-    @DisplayName("with target user agents")
+    @DisplayName("with target product tokens")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS) //Required for @MethodSource because Java 11 does not support static methods in inner classes.
-    class WithTargetUserAgents {
+    class WithTargetProductTokens {
         @ParameterizedTest
-        @DisplayName("should collect directives that apply to all user agents")
+        @DisplayName("should collect directives that apply to all robots")
         @ValueSource(strings = {
             "index",
             "index, UnknownBot: follow",
             "index, UnknownBot: follow, nocache",
             "index, MyBot-1: follow"
         })
-        void collectForAllUserAgents(String input) {
+        void collectForAllRobots(String input) {
             var parser = new RobotsTagParser(Set.of("MyBot-1", "MyBot-2"));
             parser.parse(input);
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutUserAgent().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
         }
 
         @Test
-        @DisplayName("should collect directives that apply to the target user agents")
-        void collectForTargetUserAgents() {
+        @DisplayName("should collect directives if the product token is one of the target product tokens")
+        void collectForTargetProductTokens() {
             var parser = new RobotsTagParser(Set.of("MyBot-1", "MyBot-2"));
 
             parser.parse("MyBot-1: index, follow");
-            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withUserAgent().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken().toSet());
 
             parser.parse("MyBot-2: max-image-preview: large");
-            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withUserAgent().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withProductToken().toSet());
 
-            var expectedUserAgentGroups = Map.of(
+            var expectedDirectivesByProductToken = Map.of(
                 "mybot-1", Set.of(INDEX, FOLLOW),
                 "mybot-2", Set.of(MAX_IMAGE_PREVIEW)
             );
 
-            assertEquals(expectedUserAgentGroups, parser.getCollectedDirectives().withUserAgent().toMap());
+            assertEquals(expectedDirectivesByProductToken, parser.getCollectedDirectives().withProductToken().toMap());
 
             List<String> inputs = List.of(
                 "MyBot-1: index, follow",
@@ -274,43 +274,43 @@ class RobotsTagParserTest {
             inputs.forEach(input -> {
                 parser.reset();
                 parser.parse(input);
-                assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withUserAgent().toSet());
+                assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken().toSet());
             });
         }
 
         @ParameterizedTest
-        @DisplayName("should not collect directives that only apply to other user agents")
+        @DisplayName("should not collect directives that only apply to other robots")
         @ValueSource(strings = {
             "UnknownBot: index",
             "UnknownBot: index, follow",
             "UnknownBot-1: index, UnknownBot-2: index",
             "UnknownBot-1: index, follow, UnknownBot-2: index, follow"
         })
-        void ignoreForOtherUserAgents(String input) {
+        void ignoreForOtherRobots(String input) {
             var parser = new RobotsTagParser(Set.of("MyBot-1", "MyBot-2"));
             parser.parse(input);
             assertTrue(parser.getCollectedDirectives().isEmpty());
         }
 
         @Test
-        @DisplayName("should perform case-insensitive user agent matching")
-        void caseInsensitiveUserAgents() {
+        @DisplayName("should perform case-insensitive product token matching")
+        void caseInsensitiveProductTokens() {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse("mybot: index");
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withUserAgent().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withProductToken().toSet());
         }
 
         @ParameterizedTest
-        @DisplayName("should work with empty user agent groups")
-        @MethodSource("emptyUserAgentGroupsArgs")
-        void emptyUserAgentGroups(String input, Set<Directive<?>> expectedWithoutUserAgent, Set<Directive<?>> expectedWithUserAgent) {
+        @DisplayName("should work with orphan product tokens")
+        @MethodSource("orphanProductTokensArgs")
+        void orphanProductTokens(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse(input);
-            assertEquals(expectedWithoutUserAgent, parser.getCollectedDirectives().withoutUserAgent().toSet());
-            assertEquals(expectedWithUserAgent, parser.getCollectedDirectives().withUserAgent().toSet());
+            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
         }
 
-        Stream<Arguments> emptyUserAgentGroupsArgs() {
+        Stream<Arguments> orphanProductTokensArgs() {
             return Stream.of(
                 arguments("MyBot:", Collections.emptySet(), Collections.emptySet()),
                 arguments("UnknownBot:", Collections.emptySet(), Collections.emptySet()),
@@ -325,11 +325,11 @@ class RobotsTagParserTest {
         @ParameterizedTest
         @DisplayName("should parse complex ambiguous directive strings")
         @MethodSource("complexAmbiguousStringsArgs")
-        void complexAmbiguousStrings(String input, Set<Directive<?>> expectedWithoutUserAgent, Set<Directive<?>> expectedWithUserAgent) {
+        void complexAmbiguousStrings(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse(input);
-            assertEquals(expectedWithoutUserAgent, parser.getCollectedDirectives().withoutUserAgent().toSet());
-            assertEquals(expectedWithUserAgent, parser.getCollectedDirectives().withUserAgent().toSet());
+            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
         }
 
         Stream<Arguments> complexAmbiguousStringsArgs() {

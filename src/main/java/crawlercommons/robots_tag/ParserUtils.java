@@ -81,10 +81,10 @@ public final class ParserUtils {
     }
 
     /**
-     * Normalizes a user agent by trimming and lowercasing it.
+     * Normalizes a product token by trimming and lowercasing it.
      */
-    public static String normalizeUserAgent(String userAgent) {
-        return userAgent.trim().toLowerCase(Locale.ROOT);
+    public static String normalizeProductToken(String productToken) {
+        return productToken.trim().toLowerCase(Locale.ROOT);
     }
 
     /**

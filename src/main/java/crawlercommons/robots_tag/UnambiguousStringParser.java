@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 /**
  * Parses unambiguous directive strings.
  * <p>
- * A directive string is unambiguous if it does not contain any colons. As such, unambiguous strings can neither contain any key-value directives, nor can they contain directives that only apply to specific user agents.
+ * A directive string is unambiguous if it does not contain any colons. As such, unambiguous strings can neither contain any key-value directives, nor can they contain directives that only apply to specific robots.
  * <p>
  * An unambiguous string can be treated as a string of comma-separated directives.
  */

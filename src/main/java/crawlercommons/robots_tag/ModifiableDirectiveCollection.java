@@ -9,26 +9,26 @@ import java.util.stream.Stream;
  */
 public final class ModifiableDirectiveCollection implements DirectiveCollection {
     private final All allDirectives = new All();
-    private final WithUserAgent directivesWithUserAgent = new WithUserAgent();
-    private final WithoutUserAgent directivesWithoutUserAgent = new WithoutUserAgent();
+    private final WithProductToken directivesWithProductToken = new WithProductToken();
+    private final WithoutProductToken directivesWithoutProductToken = new WithoutProductToken();
 
     /**
-     * Adds a directive that applies to all user agents.
+     * Adds a directive that applies to all robots.
      */
     void addDirective(Directive<?> directive) {
         allDirectives.directives.add(directive);
-        directivesWithoutUserAgent.directives.add(directive);
+        directivesWithoutProductToken.directives.add(directive);
     }
 
     /**
-     * Adds a directive that only applies to a specific user agent.
+     * Adds a directive that only applies to robots with a specific product token.
      * <p>
-     * The user agent must be trimmed and lowercased.
+     * The product token must be trimmed and lowercased.
      */
-    void addDirective(String userAgent, Directive<?> directive) {
+    void addDirective(String productToken, Directive<?> directive) {
         allDirectives.directives.add(directive);
 
-        directivesWithUserAgent.directivesByUserAgent.compute(userAgent, (key, directiveSet) -> {
+        directivesWithProductToken.directivesByProductToken.compute(productToken, (key, directiveSet) -> {
             if (directiveSet == null) {
                 directiveSet = new HashSet<>();
             }
@@ -40,8 +40,8 @@ public final class ModifiableDirectiveCollection implements DirectiveCollection 
 
     void clear() {
         allDirectives.directives.clear();
-        directivesWithUserAgent.directivesByUserAgent.clear();
-        directivesWithoutUserAgent.directives.clear();
+        directivesWithProductToken.directivesByProductToken.clear();
+        directivesWithoutProductToken.directives.clear();
     }
 
     @Override
@@ -50,13 +50,13 @@ public final class ModifiableDirectiveCollection implements DirectiveCollection 
     }
 
     @Override
-    public DirectivesWithUserAgent withUserAgent() {
-        return directivesWithUserAgent;
+    public DirectivesWithProductToken withProductToken() {
+        return directivesWithProductToken;
     }
 
     @Override
-    public DirectivesWithoutUserAgent withoutUserAgent() {
-        return directivesWithoutUserAgent;
+    public DirectivesWithoutProductToken withoutProductToken() {
+        return directivesWithoutProductToken;
     }
 
     @Override
@@ -78,24 +78,24 @@ public final class ModifiableDirectiveCollection implements DirectiveCollection 
         }
     }
 
-    private static class WithUserAgent implements DirectivesWithUserAgent {
-        Map<String, Set<Directive<?>>> directivesByUserAgent = new HashMap<>();
+    private static class WithProductToken implements DirectivesWithProductToken {
+        Map<String, Set<Directive<?>>> directivesByProductToken = new HashMap<>();
 
         @Override
         public Set<Directive<?>> toSet() {
-            return directivesByUserAgent.values().stream()
+            return directivesByProductToken.values().stream()
                 .flatMap(Set::stream)
                 .collect(Collectors.toUnmodifiableSet());
         }
 
         @Override
         public Map<String, Set<Directive<?>>> toMap() {
-            return directivesByUserAgent.entrySet().stream()
+            return directivesByProductToken.entrySet().stream()
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> Collections.unmodifiableSet(entry.getValue())));
         }
     }
 
-    private static class WithoutUserAgent implements DirectivesWithoutUserAgent {
+    private static class WithoutProductToken implements DirectivesWithoutProductToken {
         Set<Directive<?>> directives = new HashSet<>();
 
         @Override
@@ -115,12 +115,12 @@ public final class ModifiableDirectiveCollection implements DirectiveCollection 
         ModifiableDirectiveCollection other = (ModifiableDirectiveCollection) object;
 
         return Objects.equals(allDirectives.directives, other.allDirectives.directives)
-            && Objects.equals(directivesWithUserAgent.directivesByUserAgent, other.directivesWithUserAgent.directivesByUserAgent)
-            && Objects.equals(directivesWithoutUserAgent.directives, other.directivesWithoutUserAgent.directives);
+            && Objects.equals(directivesWithProductToken.directivesByProductToken, other.directivesWithProductToken.directivesByProductToken)
+            && Objects.equals(directivesWithoutProductToken.directives, other.directivesWithoutProductToken.directives);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(allDirectives.directives, directivesWithUserAgent.directivesByUserAgent, directivesWithoutUserAgent.directives);
+        return Objects.hash(allDirectives.directives, directivesWithProductToken.directivesByProductToken, directivesWithoutProductToken.directives);
     }
 }
