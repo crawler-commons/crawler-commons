@@ -113,14 +113,14 @@ class ParserUtilsTest {
     }
 
     @Nested
-    @DisplayName("normalizeUserAgent()")
+    @DisplayName("normalizeProductToken()")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class NormalizeUserAgent {
+    class NormalizeProductToken {
         @ParameterizedTest
-        @DisplayName("should normalize user agents")
+        @DisplayName("should normalize product tokens")
         @MethodSource("testArgs")
         void test(String input, String expected) {
-            assertEquals(expected, ParserUtils.normalizeUserAgent(input));
+            assertEquals(expected, ParserUtils.normalizeProductToken(input));
         }
 
         Stream<Arguments> testArgs() {

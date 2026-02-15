@@ -14,7 +14,7 @@ public final class PreprocessedString {
     private final String string;
 
     /**
-     * The first token in the string (i.e. everything up to the first delimiter), all lowercase and trimmed. It can be ambiguous whether this token is a directive name or a user agent.
+     * The first token in the string (i.e. everything up to the first delimiter), all lowercase and trimmed. It can be ambiguous whether this token is a directive name or a product token.
      */
     private final String firstToken;
 
