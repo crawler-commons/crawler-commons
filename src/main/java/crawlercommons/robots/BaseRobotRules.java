@@ -19,8 +19,11 @@ package crawlercommons.robots;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Result from parsing a single robots.txt file – a set of allow/disallow rules
@@ -46,6 +49,7 @@ public abstract class BaseRobotRules implements Serializable {
     private boolean _deferVisits = false;
     private boolean _matchedWildcard = false;
     private LinkedHashSet<String> _sitemaps;
+    private EnumMap<RobotsExtension, RobotsExtensionData> _extensions;
 
     public BaseRobotRules() {
         _sitemaps = new LinkedHashSet<>();
@@ -114,6 +118,74 @@ public abstract class BaseRobotRules implements Serializable {
         return new ArrayList<>(_sitemaps);
     }
 
+    /**
+     * Get extension data for a specific robots.txt extension directive.
+     *
+     * @param extension
+     *            the extension to query
+     * @return the extension data, or {@code null} if no data was collected for
+     *         this extension
+     */
+    public RobotsExtensionData getExtensionData(RobotsExtension extension) {
+        if (_extensions == null) {
+            return null;
+        }
+        return _extensions.get(extension);
+    }
+
+    /**
+     * Get all collected extension data.
+     *
+     * @return an unmodifiable map of extension data, or an empty map if no
+     *         extensions were collected. Never {@code null}.
+     */
+    public Map<RobotsExtension, RobotsExtensionData> getExtensions() {
+        if (_extensions == null) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(_extensions);
+    }
+
+    /**
+     * Add a value for a robots.txt extension directive. The extension data
+     * container is lazily created on first use.
+     *
+     * @param extension
+     *            the extension directive
+     * @param value
+     *            the directive value (text after the colon)
+     */
+    public void addExtensionValue(RobotsExtension extension, String value) {
+        if (_extensions == null) {
+            _extensions = new EnumMap<>(RobotsExtension.class);
+        }
+        SimpleRobotsExtensionData data = (SimpleRobotsExtensionData) _extensions.get(extension);
+        if (data == null) {
+            data = new SimpleRobotsExtensionData(extension);
+            _extensions.put(extension, data);
+        }
+        data.addValue(value);
+    }
+
+    /**
+     * Clear all extension data for a specific extension.
+     *
+     * @param extension
+     *            the extension to clear
+     */
+    public void clearExtensionData(RobotsExtension extension) {
+        if (_extensions != null) {
+            _extensions.remove(extension);
+        }
+    }
+
+    /**
+     * Clear all collected extension data.
+     */
+    public void clearAllExtensionData() {
+        _extensions = null;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -121,6 +193,7 @@ public abstract class BaseRobotRules implements Serializable {
         result = prime * result + (int) (_crawlDelay ^ (_crawlDelay >>> 32));
         result = prime * result + (_deferVisits ? 1231 : 1237);
         result = prime * result + ((_sitemaps == null) ? 0 : _sitemaps.hashCode());
+        result = prime * result + ((_extensions == null) ? 0 : _extensions.hashCode());
         return result;
     }
 
@@ -141,6 +214,11 @@ public abstract class BaseRobotRules implements Serializable {
             if (other._sitemaps != null)
                 return false;
         } else if (!_sitemaps.equals(other._sitemaps))
+            return false;
+        if (_extensions == null) {
+            if (other._extensions != null)
+                return false;
+        } else if (!_extensions.equals(other._extensions))
             return false;
         return true;
     }
@@ -169,6 +247,21 @@ public abstract class BaseRobotRules implements Serializable {
             int numOfSitemapsToShow = Math.min(nSitemaps, 10);
             for (int i = 0; i < numOfSitemapsToShow; i++) {
                 sb.append(sitemaps.get(i)).append("\n");
+            }
+        }
+
+        Map<RobotsExtension, RobotsExtensionData> extensions = getExtensions();
+        if (!extensions.isEmpty()) {
+            sb.append(" - extensions:\n");
+            for (Map.Entry<RobotsExtension, RobotsExtensionData> entry : extensions.entrySet()) {
+                sb.append("   ").append(entry.getKey().getDirectiveName()).append(": ");
+                List<String> values = entry.getValue().getValues();
+                if (values.size() == 1) {
+                    sb.append(values.get(0));
+                } else {
+                    sb.append(values);
+                }
+                sb.append('\n');
             }
         }
 
