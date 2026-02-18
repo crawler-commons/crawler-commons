@@ -388,7 +388,7 @@
 		<commons-io.version>2.21.0</commons-io.version>
 		<slf4j-api.version>2.0.17</slf4j-api.version>
 		<junit.version>5.13.4</junit.version>
-		<slf4j-log4j12.version>1.7.33</slf4j-log4j12.version>
+		<slf4j-simple.version>${slf4j-api.version}</slf4j-simple.version>
 
 		<!-- Maven Plugin Dependencies -->
 		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
@@ -452,8 +452,8 @@
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j-log4j12.version}</version>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j-simple.version}</version>
 			<scope>test</scope>
 		</dependency>
 
