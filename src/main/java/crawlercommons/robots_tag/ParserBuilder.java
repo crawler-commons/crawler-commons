@@ -7,9 +7,13 @@ import java.util.function.Consumer;
 
 /**
  * A builder for {@link RobotsMetaParser}s and {@link RobotsTagParser}s.
- *
- * @param <T> the type of parser built by this {@link ParserBuilder} (i.e. either {@link RobotsMetaParser} or {@link RobotsTagParser})
- * @implNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} can share the same builder class because both parsers use the same constructor parameters with the same default values.
+ * 
+ * @param <T>
+ *            the type of parser built by this {@link ParserBuilder} (i.e.
+ *            either {@link RobotsMetaParser} or {@link RobotsTagParser})
+ * @implNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} can
+ *           share the same builder class because both parsers use the same
+ *           constructor parameters with the same default values.
  * @see RobotsMetaParser#RobotsMetaParser(Set, Map, Consumer)
  * @see RobotsTagParser#RobotsTagParser(Set, Map, Consumer)
  */

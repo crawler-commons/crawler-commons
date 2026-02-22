@@ -1,7 +1,8 @@
 package crawlercommons.robots_tag;
 
 /**
- * Combines a {@link DirectiveParser} with the name of a directive that it can parse.
+ * Combines a {@link DirectiveParser} with the name of a directive that it can
+ * parse.
  */
 public final class NamedDirectiveParser<T> {
     private final String directiveName;
