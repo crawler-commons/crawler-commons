@@ -36,7 +36,8 @@ public final class Directive<T> {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Directive)) return false;
+        if (!(object instanceof Directive))
+            return false;
         Directive<?> other = (Directive<?>) object;
         return Objects.equals(name, other.name) && Objects.equals(value, other.value);
     }

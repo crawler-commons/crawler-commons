@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 
 public final class ParserUtils {
     /**
-     * Returns a function that extracts the value of a desired attribute from an HTML element.
+     * Returns a function that extracts the value of a desired attribute from an
+     * HTML element.
      */
     public static Function<String, Optional<String>> createAttributeGetter(String attributeName) {
         /*
@@ -49,7 +50,8 @@ public final class ParserUtils {
     }
 
     /**
-     * Removes the first token and everything up to the first regular expression match from a {@link PreprocessedString}.
+     * Removes the first token and everything up to the first regular expression
+     * match from a {@link PreprocessedString}.
      * <p>
      * Returns an empty string if the regular expression finds no match.
      */
@@ -68,12 +70,13 @@ public final class ParserUtils {
     }
 
     /**
-     * Returns the index of the first comma in a string, or {@code string.length()} if the string contains no commas.
+     * Returns the index of the first comma in a string, or
+     * {@code string.length()} if the string contains no commas.
      */
     public static int findFirstComma(String string) {
         int index = string.indexOf(',');
 
-        if (index == -1) { //The string does not contain any commas.
+        if (index == -1) { // The string does not contain any commas.
             return string.length();
         } else {
             return index;
@@ -88,9 +91,11 @@ public final class ParserUtils {
     }
 
     /**
-     * Returns a case-insensitive regular expression that matches all elements of a collection.
+     * Returns a case-insensitive regular expression that matches all elements
+     * of a collection.
      * <p>
-     * If the collection is empty, the resulting regular expression matches nothing.
+     * If the collection is empty, the resulting regular expression matches
+     * nothing.
      * <p>
      * Nothing is done to eliminate duplicates in the collection.
      */

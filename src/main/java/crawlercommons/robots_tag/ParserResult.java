@@ -3,7 +3,9 @@ package crawlercommons.robots_tag;
 import java.util.Objects;
 
 /**
- * A parsed value and the remainder of the string it was parsed from (i.e. the original string that the value was parsed from, but without the parsed value).
+ * A parsed value and the remainder of the string it was parsed from (i.e. the
+ * original string that the value was parsed from, but without the parsed
+ * value).
  */
 public final class ParserResult<T> {
     private final T value;
@@ -24,7 +26,8 @@ public final class ParserResult<T> {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof ParserResult)) return false;
+        if (!(object instanceof ParserResult))
+            return false;
         ParserResult<?> other = (ParserResult<?>) object;
         return Objects.equals(value, other.value) && Objects.equals(remainder, other.remainder);
     }

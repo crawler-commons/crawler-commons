@@ -83,10 +83,7 @@ class PreprocessedStringTest {
     }
 
     static Stream<Arguments> whitespaceArgs() {
-        return Stream.of(
-            arguments("a,b,c", new PreprocessedString("a,b,c", "a", 1, ',', "b,c")),
-            arguments("a:b:c", new PreprocessedString("a:b:c", "a", 1, ':', "b:c"))
-        );
+        return Stream.of(arguments("a,b,c", new PreprocessedString("a,b,c", "a", 1, ',', "b,c")), arguments("a:b:c", new PreprocessedString("a:b:c", "a", 1, ':', "b:c")));
     }
 
     @ParameterizedTest
@@ -97,10 +94,8 @@ class PreprocessedStringTest {
     }
 
     static Stream<Arguments> orphanDelimitersArgs() {
-        return Stream.of(
-            arguments("token,", new PreprocessedString("token,", "token", 5, Optional.of(','), Optional.empty())),
-            arguments("token:", new PreprocessedString("token:", "token", 5, Optional.of(':'), Optional.empty())),
-            arguments("a: , b, c", new PreprocessedString("a: , b, c", "a", 1, ':', ", b, c"))
-        );
+        return Stream.of(arguments("token,", new PreprocessedString("token,", "token", 5, Optional.of(','), Optional.empty())),
+                        arguments("token:", new PreprocessedString("token:", "token", 5, Optional.of(':'), Optional.empty())),
+                        arguments("a: , b, c", new PreprocessedString("a: , b, c", "a", 1, ':', ", b, c")));
     }
 }

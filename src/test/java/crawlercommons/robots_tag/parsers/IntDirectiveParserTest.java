@@ -17,10 +17,6 @@ class IntDirectiveParserTest implements KeyValueDirectiveParserTest<Integer> {
 
     @Override
     public Stream<Arguments> provideTestArguments() {
-        return Stream.of(
-            arguments("max-snippet", "123", 123),
-            arguments("max-snippet", "+123", 123),
-            arguments("max-snippet", "-123", -123)
-        );
+        return Stream.of(arguments("max-snippet", "123", 123), arguments("max-snippet", "+123", 123), arguments("max-snippet", "-123", -123));
     }
 }
