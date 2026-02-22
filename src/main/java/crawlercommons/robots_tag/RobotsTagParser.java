@@ -14,14 +14,21 @@ import java.util.stream.Collectors;
  * Parses the content of {@code X-Robots-Tag} HTTP response headers.
  * <p>
  * This parser is not thread-safe.
- *
- * @apiNote Creating a new {@link RobotsTagParser} instance incurs some overhead (normalizing product tokens, compiling regular expressions).
- *          It is therefore recommended to reuse existing parser instances (with {@link #reset()}) if possible.
- * @implNote There is no official standard or specification for {@code X-Robots-Tag} headers.
- *           In some cases, their syntax is ambiguous, which makes parsing difficult.
- *           Different vendors may define and support different directives.
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Robots-Tag">MDN: X-Robots-Tag</a>
- * @see <a href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag">Google: Robots Meta Tags Specifications</a>
+ * 
+ * @apiNote Creating a new {@link RobotsTagParser} instance incurs some overhead
+ *          (normalizing product tokens, compiling regular expressions). It is
+ *          therefore recommended to reuse existing parser instances (with
+ *          {@link #reset()}) if possible.
+ * @implNote There is no official standard or specification for
+ *           {@code X-Robots-Tag} headers. In some cases, their syntax is
+ *           ambiguous, which makes parsing difficult. Different vendors may
+ *           define and support different directives.
+ * @see <a
+ *      href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Robots-Tag">MDN:
+ *      X-Robots-Tag</a>
+ * @see <a
+ *      href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag">Google:
+ *      Robots Meta Tags Specifications</a>
  */
 public final class RobotsTagParser {
     /**
@@ -32,7 +39,8 @@ public final class RobotsTagParser {
     private final Map<String, DirectiveParser<?>> directiveParsersByName;
 
     /**
-     * A regular expression that matches all directive names known to the parser.
+     * A regular expression that matches all directive names known to the
+     * parser.
      */
     private final Pattern knownDirectiveNamesRegex;
 
@@ -49,16 +57,31 @@ public final class RobotsTagParser {
     private final Consumer<ParserException> exceptionHandler;
 
     /**
-     * @param targetProductTokens    Directives that apply to all robots (e.g. {@code foo} in {@code X-Robots-Tag: foo}) are always collected by the parser, but directives that only apply to specific robots (e.g. {@code bar} in {@code X-Robots-Tag: SomeBot: bar}) are only collected if the product token (in this case {@code SomeBot}) is one of the target product tokens.<br>
-     *                               The default value is {@link Collections#emptySet()}.
-     * @param directiveParsersByName Trimmed and lowercased directive names mapped to {@link DirectiveParser}s that can parse the corresponding directives.
-     *                               The parser uses these {@link DirectiveParser}s to parse directives (especially key-value directives).<br>
-     *                               The default value is {@link KnownDirectiveParsers#PARSERS_BY_NAME}.
-     * @param exceptionHandler       The parser invokes this function when it encounters a {@link ParserException} while parsing.
-     *                               Use this function to ignore, throw, log, count or collect exceptions.
-     *                               If this function throws the encountered exception, the parser stops parsing the current input.
-     *                               If the exception is not thrown, the parser advances to the next known directive or product token and continues to parse the rest of the current input.<br>
-     *                               The default value is {@link ExceptionHandlers#ignoring(RuntimeException)}.
+     * @param targetProductTokens
+     *            Directives that apply to all robots (e.g. {@code foo} in
+     *            {@code X-Robots-Tag: foo}) are always collected by the parser,
+     *            but directives that only apply to specific robots (e.g.
+     *            {@code bar} in {@code X-Robots-Tag: SomeBot: bar}) are only
+     *            collected if the product token (in this case {@code SomeBot})
+     *            is one of the target product tokens.<br>
+     *            The default value is {@link Collections#emptySet()}.
+     * @param directiveParsersByName
+     *            Trimmed and lowercased directive names mapped to
+     *            {@link DirectiveParser}s that can parse the corresponding
+     *            directives. The parser uses these {@link DirectiveParser}s to
+     *            parse directives (especially key-value directives).<br>
+     *            The default value is
+     *            {@link KnownDirectiveParsers#PARSERS_BY_NAME}.
+     * @param exceptionHandler
+     *            The parser invokes this function when it encounters a
+     *            {@link ParserException} while parsing. Use this function to
+     *            ignore, throw, log, count or collect exceptions. If this
+     *            function throws the encountered exception, the parser stops
+     *            parsing the current input. If the exception is not thrown, the
+     *            parser advances to the next known directive or product token
+     *            and continues to parse the rest of the current input.<br>
+     *            The default value is
+     *            {@link ExceptionHandlers#ignoring(RuntimeException)}.
      */
     public RobotsTagParser(Set<String> targetProductTokens, Map<String, DirectiveParser<?>> directiveParsersByName, Consumer<ParserException> exceptionHandler) {
         this.normalizedTargetProductTokens = targetProductTokens.stream()
@@ -95,11 +118,15 @@ public final class RobotsTagParser {
      * <p>
      * This method can handle empty strings.
      * <p>
-     * Nothing is done to ensure that the input is an {@code X-Robots-Tag} header.
+     * Nothing is done to ensure that the input is an {@code X-Robots-Tag}
+     * header.
      * <p>
-     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
-     *
-     * @param robotsHeader a single {@code X-Robots-Tag} header (not prefixed with {@code X-Robots-Tag:})
+     * This method throws a {@link RuntimeException} if the
+     * {@link #exceptionHandler} throws an exception.
+     * 
+     * @param robotsHeader
+     *            a single {@code X-Robots-Tag} header (not prefixed with
+     *            {@code X-Robots-Tag:})
      */
     public void parse(String robotsHeader) {
         if (robotsHeader.contains(":")) {
@@ -112,16 +139,26 @@ public final class RobotsTagParser {
     /**
      * Parses an ambiguous directive string.
      * <p>
-     * A directive string is ambiguous if it contains at least one colon. In {@code X-Robots-Tag} headers, a colon indicates directives that only apply to a specific robot or a key-value directive. There are three problems:
+     * A directive string is ambiguous if it contains at least one colon. In
+     * {@code X-Robots-Tag} headers, a colon indicates directives that only
+     * apply to a specific robot or a key-value directive. There are three
+     * problems:
      * <ol>
-     *     <li>Colons that separate product tokens from directives are indistinguishable from colons that separate directive names from directive values.</li>
-     *     <li>Some directive values contain unescaped commas, which are indistinguishable from commas that separate directives.</li>
-     *     <li>Some directive values contain unescaped colons, which are indistinguishable from colons that separate directive names from directive values.</li>
+     * <li>Colons that separate product tokens from directives are
+     * indistinguishable from colons that separate directive names from
+     * directive values.</li>
+     * <li>Some directive values contain unescaped commas, which are
+     * indistinguishable from commas that separate directives.</li>
+     * <li>Some directive values contain unescaped colons, which are
+     * indistinguishable from colons that separate directive names from
+     * directive values.</li>
      * </ol>
      * <p>
-     * An ambiguous string can not be treated as a string of comma-separated directives. Instead, it has to be parsed token by token.
+     * An ambiguous string can not be treated as a string of comma-separated
+     * directives. Instead, it has to be parsed token by token.
      * <p>
-     * This method throws a {@link RuntimeException} if the {@link #exceptionHandler} throws an exception.
+     * This method throws a {@link RuntimeException} if the
+     * {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String robotsHeader) {
         String stringToParse = ParserUtils.removeUnnecessaryLeadingCharacters(robotsHeader);

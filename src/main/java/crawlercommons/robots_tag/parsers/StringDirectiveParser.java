@@ -3,11 +3,14 @@ package crawlercommons.robots_tag.parsers;
 import crawlercommons.robots_tag.*;
 
 /**
- * Parses directives with {@link String} values (e.g. {@code max-image-preview: none}).
+ * Parses directives with {@link String} values (e.g.
+ * {@code max-image-preview: none}).
  * <p>
- * Everything up to the first comma is considered to be part of the directive value.
+ * Everything up to the first comma is considered to be part of the directive
+ * value.
  * <p>
- * The directive value is trimmed, but not modified otherwise (i.e. it is not transformed to uppercase or lowercase).
+ * The directive value is trimmed, but not modified otherwise (i.e. it is not
+ * transformed to uppercase or lowercase).
  */
 public final class StringDirectiveParser implements DirectiveParser<String> {
     private static final StringDirectiveParser SINGLETON = new StringDirectiveParser();

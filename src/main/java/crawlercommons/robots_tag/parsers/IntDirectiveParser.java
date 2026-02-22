@@ -3,7 +3,8 @@ package crawlercommons.robots_tag.parsers;
 import crawlercommons.robots_tag.*;
 
 /**
- * Parses directives with {@link Integer} values (e.g. {@code max-snippet: 123}).
+ * Parses directives with {@link Integer} values (e.g. {@code max-snippet: 123}
+ * ).
  */
 public final class IntDirectiveParser implements DirectiveParser<Integer> {
     private static final IntDirectiveParser SINGLETON = new IntDirectiveParser();

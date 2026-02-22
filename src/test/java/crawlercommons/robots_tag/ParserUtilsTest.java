@@ -32,16 +32,12 @@ class ParserUtilsTest {
         @ParameterizedTest
         @DisplayName("should work with different HTML attribute syntaxes")
         @ValueSource(strings = {
-            //Double-quoted attribute values:
-            "<foo bar=\"baz\">",
-            "<foo bar = \"baz\">",
-            //Single-quoted attribute values:
-            "<foo bar='baz'>",
-            "<foo bar = 'baz'>",
-            //Unquoted attribute values:
-            "<foo bar=baz>",
-            "<foo bar = baz>"
-        })
+                        // Double-quoted attribute values:
+                        "<foo bar=\"baz\">", "<foo bar = \"baz\">",
+                        // Single-quoted attribute values:
+                        "<foo bar='baz'>", "<foo bar = 'baz'>",
+                        // Unquoted attribute values:
+                        "<foo bar=baz>", "<foo bar = baz>" })
         void syntaxes(String input) {
             assertEquals("baz", getBarFunction.apply(input).orElseThrow());
         }
@@ -49,14 +45,9 @@ class ParserUtilsTest {
         @ParameterizedTest
         @DisplayName("should ignore matching substrings of longer attribute names")
         @ValueSource(strings = {
-            //"bar" is just a substring of a longer attribute name here, so it should be ignored:
-            "<foo barber='baz'>",
-            "<foo embark='baz'>",
-            "<foo sidebar='baz'>",
-            "<foo x-bar='baz'>",
-            "<foo x-bar-x='baz'>",
-            "<foo bar-x='baz'>"
-        })
+                        // "bar" is just a substring of a longer attribute name
+                        // here, so it should be ignored:
+                        "<foo barber='baz'>", "<foo embark='baz'>", "<foo sidebar='baz'>", "<foo x-bar='baz'>", "<foo x-bar-x='baz'>", "<foo bar-x='baz'>" })
         void substrings(String input) {
             assertTrue(getBarFunction.apply(input).isEmpty());
         }
@@ -64,7 +55,9 @@ class ParserUtilsTest {
 
     @Nested
     @DisplayName("dropUntilFirstMatch()")
-    @TestInstance(TestInstance.Lifecycle.PER_CLASS) //Required for @MethodSource because Java 11 does not support static methods in inner classes.
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    // Required for @MethodSource because Java 11 does not support static
+    // methods in inner classes.
     class DropUntilFirstMatch {
         final Pattern regex = Pattern.compile("bar");
 
@@ -77,14 +70,10 @@ class ParserUtilsTest {
 
         Stream<Arguments> testArgs() {
             return Stream.of(
-                //Input with regex matches:
-                arguments("foo, bar", "bar"),
-                arguments("foo, bar, baz", "bar, baz"),
-                arguments("foo, bar, baz, bar, baz", "bar, baz, bar, baz"),
-                //Input without regex matches:
-                arguments("foo", ""),
-                arguments("foo, baz", "")
-            );
+            // Input with regex matches:
+                            arguments("foo, bar", "bar"), arguments("foo, bar, baz", "bar, baz"), arguments("foo, bar, baz, bar, baz", "bar, baz, bar, baz"),
+                            // Input without regex matches:
+                            arguments("foo", ""), arguments("foo, baz", ""));
         }
     }
 
@@ -101,14 +90,10 @@ class ParserUtilsTest {
 
         Stream<Arguments> testArgs() {
             return Stream.of(
-                //Input without commas:
-                arguments("", 0),
-                arguments("foo", 3),
-                //Input with commas:
-                arguments(",", 0),
-                arguments("foo, bar", 3),
-                arguments("foo, bar, baz", 3)
-            );
+            // Input without commas:
+                            arguments("", 0), arguments("foo", 3),
+                            // Input with commas:
+                            arguments(",", 0), arguments("foo, bar", 3), arguments("foo, bar, baz", 3));
         }
     }
 
@@ -124,11 +109,7 @@ class ParserUtilsTest {
         }
 
         Stream<Arguments> testArgs() {
-            return Stream.of(
-                arguments("foo", "foo"),
-                arguments("Bar", "bar"),
-                arguments(" baz ", "baz")
-            );
+            return Stream.of(arguments("foo", "foo"), arguments("Bar", "bar"), arguments(" baz ", "baz"));
         }
     }
 
@@ -170,17 +151,10 @@ class ParserUtilsTest {
 
         Stream<Arguments> testArgs() {
             return Stream.of(
-                //Input without leading clutter:
-                arguments("", ""),
-                arguments("foo", "foo"),
-                arguments("foo, bar", "foo, bar"),
-                arguments("foo, bar, ", "foo, bar, "),
-                //Input with leading clutter:
-                arguments(" , ", ""),
-                arguments(", foo", "foo"),
-                arguments(", foo, bar", "foo, bar"),
-                arguments(", foo, bar, ", "foo, bar, ")
-            );
+            // Input without leading clutter:
+                            arguments("", ""), arguments("foo", "foo"), arguments("foo, bar", "foo, bar"), arguments("foo, bar, ", "foo, bar, "),
+                            // Input with leading clutter:
+                            arguments(" , ", ""), arguments(", foo", "foo"), arguments(", foo, bar", "foo, bar"), arguments(", foo, bar, ", "foo, bar, "));
         }
     }
 }
