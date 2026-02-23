@@ -50,8 +50,8 @@ class TemporalValueParserTest {
     @Nested
     @DisplayName("TemporalValueParser.ISO_LOCAL_DATE")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    // Required for @MethodSource because Java 11 does not support static
-    // methods in inner classes.
+    // @TestInstance is required for @MethodSource because Java 11 does not
+    // support static methods in inner classes.
     class IsoLocalDate {
         @ParameterizedTest
         @DisplayName("should parse ISO 8601 dates without offset")
