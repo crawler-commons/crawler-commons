@@ -56,8 +56,8 @@ class ParserUtilsTest {
     @Nested
     @DisplayName("dropUntilFirstMatch()")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    // Required for @MethodSource because Java 11 does not support static
-    // methods in inner classes.
+    // @TestInstance is required for @MethodSource because Java 11 does not
+    // support static methods in inner classes.
     class DropUntilFirstMatch {
         final Pattern regex = Pattern.compile("bar");
 

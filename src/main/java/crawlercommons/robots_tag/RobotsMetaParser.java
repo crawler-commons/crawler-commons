@@ -44,17 +44,14 @@ public final class RobotsMetaParser {
      * @return the value of the {@code name} attribute, or
      *         {@link Optional#empty()} if the {@code name} attribute is not
      *         present
+     * @implNote Because it compiles a regular expression,
+     *           {@link ParserUtils#createAttributeGetter(String)} is expensive.
+     *           Using {@link #GET_NAME_FUNCTION} ensures that
+     *           {@link ParserUtils#createAttributeGetter(String)} is only
+     *           invoked once.
      */
     private static Optional<String> getNameAttribute(String htmlElement) {
-        return GET_NAME_FUNCTION.apply(htmlElement); // Because it compiles a
-                                                     // regular expression,
-                                                     // ParserUtils.createAttributeGetter()
-                                                     // is expensive.
-                                                     // Implementing
-                                                     // getNameAttribute() like
-                                                     // this ensures that
-                                                     // ParserUtils.createAttributeGetter()
-                                                     // is only invoked once.
+        return GET_NAME_FUNCTION.apply(htmlElement);
     }
 
     /**
@@ -65,6 +62,11 @@ public final class RobotsMetaParser {
      * @return the value of the {@code content} attribute, or
      *         {@link Optional#empty()} if the {@code content} attribute is not
      *         present
+     * @implNote Because it compiles a regular expression,
+     *           {@link ParserUtils#createAttributeGetter(String)} is expensive.
+     *           Using {@link #GET_CONTENT_FUNCTION} ensures that
+     *           {@link ParserUtils#createAttributeGetter(String)} is only
+     *           invoked once.
      */
     private static Optional<String> getContentAttribute(String htmlElement) {
         return GET_CONTENT_FUNCTION.apply(htmlElement);
@@ -211,35 +213,16 @@ public final class RobotsMetaParser {
             PreprocessedString preprocessed = new PreprocessedString(stringToParse);
             boolean delimiterIsColon = preprocessed.getDelimiter().isPresent() && preprocessed.getDelimiter().get() == ':';
 
-            // Find a suitable DirectiveParser:
-            DirectiveParser<?> parser = delimiterIsColon ? directiveParsersByName.get(preprocessed.getFirstToken()) // If
-                                                                                                                    // the
-                                                                                                                    // first
-                                                                                                                    // delimiter
-                                                                                                                    // is
-                                                                                                                    // a
-                                                                                                                    // colon,
-                                                                                                                    // then
-                                                                                                                    // the
-                                                                                                                    // directive
-                                                                                                                    // must
-                                                                                                                    // be
-                                                                                                                    // a
-                                                                                                                    // key-value
-                                                                                                                    // directive.
-                            : SimpleDirectiveParser.getSingleton(); // If the
-                                                                    // first
-                                                                    // delimiter
-                                                                    // is a
-                                                                    // comma or
-                                                                    // Optional.empty(),
-                                                                    // then the
-                                                                    // directive
-                                                                    // must be a
-                                                                    // simple
-                                                                    // directive
-                                                                    // without a
-                                                                    // value.
+            /*
+             * Find a suitable DirectiveParser:
+             * 
+             * If the first delimiter is a colon, then the directive must be a
+             * key-value directive.
+             * 
+             * If the first delimiter is a comma or Optional.empty(), then the
+             * directive must be a simple directive without a value.
+             */
+            DirectiveParser<?> parser = delimiterIsColon ? directiveParsersByName.get(preprocessed.getFirstToken()) : SimpleDirectiveParser.getSingleton();
 
             if (parser != null) {
                 try {
@@ -253,51 +236,15 @@ public final class RobotsMetaParser {
                 } catch (Exception exception) { // The first token is a
                                                 // directive name.
                     exceptionHandler.accept(new ParserException("Failed to parse the first directive in \"" + stringToParse + '"', exception));
-                    stringToParse = ParserUtils.dropUntilFirstMatch(knownDirectiveNamesRegex, preprocessed); // It
-                                                                                                             // is
-                                                                                                             // unclear
-                                                                                                             // where
-                                                                                                             // the
-                                                                                                             // first
-                                                                                                             // directive
-                                                                                                             // ends,
-                                                                                                             // so
-                                                                                                             // skipping
-                                                                                                             // to
-                                                                                                             // the
-                                                                                                             // next
-                                                                                                             // known
-                                                                                                             // directive
-                                                                                                             // name
-                                                                                                             // is
-                                                                                                             // the
-                                                                                                             // only
-                                                                                                             // safe
-                                                                                                             // option.
+                    // It is unclear where the first directive ends, so skipping
+                    // to the next known directive name is the only safe option.
+                    stringToParse = ParserUtils.dropUntilFirstMatch(knownDirectiveNamesRegex, preprocessed);
                 }
             } else { // The first token is an unknown key-value directive name.
                 exceptionHandler.accept(new ParserException("Failed to find a suitable DirectiveParser for \"" + preprocessed.getFirstToken() + '"'));
-                stringToParse = ParserUtils.dropUntilFirstMatch(knownDirectiveNamesRegex, preprocessed); // It
-                                                                                                         // is
-                                                                                                         // unclear
-                                                                                                         // where
-                                                                                                         // the
-                                                                                                         // first
-                                                                                                         // directive
-                                                                                                         // ends,
-                                                                                                         // so
-                                                                                                         // skipping
-                                                                                                         // to
-                                                                                                         // the
-                                                                                                         // next
-                                                                                                         // known
-                                                                                                         // directive
-                                                                                                         // name
-                                                                                                         // is
-                                                                                                         // the
-                                                                                                         // only
-                                                                                                         // safe
-                                                                                                         // option.
+                // It is unclear where the first directive ends, so skipping to
+                // the next known directive name is the only safe option.
+                stringToParse = ParserUtils.dropUntilFirstMatch(knownDirectiveNamesRegex, preprocessed);
             }
         }
     }
