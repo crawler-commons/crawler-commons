@@ -17,17 +17,9 @@ class StringDirectiveParserTest implements KeyValueDirectiveParserTest<String> {
 
     @Override
     public Stream<Arguments> provideTestArguments() {
-        return Stream.of(arguments("max-image-preview", "none", "none"), arguments("message", "Hello World!", "Hello World!") // The
-                                                                                                                              // directive
-                                                                                                                              // value
-                                                                                                                              // should
-                                                                                                                              // not
-                                                                                                                              // be
-                                                                                                                              // transformed
-                                                                                                                              // to
-                                                                                                                              // uppercase
-                                                                                                                              // or
-                                                                                                                              // lowercase.
-        );
+        return Stream.of(arguments("max-image-preview", "none", "none"),
+        // The directive value should not be transformed to uppercase or
+        // lowercase:
+                        arguments("message", "Hello World!", "Hello World!"));
     }
 }
