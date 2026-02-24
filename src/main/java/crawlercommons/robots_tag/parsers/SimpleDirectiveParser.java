@@ -11,12 +11,12 @@ import java.util.Optional;
  * Parses simple directives that have no value (e.g. {@code follow} or
  * {@code index}).
  */
-public final class SimpleDirectiveParser implements DirectiveParser {
+public final class SimpleDirectiveParser implements DirectiveParser<Void> {
     private static final SimpleDirectiveParser SINGLETON = new SimpleDirectiveParser();
 
     @Override
-    public ParserResult<Directive<?>> parse(PreprocessedString input) {
-        var directive = new Directive<>(input.getFirstToken(), Optional.empty());
+    public ParserResult<Directive<Void>> parse(PreprocessedString input) {
+        Directive<Void> directive = new Directive<>(input.getFirstToken(), Optional.empty());
         String remainder = input.getString().substring(input.getDelimiterIndex());
         return new ParserResult<>(directive, remainder);
     }

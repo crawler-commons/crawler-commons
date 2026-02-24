@@ -34,35 +34,35 @@ public final class KnownDirectiveParsers {
      * <p>
      * Specified by: Apple, Google, HTML 4, Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> ALL = new NamedDirectiveParser<>("all", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> ALL = new NamedDirectiveParser<>("all", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code archive}
      * <p>
      * Specified by: Yandex
      */
-    public static final NamedDirectiveParser<?> ARCHIVE = new NamedDirectiveParser<>("archive", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> ARCHIVE = new NamedDirectiveParser<>("archive", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code follow}
      * <p>
      * Specified by: Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> FOLLOW = new NamedDirectiveParser<>("follow", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> FOLLOW = new NamedDirectiveParser<>("follow", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code index}
      * <p>
      * Specified by: HTML 4, Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> INDEX = new NamedDirectiveParser<>("index", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> INDEX = new NamedDirectiveParser<>("index", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code indexifembedded}
      * <p>
      * Specified by: Google
      */
-    public static final NamedDirectiveParser<?> INDEX_IF_EMBEDDED = new NamedDirectiveParser<>("indexifembedded", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> INDEX_IF_EMBEDDED = new NamedDirectiveParser<>("indexifembedded", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code max-image-preview} (e.g. {@code max-image-preview: standard})
@@ -90,77 +90,77 @@ public final class KnownDirectiveParsers {
      * <p>
      * Specified by: Apple, Google, Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> NONE = new NamedDirectiveParser<>("none", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NONE = new NamedDirectiveParser<>("none", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code noai}
      * <p>
      * Specified by: DeviantArt
      */
-    public static final NamedDirectiveParser<?> NO_AI = new NamedDirectiveParser<>("noai", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_AI = new NamedDirectiveParser<>("noai", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code noarchive}
      * <p>
      * Specified by: Baidu, Bing, Google (deprecated), Yandex
      */
-    public static final NamedDirectiveParser<?> NO_ARCHIVE = new NamedDirectiveParser<>("noarchive", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_ARCHIVE = new NamedDirectiveParser<>("noarchive", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code nocache}
      * <p>
      * Specified by: Bing
      */
-    public static final NamedDirectiveParser<?> NO_CACHE = new NamedDirectiveParser<>("nocache", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_CACHE = new NamedDirectiveParser<>("nocache", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code nofollow}
      * <p>
      * Specified by: Apple, Baidu, Google, HTML 4, Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> NO_FOLLOW = new NamedDirectiveParser<>("nofollow", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_FOLLOW = new NamedDirectiveParser<>("nofollow", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code noimageai}
      * <p>
      * Specified by: DeviantArt
      */
-    public static final NamedDirectiveParser<?> NO_IMAGE_AI = new NamedDirectiveParser<>("noimageai", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_IMAGE_AI = new NamedDirectiveParser<>("noimageai", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code noimageindex}
      * <p>
      * Specified by: Google
      */
-    public static final NamedDirectiveParser<?> NO_IMAGE_INDEX = new NamedDirectiveParser<>("noimageindex", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_IMAGE_INDEX = new NamedDirectiveParser<>("noimageindex", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code noindex}
      * <p>
      * Specified by: Apple, Bing, Google, HTML 4, Yandex, robotstxt.org
      */
-    public static final NamedDirectiveParser<?> NO_INDEX = new NamedDirectiveParser<>("noindex", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_INDEX = new NamedDirectiveParser<>("noindex", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code nositelinkssearchbox}
      * <p>
      * Specified by: Google (deprecated)
      */
-    public static final NamedDirectiveParser<?> NO_SITELINKS_SEARCH_BOX = new NamedDirectiveParser<>("nositelinkssearchbox", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_SITELINKS_SEARCH_BOX = new NamedDirectiveParser<>("nositelinkssearchbox", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code nosnippet}
      * <p>
      * Specified by: Apple, Bing, Google
      */
-    public static final NamedDirectiveParser<?> NO_SNIPPET = new NamedDirectiveParser<>("nosnippet", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_SNIPPET = new NamedDirectiveParser<>("nosnippet", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code notranslate}
      * <p>
      * Specified by: Google
      */
-    public static final NamedDirectiveParser<?> NO_TRANSLATE = new NamedDirectiveParser<>("notranslate", SimpleDirectiveParser.getSingleton());
+    public static final NamedDirectiveParser<Void> NO_TRANSLATE = new NamedDirectiveParser<>("notranslate", SimpleDirectiveParser.getSingleton());
 
     /**
      * Directive: {@code unavailable_after} (e.g. {@code unavailable_after: 2025-12-31})
