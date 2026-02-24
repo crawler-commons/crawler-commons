@@ -17,9 +17,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @DisplayName("UnambiguousStringParser")
 class UnambiguousStringParserTest {
-    static final Directive<?> FOO = new Directive<>("foo");
-    static final Directive<?> BAR = new Directive<>("bar");
-    static final Directive<?> BAZ = new Directive<>("baz");
+    static final Directive<Void> FOO = new Directive<>("foo");
+    static final Directive<Void> BAR = new Directive<>("bar");
+    static final Directive<Void> BAZ = new Directive<>("baz");
 
     @Test
     @DisplayName("should work with empty input")
