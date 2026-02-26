@@ -28,6 +28,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -511,6 +513,24 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private int _maxWarnings;
     private long _maxCrawlDelay;
     private boolean _exactUserAgentMatching;
+    private volatile Set<RobotsExtension> _enabledExtensions = Collections.emptySet();
+    private volatile Map<String, RobotsExtension> _extensionDirectiveLookup = Collections.emptyMap();
+
+    /**
+     * Mapping from {@link RobotDirective} enum values to their corresponding
+     * {@link RobotsExtension}. This allows the parser to capture values for
+     * directives already known to the {@link RobotDirective} enum when the
+     * matching extension is enabled.
+     */
+    private static final Map<RobotDirective, RobotsExtension> DIRECTIVE_TO_EXTENSION = new HashMap<>();
+    static {
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.HOST, RobotsExtension.HOST);
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.NO_INDEX, RobotsExtension.NO_INDEX);
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.REQUEST_RATE, RobotsExtension.REQUEST_RATE);
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.VISIT_TIME, RobotsExtension.VISIT_TIME);
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.ROBOT_VERSION, RobotsExtension.ROBOT_VERSION);
+        DIRECTIVE_TO_EXTENSION.put(RobotDirective.COMMENT, RobotsExtension.COMMENT);
+    }
 
     public SimpleRobotRulesParser() {
         this(DEFAULT_MAX_CRAWL_DELAY, DEFAULT_MAX_WARNINGS);
@@ -831,15 +851,19 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case UNKNOWN:
-                reportWarning(parseState, "Unknown directive in robots.txt file: {}", line);
+                if (!handlePossibleExtension(parseState, line)) {
+                    reportWarning(parseState, "Unknown directive in robots.txt file: {}", line);
+                }
                     break;
 
                 case MISSING:
-                reportWarning(parseState, "Unknown line in robots.txt file (size {}): {}", content.length, line);
+                if (!handlePossibleExtension(parseState, line)) {
+                    reportWarning(parseState, "Unknown line in robots.txt file (size {}): {}", content.length, line);
+                }
                     break;
 
                 default:
-                    // All others we just ignore
+                    handleKnownDirectiveExtension(parseState, token);
                     break;
             }
         }
@@ -1172,6 +1196,74 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     }
 
     /**
+     * Try to handle a line as an enabled extension directive. Called when the
+     * line was not recognized by the standard {@link RobotDirective} tokenizer.
+     *
+     * @param state
+     *            current parsing state
+     * @param line
+     *            the raw robots.txt line
+     * @return {@code true} if the line was handled as an extension directive
+     */
+    private boolean handlePossibleExtension(ParseState state, String line) {
+        if (_extensionDirectiveLookup.isEmpty()) {
+            return false;
+        }
+        String lowerLine = line.toLowerCase(Locale.ROOT);
+        for (Map.Entry<String, RobotsExtension> entry : _extensionDirectiveLookup.entrySet()) {
+            String prefix = entry.getKey();
+            if (lowerLine.startsWith(prefix)) {
+                String rest = line.substring(prefix.length());
+                Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(rest);
+                if (m.matches()) {
+                    handleExtensionDirective(state, entry.getValue(), m.group(1).trim());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Capture the value of a {@link RobotDirective} that has a corresponding
+     * {@link RobotsExtension} when that extension is enabled. This handles
+     * directives like HOST, NO_INDEX, REQUEST_RATE, etc. that are already
+     * recognized by the tokenizer but whose values were previously discarded.
+     *
+     * @param state
+     *            current parsing state
+     * @param token
+     *            data for directive
+     */
+    private void handleKnownDirectiveExtension(ParseState state, RobotToken token) {
+        RobotsExtension ext = DIRECTIVE_TO_EXTENSION.get(token.getDirective());
+        if (ext != null && _enabledExtensions.contains(ext)) {
+            handleExtensionDirective(state, ext, token.getData());
+        }
+    }
+
+    /**
+     * Store an extension directive value in the current rules, respecting
+     * per-group vs. global scoping.
+     *
+     * @param state
+     *            current parsing state
+     * @param extension
+     *            the robots.txt extension
+     * @param value
+     *            the directive value (text after the colon, trimmed)
+     */
+    private void handleExtensionDirective(ParseState state, RobotsExtension extension, String value) {
+        if (extension.isPerGroup()) {
+            if (state.isAddingRules()) {
+                state.getRobotRules().addExtensionValue(extension, value);
+            }
+        } else {
+            state.getRobotRules().addExtensionValue(extension, value);
+        }
+    }
+
+    /**
      * Get the number of warnings due to invalid rules/lines in the latest
      * processed robots.txt file (see
      * {@link #parseContent(String, byte[], String, String)}.
@@ -1266,6 +1358,63 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      */
     public boolean isExactUserAgentMatching() {
         return _exactUserAgentMatching;
+    }
+
+    /**
+     * Enable a single robots.txt extension directive. When enabled, the
+     * parser will capture the directive's value(s) in the returned
+     * {@link SimpleRobotRules} and suppress any &quot;unknown directive&quot;
+     * warnings for that directive.
+     *
+     * @param extension
+     *            the extension to enable
+     * @see #enableExtensions(Collection)
+     * @see #enableAllExtensions()
+     */
+    public void enableExtension(RobotsExtension extension) {
+        enableExtensions(EnumSet.of(extension));
+    }
+
+    /**
+     * Enable a collection of robots.txt extension directives. When enabled,
+     * the parser will capture each directive's value(s) in the returned
+     * {@link SimpleRobotRules} and suppress any &quot;unknown directive&quot;
+     * warnings for those directives.
+     *
+     * @param extensions
+     *            the extensions to enable
+     * @see #enableExtension(RobotsExtension)
+     * @see #enableAllExtensions()
+     */
+    public void enableExtensions(Collection<RobotsExtension> extensions) {
+        _enabledExtensions = EnumSet.copyOf(extensions);
+        _extensionDirectiveLookup = new HashMap<>();
+        for (RobotsExtension ext : _enabledExtensions) {
+            _extensionDirectiveLookup.put(ext.getDirectiveName(), ext);
+            for (String alias : ext.getAliases()) {
+                _extensionDirectiveLookup.put(alias, ext);
+            }
+        }
+    }
+
+    /**
+     * Enable all known robots.txt extension directives. This is a convenience
+     * method equivalent to
+     * {@code enableExtensions(EnumSet.allOf(RobotsExtension.class))}.
+     *
+     * @see #enableExtension(RobotsExtension)
+     * @see #enableExtensions(Collection)
+     */
+    public void enableAllExtensions() {
+        enableExtensions(EnumSet.allOf(RobotsExtension.class));
+    }
+
+    /**
+     * @return the set of currently enabled extensions (may be empty, never
+     *         {@code null})
+     */
+    public Set<RobotsExtension> getEnabledExtensions() {
+        return Collections.unmodifiableSet(_enabledExtensions);
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {

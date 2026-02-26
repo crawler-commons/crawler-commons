@@ -1418,6 +1418,307 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules2.isAllowed("https://www.example.com/home"));
     }
 
+    // --- Robots.txt extension API tests ---
+
+    @Test
+    void testExtensionLlmPolicyEnabled() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt" + CRLF //
+                        + "Sitemap: /sitemap.xml";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(data, "LLM-Policy extension data should be present");
+        assertEquals(1, data.getValues().size());
+        assertEquals("/llms.txt", data.getValues().get(0));
+        assertEquals(0, robotParser.getNumWarnings(), "No warnings expected when extension is enabled");
+        assertTrue(rules.isAllowed("http://domain.com/anypage.html"));
+    }
+
+    @Test
+    void testExtensionLlmPolicyDisabled() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        assertNull(rules.getExtensionData(RobotsExtension.LLM_POLICY), "LLM-Policy should not be stored when not enabled");
+        assertTrue(rules.getExtensions().isEmpty());
+        assertEquals(1, robotParser.getNumWarnings(), "Warning expected for unrecognized directive");
+    }
+
+    @Test
+    void testExtensionGlobalNotScopedToGroup() {
+        final String robotsTxt = "User-agent: mybot" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + "LLM-Policy: /llms.txt" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Allow: /";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(data, "Global extension should be captured regardless of user-agent matching");
+        assertEquals("/llms.txt", data.getValues().get(0));
+    }
+
+    @Test
+    void testExtensionPerGroupOnlyWhenMatched() {
+        final String robotsTxt = "User-agent: mybot" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + "Request-rate: 10/1m" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Allow: /";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.REQUEST_RATE);
+
+        // Parse as "otherbot" which matches only the wildcard group
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("otherbot"));
+        assertNull(rules.getExtensionData(RobotsExtension.REQUEST_RATE),
+                        "Per-group extension should not be captured for unmatched group");
+
+        // Parse as "mybot" which matches the specific group
+        SimpleRobotRules rules2 = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+        RobotsExtensionData data = rules2.getExtensionData(RobotsExtension.REQUEST_RATE);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("10/1m", data.getValues().get(0));
+    }
+
+    @Test
+    void testExtensionMultipleValues() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt" + CRLF //
+                        + "LLM-Policy: /ai-policy.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(data);
+        assertEquals(2, data.getValues().size());
+        assertEquals("/llms.txt", data.getValues().get(0));
+        assertEquals("/ai-policy.txt", data.getValues().get(1));
+    }
+
+    @Test
+    void testEnableAllExtensions() throws Exception {
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableAllExtensions();
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL,
+                        readFile("/robots/extension-robots.txt"), "text/plain", Set.of("mybot"));
+
+        assertEquals(0, robotParser.getNumWarnings(), "No warnings expected when all extensions are enabled");
+
+        // Global extensions
+        RobotsExtensionData llmPolicy = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(llmPolicy);
+        assertEquals("/llms.txt", llmPolicy.getValues().get(0));
+
+        RobotsExtensionData contentSignals = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(contentSignals);
+        assertEquals("/content-signals.json", contentSignals.getValues().get(0));
+
+        RobotsExtensionData host = rules.getExtensionData(RobotsExtension.HOST);
+        assertNotNull(host);
+        assertEquals("www.example.com", host.getValues().get(0));
+
+        // Per-group extensions (matched "mybot" group)
+        RobotsExtensionData requestRate = rules.getExtensionData(RobotsExtension.REQUEST_RATE);
+        assertNotNull(requestRate);
+        assertEquals("10/1m", requestRate.getValues().get(0));
+
+        RobotsExtensionData visitTime = rules.getExtensionData(RobotsExtension.VISIT_TIME);
+        assertNotNull(visitTime);
+        assertEquals("0200-0600", visitTime.getValues().get(0));
+
+        RobotsExtensionData comment = rules.getExtensionData(RobotsExtension.COMMENT);
+        assertNotNull(comment);
+        assertEquals("only crawl at night", comment.getValues().get(0));
+
+        // Core rules still work
+        assertFalse(rules.isAllowed("http://domain.com/private/page.html"));
+        assertTrue(rules.isAllowed("http://domain.com/public/page.html"));
+    }
+
+    @Test
+    void testEnableAllExtensionsWildcardAgent() throws Exception {
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableAllExtensions();
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL,
+                        readFile("/robots/extension-robots.txt"), "text/plain", Set.of());
+
+        // When matching wildcard, per-group extensions from specific groups
+        // should NOT be included
+        assertNull(rules.getExtensionData(RobotsExtension.VISIT_TIME),
+                        "Per-group extensions from non-matching groups should not be present");
+
+        // Global extensions should always be present
+        assertNotNull(rules.getExtensionData(RobotsExtension.LLM_POLICY));
+        assertNotNull(rules.getExtensionData(RobotsExtension.HOST));
+    }
+
+    @Test
+    void testExtensionDoesNotAffectCoreRules() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + "Allow: /private/public.html" + CRLF //
+                        + "LLM-Policy: /llms.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        assertFalse(rules.isAllowed("http://domain.com/private/secret.html"));
+        assertTrue(rules.isAllowed("http://domain.com/private/public.html"));
+        assertTrue(rules.isAllowed("http://domain.com/other.html"));
+
+        assertNotNull(rules.getExtensionData(RobotsExtension.LLM_POLICY));
+    }
+
+    @Test
+    void testExtensionDataInToString() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        String str = rules.toString();
+        assertTrue(str.contains("llm-policy"), "toString should include extension directive name");
+        assertTrue(str.contains("/llms.txt"), "toString should include extension value");
+    }
+
+    @Test
+    void testExtensionAsMap() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt" + CRLF //
+                        + "LLM-Policy: /ai-policy.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(data);
+        Map<String, String[]> map = data.asMap();
+        assertTrue(map.containsKey("llm-policy"));
+        assertArrayEquals(new String[] { "/llms.txt", "/ai-policy.txt" }, map.get("llm-policy"));
+    }
+
+    @Test
+    void testExtensionCaseInsensitiveDirective() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "llm-policy: /lower.txt" + CRLF //
+                        + "LLM-POLICY: /upper.txt" + CRLF //
+                        + "Llm-Policy: /mixed.txt";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LLM_POLICY);
+        assertNotNull(data);
+        assertEquals(3, data.getValues().size());
+    }
+
+    @Test
+    void testExtensionNoIndexPerGroup() {
+        final String robotsTxt = "User-agent: mybot" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + "Noindex: /secret/" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Allow: /";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.NO_INDEX);
+
+        // "mybot" matches the specific group
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.NO_INDEX);
+        assertNotNull(data, "Noindex should be captured via alias");
+        assertEquals("/secret/", data.getValues().get(0));
+    }
+
+    @Test
+    void testGetEnabledExtensions() {
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        assertTrue(robotParser.getEnabledExtensions().isEmpty());
+
+        robotParser.enableExtension(RobotsExtension.LLM_POLICY);
+        assertEquals(1, robotParser.getEnabledExtensions().size());
+        assertTrue(robotParser.getEnabledExtensions().contains(RobotsExtension.LLM_POLICY));
+
+        robotParser.enableAllExtensions();
+        assertEquals(RobotsExtension.values().length, robotParser.getEnabledExtensions().size());
+    }
+
+    @Test
+    void testExtensionEqualsAndHashCode() {
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "LLM-Policy: /llms.txt";
+
+        SimpleRobotRulesParser parser1 = new SimpleRobotRulesParser();
+        parser1.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules1 = parser1.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        SimpleRobotRulesParser parser2 = new SimpleRobotRulesParser();
+        parser2.enableExtension(RobotsExtension.LLM_POLICY);
+        SimpleRobotRules rules2 = parser2.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        assertEquals(rules1, rules2);
+        assertEquals(rules1.hashCode(), rules2.hashCode());
+
+        // Without extensions enabled, rules should differ
+        SimpleRobotRulesParser parser3 = new SimpleRobotRulesParser();
+        SimpleRobotRules rules3 = parser3.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of());
+
+        assertNotEquals(rules1, rules3);
+    }
+
+    @Test
+    void testExtendedStandardWithExtensionsEnabled() throws Exception {
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableAllExtensions();
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL,
+                        readFile("/robots/extended-standard-robots.txt"), "text/plain", Set.of("bot1"));
+        assertEquals(0, robotParser.getNumWarnings(), "Zero warnings with extended directives");
+
+        RobotsExtensionData requestRate = rules.getExtensionData(RobotsExtension.REQUEST_RATE);
+        assertNotNull(requestRate, "Request-rate should be captured when enabled");
+        assertEquals("30/1m", requestRate.getValues().get(0));
+
+        RobotsExtensionData visitTime = rules.getExtensionData(RobotsExtension.VISIT_TIME);
+        assertNotNull(visitTime);
+        assertEquals("0100-0600", visitTime.getValues().get(0));
+
+        RobotsExtensionData robotVersion = rules.getExtensionData(RobotsExtension.ROBOT_VERSION);
+        assertNotNull(robotVersion);
+        assertEquals("2.0", robotVersion.getValues().get(0));
+
+        RobotsExtensionData comment = rules.getExtensionData(RobotsExtension.COMMENT);
+        assertNotNull(comment);
+        assertEquals("This is a comment about bot1", comment.getValues().get(0));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);

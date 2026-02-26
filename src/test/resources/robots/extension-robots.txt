@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+LLM-Policy: /llms.txt
+Sitemap: /sitemap.xml
+Content-Signals: /content-signals.json
+
+User-agent: mybot
+Disallow: /private/
+Request-rate: 10/1m
+Visit-time: 0200-0600
+Comment: only crawl at night
+No-index: /secret/
+
+User-agent: otherbot
+Disallow: /admin/
+Request-rate: 5/1m
+
+Host: www.example.com
