@@ -73,7 +73,9 @@ public class Namespace {
 
     public static final String[] LINKS = {
                     "http://www.w3.org/1999/xhtml",
-                    "https://www.w3.org/1999/xhtml"
+                    "https://www.w3.org/1999/xhtml",
+                    "http://www.w3.org/1999/xhtml/",
+                    "https://www.w3.org/1999/xhtml/"
     };
 
     public static final String[] PAGEMAPS = {
