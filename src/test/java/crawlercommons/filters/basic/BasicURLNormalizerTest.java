@@ -65,7 +65,12 @@ public class BasicURLNormalizerTest {
                     // not a query param, slash must remain
                     "https://example.com/path/show.php?/category/3,", //
                     // not a query param, slash and %2F have distinct semantics
-                    "https://example.com/?categoryA/categoryB/this_%2F_that," })
+                    "https://example.com/?categoryA/categoryB/this_%2F_that,", //
+                    // issue #559: percent-encoded unreserved chars in the path
+                    // shorten the file when unescaped; the query must still be
+                    // parsed without a StringIndexOutOfBoundsException
+                    "https://example.org/p%2d1/p%2d2/?q=f,https://example.org/p-1/p-2/?q=f", //
+                    "https://example.org/p%2d1/p%2d2/?b=2&a=1,https://example.org/p-1/p-2/?a=1&b=2" })
     public void testQueryParameters(String url, String urlNorm) {
         normalizer = new BasicURLNormalizer();
         if (urlNorm == null) {
