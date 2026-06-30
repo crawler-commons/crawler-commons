@@ -318,23 +318,27 @@ public class BasicURLNormalizer extends URLFilter {
      * @return a normalized URL file
      */
     private String normalizeUrlFile(String file) {
+        // Normalize (unescape unreserved percent-encoded characters) before
+        // locating the query part. Unescaping can shorten the file (e.g. "%2D"
+        // -> "-"), so an index computed on the original string would be stale
+        // afterwards and may point past the end of the unescaped string
+        // (issue #559). Only unreserved characters are unescaped, so this
+        // cannot introduce a new '?' query delimiter into the path.
+        file = unescapePath(file);
+
         // find the beginning of the query parameters
         int endPathIdx = file.indexOf('?');
         if (endPathIdx == -1) {
-            // no query parameters, just properly normalize the path
-            return unescapePath(file);
+            // no query parameters, path is already normalized
+            return file;
         }
 
         int queryStartIdx = endPathIdx + 1;
         if (queryStartIdx >= file.length()) {
             // question mark was the last char in the file, so the query parameters
-            // string is empty. we can just remove the question mark and properly
-            // normalize the path.
-            final String path = file.substring(0, file.length() - 1);
-            return unescapePath(path);
+            // string is empty. we can just remove the question mark.
+            return file.substring(0, file.length() - 1);
         }
-
-        file = unescapePath(file);
 
         List<NameValuePair> pairs =
                 parseQueryParameters(file, queryStartIdx, queryParamsToRemove);
