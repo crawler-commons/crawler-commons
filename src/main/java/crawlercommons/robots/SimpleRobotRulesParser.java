@@ -513,8 +513,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     private int _maxWarnings;
     private long _maxCrawlDelay;
     private boolean _exactUserAgentMatching;
-    private Set<RobotsExtension> _enabledExtensions = Collections.emptySet();
-    private Map<String, RobotsExtension> _extensionDirectiveLookup = Collections.emptyMap();
+    private volatile Set<RobotsExtension> _enabledExtensions = Collections.emptySet();
+    private volatile Map<String, RobotsExtension> _extensionDirectiveLookup = Collections.emptyMap();
 
     /**
      * Mapping from {@link RobotDirective} enum values to their corresponding
