@@ -25,6 +25,7 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -133,8 +134,8 @@ public class CrawlerURLTest {
         assertNotEquals(a, c);
         assertEquals(SAMPLE, a.toString());
         assertEquals(a.toStringURL(), a.toString());
-        assertNotEquals(a, null);
-        assertNotEquals(a, "a string");
+        assertNotNull(a);
+        assertNotEquals("a string", a);
         assertTrue(a.equals(a));
     }
 

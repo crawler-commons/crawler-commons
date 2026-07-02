@@ -275,7 +275,7 @@ public class BasicURLNormalizer extends URLFilter {
                     String tempUrl = protocol + "://" + (host == null ? "" : host) + (port == -1 ? "" : ":" + port) + file;
                     file2 = getFileWithNormalizedPath(new URI(tempUrl));
                 } else {
-                    file2 = getFileWithNormalizedPath(new URI(urlString));
+                    file2 = getFileWithNormalizedPath(crawlerUrl.toJavaURI());
                 }
                 if (!file.equals(file2)) {
                     changed = true;
