@@ -33,6 +33,7 @@ import java.util.TreeMap;
 
 import crawlercommons.sitemaps.extension.Extension;
 import crawlercommons.sitemaps.extension.ExtensionMetadata;
+import crawlercommons.url.CrawlerURL;
 
 /**
  * The SitemapUrl class represents a URL found in a Sitemap.
@@ -113,6 +114,126 @@ public class SiteMapURL implements Serializable {
     }
 
     /**
+     * Constructor mirroring {@link #SiteMapURL(URL, boolean)} but accepting a
+     * {@link java.net.URI} so that callers using URI representations do not need
+     * to convert beforehand (see issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a {@link java.net.URI}
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(URI url, boolean valid) {
+        setUrl(url);
+        setValid(valid);
+    }
+
+    /**
+     * Constructor mirroring
+     * {@link #SiteMapURL(URL, Date, ChangeFrequency, double, boolean)} but
+     * accepting a {@link java.net.URI} (see issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a {@link java.net.URI}
+     * @param lastModified
+     *            when the URL was last modified
+     * @param changeFreq
+     *            how often the URL changes
+     * @param priority
+     *            a value between [0.0 - 1.0]
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(URI url, Date lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
+        this(url, valid);
+        setLastModified(lastModified);
+        setChangeFrequency(changeFreq);
+        setPriority(priority);
+    }
+
+    /**
+     * Constructor mirroring
+     * {@link #SiteMapURL(URL, ZonedDateTime, ChangeFrequency, double, boolean)}
+     * but accepting a {@link java.net.URI} (see issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a {@link java.net.URI}
+     * @param lastModified
+     *            when the URL was last modified
+     * @param changeFreq
+     *            how often the URL changes
+     * @param priority
+     *            a value between [0.0 - 1.0]
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(URI url, ZonedDateTime lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
+        this(url, Date.from(lastModified.toInstant()), changeFreq, priority, valid);
+    }
+
+    /**
+     * Constructor mirroring {@link #SiteMapURL(URL, boolean)} but accepting a
+     * {@link crawlercommons.url.CrawlerURL} so that callers using the
+     * crawler-commons URL representation do not need to convert beforehand (see
+     * issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a
+     *            {@link crawlercommons.url.CrawlerURL}
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(CrawlerURL url, boolean valid) {
+        setUrl(url);
+        setValid(valid);
+    }
+
+    /**
+     * Constructor mirroring
+     * {@link #SiteMapURL(URL, Date, ChangeFrequency, double, boolean)} but
+     * accepting a {@link crawlercommons.url.CrawlerURL} (see issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a
+     *            {@link crawlercommons.url.CrawlerURL}
+     * @param lastModified
+     *            when the URL was last modified
+     * @param changeFreq
+     *            how often the URL changes
+     * @param priority
+     *            a value between [0.0 - 1.0]
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(CrawlerURL url, Date lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
+        this(url, valid);
+        setLastModified(lastModified);
+        setChangeFrequency(changeFreq);
+        setPriority(priority);
+    }
+
+    /**
+     * Constructor mirroring
+     * {@link #SiteMapURL(URL, ZonedDateTime, ChangeFrequency, double, boolean)}
+     * but accepting a {@link crawlercommons.url.CrawlerURL} (see issue #556).
+     *
+     * @param url
+     *            URL of the sitemap entry as a
+     *            {@link crawlercommons.url.CrawlerURL}
+     * @param lastModified
+     *            when the URL was last modified
+     * @param changeFreq
+     *            how often the URL changes
+     * @param priority
+     *            a value between [0.0 - 1.0]
+     * @param valid
+     *            whether the Sitemap is valid syntax or not
+     */
+    public SiteMapURL(CrawlerURL url, ZonedDateTime lastModified, ChangeFrequency changeFreq, double priority, boolean valid) {
+        this(url, Date.from(lastModified.toInstant()), changeFreq, priority, valid);
+    }
+
+    /**
      * Return the URL.
      * 
      * @return URL
@@ -142,6 +263,48 @@ public class SiteMapURL implements Serializable {
         try {
             this.url = new URI(url).toURL();
         } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
+            LOG.error("Bad url: [{}], Exception: {}", url, e.toString());
+            this.url = null;
+        }
+    }
+
+    /**
+     * Set the URL from a {@link java.net.URI} (see issue #556).
+     *
+     * @param url
+     *            of the sitemap. In case the URI cannot be converted to a
+     *            {@link URL}, the current url in this instance will be set to
+     *            NULL
+     */
+    public void setUrl(URI url) {
+        if (url == null) {
+            this.url = null;
+            return;
+        }
+        try {
+            this.url = url.toURL();
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            LOG.error("Bad url: [{}], Exception: {}", url, e.toString());
+            this.url = null;
+        }
+    }
+
+    /**
+     * Set the URL from a {@link crawlercommons.url.CrawlerURL} (see issue #556).
+     *
+     * @param url
+     *            of the sitemap. In case the wrapped URL cannot be converted to
+     *            a {@link URL}, the current url in this instance will be set to
+     *            NULL
+     */
+    public void setUrl(CrawlerURL url) {
+        if (url == null) {
+            this.url = null;
+            return;
+        }
+        try {
+            this.url = url.toJavaURL();
+        } catch (RuntimeException e) {
             LOG.error("Bad url: [{}], Exception: {}", url, e.toString());
             this.url = null;
         }

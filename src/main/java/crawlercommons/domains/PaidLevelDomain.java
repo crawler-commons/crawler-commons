@@ -16,11 +16,14 @@
 
 package crawlercommons.domains;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import crawlercommons.url.CrawlerURL;
 
 /**
  * Routines to extract the PLD (paid-level domain, as per the IRLbot paper) from
@@ -69,6 +72,37 @@ public class PaidLevelDomain {
      * @return PLD, e.g. <code>example.co.uk</code>
      */
     public static String getPLD(URL url) {
+        return getPLD(url.getHost());
+    }
+
+    /**
+     * Extract the PLD (paid-level domain) from the URI.
+     *
+     * <p>
+     * Overload added for issue #556 to support {@link java.net.URI} as an
+     * alternate URL representation without forcing a conversion at the call
+     * site.
+     *
+     * @param uri
+     *            valid URI, e.g. <code>https://www.example.co.uk/</code>
+     * @return PLD, e.g. <code>example.co.uk</code>
+     */
+    public static String getPLD(URI uri) {
+        return getPLD(uri.getHost());
+    }
+
+    /**
+     * Extract the PLD (paid-level domain) from the {@link CrawlerURL}.
+     *
+     * <p>
+     * Overload added for issue #556 so callers holding a {@link CrawlerURL} can
+     * avoid converting to {@link String} or {@link URL} first.
+     *
+     * @param url
+     *            valid URL, e.g. <code>https://www.example.co.uk/</code>
+     * @return PLD, e.g. <code>example.co.uk</code>
+     */
+    public static String getPLD(CrawlerURL url) {
         return getPLD(url.getHost());
     }
 }
