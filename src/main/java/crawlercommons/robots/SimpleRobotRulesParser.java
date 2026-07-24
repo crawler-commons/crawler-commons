@@ -1095,18 +1095,17 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         try {
             path = normalizePathDirective(path);
+            if (path.length() == 0) {
+                /*
+                 * Allow: <nothing> => allow all.
+                 *
+                 * See handleDisallow(...): We ignore the empty allow statement.
+                 */
+            } else {
+                state.addRule(path, true);
+            }
         } catch (Exception e) {
             reportWarning(state, "Error parsing robots rules - can't decode path: {}", path);
-        }
-
-        if (path.length() == 0) {
-            /*
-             * Allow: <nothing> => allow all.
-             * 
-             * See handleDisallow(...): We ignore the empty allow statement.
-             */
-        } else {
-            state.addRule(path, true);
         }
     }
 
