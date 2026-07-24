@@ -1719,6 +1719,14 @@ public class SimpleRobotRulesParserTest {
         assertEquals("This is a comment about bot1", comment.getValues().get(0));
     }
 
+    @Test
+    void testGetNumWarningsBeforeParse() {
+        // getNumWarnings() must not throw a NullPointerException when called on
+        // a thread that has not yet parsed any robots.txt file.
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);
