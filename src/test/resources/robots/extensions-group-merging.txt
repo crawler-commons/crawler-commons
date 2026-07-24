@@ -1,0 +1,31 @@
+# Robots.txt extension and merging of robots.txt groups
+# cf. crawl-delay-group-merging.txt
+#
+# Most extensions are directed to a single user-agent (group).
+# However, some extensions (e.g., the sitemap directive) have
+# a global scope and apply to all user-agents.
+
+Content-Signal: search=yes,ai-train=yes,ai-input=yes  # global scope, affects all user-agents
+
+User-agent: *
+Allow: /llms.txt
+Visit-time: 0600-0845
+
+User-agent: mybot
+Request-rate: 10/1m
+User-agent: yourbot
+Disallow: /private/  # Per RFC9309 (group merging): applies to mybot and yourbot
+
+User-agent: *
+Disallow: /
+
+User-agent: mybot
+Clean-Param: utm_source /
+
+User-agent: yourbot
+Disallow: /login/    # Per RFC9309 (group merging): applies to mybot and yourbot
+
+User-agent: *
+Request-rate: 30/1m
+
+

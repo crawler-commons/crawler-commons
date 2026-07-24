@@ -1495,6 +1495,82 @@ public class SimpleRobotRulesParserTest {
         assertEquals("10/1m", data.getValues().get(0));
     }
 
+    /**
+     * Test the combination of merging rule groups and the Crawl-delay extension.
+     *
+     * @throws Exception
+     */
+    @Test
+    void testCrawlDelayGroupMerging() throws Exception {
+        byte[] robotstxt = readFile("/robots/crawl-delay-group-merging.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("mybot"));
+        assertEquals(10000, rules.getCrawlDelay());
+        assertFalse(rules.isAllowed("https://example.com/private/"), "explicitely disallowed");
+        assertTrue(rules.isAllowed("https://example.com/login/"), "implicitely allowed");
+        assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
+
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("yourbot"));
+        assertEquals(Long.MIN_VALUE, rules.getCrawlDelay()); // not defined
+        assertFalse(rules.isAllowed("https://example.com/private/"), "explicitely disallowed");
+        assertFalse(rules.isAllowed("https://example.com/login/"), "explicitely disallowed");
+        assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
+
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("anyotherbot"));
+        assertEquals(30000, rules.getCrawlDelay());
+        assertTrue(rules.isAllowed("https://example.com/private/"), "implicitely allowed");
+        assertTrue(rules.isAllowed("https://example.com/login/"), "implicitely allowed");
+        assertTrue(rules.isAllowed("https://example.com/"), "explicitely allowed");
+    }
+
+    @Test
+    void testExtensionsGroupMerging() throws Exception {
+        byte[] robotstxt = readFile("/robots/extensions-group-merging.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableAllExtensions();
+
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("mybot"));
+        // TODO: Visit-time leaks from wild-card user-agent, see #590
+        // assertEquals(3, rules.getExtensions().size(), "Content-Signal (global scope), Request-rate and Clean-param");
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("search=yes,ai-train=yes,ai-input=yes", data.getValues().get(0));
+        data = rules.getExtensionData(RobotsExtension.REQUEST_RATE);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("10/1m", data.getValues().get(0));
+        data = rules.getExtensionData(RobotsExtension.CLEAN_PARAM);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("utm_source /", data.getValues().get(0));
+        assertFalse(rules.isAllowed("https://example.com/private/"), "explicitely disallowed");
+        assertFalse(rules.isAllowed("https://example.com/login/"), "explicitely disallowed as part of a rule group");
+        assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
+
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("yourbot"));
+        // TODO: Visit-time leaks from wild-card user-agent, see #590
+        // assertEquals(1, rules.getExtensions().size(), "Content-Signal (global scope)");
+        assertNotNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS));
+        assertFalse(rules.isAllowed("https://example.com/private/"), "explicitely disallowed");
+        assertFalse(rules.isAllowed("https://example.com/login/"), "explicitely disallowed");
+        assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
+
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("anyotherbot"));
+        assertEquals(3, rules.getExtensions().size(), "Content-Signal, Visit-time and Request-rate");
+        assertNotNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS));
+        data = rules.getExtensionData(RobotsExtension.VISIT_TIME);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("0600-0845", data.getValues().get(0));
+        data = rules.getExtensionData(RobotsExtension.REQUEST_RATE);
+        assertNotNull(data, "Per-group extension should be captured for matched group");
+        assertEquals("30/1m", data.getValues().get(0));
+        assertFalse(rules.isAllowed("https://example.com/private/"), "implicitely disallowed");
+        assertFalse(rules.isAllowed("https://example.com/login/"), "implicitely disallowed");
+        assertFalse(rules.isAllowed("https://example.com/"), "explicitely disallowed");
+        assertTrue(rules.isAllowed("https://example.com/llms.txt"), "explicitely allowed");
+    }
+
     @Test
     void testExtensionPerGroupNotLeakedFromWildcard() {
         // Per-group extension values collected under the wildcard group must
