@@ -65,7 +65,7 @@ public enum RobotsExtension {
      * <a href="https://blog.cloudflare.com/content-signals-policy">Cloudflare
      * blog post</a>.
      */
-    CONTENT_SIGNALS("content-signals", false),
+    CONTENT_SIGNALS("content-signal", false, "content-signals"),
 
     /**
      * The &quot;Host&quot; directive was used by Yandex to indicate the main or
