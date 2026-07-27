@@ -79,6 +79,45 @@ public class BasicURLNormalizerTest {
         normalizeTest(url, urlNorm);
     }
 
+    /**
+     * Issue #587: the square brackets enclosing an IPv6 host are reserved
+     * delimiters and must survive escaping, otherwise the URL is rejected as
+     * malformed.
+     */
+    @ParameterizedTest
+    @CsvSource({ //
+                    "http://[::1]/,", //
+                    "http://[::1],http://[::1]/", //
+                    "http://[2001:db8::1]/path?q=1,", //
+                    // host is lowercased, default port is dropped
+                    "http://[2001:DB8::1]/,http://[2001:db8::1]/", //
+                    "http://[::1]:80/,http://[::1]/", //
+                    "https://[::1]:443/,https://[::1]/", //
+                    // non-default port is kept
+                    "http://[::1]:8080/x,", //
+                    // IPv4-mapped IPv6 address
+                    "http://[::ffff:127.0.0.1]/,", //
+                    // path normalization still applies
+                    "http://[::1]/a/../b,http://[::1]/b", //
+                    // userinfo is stripped as for any other host
+                    "http://user:pass@[::1]/x,http://[::1]/x", //
+                    // brackets outside the host are still escaped
+                    "http://example.com/[x],http://example.com/%5Bx%5D" })
+    public void testIPv6Host(String url, String urlNorm) {
+        normalizer = new BasicURLNormalizer();
+        normalizeTest(url, urlNorm == null ? url : urlNorm);
+    }
+
+    /** Issue #587: bracketed hosts which are not valid IPv6 literals. */
+    @ParameterizedTest
+    @CsvSource({ "http://[::1", "http://[]/", "http://[::1]./", //
+                    // percent-encoding is not part of the IP-literal grammar
+                    "http://[::%31]/" })
+    public void testInvalidIPv6Host(String url) {
+        normalizer = new BasicURLNormalizer();
+        assertNull(normalizer.filter(url), "normalizing: " + url);
+    }
+
     @Test
     public void testHostToUnicode() {
         normalizer = BasicURLNormalizer.newBuilder().idnNormalization(BasicURLNormalizer.IdnNormalization.UNICODE).build();

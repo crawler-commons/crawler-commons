@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+- BasicURLNormalizer rejects URLs with IPv6 address as host name (Richard Zowalla, sebastian-nagel) #587
 - [Robots.txt] Remove dead catch blocks around path normalization (jnioche) #596
 - [Robots.txt] Fix typo in "Content-Signal" extension directive (sebastian-nagel) #595
 - [Robots.txt] Replace per-line directive-prefix scan in tokenize() with a prefix trie (jnioche) #593

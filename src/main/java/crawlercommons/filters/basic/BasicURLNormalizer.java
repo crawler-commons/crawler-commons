@@ -186,7 +186,7 @@ public class BasicURLNormalizer extends URLFilter {
         }
 
         // escape to ensure URL does not contain illegal characters
-        urlString = escapePath(urlString);
+        urlString = escapeUrlString(urlString);
 
         // Wrap the parsed URL in a CrawlerURL (issue #556) so the alternate
         // representations and components are obtained through a single,
@@ -595,6 +595,53 @@ public class BasicURLNormalizer extends URLFilter {
     }
 
     /**
+     * Escape a complete URL string, leaving a bracketed IPv6 literal in the
+     * authority component untouched.
+     * <p>
+     * The square brackets enclosing an IPv6 address are reserved delimiters (<a
+     * href="https://tools.ietf.org/html/rfc3986#section-3.2.2">RFC3986, section
+     * 3.2.2</a>) and must not be percent-encoded: escaping them turns a valid
+     * host such as {@code [::1]} into {@code %5B::1%5D}, which is then rejected
+     * as a malformed URL (issue #587). Everything outside the IPv6 literal is
+     * escaped by {@link #escapePath(String)} as before.
+     */
+    private static String escapeUrlString(String urlString) {
+        int hostStart = urlString.indexOf("://");
+        if (hostStart < 0) {
+            return escapePath(urlString);
+        }
+        hostStart += 3;
+
+        int authorityEnd = urlString.length();
+        for (int i = hostStart; i < authorityEnd; i++) {
+            char c = urlString.charAt(i);
+            if (c == '/' || c == '?') {
+                authorityEnd = i;
+                break;
+            }
+        }
+
+        // skip over the userinfo component, if present
+        int at = urlString.lastIndexOf('@', authorityEnd - 1);
+        if (at >= hostStart) {
+            hostStart = at + 1;
+        }
+
+        if (hostStart >= authorityEnd || urlString.charAt(hostStart) != '[') {
+            return escapePath(urlString);
+        }
+        int hostEnd = urlString.indexOf(']', hostStart);
+        if (hostEnd < 0 || hostEnd >= authorityEnd) {
+            // unbalanced bracket: not an IPv6 literal, escape as before
+            return escapePath(urlString);
+        }
+
+        return escapePath(urlString.substring(0, hostStart)) //
+                        + urlString.substring(hostStart, hostEnd + 1) //
+                        + escapePath(urlString.substring(hostEnd + 1));
+    }
+
+    /**
      * Convert path segment of URL from Unicode to UTF-8 and escape all
      * characters which should be escaped according to <a
      * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC3986</a>.
@@ -655,6 +702,21 @@ public class BasicURLNormalizer extends URLFilter {
     }
 
     private String normalizeHostName(String host) throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedEncodingException {
+
+        /*
+         * 0. IPv6 literal (issue #587): the address itself has already been
+         * validated by java.net.URI, only the hexadecimal digits need to be
+         * lowercased. None of the steps below apply: percent-encoding is not
+         * part of the IP-literal grammar (a percent sign can only introduce a
+         * zone identifier, which is not meaningful in a URL), and neither IDN
+         * mapping nor trailing-dot removal are defined for IP addresses.
+         */
+        if (host.startsWith("[") && host.endsWith("]")) {
+            if (host.indexOf('%') != -1) {
+                throw new IllegalArgumentException("Percent-encoding not allowed in IPv6 literal: " + host);
+            }
+            return host.toLowerCase(Locale.ROOT);
+        }
 
         /* 1. unescape percent-encoded characters in host name */
         if (host.indexOf('%') != -1) {
