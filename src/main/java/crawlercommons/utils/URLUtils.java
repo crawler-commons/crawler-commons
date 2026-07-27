@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
+import crawlercommons.url.CrawlerURL;
+
 public class URLUtils {
 
     /**
@@ -51,6 +53,67 @@ public class URLUtils {
             }
 
             return base.toURI().resolve(resolvedSpec).toURL();
+        } catch (Exception e) {
+            throw (MalformedURLException) new MalformedURLException(e.getMessage()).initCause(e);
+        }
+    }
+
+    /**
+     * Resolves a URL against a base URL.
+     *
+     * <p>
+     * Overload accepting a {@code java.net.URI} base, added for issue #556 to
+     * let callers that already hold a {@code URI} avoid converting to
+     * {@code java.net.URL} first. It delegates to
+     * {@link #resolve(URL, String)} so resolution semantics stay identical.
+     * </p>
+     *
+     * @param base
+     *            the base URL, or {@code null}
+     * @param spec
+     *            the URL specification to resolve
+     * @return the resolved URL
+     * @throws MalformedURLException
+     *             if the URL cannot be resolved
+     */
+    public static URL resolve(URI base, String spec) throws MalformedURLException {
+        if (base == null) {
+            return resolve((URL) null, spec);
+        }
+        try {
+            return resolve(base.toURL(), spec);
+        } catch (MalformedURLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw (MalformedURLException) new MalformedURLException(e.getMessage()).initCause(e);
+        }
+    }
+
+    /**
+     * Resolves a URL against a base URL.
+     *
+     * <p>
+     * Overload accepting a {@link CrawlerURL} base, added for issue #556 to let
+     * callers pass the lazily-converting wrapper directly. It delegates to
+     * {@link #resolve(URL, String)} so resolution semantics stay identical.
+     * </p>
+     *
+     * @param base
+     *            the base URL, or {@code null}
+     * @param spec
+     *            the URL specification to resolve
+     * @return the resolved URL
+     * @throws MalformedURLException
+     *             if the URL cannot be resolved
+     */
+    public static URL resolve(CrawlerURL base, String spec) throws MalformedURLException {
+        if (base == null) {
+            return resolve((URL) null, spec);
+        }
+        try {
+            return resolve(base.toJavaURL(), spec);
+        } catch (MalformedURLException e) {
+            throw e;
         } catch (Exception e) {
             throw (MalformedURLException) new MalformedURLException(e.getMessage()).initCause(e);
         }

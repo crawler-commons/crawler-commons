@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
+import crawlercommons.url.CrawlerURL;
 
 /**
  * {@inheritDoc}
@@ -223,6 +224,60 @@ public class SimpleRobotRules extends BaseRobotRules {
         return isAllowedPath(getPath(url, true));
     }
 
+    /**
+     * Check whether a URL is allowed to be fetched according to the robots
+     * rules.
+     *
+     * <p>
+     * Overload accepting a {@link java.net.URI}, added as part of issue <a
+     * href="https://github.com/crawler-commons/crawler-commons/issues/556">#556</a>
+     * to avoid forced conversions between URL representations. It delegates to
+     * the same matching logic as {@link #isAllowed(String)} and
+     * {@link #isAllowed(URL)}.
+     * </p>
+     *
+     * @see #isAllowed(String)
+     *
+     * @param uri
+     *            URI to be checked
+     * @return true if the URI is allowed
+     */
+    public boolean isAllowed(URI uri) {
+        if (_mode == RobotRulesMode.ALLOW_NONE) {
+            return false;
+        } else if (_mode == RobotRulesMode.ALLOW_ALL) {
+            return true;
+        }
+        return isAllowedPath(getPath(uri, true));
+    }
+
+    /**
+     * Check whether a URL is allowed to be fetched according to the robots
+     * rules.
+     *
+     * <p>
+     * Overload accepting a {@link CrawlerURL}, added as part of issue <a
+     * href="https://github.com/crawler-commons/crawler-commons/issues/556">#556</a>
+     * to avoid forced conversions between URL representations. It delegates to
+     * the same matching logic as {@link #isAllowed(String)} and
+     * {@link #isAllowed(URL)}.
+     * </p>
+     *
+     * @see #isAllowed(String)
+     *
+     * @param url
+     *            {@link CrawlerURL} to be checked
+     * @return true if the URL is allowed
+     */
+    public boolean isAllowed(CrawlerURL url) {
+        if (_mode == RobotRulesMode.ALLOW_NONE) {
+            return false;
+        } else if (_mode == RobotRulesMode.ALLOW_ALL) {
+            return true;
+        }
+        return isAllowedPath(getPath(url, true));
+    }
+
     private boolean isAllowedPath(String pathWithQuery) {
         // Always allow robots.txt
         if (pathWithQuery.equals("/robots.txt")) {
@@ -298,6 +353,28 @@ public class SimpleRobotRules extends BaseRobotRules {
             URL urlObj = new URI(url).toURL();
 
             return getPath(urlObj, getWithQuery);
+        } catch (Exception e) {
+            // If the URL is invalid, we don't really care since the fetch
+            // will fail, so return the root.
+            return "/";
+        }
+    }
+
+    private String getPath(URI uri, boolean getWithQuery) {
+        try {
+            URL urlObj = uri.toURL();
+
+            return getPath(urlObj, getWithQuery);
+        } catch (Exception e) {
+            // If the URI is invalid, we don't really care since the fetch
+            // will fail, so return the root.
+            return "/";
+        }
+    }
+
+    private String getPath(CrawlerURL url, boolean getWithQuery) {
+        try {
+            return getPath(url.toJavaURL(), getWithQuery);
         } catch (Exception e) {
             // If the URL is invalid, we don't really care since the fetch
             // will fail, so return the root.

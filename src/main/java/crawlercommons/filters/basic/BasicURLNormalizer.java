@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.filters.URLFilter;
+import crawlercommons.url.CrawlerURL;
 
 /**
  * Converts URLs to a
@@ -187,12 +188,21 @@ public class BasicURLNormalizer extends URLFilter {
         // escape to ensure URL does not contain illegal characters
         urlString = escapePath(urlString);
 
-        URL url = parseStringToURL(urlString);
-        if (url == null) {
+        // Wrap the parsed URL in a CrawlerURL (issue #556) so the alternate
+        // representations and components are obtained through a single,
+        // lazily-cached carrier instead of repeatedly re-parsing strings.
+        CrawlerURL crawlerUrl = parseStringToCrawlerURL(urlString);
+        if (crawlerUrl == null) {
             LOG.debug("Malformed URL {}", urlString);
             return null;
         }
 
+        // The protocol/host/port/file components are read from the
+        // java.net.URL view of the CrawlerURL. The java.net.URL parsing
+        // semantics (e.g. lowercased protocol, lenient host parsing) are
+        // intentionally retained here to preserve the externally observable
+        // behavior of filter(String).
+        URL url = crawlerUrl.toJavaURL();
         String protocol = url.getProtocol();
         String host = url.getHost();
         int port = url.getPort();
@@ -265,7 +275,7 @@ public class BasicURLNormalizer extends URLFilter {
                     String tempUrl = protocol + "://" + (host == null ? "" : host) + (port == -1 ? "" : ":" + port) + file;
                     file2 = getFileWithNormalizedPath(new URI(tempUrl));
                 } else {
-                    file2 = getFileWithNormalizedPath(new URI(urlString));
+                    file2 = getFileWithNormalizedPath(crawlerUrl.toJavaURI());
                 }
                 if (!file.equals(file2)) {
                     changed = true;
@@ -287,6 +297,25 @@ public class BasicURLNormalizer extends URLFilter {
             }
 
         return urlString;
+    }
+
+    /**
+     * Tries to parse the given string into a {@link CrawlerURL} (issue #556).
+     * The string is first parsed into a {@link java.net.URL} (applying the same
+     * scheme-prefixing fallback as {@link #parseStringToURL(String)}) and then
+     * wrapped, so the lazily-cached java.net.URL view is reused for component
+     * lookups without re-parsing.
+     *
+     * @param urlString a string which possibly contains a URL
+     * @return a {@link CrawlerURL}, or {@code null} if the string cannot be
+     *         parsed into a valid URL
+     */
+    private static CrawlerURL parseStringToCrawlerURL(String urlString) {
+        URL url = parseStringToURL(urlString);
+        if (url == null) {
+            return null;
+        }
+        return CrawlerURL.of(url);
     }
 
     /**
