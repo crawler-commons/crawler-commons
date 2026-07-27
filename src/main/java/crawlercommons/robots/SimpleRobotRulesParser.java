@@ -296,6 +296,21 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             _curRules.clearRules();
         }
 
+        /**
+         * Clear the per-group extension data collected so far in the current
+         * rules. Called when a wildcard group is superseded by a matching
+         * specific user-agent group, so that per-group extension values (e.g.
+         * Clean-param) collected under the wildcard do not leak into the rules
+         * of the matched agent. Global (file-wide) extensions are not affected.
+         */
+        public void clearPerGroupExtensions() {
+            for (RobotsExtension ext : RobotsExtension.values()) {
+                if (ext.isPerGroup()) {
+                    _curRules.clearExtensionData(ext);
+                }
+            }
+        }
+
         public void addRule(String prefix, boolean allow) {
             _curRules.addRule(prefix, allow);
         }
@@ -1017,10 +1032,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 state.setAddingCrawlDelay(true);
             } else if (targetNames.contains(agentName) || (!isValidUserAgentToObey(agentName) && userAgentProductTokenPartialMatch(agentName, targetNames))) {
                 if (state.isMatchedWildcard()) {
-                    // Clear rules and Crawl-delay of the wildcard user-agent
-                    // found before the non-wildcard user-agent match.
+                    // Clear rules, Crawl-delay and per-group extensions of the
+                    // wildcard user-agent found before the non-wildcard
+                    // user-agent match.
                     state.clearRules();
                     state.clearCrawlDelay();
+                    state.clearPerGroupExtensions();
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);
@@ -1062,10 +1079,12 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
             if (matched) {
                 if (state.isMatchedWildcard()) {
-                    // Clear rules and Crawl-delay of the wildcard user-agent
-                    // found before the non-wildcard user-agent match.
+                    // Clear rules, Crawl-delay and per-group extensions of the
+                    // wildcard user-agent found before the non-wildcard
+                    // user-agent match.
                     state.clearRules();
                     state.clearCrawlDelay();
+                    state.clearPerGroupExtensions();
                 }
                 state.setMatchedRealName(true);
                 state.setAddingRules(true);

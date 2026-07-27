@@ -1496,6 +1496,32 @@ public class SimpleRobotRulesParserTest {
     }
 
     @Test
+    void testExtensionPerGroupNotLeakedFromWildcard() {
+        // Per-group extension values collected under the wildcard group must
+        // not leak into the rules of a specific agent that supersedes the
+        // wildcard group (same as the allow/disallow rules and the crawl-delay,
+        // which are cleared when the specific group matches).
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Request-rate: 1/10m" + CRLF //
+                        + "Disallow: /wild/" + CRLF //
+                        + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "Disallow: /bot/";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.REQUEST_RATE);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+
+        // sanity: the wildcard rules were cleared in favour of the mybot group
+        assertTrue(rules.isAllowed("http://www.example.com/wild/"), "Wildcard disallow rules should be cleared for the matched agent");
+        assertFalse(rules.isAllowed("http://www.example.com/bot/"), "The matched agent's own disallow rules should apply");
+
+        // the Request-rate from the wildcard group must not leak into mybot
+        assertNull(rules.getExtensionData(RobotsExtension.REQUEST_RATE),
+                        "Per-group extension collected under the wildcard group should not leak into the matched agent's rules");
+    }
+
+    @Test
     void testExtensionMultipleValues() {
         final String robotsTxt = "User-agent: *" + CRLF //
                         + "Allow: /" + CRLF //
