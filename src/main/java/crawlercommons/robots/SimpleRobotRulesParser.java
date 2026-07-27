@@ -566,7 +566,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
     public static final long DEFAULT_MAX_CRAWL_DELAY = 300000;
 
     // number of warnings found in the latest processed robots.txt file
-    private ThreadLocal<Integer> _numWarningsDuringLastParse = new ThreadLocal<>();
+    private ThreadLocal<Integer> _numWarningsDuringLastParse = ThreadLocal.withInitial(() -> 0);
 
     private int _maxWarnings;
     private long _maxCrawlDelay;
