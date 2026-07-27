@@ -394,6 +394,20 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
     private static Map<String, RobotDirective> DIRECTIVE_PREFIX = new HashMap<String, RobotDirective>();
 
+    /**
+     * Node of the directive-prefix trie used by {@link #tokenize(String)} to
+     * look up the directive at the start of a robots.txt line without scanning
+     * every known prefix. Each node represents the prefix spelled out by the
+     * path from the root; {@link #directive} is non-{@code null} if a known
+     * directive prefix ends at this node.
+     */
+    private static final class DirectiveTrieNode {
+        private final Map<Character, DirectiveTrieNode> children = new HashMap<>();
+        private RobotDirective directive;
+    }
+
+    private static final DirectiveTrieNode DIRECTIVE_TRIE = new DirectiveTrieNode();
+
     static {
         for (RobotDirective directive : RobotDirective.values()) {
             if (!directive.isSpecial()) {
@@ -430,6 +444,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         DIRECTIVE_PREFIX.put("sitemaps", RobotDirective.SITEMAP);
 
         DIRECTIVE_PREFIX.put("https", RobotDirective.HTTP);
+
+        // Build the lookup trie from the (already lower-cased) directive prefixes.
+        for (Map.Entry<String, RobotDirective> entry : DIRECTIVE_PREFIX.entrySet()) {
+            String prefix = entry.getKey();
+            DirectiveTrieNode node = DIRECTIVE_TRIE;
+            for (int i = 0; i < prefix.length(); i++) {
+                node = node.children.computeIfAbsent(prefix.charAt(i), c -> new DirectiveTrieNode());
+            }
+            node.directive = entry.getValue();
+        }
     }
 
     // separator is either one or more spaces/tabs, or a colon
@@ -451,28 +475,25 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      */
     private static RobotToken tokenize(String line) {
         String lowerLine = line.toLowerCase(Locale.ROOT);
-        for (String prefix : DIRECTIVE_PREFIX.keySet()) {
-            int prefixLength = prefix.length();
-            if (lowerLine.startsWith(prefix)) {
-                RobotDirective directive = DIRECTIVE_PREFIX.get(prefix);
-                String dataPortion = line.substring(prefixLength);
 
-                if (directive.isPrefix()) {
-                    Matcher m = DIRECTIVE_SUFFIX_PATTERN.matcher(dataPortion);
-                    if (m.matches()) {
-                        dataPortion = m.group(1);
-                    } else {
-                        continue;
-                    }
-                }
-
-                Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(dataPortion);
-                if (!m.matches()) {
-                    m = BLANK_DIRECTIVE_DELIMITER.matcher(dataPortion);
-                }
-
-                if (m.matches()) {
-                    return new RobotToken(directive, m.group(1).trim());
+        /*
+         * Walk the directive-prefix trie along the characters of the line. For
+         * every known directive prefix ending on the path, check whether the
+         * remainder of the line forms a valid directive (correct separator).
+         * The prefixes are visited in order of increasing length; at most one
+         * of them can be followed by a valid separator, so the first match is
+         * returned. This avoids scanning every known prefix for each line.
+         */
+        DirectiveTrieNode node = DIRECTIVE_TRIE;
+        for (int i = 0; i < lowerLine.length(); i++) {
+            node = node.children.get(lowerLine.charAt(i));
+            if (node == null) {
+                break;
+            }
+            if (node.directive != null) {
+                RobotToken token = matchDirective(line, node.directive, i + 1);
+                if (token != null) {
+                    return token;
                 }
             }
         }
@@ -483,6 +504,43 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } else {
             return new RobotToken(RobotDirective.MISSING, line);
         }
+    }
+
+    /**
+     * Check whether a directive prefix found at the start of a line is followed
+     * by a valid separator and, if so, build the corresponding
+     * {@link RobotToken}.
+     *
+     * @param line
+     *            the original (not lower-cased) robots.txt line
+     * @param directive
+     *            the directive whose prefix matched the start of the line
+     * @param prefixLength
+     *            the length of the matched prefix
+     * @return the parsed token, or {@code null} if the prefix is not followed by
+     *         a valid separator (e.g. the prefix is only part of a longer word)
+     */
+    private static RobotToken matchDirective(String line, RobotDirective directive, int prefixLength) {
+        String dataPortion = line.substring(prefixLength);
+
+        if (directive.isPrefix()) {
+            Matcher m = DIRECTIVE_SUFFIX_PATTERN.matcher(dataPortion);
+            if (m.matches()) {
+                dataPortion = m.group(1);
+            } else {
+                return null;
+            }
+        }
+
+        Matcher m = COLON_DIRECTIVE_DELIMITER.matcher(dataPortion);
+        if (!m.matches()) {
+            m = BLANK_DIRECTIVE_DELIMITER.matcher(dataPortion);
+        }
+
+        if (m.matches()) {
+            return new RobotToken(directive, m.group(1).trim());
+        }
+        return null;
     }
 
     private static final Pattern SIMPLE_HTML_PATTERN = Pattern.compile("(?is)<(html|head|body)\\s*>");
