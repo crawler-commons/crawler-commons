@@ -1,0 +1,30 @@
+# Crawl-delay extension and merging of robots.txt groups
+#
+# RFC 9309, section 2.2.1. The User-Agent Line
+# https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.1
+# Figure 2: Example of how to merge two robots.txt groups that match the same product token
+#
+# RFC 9309, section 2.2.4. Other Records
+# https://www.rfc-editor.org/rfc/rfc9309.html#section-2.2.4
+# "Parsing of other records MUST NOT interfere with the parsing of explicitly defined records in Section 2.
+#  For example, a "Sitemaps" record MUST NOT terminate a group."
+#
+# Also the Crawl-delay directive must not interfer with rule assignment.
+#
+# Unlike the Sitemaps directive, which has a global scope,
+# the Crawl-delay directives are assigned to individual user-agents.
+
+User-agent: mybot
+Crawl-delay: 10
+User-agent: yourbot
+Disallow: /private/  # Per RFC9309 (group merging): applies to mybot and yourbot
+
+User-agent: *
+Allow: /
+
+User-agent: yourbot
+Disallow: /login/    # Per RFC9309 (group merging): applies to mybot and yourbot
+
+User-agent: *
+Crawl-delay: 30
+
