@@ -1,7 +1,21 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
-- Port WHATWG URL normalization tests from Web Platform Tests for URLUtils.resolve + BasicURLNormalizer (Richard Zowalla) #535
+- [Robots.txt] Remove dead catch blocks around path normalization (jnioche) #596
+- [Robots.txt] Fix typo in "Content-Signal" extension directive (sebastian-nagel) #595
+- [Robots.txt] Replace per-line directive-prefix scan in tokenize() with a prefix trie (jnioche) #593
+- [Robots.txt] Avoid NullPointerException in getNumWarnings() before first parse (jnioche) #592
+- [Robots.txt] Fix per-group extension values leaking from the wildcard group (jnioche) #590
+- [Robots.txt] Support LLM-Policy entry in robots.txt (lewismc) #569
+- Fix StringIndexOutOfBoundsException in BasicURLNormalizer for percent-encoded path with query (Richard Zowalla) #559, #585
+- Add lazy CrawlerURL and URI/CrawlerURL API variants (Richard Zowalla) #556, #584
+- Port WHATWG URL normalization tests from Web Platform Tests for URLUtils.resolve + BasicURLNormalizer (Richard Zowalla) #535, #586
+- [Sitemaps] Sitemap extension LinkAttributes: allow XHTML namespace URIs with trailing slash (sebastian-nagel) #572
+- Fix SLF4J test dependency version mismatch (lewismc) #570
+- Let Dependabot upgrade GitHub workflow actions (sebastian-nagel) #578
+- Upgrade dependencies (dependabot) #574, #575, #588
+- Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589
+- Upgrade GitHub workflow actions (dependabot) #579, #580
 
 Release 1.6 (2025-12-04)
 - Support IDNA2008 Unicode domains by using ALLOW_UNASSIGNED in IDN methods within TldFinder / Normalizer. (Richard Zowalla, sebastian-nagel) #551, #552
