@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -478,7 +479,18 @@ public class SiteMapParser {
      */
     protected AbstractSiteMap processXml(URL sitemapUrl, byte[] xmlContent) throws UnknownFormatException {
 
-        InputStream in = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new ByteArrayInputStream(xmlContent)));
+        InputStream in;
+        try {
+            in = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new ByteArrayInputStream(xmlContent)));
+        } catch (IOException e) {
+            /*
+             * Since commons-io 2.22.0 the BOMInputStream constructor reads the
+             * byte-order mark eagerly and declares IOException. Reading from
+             * the in-memory byte[] cannot fail, so this is unreachable - the
+             * signature of this method is kept unchanged.
+             */
+            throw new UncheckedIOException("Failed to read byte-order mark of sitemap " + sitemapUrl, e);
+        }
         InputSource is = new InputSource();
         is.setCharacterStream(new BufferedReader(new InputStreamReader(in, UTF_8)));
 

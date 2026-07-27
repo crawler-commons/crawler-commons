@@ -385,7 +385,7 @@
 	<properties>
 		<!-- Dependencies -->
 
-		<commons-io.version>2.21.0</commons-io.version>
+		<commons-io.version>2.22.0</commons-io.version>
 		<slf4j-api.version>2.0.18</slf4j-api.version>
 		<junit.version>5.14.4</junit.version>
 		<slf4j-simple.version>2.0.18</slf4j-simple.version>
