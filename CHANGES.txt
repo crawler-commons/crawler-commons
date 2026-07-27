@@ -13,7 +13,8 @@ Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - [Sitemaps] Sitemap extension LinkAttributes: allow XHTML namespace URIs with trailing slash (sebastian-nagel) #572
 - Fix SLF4J test dependency version mismatch (lewismc) #570
 - Let Dependabot upgrade GitHub workflow actions (sebastian-nagel) #578
-- Upgrade dependencies (dependabot) #574, #575, #588
+- [Sitemaps] Handle IOException declared by the BOMInputStream constructor since commons-io 2.22.0 (Richard Zowalla) #573
+- Upgrade dependencies (dependabot) #573, #574, #575, #588
 - Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589
 - Upgrade GitHub workflow actions (dependabot) #579, #580
 
