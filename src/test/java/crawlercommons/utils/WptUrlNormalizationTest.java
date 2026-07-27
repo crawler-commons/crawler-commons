@@ -107,10 +107,8 @@ public class WptUrlNormalizationTest {
         EXCLUSIONS.add("http://foo/abcd#foo?bar || http://example.org/foo/bar"); // WHATWG-divergence: crawler-commons drops the fragment component
         EXCLUSIONS.add("[61:24:74]:98 || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
         EXCLUSIONS.add("http:[61:27]/:foo || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal canonicalization differs
-        EXCLUSIONS.add("http://[2001::1] || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
-        EXCLUSIONS.add("http://[::127.0.0.1] || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
-        EXCLUSIONS.add("http://[0:0:0:0:0:0:13.1.68.3] || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
-        EXCLUSIONS.add("http://[2001::1]:80 || http://example.org/foo/bar"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
+        EXCLUSIONS.add("http://[::127.0.0.1] || http://example.org/foo/bar"); // WHATWG-divergence: embedded IPv4 in IPv6 literal not rewritten to hex groups
+        EXCLUSIONS.add("http://[0:0:0:0:0:0:13.1.68.3] || http://example.org/foo/bar"); // WHATWG-divergence: embedded IPv4 in IPv6 literal not rewritten to hex groups
         EXCLUSIONS.add("http:/example.com/ || http://example.org/foo/bar"); // WHATWG-divergence: relative/opaque scheme prefix resolved against base differently
         EXCLUSIONS.add("http:/ || http://example.com/"); // WHATWG-divergence: relative/opaque scheme prefix resolved against base differently
         EXCLUSIONS.add("https:/example.com/ || http://example.org/foo/bar"); // WHATWG-divergence: relative/opaque scheme prefix resolved against base differently
@@ -213,11 +211,9 @@ public class WptUrlNormalizationTest {
         EXCLUSIONS.add("https://0000000000000000000000000000000000000000177.0.0.1 || "); // WHATWG-divergence: WHATWG canonicalizes host to dotted-decimal IPv4; cc leaves as-is
         EXCLUSIONS.add("https://0x100000000/test || "); // WHATWG-divergence: WHATWG rejects invalid IPv4/host; Java URI accepts
         EXCLUSIONS.add("https://256.0.0.1/test || "); // WHATWG-divergence: WHATWG rejects invalid IPv4/host; Java URI accepts
-        EXCLUSIONS.add("http://[1:0::] || http://example.net/"); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
+        EXCLUSIONS.add("http://[1:0::] || http://example.net/"); // WHATWG-divergence: IPv6 literal zero-compression not canonicalized
         EXCLUSIONS.add("http://? || "); // WHATWG-divergence: empty host not rejected
         EXCLUSIONS.add("http://# || "); // WHATWG-divergence: empty host not rejected
-        EXCLUSIONS.add("http://[0:1:0:1:0:1:0:1] || "); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
-        EXCLUSIONS.add("http://[1:0:1:0:1:0:1:0] || "); // WHATWG-divergence: IPv6 literal parsing/compression; Java URI rejects
         EXCLUSIONS.add("http://example.org/test?\" || "); // WHATWG-divergence: WHATWG percent-encodes forbidden chars in path/query/fragment; Java URI rejects
         EXCLUSIONS.add("http://example.org/test?# || "); // WHATWG-divergence: crawler-commons drops the fragment component
         EXCLUSIONS.add("http://example.org/test?< || "); // WHATWG-divergence: WHATWG percent-encodes forbidden chars in path/query/fragment; Java URI rejects
