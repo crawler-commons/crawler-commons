@@ -55,10 +55,10 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
 
         parser.parse("index");
-        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("max-image-preview: large");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -67,14 +67,14 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
 
         parser.parse("index, follow");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("max-image-preview: large, unavailable_after: 2025-12-31");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken());
 
         parser.reset();
         parser.parse("max-image-preview: large, index, unavailable_after: 2025-12-31, follow");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @ParameterizedTest
@@ -93,7 +93,7 @@ class RobotsTagParserTest {
     void parseSimpleDirectives(String input) {
         var parser = new RobotsTagParser();
         parser.parse(input);
-        assertTrue(parser.getCollectedDirectives().withoutProductToken().toSet().contains(new Directive<>("foo-123")));
+        assertTrue(parser.getCollectedDirectives().withoutProductToken().contains(new Directive<>("foo-123")));
     }
 
     @Test
@@ -102,7 +102,7 @@ class RobotsTagParserTest {
         var parser = new RobotsTagParser();
         parser.parse(" INDEX, FOLLOW "); //Unambiguous directive string
         parser.parse(" Max-Image-Preview : large "); //Ambiguous directive string
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -112,18 +112,18 @@ class RobotsTagParserTest {
 
         //Unambiguous directive strings:
         parser.parse("index, follow, index");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("follow");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         //Ambiguous directive strings:
         parser.reset();
         parser.parse("index, max-image-preview: large, index");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("max-image-preview: large");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @ParameterizedTest
@@ -132,8 +132,8 @@ class RobotsTagParserTest {
     void excessCommas(String input, Set<Directive<?>> expected) {
         var parser = new RobotsTagParser();
         parser.parse(input);
-        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken().toSet());
-        assertTrue(parser.getCollectedDirectives().withProductToken().toMap().isEmpty());
+        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken());
+        assertTrue(parser.getCollectedDirectives().withProductToken().isEmpty());
     }
 
     static Stream<Arguments> excessCommasArgs() {
@@ -173,8 +173,8 @@ class RobotsTagParserTest {
     void recoverFromParsingFailures(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
         var parser = new RobotsTagParser(Set.of("MyBot"));
         parser.parse(input);
-        assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
-        assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
+        assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken());
+        assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken());
     }
 
     static Stream<Arguments> recoverFromParsingFailuresArgs() {
@@ -212,7 +212,7 @@ class RobotsTagParserTest {
         void collectForAllRobots(String input) {
             var parser = new RobotsTagParser();
             parser.parse(input);
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
         }
 
         @ParameterizedTest
@@ -243,7 +243,7 @@ class RobotsTagParserTest {
         void collectForAllRobots(String input) {
             var parser = new RobotsTagParser(Set.of("MyBot-1", "MyBot-2"));
             parser.parse(input);
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
         }
 
         @Test
@@ -252,17 +252,17 @@ class RobotsTagParserTest {
             var parser = new RobotsTagParser(Set.of("MyBot-1", "MyBot-2"));
 
             parser.parse("MyBot-1: index, follow");
-            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken());
 
             parser.parse("MyBot-2: max-image-preview: large");
-            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withProductToken());
 
             var expectedDirectivesByProductToken = Map.of(
                 "mybot-1", Set.of(INDEX, FOLLOW),
                 "mybot-2", Set.of(MAX_IMAGE_PREVIEW)
             );
 
-            assertEquals(expectedDirectivesByProductToken, parser.getCollectedDirectives().withProductToken().toMap());
+            assertEquals(expectedDirectivesByProductToken, parser.getCollectedDirectives().toMap());
 
             List<String> inputs = List.of(
                 "MyBot-1: index, follow",
@@ -274,7 +274,7 @@ class RobotsTagParserTest {
             inputs.forEach(input -> {
                 parser.reset();
                 parser.parse(input);
-                assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken().toSet());
+                assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken());
             });
         }
 
@@ -297,7 +297,7 @@ class RobotsTagParserTest {
         void caseInsensitiveProductTokens() {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse("mybot: index");
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withProductToken());
         }
 
         @ParameterizedTest
@@ -306,8 +306,8 @@ class RobotsTagParserTest {
         void orphanProductTokens(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse(input);
-            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
-            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken());
+            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken());
         }
 
         Stream<Arguments> orphanProductTokensArgs() {
@@ -328,8 +328,8 @@ class RobotsTagParserTest {
         void complexAmbiguousStrings(String input, Set<Directive<?>> expectedWithoutProductToken, Set<Directive<?>> expectedWithProductToken) {
             var parser = new RobotsTagParser(Set.of("MyBot"));
             parser.parse(input);
-            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken().toSet());
-            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(expectedWithoutProductToken, parser.getCollectedDirectives().withoutProductToken());
+            assertEquals(expectedWithProductToken, parser.getCollectedDirectives().withProductToken());
         }
 
         Stream<Arguments> complexAmbiguousStringsArgs() {

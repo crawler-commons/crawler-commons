@@ -57,10 +57,10 @@ class RobotsMetaParserTest {
         var parser = new RobotsMetaParser();
 
         parser.parse("<meta name='robots' content='index'>");
-        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("<meta name='robots' content='max-image-preview: large'>");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -69,14 +69,14 @@ class RobotsMetaParserTest {
         var parser = new RobotsMetaParser();
 
         parser.parse("<meta name='robots' content='index, follow'>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("<meta name='robots' content='max-image-preview: large, unavailable_after: 2025-12-31'>");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken());
 
         parser.reset();
         parser.parse("<meta name='robots' content='max-image-preview: large, index, unavailable_after: 2025-12-31, follow'>");
-        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW, UNAVAILABLE_AFTER), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ class RobotsMetaParserTest {
     void parseSimpleDirectives(String input) {
         var parser = new RobotsMetaParser();
         parser.parse(input);
-        assertTrue(parser.getCollectedDirectives().withoutProductToken().toSet().contains(new Directive<>("foo-123")));
+        assertTrue(parser.getCollectedDirectives().withoutProductToken().contains(new Directive<>("foo-123")));
     }
 
     @Test
@@ -103,7 +103,7 @@ class RobotsMetaParserTest {
     void normalizeDirectiveNames() {
         var parser = new RobotsMetaParser();
         parser.parse("<meta name='robots' content=' Index, FOLLOW '>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -113,18 +113,18 @@ class RobotsMetaParserTest {
 
         //Unambiguous directive strings:
         parser.parse("<meta name='robots' content='index, follow, index'>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("<meta name='robots' content='follow'>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
 
         //Ambiguous directive strings:
         parser.reset();
         parser.parse("<meta name='robots' content='index, max-image-preview: large, index'>");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
 
         parser.parse("<meta name='robots' content='max-image-preview: large'>");
-        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @ParameterizedTest
@@ -133,8 +133,8 @@ class RobotsMetaParserTest {
     void excessCommas(String input, Set<Directive<?>> expected) {
         var parser = new RobotsMetaParser();
         parser.parse(input);
-        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken().toSet());
-        assertTrue(parser.getCollectedDirectives().withProductToken().toMap().isEmpty());
+        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken());
+        assertTrue(parser.getCollectedDirectives().withProductToken().isEmpty());
     }
 
     static Stream<Arguments> excessCommasArgs() {
@@ -169,7 +169,7 @@ class RobotsMetaParserTest {
     void htmlAttributeSyntaxes(String input) {
         var parser = new RobotsMetaParser();
         parser.parse(input);
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -177,7 +177,7 @@ class RobotsMetaParserTest {
     void htmlAttributeOrders() {
         var parser = new RobotsMetaParser();
         parser.parse("<meta content='index, follow' name='robots'>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -185,7 +185,7 @@ class RobotsMetaParserTest {
     void htmlCaseInsensitive() {
         var parser = new RobotsMetaParser();
         parser.parse("<META Name='robots' Content='index'>");
-        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @Test
@@ -198,7 +198,7 @@ class RobotsMetaParserTest {
         assertTrue(parser.getCollectedDirectives().isEmpty());
 
         parser.parse("<meta foo='bar' name='robots' baz content='index, follow'>");
-        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken().toSet());
+        assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withoutProductToken());
     }
 
     @ParameterizedTest
@@ -222,8 +222,8 @@ class RobotsMetaParserTest {
     void recoverFromParsingFailures(String input, Set<Directive<?>> expected) {
         var parser = new RobotsMetaParser();
         parser.parse(input);
-        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken().toSet());
-        assertTrue(parser.getCollectedDirectives().withProductToken().toMap().isEmpty());
+        assertEquals(expected, parser.getCollectedDirectives().withoutProductToken());
+        assertTrue(parser.getCollectedDirectives().withProductToken().isEmpty());
     }
 
     static Stream<Arguments> recoverFromParsingFailuresArgs() {
@@ -245,7 +245,7 @@ class RobotsMetaParserTest {
         void collectForAllRobots() {
             var parser = new RobotsMetaParser();
             parser.parse("<meta name='robots' content='index'>");
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
         }
 
         @Test
@@ -265,7 +265,7 @@ class RobotsMetaParserTest {
         void collectForAllRobots() {
             var parser = new RobotsMetaParser(Set.of("MyBot-1", "MyBot-2"));
             parser.parse("<meta name='robots' content='index'>");
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withoutProductToken());
         }
 
         @Test
@@ -274,17 +274,17 @@ class RobotsMetaParserTest {
             var parser = new RobotsMetaParser(Set.of("MyBot-1", "MyBot-2"));
 
             parser.parse("<meta name='MyBot-1' content='index, follow'>");
-            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW), parser.getCollectedDirectives().withProductToken());
 
             parser.parse("<meta name='MyBot-2' content='max-image-preview: large'>");
-            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX, FOLLOW, MAX_IMAGE_PREVIEW), parser.getCollectedDirectives().withProductToken());
 
             var expectedDirectivesByProductToken = Map.of(
                 "mybot-1", Set.of(INDEX, FOLLOW),
                 "mybot-2", Set.of(MAX_IMAGE_PREVIEW)
             );
 
-            assertEquals(expectedDirectivesByProductToken, parser.getCollectedDirectives().withProductToken().toMap());
+            assertEquals(expectedDirectivesByProductToken, parser.getCollectedDirectives().toMap());
         }
 
         @Test
@@ -300,7 +300,7 @@ class RobotsMetaParserTest {
         void caseInsensitiveProductTokens() {
             var parser = new RobotsMetaParser(Set.of("MyBot"));
             parser.parse("<meta name='mybot' content='index'>");
-            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withProductToken().toSet());
+            assertEquals(Set.of(INDEX), parser.getCollectedDirectives().withProductToken());
         }
     }
 }
