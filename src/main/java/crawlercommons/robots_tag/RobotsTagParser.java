@@ -52,7 +52,7 @@ public final class RobotsTagParser {
     /**
      * All directives that have been collected since the last reset.
      */
-    private final ModifiableDirectiveCollection directiveCollection;
+    private DirectiveCollection directiveCollection;
 
     private final Consumer<ParserException> exceptionHandler;
 
@@ -91,7 +91,7 @@ public final class RobotsTagParser {
         this.directiveParsersByName = Map.copyOf(directiveParsersByName); //Defensive copy.
         this.knownDirectiveNamesRegex = ParserUtils.regexForCollectionElements(directiveParsersByName.keySet());
         this.knownProductTokensRegex = ParserUtils.regexForCollectionElements(normalizedTargetProductTokens);
-        this.directiveCollection = new ModifiableDirectiveCollection();
+        this.directiveCollection = new DirectiveCollection();
         this.exceptionHandler = exceptionHandler;
     }
 
@@ -226,9 +226,13 @@ public final class RobotsTagParser {
     }
 
     /**
-     * Clears the set of collected directives.
+     * Resets this parser and starts a new {@link DirectiveCollection}.
+     * <p>
+     * Subsequent invocations of {@link #parse(String)} will collect directives into the new {@link DirectiveCollection}.
+     * <p>
+     * This method does not modify the target product tokens, the {@link DirectiveParser}s, and the exception handler.
      */
     public void reset() {
-        directiveCollection.clear();
+        directiveCollection = new DirectiveCollection();
     }
 }
