@@ -122,7 +122,7 @@ public final class RobotsTagParser {
      * header.
      * <p>
      * This method throws a {@link RuntimeException} if the
-     * {@link #exceptionHandler} throws an exception.
+     * exception handler throws an exception.
      * 
      * @param robotsHeader
      *            a single {@code X-Robots-Tag} header (not prefixed with
@@ -157,7 +157,7 @@ public final class RobotsTagParser {
      * An ambiguous string can not be treated as a string of comma-separated
      * directives. Instead, it has to be parsed token by token.
      * <p>
-     * This method throws a {@link RuntimeException} if the
+     * This method throws a {@link RuntimeException} if
      * {@link #exceptionHandler} throws an exception.
      */
     private void parseAmbiguousString(String robotsHeader) {
