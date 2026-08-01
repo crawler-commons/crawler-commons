@@ -1,7 +1,7 @@
 package crawlercommons.robots_tag;
 
 /**
- * Well-known simple directives without values.
+ * Common simple directives without values.
  */
 public final class KnownSimpleDirectives {
     /*
