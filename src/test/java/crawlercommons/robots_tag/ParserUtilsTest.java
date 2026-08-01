@@ -143,7 +143,7 @@ class ParserUtilsTest {
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class RemoveUnnecessaryLeadingCharacters {
         @ParameterizedTest
-        @DisplayName("should remove leading leading commas and whitespace characters")
+        @DisplayName("should remove leading commas and whitespace characters")
         @MethodSource("testArgs")
         void test(String input, String expected) {
             assertEquals(expected, ParserUtils.removeUnnecessaryLeadingCharacters(input));
