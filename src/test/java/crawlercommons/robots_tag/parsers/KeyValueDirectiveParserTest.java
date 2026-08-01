@@ -14,8 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Common tests for key-value directive parsers.
@@ -82,13 +81,22 @@ interface KeyValueDirectiveParserTest<T> {
 
         List<String> inputs = List.of(
             key + ':' + value, //No whitespace
-            "   " + key + "   :   " + value + "   " //Too much whitespace
+            key + ':' + value + ",foo",
+            "   " + key + "   :   " + value + "   ", //Too much whitespace
+            "   " + key + "   :   " + value + "   ,   foo"
         );
 
         inputs.forEach(input -> {
-            var expected = new ParserResult<>(new Directive<>(key, expectedValue), "");
+            var expectedDirective = new Directive<>(key, expectedValue);
             var actual = parser.parse(new PreprocessedString(input));
-            assertEquals(expected, actual);
+            var actualRemainder = actual.getRemainder();
+
+            assertEquals(expectedDirective, actual.getValue());
+            assertTrue(actualRemainder.length() < input.length());
+
+            if (!actualRemainder.isEmpty()) {
+                assertTrue(actualRemainder.startsWith(" ") || actualRemainder.startsWith(","));
+            }
         });
     }
 
