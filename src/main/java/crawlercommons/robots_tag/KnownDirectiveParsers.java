@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * {@link DirectiveParser}s for well-known directives.
+ * {@link DirectiveParser}s for common directives.
  */
 public final class KnownDirectiveParsers {
     /*
