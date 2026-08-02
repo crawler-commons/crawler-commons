@@ -21,7 +21,7 @@ public final class KnownDirectiveParsers {
         Sources and references:
             - Apple: https://support.apple.com/en-us/119829
             - Baidu: https://www.baidu.com/search/robots_english.html
-            - Bing: https://www.bing.com/webmasters/help/which-robots-metatags-does-bing-support-5198d240
+            - Bing: https://www.bing.com/webmasters/help/robots-meta-tags-and-attributes-that-bing-supports-5198d240
             - DeviantArt: https://www.deviantart.com/team/journal/UPDATE-All-Deviations-Are-Opted-Out-of-AI-Datasets-934500371
             - Google: https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
             - HTML 4: https://www.w3.org/TR/html4/appendix/notes.html#h-B.4.1.2 (first published in 1997)
