@@ -17,7 +17,7 @@
 
 	<url>https://github.com/crawler-commons/crawler-commons</url>
 
-	<description>crawler-commons is a set of reusable Java components that implement 
+	<description>crawler-commons is a set of reusable Java components that implement
 	functionality common to any web crawler.
 	</description>
 
@@ -273,6 +273,24 @@
 				<version>${maven-javadoc-plugin.version}</version>
 				<configuration>
 					<source>${javac.src.version}</source>
+                    <!-- This plugin does not support @apiNote, @implSpec and @implNote out-of-the-box. -->
+                    <tags>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implSpec</name>
+                            <placement>a</placement>
+                            <head>Implementation Requirements:</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation Note:</head>
+                        </tag>
+                    </tags>
 				</configuration>
 				<executions>
 					<execution>
