@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,6 +74,11 @@ interface KeyValueDirectiveParserTest<T> {
         });
     }
 
+    /**
+     * This regular expression matches all expected non-empty remainders in the {@link #whitespace(String, String, Object)} test.
+     */
+    Pattern EXPECTED_REMAINDER_REGEX = Pattern.compile("^ *, *foo");
+
     @ParameterizedTest
     @DisplayName("should not be affected by whitespace")
     @MethodSource("provideTestArguments")
@@ -95,7 +101,7 @@ interface KeyValueDirectiveParserTest<T> {
             assertTrue(actualRemainder.length() < input.length());
 
             if (!actualRemainder.isEmpty()) {
-                assertTrue(actualRemainder.startsWith(" ") || actualRemainder.startsWith(","));
+                assertTrue(EXPECTED_REMAINDER_REGEX.matcher(actualRemainder).matches());
             }
         });
     }
