@@ -121,8 +121,8 @@ public final class RobotsTagParser {
      * Nothing is done to ensure that the input is an {@code X-Robots-Tag}
      * header.
      * <p>
-     * This method throws a {@link RuntimeException} if the
-     * exception handler throws an exception.
+     * This method throws a {@link RuntimeException} if the exception handler
+     * throws an exception.
      * 
      * @param robotsHeader
      *            a single {@code X-Robots-Tag} header (not prefixed with
@@ -228,9 +228,11 @@ public final class RobotsTagParser {
     /**
      * Resets this parser and starts a new {@link DirectiveCollection}.
      * <p>
-     * Subsequent invocations of {@link #parse(String)} will collect directives into the new {@link DirectiveCollection}.
+     * Subsequent invocations of {@link #parse(String)} will collect directives
+     * into the new {@link DirectiveCollection}.
      * <p>
-     * This method does not modify the target product tokens, the {@link DirectiveParser}s, and the exception handler.
+     * This method does not modify the target product tokens, the
+     * {@link DirectiveParser}s, and the exception handler.
      */
     public void reset() {
         directiveCollection = new DirectiveCollection();
