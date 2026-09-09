@@ -1,0 +1,59 @@
+name: Publish SNAPSHOT to the Maven Central Repository
+
+on:
+  schedule:
+    # every day, 5min after midnight, UTC
+    - cron: '5 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    # do not run the scheduled job on forks
+    if: github.repository == 'crawler-commons/crawler-commons'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Check whether a snapshot is due
+        id: check
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          case "$VERSION" in
+            *-SNAPSHOT) ;;
+            *) echo "::notice::POM version $VERSION is not a snapshot, skipping"
+               exit 0 ;;
+          esac
+          # a manual run always deploys, the scheduled one only if there is
+          # something new: window slightly wider than the schedule so that a
+          # commit is never missed
+          if [ "$EVENT" != "workflow_dispatch" ] \
+             && [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -gt 90000 ]; then
+            echo "::notice::no commit in the last 25 hours, skipping"
+            exit 0
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure a clean state without crawler-commons artifacts
+        if: steps.check.outputs.deploy == 'true'
+        run: rm -rf ~/.m2/repository/com/github/crawler-commons
+
+      - name: Deploy Maven snapshot
+        if: steps.check.outputs.deploy == 'true'
+        # snapshots are not validated by Central: no signing, javadoc or sources needed
+        run: mvn -U -B -e -ntp -P release -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
