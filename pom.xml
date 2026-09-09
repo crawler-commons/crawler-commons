@@ -283,6 +283,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>${maven-enforcer-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>enforce-versions</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>[3.6.3,)</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>[11,)</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -398,6 +421,7 @@
 		<maven-release-plugin.version>3.3.1</maven-release-plugin.version>
 		<maven-source-plugin.version>3.4.0</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+		<maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
 		<maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 		<apache-rat-plugin.version>0.8</apache-rat-plugin.version>
 		<maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
