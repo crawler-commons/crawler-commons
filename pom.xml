@@ -30,14 +30,6 @@
 		<tag>crawler-commons-1.5</tag>
 	</scm>
 
-	<distributionManagement>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Staging Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-
 	<issueManagement>
 		<system>GitHub Issues</system>
 		<url>https://github.com/crawler-commons/crawler-commons/issues</url>
