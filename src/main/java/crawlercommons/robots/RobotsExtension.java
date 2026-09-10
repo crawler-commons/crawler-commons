@@ -72,15 +72,34 @@ public enum RobotsExtension {
      * Cloudflare Content Signals policy directive, an extension for content
      * governance rules (e.g. AI training data usage, attribution). See <a
      * href="https://blog.cloudflare.com/content-signals-policy">Cloudflare blog
-     * post</a>.
+     * post</a> and <a href="https://contentsignals.org/">contentsignals.org</a>.
+     * 
+     * <p>
+     * The directive is written inside a user-agent group and is therefore
+     * scoped to that group, in the same way as {@code Disallow} or
+     * {@code Crawl-delay}: a site may express different content signals for
+     * different crawlers.
+     * </p>
      * 
      * Example:
      * 
      * <pre>
+     * User-agent: *
      * Content-Signal: search=yes, ai-train=no
+     * Disallow:
+     * 
+     * User-agent: mybot
+     * Content-Signal: search=yes, ai-train=yes
+     * Disallow:
      * </pre>
+     * 
+     * <p>
+     * The value is stored as the raw, unparsed string: splitting it into
+     * signal/value pairs and handling the optional path-prefix form
+     * ({@code Content-Signal: /images/ ai-train=no}) is left to the caller.
+     * </p>
      */
-    CONTENT_SIGNALS("content-signal", false, "content-signals"),
+    CONTENT_SIGNALS("content-signal", true, "content-signals"),
 
     /**
      * The &quot;Host&quot; directive was used by Yandex to indicate the main or
