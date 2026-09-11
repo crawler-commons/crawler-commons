@@ -1618,9 +1618,19 @@ public class SimpleRobotRulesParserTest {
     }
 
     /**
-     * A Content-Signal line above the first User-agent line does not belong to
-     * any group and is dropped, in the same way as a Disallow rule outside of
-     * a group.
+     * A Content-Signal line above the first User-agent line is not part of any
+     * group and is therefore not collected.
+     * 
+     * <p>
+     * This follows from the way per-group extensions are scoped, and not from
+     * a rule of the Content Signals specification: unlike RFC 9309, which
+     * requires a rule block to start with a User-agent line, the specification
+     * does not state what the scope of a Content-Signal outside of any group
+     * is, and there are sites which place the directive at the top of the file
+     * with an obviously global intention. Whether such values should be
+     * collected separately, so that users can decide how to use them, is still
+     * open.
+     * </p>
      */
     @Test
     void testContentSignalBeforeFirstGroup() {

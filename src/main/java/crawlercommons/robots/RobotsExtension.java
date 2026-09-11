@@ -75,10 +75,9 @@ public enum RobotsExtension {
      * post</a> and <a href="https://contentsignals.org/">contentsignals.org</a>.
      * 
      * <p>
-     * The directive is written inside a user-agent group and is therefore
-     * scoped to that group, in the same way as {@code Disallow} or
-     * {@code Crawl-delay}: a site may express different content signals for
-     * different crawlers.
+     * The directive is written inside a user-agent group, so that a site may
+     * express different content signals for different crawlers, and is scoped
+     * to that group (see {@link #isPerGroup()}).
      * </p>
      * 
      * Example:
@@ -94,9 +93,10 @@ public enum RobotsExtension {
      * </pre>
      * 
      * <p>
-     * The value is stored as the raw, unparsed string: splitting it into
-     * signal/value pairs and handling the optional path-prefix form
-     * ({@code Content-Signal: /images/ ai-train=no}) is left to the caller.
+     * The value is stored unparsed (see {@link RobotsExtensionData}):
+     * splitting it into signal/value pairs and handling the optional
+     * path-prefix form ({@code Content-Signal: /images/ ai-train=no}) is left
+     * to the caller.
      * </p>
      */
     CONTENT_SIGNALS("content-signal", true, "content-signals"),
@@ -191,6 +191,24 @@ public enum RobotsExtension {
     }
 
     /**
+     * Whether this directive is scoped to a user-agent group.
+     * 
+     * <p>
+     * The values of a per-group directive are collected following the same
+     * group matching rules as the {@code Allow} and {@code Disallow} rules of
+     * <a href="https://www.rfc-editor.org/rfc/rfc9309.html">RFC 9309</a>: a
+     * group matching the crawler by name supersedes the wildcard group, and
+     * the values of all groups matching the crawler are merged. The values of
+     * a global directive are a statement about the site as a whole and are
+     * collected wherever the directive appears in the file.
+     * </p>
+     * 
+     * <p>
+     * Note that a per-group directive placed outside of any group, that is
+     * before the first {@code User-agent} line, is not collected, as it is not
+     * part of any group.
+     * </p>
+     * 
      * @return {@code true} if this directive is scoped to a specific user-agent
      *         group, {@code false} if it applies globally to the entire
      *         robots.txt file
