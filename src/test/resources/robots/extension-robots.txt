@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 LLM-Policy: /llms.txt
 Sitemap: /sitemap.xml
-Content-Signals: /content-signals.json
+Content-Signals: search=yes,ai-train=no
 
 User-agent: mybot
 Disallow: /private/
@@ -10,6 +10,7 @@ Request-rate: 10/1m
 Visit-time: 0200-0600
 Comment: only crawl at night
 No-index: /secret/
+Content-Signal: search=yes,ai-train=yes
 
 User-agent: otherbot
 Disallow: /admin/
