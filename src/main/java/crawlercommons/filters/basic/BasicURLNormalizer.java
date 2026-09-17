@@ -16,14 +16,12 @@
 
 package crawlercommons.filters.basic;
 
-import static java.net.IDN.ALLOW_UNASSIGNED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,6 +43,8 @@ import org.slf4j.LoggerFactory;
 
 import crawlercommons.filters.URLFilter;
 import crawlercommons.url.CrawlerURL;
+import crawlercommons.utils.idn.IdnConverter;
+import crawlercommons.utils.idn.IdnConverters;
 
 /**
  * Converts URLs to a
@@ -160,6 +160,7 @@ public class BasicURLNormalizer extends URLFilter {
 
     private final Set<String> queryParamsToRemove;
     private final IdnNormalization idnNormalization;
+    private final IdnConverter idnConverter;
 
 
     public BasicURLNormalizer() {
@@ -169,6 +170,7 @@ public class BasicURLNormalizer extends URLFilter {
     public BasicURLNormalizer(Builder builder) {
         this.queryParamsToRemove = builder.queryParamsToRemove;
         this.idnNormalization = builder.idnNormalization;
+        this.idnConverter = builder.idnConverter != null ? builder.idnConverter : IdnConverters.getDefault();
     }
 
     @Override
@@ -743,9 +745,9 @@ public class BasicURLNormalizer extends URLFilter {
              * (non-ASCII dot-separated segment) is longer than 256 characters,
              * cf. https://bugs.openjdk.java.net/browse/JDK-6806873
              */
-            host = IDN.toASCII(host, ALLOW_UNASSIGNED);
+            host = idnConverter.toASCII(host);
         } else if (this.idnNormalization == IdnNormalization.UNICODE && host.contains("xn--")) {
-            host = IDN.toUnicode(host, ALLOW_UNASSIGNED);
+            host = idnConverter.toUnicode(host);
         }
 
         /* 4. trim a trailing dot */
@@ -777,6 +779,7 @@ public class BasicURLNormalizer extends URLFilter {
     public static class Builder {
 
         public IdnNormalization idnNormalization = IdnNormalization.PUNYCODE;
+        IdnConverter idnConverter;
         Set<String> queryParamsToRemove = new TreeSet<>();
 
         private Builder() {
@@ -804,6 +807,21 @@ public class BasicURLNormalizer extends URLFilter {
          */
         public Builder idnNormalization(IdnNormalization idnNormalization) {
             this.idnNormalization = idnNormalization;
+            return this;
+        }
+
+        /**
+         * Sets the converter used to map internationalized domain names
+         * between Unicode and ASCII. If not set,
+         * {@link IdnConverters#getDefault()} is used, which prefers the
+         * IDNA2008-compliant ICU4J implementation if available on the
+         * classpath.
+         *
+         * @param idnConverter
+         * @return this builder
+         */
+        public Builder idnConverter(IdnConverter idnConverter) {
+            this.idnConverter = idnConverter;
             return this;
         }
 
