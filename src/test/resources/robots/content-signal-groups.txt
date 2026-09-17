@@ -1,0 +1,21 @@
+# Content-Signal (https://contentsignals.org/) is written inside a user-agent
+# group and is therefore scoped to that group, in the same way as Disallow.
+
+Content-Signal: ai-train=maybe   # outside of any user-agent group
+
+User-agent: *
+Content-Signal: search=yes,ai-train=no
+Disallow:
+
+User-agent: mybot
+Content-Signal: search=yes,ai-train=yes
+Disallow: /private/
+
+User-agent: yourbot
+User-agent: mybot
+Content-Signal: ai-input=yes     # per RFC 9309 (group merging): mybot and yourbot
+Disallow: /login/
+
+User-agent: otherbot
+Content-Signal: search=no,ai-train=no
+Disallow: /

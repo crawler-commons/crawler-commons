@@ -1534,10 +1534,11 @@ public class SimpleRobotRulesParserTest {
 
         SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("mybot"));
         // TODO: Visit-time leaks from wild-card user-agent, see #590
-        // assertEquals(3, rules.getExtensions().size(), "Content-Signal (global scope), Request-rate and Clean-param");
+        // assertEquals(3, rules.getExtensions().size(), "Content-Signal, Request-rate and Clean-param");
         RobotsExtensionData data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
         assertNotNull(data, "Per-group extension should be captured for matched group");
-        assertEquals("search=yes,ai-train=yes,ai-input=yes", data.getValues().get(0));
+        assertEquals(List.of("search=yes,ai-train=yes,ai-input=yes"), data.getValues(),
+                        "Only the Content-Signal of the matched group, not the one of the superseded wildcard group nor the one outside of any group");
         data = rules.getExtensionData(RobotsExtension.REQUEST_RATE);
         assertNotNull(data, "Per-group extension should be captured for matched group");
         assertEquals("10/1m", data.getValues().get(0));
@@ -1549,16 +1550,17 @@ public class SimpleRobotRulesParserTest {
         assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
 
         rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("yourbot"));
-        // TODO: Visit-time leaks from wild-card user-agent, see #590
-        // assertEquals(1, rules.getExtensions().size(), "Content-Signal (global scope)");
-        assertNotNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS));
+        assertNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS),
+                        "Content-Signal is defined in the wildcard group (superseded) and in the mybot group (not matching)");
         assertFalse(rules.isAllowed("https://example.com/private/"), "explicitely disallowed");
         assertFalse(rules.isAllowed("https://example.com/login/"), "explicitely disallowed");
         assertTrue(rules.isAllowed("https://example.com/"), "implicitely allowed");
 
         rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("anyotherbot"));
         assertEquals(3, rules.getExtensions().size(), "Content-Signal, Visit-time and Request-rate");
-        assertNotNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS));
+        data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(data, "Per-group extension of the wildcard group applies if no specific group matches");
+        assertEquals("search=yes,ai-train=no", data.getValues().get(0));
         data = rules.getExtensionData(RobotsExtension.VISIT_TIME);
         assertNotNull(data, "Per-group extension should be captured for matched group");
         assertEquals("0600-0845", data.getValues().get(0));
@@ -1569,6 +1571,102 @@ public class SimpleRobotRulesParserTest {
         assertFalse(rules.isAllowed("https://example.com/login/"), "implicitely disallowed");
         assertFalse(rules.isAllowed("https://example.com/"), "explicitely disallowed");
         assertTrue(rules.isAllowed("https://example.com/llms.txt"), "explicitely allowed");
+    }
+
+    /**
+     * The Content-Signal directive (https://contentsignals.org/) is written
+     * inside a user-agent group, so it is scoped to that group: a specific
+     * group supersedes the wildcard group, and the values of groups not
+     * matching the target agent are never visible.
+     */
+    @Test
+    void testContentSignalScopedToMatchingGroup() throws Exception {
+        byte[] robotstxt = readFile("/robots/content-signal-groups.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.CONTENT_SIGNALS);
+
+        // "mybot" has groups of its own: the wildcard group is superseded and
+        // the values of the two matching groups are merged (RFC 9309)
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("mybot"));
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(data);
+        assertEquals(List.of("search=yes,ai-train=yes", "ai-input=yes"), data.getValues(),
+                        "Content-Signal values of all groups matching the agent, and of no other group");
+
+        // "otherbot" only sees the Content-Signal of its own group
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("otherbot"));
+        data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(data);
+        assertEquals(List.of("search=no,ai-train=no"), data.getValues());
+
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    @Test
+    void testContentSignalWildcardFallback() throws Exception {
+        byte[] robotstxt = readFile("/robots/content-signal-groups.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.CONTENT_SIGNALS);
+
+        // an agent without a group of its own falls back to the wildcard group
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotstxt, "text/plain", Set.of("somebot"));
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(data);
+        assertEquals(List.of("search=yes,ai-train=no"), data.getValues());
+    }
+
+    /**
+     * A Content-Signal line above the first User-agent line is not part of any
+     * group and is therefore not collected.
+     * 
+     * <p>
+     * This follows from the way per-group extensions are scoped, and not from
+     * a rule of the Content Signals specification: unlike RFC 9309, which
+     * requires a rule block to start with a User-agent line, the specification
+     * does not state what the scope of a Content-Signal outside of any group
+     * is, and there are sites which place the directive at the top of the file
+     * with an obviously global intention. Whether such values should be
+     * collected separately, so that users can decide how to use them, is still
+     * open.
+     * </p>
+     */
+    @Test
+    void testContentSignalBeforeFirstGroup() {
+        final String robotsTxt = "Content-Signal: ai-train=maybe" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.CONTENT_SIGNALS);
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+
+        assertNull(rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS),
+                        "Content-Signal outside of any user-agent group is not part of any group");
+    }
+
+    @Test
+    void testContentSignalAliasScoping() {
+        // the "content-signals" alias must be scoped in the very same way as
+        // the canonical "content-signal" directive name
+        final String robotsTxt = "User-agent: *" + CRLF //
+                        + "Content-Signals: ai-train=no" + CRLF //
+                        + "Disallow:" + CRLF //
+                        + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "Content-Signals: ai-train=yes" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.CONTENT_SIGNALS);
+
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+        assertEquals(List.of("ai-train=yes"), rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS).getValues());
+
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("somebot"));
+        assertEquals(List.of("ai-train=no"), rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS).getValues());
     }
 
     @Test
@@ -1629,10 +1727,6 @@ public class SimpleRobotRulesParserTest {
         assertNotNull(llmPolicy);
         assertEquals("/llms.txt", llmPolicy.getValues().get(0));
 
-        RobotsExtensionData contentSignals = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
-        assertNotNull(contentSignals);
-        assertEquals("/content-signals.json", contentSignals.getValues().get(0));
-
         RobotsExtensionData host = rules.getExtensionData(RobotsExtension.HOST);
         assertNotNull(host);
         assertEquals("www.example.com", host.getValues().get(0));
@@ -1649,6 +1743,11 @@ public class SimpleRobotRulesParserTest {
         RobotsExtensionData comment = rules.getExtensionData(RobotsExtension.COMMENT);
         assertNotNull(comment);
         assertEquals("only crawl at night", comment.getValues().get(0));
+
+        RobotsExtensionData contentSignals = rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS);
+        assertNotNull(contentSignals);
+        assertEquals("search=yes,ai-train=yes", contentSignals.getValues().get(0),
+                        "Content-Signal of the matched group, not the one of the superseded wildcard group");
 
         // Core rules still work
         assertFalse(rules.isAllowed("http://domain.com/private/page.html"));
@@ -1670,6 +1769,9 @@ public class SimpleRobotRulesParserTest {
         // Global extensions should always be present
         assertNotNull(rules.getExtensionData(RobotsExtension.LLM_POLICY));
         assertNotNull(rules.getExtensionData(RobotsExtension.HOST));
+
+        // The wildcard group applies if no specific group matches
+        assertEquals(List.of("search=yes,ai-train=no"), rules.getExtensionData(RobotsExtension.CONTENT_SIGNALS).getValues());
     }
 
     @Test
