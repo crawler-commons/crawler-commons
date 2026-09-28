@@ -46,6 +46,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
@@ -57,6 +58,7 @@ import crawlercommons.mimetypes.MimeTypeDetector;
 import crawlercommons.sitemaps.AbstractSiteMap.SitemapType;
 import crawlercommons.sitemaps.extension.Extension;
 import crawlercommons.sitemaps.sax.DelegatorHandler;
+import crawlercommons.sitemaps.sax.UrlLimitExceededException;
 
 public class SiteMapParser {
     public static final Logger LOG = LoggerFactory.getLogger(SiteMapParser.class);
@@ -64,7 +66,7 @@ public class SiteMapParser {
     /**
      * According to the specs, 50K URLs per Sitemap is the max
      */
-    private static final int MAX_URLS = 50000;
+    public static final int MAX_URLS = 50000;
 
     /**
      * Sitemaps (including sitemap index files) &quot;must be no larger than
@@ -112,6 +114,12 @@ public class SiteMapParser {
 
     /* Function to normalize or filter URLs. Does nothing by default. */
     private Function<String, String> urlFilter = (String url) -> url;
+
+    /** Maximum number of URLs accepted from a single sitemap. */
+    private int maxUrls = MAX_URLS;
+
+    /** Maximum size of a sitemap (uncompressed) in bytes. */
+    private long maxBytes = MAX_BYTES_ALLOWED;
 
     /**
      * SiteMapParser with strict location validation ({@link #isStrict()}) and not
@@ -262,6 +270,68 @@ public class SiteMapParser {
     }
 
     /**
+     * @return the maximum number of URLs accepted from a single sitemap, see
+     *         {@link #setMaxUrls(int)}
+     */
+    public int getMaxUrls() {
+        return maxUrls;
+    }
+
+    /**
+     * Set the maximum number of URLs accepted from a single sitemap, sitemap
+     * index or feed. If a sitemap contains more URLs, parsing is stopped and
+     * the sitemap is returned holding only the first <code>maxUrls</code>
+     * URLs. URLs skipped because they are invalid or rejected by the URL
+     * filter are not counted.
+     * 
+     * <p>
+     * Note that the limit is applied per sitemap: a sitemap index may list up
+     * to <code>maxUrls</code> sitemaps each containing up to
+     * <code>maxUrls</code> URLs. With the default limit, recursively
+     * processing a single sitemap index may result in up to 2.5 billion URLs.
+     * </p>
+     * 
+     * @param maxUrls
+     *            maximum number of URLs, default is {@link #MAX_URLS}
+     * @throws IllegalArgumentException
+     *             if maxUrls is not a positive number
+     */
+    public void setMaxUrls(int maxUrls) {
+        if (maxUrls <= 0) {
+            throw new IllegalArgumentException("Max. number of URLs must be positive: " + maxUrls);
+        }
+        this.maxUrls = maxUrls;
+    }
+
+    /**
+     * @return the maximum size of a sitemap in bytes, see
+     *         {@link #setMaxBytes(long)}
+     */
+    public long getMaxBytes() {
+        return maxBytes;
+    }
+
+    /**
+     * Set the maximum size of a sitemap in bytes. The limit is applied to the
+     * content passed to the parser and also to the uncompressed content of
+     * gzipped sitemaps. If a sitemap is larger, an
+     * {@link UnknownFormatException} is thrown unless partially parsed
+     * sitemaps are allowed. In the latter case, the content is truncated and
+     * the URLs found within the size limit are returned.
+     * 
+     * @param maxBytes
+     *            maximum size in bytes, default is {@link #MAX_BYTES_ALLOWED}
+     * @throws IllegalArgumentException
+     *             if maxBytes is not a positive number
+     */
+    public void setMaxBytes(long maxBytes) {
+        if (maxBytes <= 0) {
+            throw new IllegalArgumentException("Max. number of bytes must be positive: " + maxBytes);
+        }
+        this.maxBytes = maxBytes;
+    }
+
+    /**
      * Returns a SiteMap or SiteMapIndex given an online sitemap URL
      *
      * Please note that this method is a static method which goes online and
@@ -284,7 +354,10 @@ public class SiteMapParser {
         if (onlineSitemapUrl == null) {
             return null;
         }
-        byte[] bytes = IOUtils.toByteArray(onlineSitemapUrl);
+        byte[] bytes;
+        try (InputStream in = limitSize(onlineSitemapUrl.openStream())) {
+            bytes = IOUtils.toByteArray(in);
+        }
         return parseSiteMap(bytes, onlineSitemapUrl);
     }
 
@@ -364,23 +437,29 @@ public class SiteMapParser {
     public AbstractSiteMap parseSiteMap(String contentType, byte[] content, URL url) throws UnknownFormatException, IOException {
         String mimeType = mimeTypeDetector.normalize(contentType, content);
 
+        checkSize(url, content.length);
+
         String msg;
         if (mimeTypeDetector.isXml(mimeType)) {
             return processXml(url, content);
         } else if (mimeTypeDetector.isText(mimeType)) {
             return processText(url, content);
         } else if (mimeTypeDetector.isGzip(mimeType)) {
-            try (InputStream decompressed = new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(content)))) {
+            try (BoundedInputStream bounded = limitSize(new GZIPInputStream(new ByteArrayInputStream(content))); InputStream decompressed = new BufferedInputStream(bounded)) {
                 String compressedType = mimeTypeDetector.detect(decompressed);
                 if (mimeTypeDetector.isXml(compressedType)) {
                     return processGzippedXML(url, content);
                 } else if (mimeTypeDetector.isText(compressedType)) {
-                    return processText(url, decompressed);
+                    SiteMap sitemap = processText(url, decompressed);
+                    checkSize(url, bounded.getCount());
+                    return sitemap;
                 } else if (compressedType == null) {
                     msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
                 } else {
                     msg = String.format(Locale.ROOT, "Can't parse a sitemap with MediaType '%s' (embedded in %s) from '%s'", compressedType, contentType, url);
                 }
+            } catch (UnknownFormatException e) {
+                throw e;
             } catch (Exception e) {
                 msg = String.format(Locale.ROOT, "Failed to detect embedded MediaType of gzipped sitemap '%s'", url);
                 throw new UnknownFormatException(msg, e);
@@ -429,6 +508,12 @@ public class SiteMapParser {
      * <p>
      * This method is a convenience method for a user who has a sitemap and
      * wants a simple way to traverse it.
+     * <p>
+     * Note that the limits on the number of URLs ({@link #setMaxUrls(int)}) and
+     * the size ({@link #setMaxBytes(long)}) are applied to every single
+     * sitemap but not to the traversal as a whole: with the default limits a
+     * recursively processed sitemap index may hold up to 2.5 billion URLs
+     * (50,000 sitemaps with 50,000 URLs each).
      * <p>
      * Exceptions thrown by the action are relayed to the caller.
      *
@@ -481,7 +566,7 @@ public class SiteMapParser {
 
         InputStream in;
         try {
-            in = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new ByteArrayInputStream(xmlContent)));
+            in = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new ByteArrayInputStream(xmlContent, 0, limitLength(xmlContent))));
         } catch (IOException e) {
             /*
              * Since commons-io 2.22.0 the BOMInputStream constructor reads the
@@ -510,7 +595,7 @@ public class SiteMapParser {
      *             if there is an error reading in the site map content
      */
     protected SiteMap processText(URL sitemapUrl, byte[] content) throws IOException {
-        return processText(sitemapUrl, new ByteArrayInputStream(content));
+        return processText(sitemapUrl, new ByteArrayInputStream(content, 0, limitLength(content)));
     }
 
     /**
@@ -537,7 +622,7 @@ public class SiteMapParser {
 
         String line;
         int i = 0;
-        while ((line = reader.readLine()) != null && ++i <= MAX_URLS) {
+        while ((line = reader.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) {
                 continue;
@@ -551,9 +636,13 @@ public class SiteMapParser {
                 URL url = new URI(urlFiltered).toURL();
                 boolean valid = urlIsValid(textSiteMap.getBaseUrl(), url.toString());
                 if (valid || !strict) {
+                    if (i >= maxUrls) {
+                        LOG.warn("Truncated sitemap {}: more than {} URLs", sitemapUrl, maxUrls);
+                        break;
+                    }
                     SiteMapURL sUrl = new SiteMapURL(url, valid);
                     textSiteMap.addSiteMapUrl(sUrl);
-                    LOG.debug("  {}. {}", i, sUrl);
+                    LOG.debug("  {}. {}", (++i), sUrl);
                 } else {
                     LOG.info("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
                 }
@@ -589,10 +678,61 @@ public class SiteMapParser {
         String xmlUrl = url.toString().replaceFirst("\\.gz$", "");
         LOG.debug("XML url = {}", xmlUrl);
 
-        InputStream decompressed = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(new GZIPInputStream(is)));
+        BoundedInputStream bounded = limitSize(new GZIPInputStream(is));
+        InputStream decompressed = new SkipLeadingWhiteSpaceInputStream(new BOMInputStream(bounded));
         InputSource in = new InputSource(decompressed);
         in.setSystemId(xmlUrl);
-        return processXml(url, in);
+        AbstractSiteMap sitemap;
+        try {
+            sitemap = processXml(url, in);
+        } catch (UnknownFormatException e) {
+            if (bounded.getCount() > maxBytes) {
+                // parsing failed because the content was truncated
+                String msg = String.format(Locale.ROOT, "Sitemap '%s' exceeds the size limit of %d bytes", url, maxBytes);
+                throw new UnknownFormatException(msg, e);
+            }
+            throw e;
+        }
+        checkSize(url, bounded.getCount());
+        return sitemap;
+    }
+
+    /**
+     * Verify that the size of a sitemap does not exceed the limit, see
+     * {@link #setMaxBytes(long)}.
+     * 
+     * @param sitemapUrl
+     *            URL of the sitemap
+     * @param size
+     *            size of the sitemap in bytes
+     * @throws UnknownFormatException
+     *             if the limit is exceeded and partially parsed sitemaps are
+     *             not allowed
+     */
+    private void checkSize(URL sitemapUrl, long size) throws UnknownFormatException {
+        if (size <= maxBytes) {
+            return;
+        }
+        if (!allowPartial) {
+            String msg = String.format(Locale.ROOT, "Sitemap '%s' exceeds the size limit of %d bytes", sitemapUrl, maxBytes);
+            throw new UnknownFormatException(msg);
+        }
+        LOG.warn("Truncated sitemap {}: size limit of {} bytes exceeded", sitemapUrl, maxBytes);
+    }
+
+    /**
+     * Wrap the stream so that one byte more than the size limit can be read.
+     * The extra byte allows to distinguish content which exceeds the limit
+     * from content with a size equal to the limit.
+     */
+    private BoundedInputStream limitSize(InputStream stream) throws IOException {
+        long max = (maxBytes == Long.MAX_VALUE) ? maxBytes : maxBytes + 1;
+        return BoundedInputStream.builder().setInputStream(stream).setMaxCount(max).get();
+    }
+
+    /** @return the number of bytes of the content within the size limit */
+    private int limitLength(byte[] content) {
+        return (int) Math.min(content.length, maxBytes);
     }
 
     /**
@@ -639,6 +779,7 @@ public class SiteMapParser {
         }
         handler.setExtensionNamespaces(extensionNamespaces);
         handler.setURLFilter(urlFilter);
+        handler.setMaxUrls(maxUrls);
 
         try {
             SAXParser saxParser = factory.newSAXParser();
@@ -664,6 +805,11 @@ public class SiteMapParser {
             UnknownFormatException ufe = new UnknownFormatException("Failed to parse " + sitemapUrl);
             ufe.initCause(e);
             throw ufe;
+        } catch (UrlLimitExceededException e) {
+            LOG.warn("Truncated sitemap {}: more than {} URLs", sitemapUrl, maxUrls);
+            AbstractSiteMap sitemap = handler.getSiteMap();
+            sitemap.setProcessed(true);
+            return sitemap;
         } catch (SAXException e) {
             LOG.warn("Error parsing sitemap {}: {}", sitemapUrl, e.getMessage());
             AbstractSiteMap sitemap = handler.getSiteMap();

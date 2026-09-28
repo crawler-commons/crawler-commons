@@ -129,7 +129,7 @@ class XMLIndexHandler extends DelegatorHandler {
         return sitemap;
     }
 
-    private void maybeAddSiteMap() {
+    private void maybeAddSiteMap() throws UrlLimitExceededException {
         if (loc == null) {
             return;
         }
@@ -142,9 +142,10 @@ class XMLIndexHandler extends DelegatorHandler {
         try {
             // check that the value is a valid URL
             URL locURL = new URI(urlFiltered).toURL();
+            countUrl();
             SiteMap s = new SiteMap(locURL, lastMod);
             sitemap.addSitemap(s);
-            LOG.debug("  {}. {}", (i + 1), s);
+            LOG.debug("  {}. {}", (++i), s);
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             LOG.trace("Don't create an entry with a bad URL", e);
             LOG.debug("Bad url: [{}]", value);

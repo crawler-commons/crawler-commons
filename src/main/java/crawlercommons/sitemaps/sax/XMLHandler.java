@@ -160,7 +160,7 @@ class XMLHandler extends DelegatorHandler {
         return sitemap;
     }
 
-    private void maybeAddSiteMapUrl() {
+    private void maybeAddSiteMapUrl() throws UrlLimitExceededException {
         String value = null;
         if (loc != null) {
             value = stripAllBlank(loc);
@@ -180,6 +180,7 @@ class XMLHandler extends DelegatorHandler {
             URL locURL = new URI(urlFiltered).toURL();
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (valid || !isStrict()) {
+                countUrl();
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);
                 sUrl.setChangeFrequency(changeFreq);

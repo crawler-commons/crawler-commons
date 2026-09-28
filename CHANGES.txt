@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+- [Sitemaps] Enforce limits on the number of URLs and the size of sitemaps, also for XML and gzipped sitemaps (Richard Zowalla, sebastian-nagel) #611
 - [Robots.txt] Scope the Content-Signal extension to the user-agent group it is defined in (jnioche) #604
 - BasicURLNormalizer rejects URLs with IPv6 address as host name (Richard Zowalla, sebastian-nagel) #587
 - [Robots.txt] Remove dead catch blocks around path normalization (jnioche) #596

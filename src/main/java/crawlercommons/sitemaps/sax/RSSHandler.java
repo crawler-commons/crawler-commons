@@ -175,10 +175,11 @@ class RSSHandler extends DelegatorHandler {
         }
     }
 
-    private void maybeAddSiteMapUrl() {
+    private void maybeAddSiteMapUrl() throws UrlLimitExceededException {
         if (locURL != null) {
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (!isStrict() || valid) {
+                countUrl();
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);
                 sitemap.addSiteMapUrl(sUrl);

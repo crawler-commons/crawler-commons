@@ -32,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.Namespace;
+import crawlercommons.sitemaps.SiteMapParser;
 import crawlercommons.sitemaps.UnknownFormatException;
 import crawlercommons.sitemaps.extension.Extension;
 
@@ -51,6 +52,8 @@ public class DelegatorHandler extends DefaultHandler {
     protected Map<String, Extension> extensionNamespaces;
     private StringBuilder characterBuffer = new StringBuilder();
     protected Function<String, String> urlFilter = (String url) -> url;
+    private int maxUrls = SiteMapParser.MAX_URLS;
+    private int numUrls = 0;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -100,6 +103,32 @@ public class DelegatorHandler extends DefaultHandler {
 
     public void setURLFilter(Function<String, String> urlFilter) {
         this.urlFilter = urlFilter;
+    }
+
+    /**
+     * Set the maximum number of URLs accepted from a single sitemap, sitemap
+     * index or feed. Parsing is stopped if the document contains more URLs.
+     * 
+     * @param maxUrls
+     *            maximum number of URLs, default is
+     *            {@link SiteMapParser#MAX_URLS}
+     */
+    public void setMaxUrls(int maxUrls) {
+        this.maxUrls = maxUrls;
+    }
+
+    /**
+     * Count a URL which is about to be added to the sitemap. Must be called
+     * before the URL is added.
+     * 
+     * @throws UrlLimitExceededException
+     *             if the sitemap already holds the maximum number of URLs
+     */
+    protected void countUrl() throws UrlLimitExceededException {
+        if (numUrls >= maxUrls) {
+            throw new UrlLimitExceededException("More than " + maxUrls + " URLs in sitemap");
+        }
+        numUrls++;
     }
 
     protected void setException(UnknownFormatException exception) {
@@ -176,6 +205,7 @@ public class DelegatorHandler extends DefaultHandler {
         }
         delegate.setExtensionNamespaces(extensionNamespaces);
         delegate.setURLFilter(urlFilter);
+        delegate.setMaxUrls(maxUrls);
     }
 
     @Override
