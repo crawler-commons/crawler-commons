@@ -402,6 +402,7 @@
 
 		<commons-io.version>2.22.0</commons-io.version>
 		<slf4j-api.version>2.0.19</slf4j-api.version>
+		<icu4j.version>78.3</icu4j.version>
 		<junit.version>5.14.4</junit.version>
 		<slf4j-simple.version>2.0.19</slf4j-simple.version>
 
@@ -448,6 +449,15 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j-api.version}</version>
+		</dependency>
+
+		<!-- Optional: IDNA2008 (UTS #46) support, used if present on the classpath -->
+
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>${icu4j.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Test dependencies -->
