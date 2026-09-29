@@ -180,7 +180,7 @@ class XMLHandler extends DelegatorHandler {
             URL locURL = new URI(urlFiltered).toURL();
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (valid || !isStrict()) {
-                countUrl();
+                checkAndIncrementURLCount();
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);
                 sUrl.setChangeFrequency(changeFreq);

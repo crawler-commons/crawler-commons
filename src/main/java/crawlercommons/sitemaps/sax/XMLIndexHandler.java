@@ -142,7 +142,7 @@ class XMLIndexHandler extends DelegatorHandler {
         try {
             // check that the value is a valid URL
             URL locURL = new URI(urlFiltered).toURL();
-            countUrl();
+            checkAndIncrementURLCount();
             SiteMap s = new SiteMap(locURL, lastMod);
             sitemap.addSitemap(s);
             LOG.debug("  {}. {}", (++i), s);

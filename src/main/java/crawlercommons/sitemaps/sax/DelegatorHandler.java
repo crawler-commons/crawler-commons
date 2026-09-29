@@ -118,13 +118,13 @@ public class DelegatorHandler extends DefaultHandler {
     }
 
     /**
-     * Count a URL which is about to be added to the sitemap. Must be called
-     * before the URL is added.
+     * Check that the maximum number of URLs is not yet reached and increment
+     * the number of URLs. Must be called before a URL is added to the sitemap.
      * 
      * @throws UrlLimitExceededException
      *             if the sitemap already holds the maximum number of URLs
      */
-    protected void countUrl() throws UrlLimitExceededException {
+    protected void checkAndIncrementURLCount() throws UrlLimitExceededException {
         if (numUrls >= maxUrls) {
             throw new UrlLimitExceededException("More than " + maxUrls + " URLs in sitemap");
         }

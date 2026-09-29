@@ -179,7 +179,7 @@ class RSSHandler extends DelegatorHandler {
         if (locURL != null) {
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (!isStrict() || valid) {
-                countUrl();
+                checkAndIncrementURLCount();
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);
                 sitemap.addSiteMapUrl(sUrl);
