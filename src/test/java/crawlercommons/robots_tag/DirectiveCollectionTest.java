@@ -3,6 +3,7 @@ package crawlercommons.robots_tag;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,5 +92,28 @@ public class DirectiveCollectionTest {
         assertFalse(withoutProductToken.isEmpty());
         assertFalse(withProductToken.isEmpty());
         assertFalse(withMyBot.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should reflect changes made directly to the underlying map")
+    void modifyUnderlyingMap() {
+        var directiveCollection = new DirectiveCollection();
+        var map = directiveCollection.getMap();
+
+        directiveCollection.addDirective(FOO);
+        directiveCollection.addDirective("MyBot-1", FOO);
+
+        map.get(DirectiveCollection.DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY).add(BAR);
+        map.get("MyBot-1").add(BAZ);
+        map.put("MyBot-2", new HashSet<>(Set.of(FOO, BAR, BAZ))); //Use a HashSet because Set.of() returns an unmodifiable set while the DirectiveCollection class expects a modifiable set.
+
+        assertEquals(directiveCollection.withoutProductToken(), Set.of(FOO, BAR));
+        assertEquals(directiveCollection.withProductToken("MyBot-1"), Set.of(FOO, BAZ));
+        assertEquals(directiveCollection.withProductToken("MyBot-2"), Set.of(FOO, BAR, BAZ));
+
+        map.clear();
+        assertTrue(directiveCollection.isEmpty());
+        assertTrue(directiveCollection.withoutProductToken().isEmpty());
+        assertTrue(directiveCollection.withProductToken().isEmpty());
     }
 }
