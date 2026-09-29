@@ -16,20 +16,10 @@ public final class DirectiveCollection {
     private final Map<String, Set<Directive<?>>> directivesByProductToken = new HashMap<>();
 
     /**
-     * This field exists so that {@link #addDirective(Directive)} and {@link #withoutProductToken()} do not need to look up the mapping for {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY} in {@link #directivesByProductToken}.
-     */
-    private Set<Directive<?>> directivesWithoutProductToken = null;
-
-    /**
      * Adds a directive that applies to all robots.
      */
     public void addDirective(Directive<?> directive) {
-        if (directivesWithoutProductToken == null) {
-            directivesWithoutProductToken = new HashSet<>();
-            directivesByProductToken.put(DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY, directivesWithoutProductToken);
-        }
-
-        directivesWithoutProductToken.add(directive);
+        addDirective(DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY, directive);
     }
 
     /**
@@ -52,7 +42,6 @@ public final class DirectiveCollection {
      */
     public void clear() {
         directivesByProductToken.clear();
-        directivesWithoutProductToken = null;
     }
 
     public boolean isEmpty() {
@@ -149,10 +138,12 @@ public final class DirectiveCollection {
      * The collection returned by this method is immutable.
      */
     public Set<Directive<?>> withoutProductToken() {
-        if (directivesWithoutProductToken == null) {
+        Set<Directive<?>> directives = directivesByProductToken.get(DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY);
+
+        if (directives == null) {
             return Collections.emptySet();
         } else {
-            return Set.copyOf(directivesWithoutProductToken);
+            return Set.copyOf(directives);
         }
     }
 
