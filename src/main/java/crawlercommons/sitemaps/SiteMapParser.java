@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
@@ -287,8 +288,9 @@ public class SiteMapParser {
      * <p>
      * Note that the limit is applied per sitemap: a sitemap index may list up
      * to <code>maxUrls</code> sitemaps each containing up to
-     * <code>maxUrls</code> URLs. With the default limit, recursively
-     * processing a single sitemap index may result in up to 2.5 billion URLs.
+     * <code>maxUrls</code> URLs. With the default limit, a sitemap index
+     * referencing only sitemaps (no further indexes) may result in up to 2.5
+     * billion URLs. Nested sitemap indexes may result in even more URLs.
      * </p>
      * 
      * @param maxUrls
@@ -450,7 +452,7 @@ public class SiteMapParser {
                 if (mimeTypeDetector.isXml(compressedType)) {
                     return processGzippedXML(url, content);
                 } else if (mimeTypeDetector.isText(compressedType)) {
-                    SiteMap sitemap = processText(url, decompressed);
+                    SiteMap sitemap = processText(url, decompressed, () -> bounded.getCount() > maxBytes);
                     checkSize(url, bounded.getCount());
                     return sitemap;
                 } else if (compressedType == null) {
@@ -512,8 +514,10 @@ public class SiteMapParser {
      * Note that the limits on the number of URLs ({@link #setMaxUrls(int)}) and
      * the size ({@link #setMaxBytes(long)}) are applied to every single
      * sitemap but not to the traversal as a whole: with the default limits a
-     * recursively processed sitemap index may hold up to 2.5 billion URLs
-     * (50,000 sitemaps with 50,000 URLs each).
+     * sitemap index referencing only sitemaps may hold up to 2.5 billion URLs
+     * (50,000 sitemaps with 50,000 URLs each). The traversal follows nested
+     * sitemap indexes without any limit on the depth, so the number of URLs
+     * may be even higher.
      * <p>
      * Exceptions thrown by the action are relayed to the caller.
      *
@@ -595,7 +599,7 @@ public class SiteMapParser {
      *             if there is an error reading in the site map content
      */
     protected SiteMap processText(URL sitemapUrl, byte[] content) throws IOException {
-        return processText(sitemapUrl, new ByteArrayInputStream(content, 0, limitLength(content)));
+        return processText(sitemapUrl, new ByteArrayInputStream(content, 0, limitLength(content)), () -> content.length > maxBytes);
     }
 
     /**
@@ -611,6 +615,24 @@ public class SiteMapParser {
      *             if there is an error reading in the site map content
      */
     protected SiteMap processText(URL sitemapUrl, InputStream stream) throws IOException {
+        return processText(sitemapUrl, stream, () -> false);
+    }
+
+    /**
+     * Process a text-based Sitemap.
+     *
+     * @param sitemapUrl
+     *            URL to sitemap file
+     * @param stream
+     *            content stream
+     * @param truncated
+     *            tells whether the content was truncated at the size limit, if
+     *            true the last line is skipped because it may be incomplete
+     * @return The site map
+     * @throws IOException
+     *             if there is an error reading in the site map content
+     */
+    private SiteMap processText(URL sitemapUrl, InputStream stream, BooleanSupplier truncated) throws IOException {
         LOG.debug("Processing textual Sitemap");
 
         SiteMap textSiteMap = new SiteMap(sitemapUrl);
@@ -621,8 +643,14 @@ public class SiteMapParser {
         BufferedReader reader = new BufferedReader(new InputStreamReader(bomIs, UTF_8));
 
         String line;
+        String nextLine = reader.readLine();
         int i = 0;
-        while ((line = reader.readLine()) != null) {
+        while ((line = nextLine) != null) {
+            nextLine = reader.readLine();
+            if (nextLine == null && truncated.getAsBoolean()) {
+                LOG.warn("Truncated sitemap {}: skipped last line, size limit of {} bytes exceeded", sitemapUrl, maxBytes);
+                break;
+            }
             line = line.trim();
             if (line.isEmpty()) {
                 continue;
@@ -642,7 +670,8 @@ public class SiteMapParser {
                     }
                     SiteMapURL sUrl = new SiteMapURL(url, valid);
                     textSiteMap.addSiteMapUrl(sUrl);
-                    LOG.debug("  {}. {}", (++i), sUrl);
+                    i++;
+                    LOG.debug("  {}. {}", i, sUrl);
                 } else {
                     LOG.info("URL: {} is excluded from the sitemap as it is not a valid url = not under the base url: {}", url.toExternalForm(), textSiteMap.getBaseUrl());
                 }
@@ -808,6 +837,9 @@ public class SiteMapParser {
         } catch (UrlLimitExceededException e) {
             LOG.warn("Truncated sitemap {}: more than {} URLs", sitemapUrl, maxUrls);
             AbstractSiteMap sitemap = handler.getSiteMap();
+            if (sitemap == null) {
+                throw new UnknownFormatException("Failed to parse " + sitemapUrl, e);
+            }
             sitemap.setProcessed(true);
             return sitemap;
         } catch (SAXException e) {

@@ -176,6 +176,9 @@ public class DelegatorHandler extends DefaultHandler {
         // configure delegate
         delegate.setStrictNamespace(isStrictNamespace());
         delegate.setAcceptedNamespaces(acceptedNamespaces);
+        delegate.setExtensionNamespaces(extensionNamespaces);
+        delegate.setURLFilter(urlFilter);
+        delegate.setMaxUrls(maxUrls);
         // validate XML namespace
         if (isStrictNamespace()) {
             if (delegate instanceof AtomHandler || delegate instanceof RSSHandler) {
@@ -203,9 +206,6 @@ public class DelegatorHandler extends DefaultHandler {
                 return;
             }
         }
-        delegate.setExtensionNamespaces(extensionNamespaces);
-        delegate.setURLFilter(urlFilter);
-        delegate.setMaxUrls(maxUrls);
     }
 
     @Override
@@ -260,14 +260,24 @@ public class DelegatorHandler extends DefaultHandler {
     @Override
     public void error(SAXParseException e) throws SAXException {
         if (delegate != null) {
-            delegate.error(e);
+            try {
+                delegate.error(e);
+            } catch (UrlLimitExceededException ex) {
+                // URL beyond the limit is skipped, the parser error is handled
+                // by the parser
+            }
         }
     }
 
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
         if (delegate != null) {
-            delegate.fatalError(e);
+            try {
+                delegate.fatalError(e);
+            } catch (UrlLimitExceededException ex) {
+                // URL beyond the limit is skipped, the parser error is handled
+                // by the parser
+            }
         }
     }
 

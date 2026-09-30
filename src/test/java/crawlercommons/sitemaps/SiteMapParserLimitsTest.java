@@ -262,6 +262,63 @@ public class SiteMapParserLimitsTest {
         assertTrue(n > 0 && n < 100, "Expected truncated sitemap but got " + n + " URLs");
     }
 
+    @Test
+    public void testFeedMaxUrlsStrictNamespace() throws Exception {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setStrictNamespace(true);
+        parser.setMaxUrls(10);
+        assertEquals(10, parse(parser, "application/rss+xml", getRssFeed(25), "http://www.example.com/feed.rss").getSiteMapUrls().size());
+        assertEquals(10, parse(parser, "application/atom+xml", getAtomFeed(25), "http://www.example.com/feed.atom").getSiteMapUrls().size());
+    }
+
+    @Test
+    public void testRssFilteredUrlsNotCounted() throws Exception {
+        SiteMapParser parser = new SiteMapParser();
+        parser.setMaxUrls(10);
+        // skip every second URL
+        parser.setURLFilter((String u) -> u.matches(".*[02468]\\.html") ? u : null);
+        SiteMap sm = parse(parser, "application/rss+xml", getRssFeed(25), "http://www.example.com/feed.rss");
+        assertEquals(10, sm.getSiteMapUrls().size());
+        for (SiteMapURL u : sm.getSiteMapUrls()) {
+            assertTrue(u.getUrl().toString().matches(".*[02468]\\.html"), "Filtered URL added: " + u.getUrl());
+        }
+    }
+
+    @Test
+    public void testTextSitemapTruncatedLastLineSkipped() throws Exception {
+        SiteMapParser parser = new SiteMapParser(true, true);
+        byte[] text = getTextSitemap(100);
+        // cut in the middle of a URL
+        parser.setMaxBytes(text.length / 2 + 25);
+        for (SiteMap sm : new SiteMap[] { parse(parser, "text/plain", text, "http://www.example.com/sitemap.txt"),
+                        parse(parser, "application/gzip", gzip(text), "http://www.example.com/sitemap.txt.gz") }) {
+            assertTrue(sm.getSiteMapUrls().size() < 100);
+            for (SiteMapURL u : sm.getSiteMapUrls()) {
+                assertTrue(u.getUrl().toString().endsWith(".html"), "Incomplete URL added: " + u.getUrl());
+            }
+        }
+    }
+
+    @Test
+    public void testMaxUrlsBrokenSitemapIndex() throws Exception {
+        // a broken sitemap index with more entries than allowed
+        byte[] content = (XML_DECLARATION + "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n" //
+                        + " <sitemap><loc>http://www.example.com/sitemap1.xml</loc></sitemap>\n" //
+                        + " <sitemap><loc>http://www.example.com/sitemap2.xml</loc></sitemap>\n" //
+                        + " <sitemap><loc>http://www.example.com/sitemap3.xml</loc><broken").getBytes(UTF_8);
+        URL url = url("http://www.example.com/sitemapindex.xml");
+
+        SiteMapParser parser = new SiteMapParser();
+        parser.setMaxUrls(2);
+        assertThrows(UnknownFormatException.class, () -> parser.parseSiteMap("text/xml", content, url));
+
+        SiteMapParser partialParser = new SiteMapParser(true, true);
+        partialParser.setMaxUrls(2);
+        AbstractSiteMap asm = partialParser.parseSiteMap("text/xml", content, url);
+        assertTrue(asm.isIndex());
+        assertEquals(2, ((SiteMapIndex) asm).getSitemaps().size());
+    }
+
     private void assertSizeLimitExceeded(SiteMapParser parser, String contentType, byte[] content, String url) {
         UnknownFormatException e = assertThrows(UnknownFormatException.class, () -> parser.parseSiteMap(contentType, content, url(url)));
         assertTrue(e.getMessage().contains("exceeds the size limit"), "Unexpected message: " + e.getMessage());
