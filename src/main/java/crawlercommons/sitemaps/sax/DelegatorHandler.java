@@ -32,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.Namespace;
+import crawlercommons.sitemaps.SiteMapParser;
 import crawlercommons.sitemaps.UnknownFormatException;
 import crawlercommons.sitemaps.extension.Extension;
 
@@ -51,6 +52,8 @@ public class DelegatorHandler extends DefaultHandler {
     protected Map<String, Extension> extensionNamespaces;
     private StringBuilder characterBuffer = new StringBuilder();
     protected Function<String, String> urlFilter = (String url) -> url;
+    private int maxUrls = SiteMapParser.MAX_URLS;
+    private int numUrls = 0;
 
     protected DelegatorHandler(LinkedList<String> elementStack, boolean strict) {
         this.elementStack = elementStack;
@@ -102,6 +105,32 @@ public class DelegatorHandler extends DefaultHandler {
         this.urlFilter = urlFilter;
     }
 
+    /**
+     * Set the maximum number of URLs accepted from a single sitemap, sitemap
+     * index or feed. Parsing is stopped if the document contains more URLs.
+     * 
+     * @param maxUrls
+     *            maximum number of URLs, default is
+     *            {@link SiteMapParser#MAX_URLS}
+     */
+    public void setMaxUrls(int maxUrls) {
+        this.maxUrls = maxUrls;
+    }
+
+    /**
+     * Check that the maximum number of URLs is not yet reached and increment
+     * the number of URLs. Must be called before a URL is added to the sitemap.
+     * 
+     * @throws UrlLimitExceededException
+     *             if the sitemap already holds the maximum number of URLs
+     */
+    protected void checkAndIncrementURLCount() throws UrlLimitExceededException {
+        if (numUrls >= maxUrls) {
+            throw new UrlLimitExceededException("More than " + maxUrls + " URLs in sitemap");
+        }
+        numUrls++;
+    }
+
     protected void setException(UnknownFormatException exception) {
         this.exception = exception;
     }
@@ -147,6 +176,9 @@ public class DelegatorHandler extends DefaultHandler {
         // configure delegate
         delegate.setStrictNamespace(isStrictNamespace());
         delegate.setAcceptedNamespaces(acceptedNamespaces);
+        delegate.setExtensionNamespaces(extensionNamespaces);
+        delegate.setURLFilter(urlFilter);
+        delegate.setMaxUrls(maxUrls);
         // validate XML namespace
         if (isStrictNamespace()) {
             if (delegate instanceof AtomHandler || delegate instanceof RSSHandler) {
@@ -174,8 +206,6 @@ public class DelegatorHandler extends DefaultHandler {
                 return;
             }
         }
-        delegate.setExtensionNamespaces(extensionNamespaces);
-        delegate.setURLFilter(urlFilter);
     }
 
     @Override
@@ -230,14 +260,24 @@ public class DelegatorHandler extends DefaultHandler {
     @Override
     public void error(SAXParseException e) throws SAXException {
         if (delegate != null) {
-            delegate.error(e);
+            try {
+                delegate.error(e);
+            } catch (UrlLimitExceededException ex) {
+                // URL beyond the limit is skipped, the parser error is handled
+                // by the parser
+            }
         }
     }
 
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
         if (delegate != null) {
-            delegate.fatalError(e);
+            try {
+                delegate.fatalError(e);
+            } catch (UrlLimitExceededException ex) {
+                // URL beyond the limit is skipped, the parser error is handled
+                // by the parser
+            }
         }
     }
 
