@@ -25,11 +25,9 @@ public final class ParserUtils {
                 - There may be whitespace characters around the equals sign that separates the attribute name from the attribute value.
                 - Attribute values can be double-quoted, single-quoted or unquoted.
 
-            Note: The regular expression does not quote the attribute name (see Pattern.quote()), so it might not work with attribute names that contain regular expression metacharacters.
-
             Reference: WHATWG HTML Standard: https://html.spec.whatwg.org/multipage/syntax.html (→ 13.1.2.3 Attributes)
          */
-        Pattern attributeRegex = Pattern.compile("(?i)\\s" + attributeName + "\\s*=\\s*(\"[^\"]+\"|'[^']+'|[^\\s\"'=<>`]+)");
+        Pattern attributeRegex = Pattern.compile("(?i)\\s" + Pattern.quote(attributeName) + "\\s*=\\s*(\"[^\"]+\"|'[^']+'|[^\\s\"'=<>`]+)");
 
         return (String htmlElement) -> {
             Matcher matcher = attributeRegex.matcher(htmlElement);

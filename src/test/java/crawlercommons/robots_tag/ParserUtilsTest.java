@@ -51,6 +51,14 @@ class ParserUtilsTest {
         void substrings(String input) {
             assertTrue(getBarFunction.apply(input).isEmpty());
         }
+
+        @Test
+        @DisplayName("should work with attribute names that contain regex metacharacters")
+        void regexMetacharacters() {
+            String input = "<foo bar-*$()[]{}+baz=\"123\">";
+            var getAttributeFunction = ParserUtils.createAttributeGetter("bar-*$()[]{}+baz");
+            assertEquals("123", getAttributeFunction.apply(input).orElseThrow());
+        }
     }
 
     @Nested
