@@ -17,6 +17,8 @@
 package crawlercommons.domains;
 
 import crawlercommons.domains.EffectiveTldFinder.EffectiveTLD;
+import crawlercommons.utils.idn.IdnConverter;
+import crawlercommons.utils.idn.IdnConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -341,5 +343,64 @@ public class EffectiveTldFinderTest {
         } else {
             assertEquals(expectedDomain, ad, "Domain under public suffix does not match");
         }
+    }
+
+    @Test
+    public final void testBuilderDefaultConverter() {
+        EffectiveTldFinder finder = EffectiveTldFinder.newBuilder().build();
+        assertNotSame(EffectiveTldFinder.getInstance(), finder);
+        assertTrue(finder.isConfigured());
+        assertSame(IdnConverters.getDefault(), finder.getIdnConverter());
+        assertEquals("рф", finder.findEffectiveTLD("спб.бесплатныеобъявления.рф", true).getDomain());
+        assertEquals("бесплатныеобъявления.рф", finder.findAssignedDomain("спб.бесплатныеобъявления.рф", true, false));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "jdk", "icu4j" })
+    public final void testBuilderIdnConverter(String impl) {
+        IdnConverter converter = impl.equals("jdk") ? IdnConverters.jdk() : IdnConverters.icu4j();
+        EffectiveTldFinder finder = EffectiveTldFinder.newBuilder().idnConverter(converter).build();
+        assertSame(converter, finder.getIdnConverter());
+        assertEquals("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", finder.findAssignedDomain("xn--90a1af.xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", true, false));
+        assertEquals("бесплатныеобъявления.рф", finder.findAssignedDomain("спб.бесплатныеобъявления.рф", true, false));
+        // Balinese script, added in Unicode 5.0 (issue #551)
+        assertEquals("ᬩᬮᬶ.id", finder.findEffectiveTLD("ᬩᬮᬶ.id", false).getDomain());
+    }
+
+    @Test
+    public final void testBuilderSkipsRulesRejectedByConverter() {
+        // a converter rejecting all non-ASCII names
+        IdnConverter asciiOnly = new IdnConverter() {
+            @Override
+            public String toASCII(String name) {
+                if (!name.chars().allMatch(c -> c < 128)) {
+                    throw new IllegalArgumentException("Not ASCII: " + name);
+                }
+                return name;
+            }
+
+            @Override
+            public String toUnicode(String name) {
+                return name;
+            }
+
+            @Override
+            public String getName() {
+                return "ascii-only";
+            }
+
+            @Override
+            public String getVersion() {
+                return "test";
+            }
+        };
+        EffectiveTldFinder finder = EffectiveTldFinder.newBuilder().idnConverter(asciiOnly).build();
+        assertTrue(finder.isConfigured());
+        assertEquals("com", finder.findEffectiveTLD("www.example.com", false).getDomain());
+        // IDN rule "рф" is skipped
+        assertNull(finder.findEffectiveTLD("бесплатныеобъявления.рф", false));
+        assertNull(finder.findEffectiveTLD("xn--80abbembcyvesfij3at4loa4ff.xn--p1ai", false));
+        // the singleton instance is not affected
+        assertEquals("рф", EffectiveTldFinder.getEffectiveTLD("бесплатныеобъявления.рф").getDomain());
     }
 }
