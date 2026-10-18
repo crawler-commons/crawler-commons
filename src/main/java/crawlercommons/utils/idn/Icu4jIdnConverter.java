@@ -19,7 +19,9 @@ package crawlercommons.utils.idn;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.ibm.icu.lang.UCharacter;
 import com.ibm.icu.text.IDNA;
+import com.ibm.icu.util.VersionInfo;
 
 /**
  * {@link IdnConverter} based on ICU4J's implementation of <a
@@ -81,6 +83,11 @@ public class Icu4jIdnConverter implements IdnConverter {
     @Override
     public String getName() {
         return "icu4j";
+    }
+
+    @Override
+    public String getVersion() {
+        return "ICU " + VersionInfo.ICU_VERSION + ", Unicode " + UCharacter.getUnicodeVersion();
     }
 
     private static void checkErrors(String name, IDNA.Info info) {

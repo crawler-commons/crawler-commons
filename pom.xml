@@ -204,6 +204,27 @@
 					<forkCount>2</forkCount>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
+				<executions>
+					<!-- Run the IDN-related tests again with the IDNA2003 fallback
+						(java.net.IDN), as ICU4J is on the test classpath -->
+					<execution>
+						<id>idn-jdk</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<systemPropertyVariables>
+								<crawlercommons.idn.impl>jdk</crawlercommons.idn.impl>
+							</systemPropertyVariables>
+							<includes>
+								<include>crawlercommons/domains/*Test.java</include>
+								<include>crawlercommons/filters/**/*Test.java</include>
+								<include>crawlercommons/utils/idn/*Test.java</include>
+							</includes>
+							<reportNameSuffix>idn-jdk</reportNameSuffix>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>

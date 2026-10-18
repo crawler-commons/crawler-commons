@@ -32,9 +32,18 @@ public class IdnConverterTest {
     private final IdnConverter icu = IdnConverters.icu4j();
 
     @Test
-    void testIcu4jIsDefaultWhenOnClasspath() {
+    void testDefault() {
         assertTrue(IdnConverters.isIcu4jAvailable());
-        assertEquals("icu4j", IdnConverters.getDefault().getName());
+        // ICU4J is on the test classpath and used unless the JDK fallback is
+        // forced, cf. the "idn-jdk" surefire execution
+        String expected = System.getProperty(IdnConverters.IMPL_PROPERTY, "icu4j");
+        assertEquals(expected, IdnConverters.getDefault().getName());
+    }
+
+    @Test
+    void testVersion() {
+        assertEquals("IDNA2003, Unicode 3.2", jdk.getVersion());
+        assertTrue(icu.getVersion().startsWith("ICU "), icu.getVersion());
     }
 
     @ParameterizedTest

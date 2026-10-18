@@ -49,4 +49,9 @@ public class JdkIdnConverter implements IdnConverter {
     public String getName() {
         return "jdk";
     }
+
+    @Override
+    public String getVersion() {
+        return "IDNA2003, Unicode 3.2";
+    }
 }

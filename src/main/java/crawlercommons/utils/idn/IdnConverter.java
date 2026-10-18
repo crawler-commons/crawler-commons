@@ -56,4 +56,15 @@ public interface IdnConverter {
      * @return a short name identifying the implementation, e.g. for logging
      */
     String getName();
+
+    /**
+     * Describes the version of the underlying implementation and of the
+     * Unicode data it relies on. Conversion results may change between
+     * versions, e.g. because of updates to the <a
+     * href="https://www.unicode.org/reports/tr46/#IDNA_Mapping_Table">IDNA
+     * mapping table</a>.
+     *
+     * @return version information, e.g. for logging
+     */
+    String getVersion();
 }

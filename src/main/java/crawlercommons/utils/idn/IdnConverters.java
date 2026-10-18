@@ -108,7 +108,7 @@ public final class IdnConverters {
             }
             converter = isIcu4jAvailable() ? icu4j() : jdk();
         }
-        LOG.debug("Using IDN converter: {}", converter.getName());
+        LOG.info("Using IDN converter: {} ({})", converter.getName(), converter.getVersion());
         return converter;
     }
 }
