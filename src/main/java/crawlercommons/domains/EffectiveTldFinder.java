@@ -16,7 +16,6 @@
 
 package crawlercommons.domains;
 
-import static java.net.IDN.ALLOW_UNASSIGNED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -43,6 +42,9 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import crawlercommons.utils.idn.IdnConverter;
+import crawlercommons.utils.idn.IdnConverters;
 
 /**
  * To determine the actual domain name of a host name or URL requires knowledge
@@ -125,6 +127,7 @@ public class EffectiveTldFinder {
     public static final int MAX_DOMAIN_LENGTH_PART = 63;
 
     private static EffectiveTldFinder instance = null;
+    private final IdnConverter idnConverter;
     private Map<String, EffectiveTLD> domains = null;
     private SuffixTrie<EffectiveTLD> domainTrie = new SuffixTrie<>();
     private boolean configured = false;
@@ -133,6 +136,15 @@ public class EffectiveTldFinder {
      * A singleton loading the public suffix list from the Java class path.
      */
     private EffectiveTldFinder() {
+        this(IdnConverters.getDefault());
+    }
+
+    /**
+     * An instance loading the public suffix list from the Java class path and
+     * using the given {@link IdnConverter}.
+     */
+    private EffectiveTldFinder(IdnConverter idnConverter) {
+        this.idnConverter = idnConverter;
         URL publicSuffixList = this.getClass().getResource(ETLD_DATA);
         LOGGER.info("Loading public suffix list from class path: {}", publicSuffixList);
         try (InputStream is = publicSuffixList.openStream()) {
@@ -155,6 +167,20 @@ public class EffectiveTldFinder {
     }
 
     /**
+     * Create a new builder object for creating a customized
+     * {@link EffectiveTldFinder} instance. Use the instance methods
+     * {@link #findEffectiveTLD(String, boolean)} and
+     * {@link #findAssignedDomain(String, boolean, boolean)} of the built
+     * instance; the static methods always use the singleton instance, see
+     * {@link #getInstance()}.
+     *
+     * @return a {@link Builder} ready to use
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
      * (Re)initialize EffectiveTldFinder with custom public suffix list.
      *
      * @param effectiveTldDataStream
@@ -166,7 +192,7 @@ public class EffectiveTldFinder {
         domainTrie = new SuffixTrie<>();
         boolean inPrivateDomainSection = false;
         try {
-            int linesRead = 0, rulesRead = 0;
+            int linesRead = 0, rulesRead = 0, rulesSkipped = 0;
             BoundedInputStream isCounting = BoundedInputStream.builder().setInputStream(effectiveTldDataStream).get();
             InputStream is = isCounting;
             List<MessageDigest> digests = new ArrayList<>();
@@ -200,7 +226,16 @@ public class EffectiveTldFinder {
                     continue;
                 }
                 rulesRead++;
-                EffectiveTLD entry = new EffectiveTLD(line, inPrivateDomainSection);
+                EffectiveTLD entry;
+                try {
+                    entry = new EffectiveTLD(line, inPrivateDomainSection, idnConverter);
+                } catch (IllegalArgumentException e) {
+                    // the IDN converter may reject public suffixes, e.g. if
+                    // it follows a stricter IDNA specification
+                    LOGGER.debug("Skipping invalid rule in public suffix list (line {}): {} - {}", linesRead, line, e.getMessage());
+                    rulesSkipped++;
+                    continue;
+                }
                 for (String var : entry.getNameVariants()) {
                     domains.put(var, entry);
                     domainTrie.put(var, entry);
@@ -211,6 +246,9 @@ public class EffectiveTldFinder {
             is.close();
             long bytesRead = isCounting.getCount();
             LOGGER.info("Successfully read public suffix list: {} bytes, {} lines, {} rules", bytesRead, linesRead, rulesRead);
+            if (rulesSkipped > 0) {
+                LOGGER.warn("Skipped {} rules of the public suffix list rejected by IDN converter {}", rulesSkipped, idnConverter.getName());
+            }
             for (MessageDigest digest : digests) {
                 byte[] d = digest.digest();
                 BigInteger bi = new BigInteger(1, d);
@@ -255,7 +293,22 @@ public class EffectiveTldFinder {
      * @return the {@link EffectiveTLD}
      */
     public static EffectiveTLD getEffectiveTLD(String hostname, boolean excludePrivate) {
-        SuffixTrie.LookupResult<EffectiveTLD> res = findEffectiveTLD(hostname, excludePrivate);
+        return getInstance().findEffectiveTLD(hostname, excludePrivate);
+    }
+
+    /**
+     * Get EffectiveTLD for host name using this instance of
+     * EffectiveTldFinder.
+     *
+     * @param hostname
+     *            the hostname for which to find the {@link EffectiveTLD}
+     * @param excludePrivate
+     *            do not return an effective TLD from the PRIVATE section,
+     *            instead return the shorter eTLD not in the PRIVATE section
+     * @return the {@link EffectiveTLD}
+     */
+    public EffectiveTLD findEffectiveTLD(String hostname, boolean excludePrivate) {
+        SuffixTrie.LookupResult<EffectiveTLD> res = lookupEffectiveTLD(hostname, excludePrivate);
         if (res == null) {
             return null;
         }
@@ -263,7 +316,7 @@ public class EffectiveTldFinder {
     }
 
     /**
-     * Find EffectiveTLD and offset in host name using the singleton instance of
+     * Find EffectiveTLD and offset in host name using this instance of
      * EffectiveTldFinder.
      *
      * @param hostname
@@ -273,8 +326,8 @@ public class EffectiveTldFinder {
      *            instead return the shorter eTLD not in the PRIVATE section
      * @return the {@link EffectiveTLD} or null if none is found
      */
-    private static SuffixTrie.LookupResult<EffectiveTLD> findEffectiveTLD(String hostname, boolean excludePrivate) {
-        List<SuffixTrie.LookupResult<EffectiveTLD>> suffixes = getInstance().domainTrie.getSuffixes(hostname);
+    private SuffixTrie.LookupResult<EffectiveTLD> lookupEffectiveTLD(String hostname, boolean excludePrivate) {
+        List<SuffixTrie.LookupResult<EffectiveTLD>> suffixes = domainTrie.getSuffixes(hostname);
         for (int i = suffixes.size() - 1; i >= 0; i--) {
             SuffixTrie.LookupResult<EffectiveTLD> res = suffixes.get(i);
             int offset = res.offset;
@@ -368,8 +421,29 @@ public class EffectiveTldFinder {
      *         valid TLD is found
      */
     public static String getAssignedDomain(String hostname, boolean strict, boolean excludePrivate) {
+        return getInstance().findAssignedDomain(hostname, strict, excludePrivate);
+    }
+
+    /**
+     * This method uses the effective TLD to determine which component of a FQDN
+     * is the NIC-assigned domain name, using this instance of
+     * EffectiveTldFinder.
+     *
+     * @param hostname
+     *            a string for which to obtain a NIC-assigned domain name
+     * @param strict
+     *            do not return the hostname as fall-back if a FQDN with valid
+     *            TLD cannot be determined
+     * @param excludePrivate
+     *            do not return a domain which is below an eTLD from the PRIVATE
+     *            section, return the shorter domain which is below the
+     *            &quot;ICANN&quot; registry suffix
+     * @return the NIC-assigned domain name, null if strict and no FQDN with
+     *         valid TLD is found
+     */
+    public String findAssignedDomain(String hostname, boolean strict, boolean excludePrivate) {
         hostname = hostname.toLowerCase(Locale.ROOT);
-        SuffixTrie.LookupResult<EffectiveTLD> res = findEffectiveTLD(hostname, excludePrivate);
+        SuffixTrie.LookupResult<EffectiveTLD> res = lookupEffectiveTLD(hostname, excludePrivate);
         if (res == null) {
             return (strict ? null : hostname);
         }
@@ -405,7 +479,7 @@ public class EffectiveTldFinder {
         String domainSegment = hostname.substring(start, etldStartPos);
         if (!EffectiveTLD.isAscii(domainSegment)) {
             try {
-                IDN.toASCII(domainSegment, ALLOW_UNASSIGNED);
+                idnConverter.toASCII(domainSegment);
             } catch (IllegalArgumentException e) {
                 // not a valid IDN segment,
                 // includes check for max. length (63 chars)
@@ -422,6 +496,56 @@ public class EffectiveTldFinder {
 
     public boolean isConfigured() {
         return configured;
+    }
+
+    /**
+     * @return the {@link IdnConverter} used by this instance
+     */
+    public IdnConverter getIdnConverter() {
+        return idnConverter;
+    }
+
+    /**
+     * A builder class for the {@link EffectiveTldFinder}.
+     */
+    public static class Builder {
+
+        IdnConverter idnConverter;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets the converter used to map internationalized domain names
+         * between Unicode and ASCII. If not set,
+         * {@link IdnConverters#getDefault()} is used, which prefers the
+         * IDNA2008-compliant ICU4J implementation if available on the
+         * classpath.
+         *
+         * <p>
+         * Note: rules of the public suffix list rejected by the converter are
+         * skipped.
+         * </p>
+         *
+         * @param idnConverter
+         * @return this builder
+         */
+        public Builder idnConverter(IdnConverter idnConverter) {
+            this.idnConverter = idnConverter;
+            return this;
+        }
+
+        /**
+         * Constructs the custom EffectiveTldFinder instance, loading the
+         * public suffix list from the Java class path. Use
+         * {@link EffectiveTldFinder#initialize(InputStream)} to load a custom
+         * list.
+         *
+         * @return the constructed EffectiveTldFinder
+         */
+        public EffectiveTldFinder build() {
+            return new EffectiveTldFinder(idnConverter != null ? idnConverter : IdnConverters.getDefault());
+        }
     }
 
     private static String join(String[] ary) {
@@ -526,6 +650,7 @@ public class EffectiveTldFinder {
         private String domain = null;
         private String idn = null;
         private String suffix = null; // same as domain except for matched wildcard suffixes
+        private final IdnConverter idnConverter;
 
         /**
          * Parse one non-empty, non-comment line in the public suffix list and
@@ -541,6 +666,26 @@ public class EffectiveTldFinder {
          *             prohibited in IDNs, cf. {@link IDN#toASCII(String)}
          */
         public EffectiveTLD(String line, boolean isPrivateDomain) throws IllegalArgumentException {
+            this(line, isPrivateDomain, IdnConverters.getDefault());
+        }
+
+        /**
+         * Parse one non-empty, non-comment line in the public suffix list and
+         * hold the public suffix and its properties in the created object.
+         *
+         * @param line
+         *            non-empty, non-comment line in the public suffix list
+         * @param isPrivateDomain
+         *            whether line is in the section of &quot;PRIVATE
+         *            DOMAINS&quot; of the public suffix list
+         * @param idnConverter
+         *            converter used to map IDN suffixes to ASCII
+         * @throws IllegalArgumentException
+         *             if the input line contains non-ASCII Unicode characters
+         *             rejected by the IDN converter
+         */
+        public EffectiveTLD(String line, boolean isPrivateDomain, IdnConverter idnConverter) throws IllegalArgumentException {
+            this.idnConverter = idnConverter;
             if (line.startsWith(EXCEPTION)) {
                 exception = true;
                 domain = line.substring(EXCEPTION.length(), line.length());
@@ -575,6 +720,7 @@ public class EffectiveTldFinder {
             exception = from.exception;
             isPrivate = from.isPrivate;
             idn = from.idn;
+            idnConverter = from.idnConverter;
         }
 
         /**
@@ -614,7 +760,7 @@ public class EffectiveTldFinder {
             String[] var = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 if (!isAscii(parts[i])) {
-                    var[i] = IDN.toASCII(parts[i], ALLOW_UNASSIGNED);
+                    var[i] = idnConverter.toASCII(parts[i]);
                 }
             }
             for (int i = 0; i < parts.length; i++) {
@@ -650,11 +796,11 @@ public class EffectiveTldFinder {
          * @throws IllegalArgumentException
          *             if the input contains prohibited characters
          */
-        private static String asciiConvert(String str) throws IllegalArgumentException {
+        private String asciiConvert(String str) throws IllegalArgumentException {
             if (isAscii(str)) {
                 return str.toLowerCase(Locale.ROOT);
             }
-            return IDN.toASCII(str, ALLOW_UNASSIGNED);
+            return idnConverter.toASCII(str);
         }
 
         private static boolean isAscii(String str) {
