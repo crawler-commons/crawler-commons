@@ -133,7 +133,7 @@ class AtomHandler extends DelegatorHandler {
         return sitemap;
     }
 
-    private void maybeAddSiteMapUrl() {
+    private void maybeAddSiteMapUrl() throws UrlLimitExceededException {
         if (valid) {
             if (loc == null) {
                 LOG.debug("Missing url");
@@ -144,6 +144,7 @@ class AtomHandler extends DelegatorHandler {
                     LOG.debug("Filtered URL {}", loc.toString());
                     return;
                 }
+                checkAndIncrementURLCount();
                 SiteMapURL sUrl = new SiteMapURL(urlFiltered, lastMod, null, null, valid);
                 sitemap.addSiteMapUrl(sUrl);
                 LOG.debug("  {}. {}", (++i), sUrl);

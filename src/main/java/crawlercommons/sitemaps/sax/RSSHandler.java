@@ -162,8 +162,8 @@ class RSSHandler extends DelegatorHandler {
         }
         try {
             // check that the value is a valid URL
-            locURL = sitemap.getUrl().toURI().resolve(value).toURL();
-            String urlFiltered = urlFilter.apply(locURL.toString());
+            URL url = sitemap.getUrl().toURI().resolve(value).toURL();
+            String urlFiltered = urlFilter.apply(url.toString());
             if (urlFiltered == null) {
                 LOG.debug("Filtered URL {}", value);
                 return;
@@ -175,10 +175,11 @@ class RSSHandler extends DelegatorHandler {
         }
     }
 
-    private void maybeAddSiteMapUrl() {
+    private void maybeAddSiteMapUrl() throws UrlLimitExceededException {
         if (locURL != null) {
             boolean valid = urlIsValid(sitemap.getBaseUrl(), locURL.toString());
             if (!isStrict() || valid) {
+                checkAndIncrementURLCount();
                 SiteMapURL sUrl = new SiteMapURL(locURL, valid);
                 sUrl.setLastModified(lastMod);
                 sitemap.addSiteMapUrl(sUrl);
