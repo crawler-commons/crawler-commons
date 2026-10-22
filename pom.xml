@@ -442,7 +442,7 @@
 		<maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
 		<checksum-maven-plugin.version>1.4</checksum-maven-plugin.version>
 		<maven.download.plugin.version>1.13.0</maven.download.plugin.version>
-		<central-publishing-plugin.version>0.11.0</central-publishing-plugin.version>
+		<central-publishing-plugin.version>0.12.0</central-publishing-plugin.version>
 
 		<!-- General Properties -->
 		<implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
