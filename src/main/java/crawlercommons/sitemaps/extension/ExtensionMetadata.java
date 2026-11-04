@@ -55,4 +55,31 @@ public abstract class ExtensionMetadata implements Serializable {
         return (a == b) || (a != null && b != null && a.toString().equals(b.toString()));
     }
 
+    /**
+     * Look up an enum constant by name, ignoring case and surrounding white
+     * space. Sitemap extension values are written in different cases in the
+     * wild, for example "subscription" for Subscription or "hd" for HD.
+     * 
+     * @param <E>
+     *            enum type
+     * @param enumType
+     *            class of the enum
+     * @param name
+     *            value found in the sitemap
+     * @return the matching enum constant
+     * @throws IllegalArgumentException
+     *             if no constant matches the value
+     */
+    public static <E extends Enum<E>> E valueOfIgnoreCase(Class<E> enumType, String name) {
+        if (name != null) {
+            String trimmed = name.trim();
+            for (E constant : enumType.getEnumConstants()) {
+                if (constant.name().equalsIgnoreCase(trimmed)) {
+                    return constant;
+                }
+            }
+        }
+        throw new IllegalArgumentException("No enum constant " + enumType.getCanonicalName() + "." + name);
+    }
+
 }

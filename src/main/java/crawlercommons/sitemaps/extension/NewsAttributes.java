@@ -173,7 +173,7 @@ public class NewsAttributes extends ExtensionMetadata {
     }
 
     public void setAccess(String access) {
-        this.access = AccessOption.valueOf(access);
+        this.access = valueOfIgnoreCase(AccessOption.class, access);
     }
 
     @Override

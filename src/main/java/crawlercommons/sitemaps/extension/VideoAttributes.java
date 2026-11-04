@@ -630,7 +630,7 @@ public class VideoAttributes extends ExtensionMetadata {
         }
 
         public void setVideoType(String videoType) {
-            this.videoType = VideoType.valueOf(videoType);
+            this.videoType = valueOfIgnoreCase(VideoType.class, videoType);
         }
 
         public String getEpisodeTitle() {
