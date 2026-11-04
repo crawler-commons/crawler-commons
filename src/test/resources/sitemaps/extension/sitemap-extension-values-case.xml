@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <!--
+      extension values written in a different case than the enum constants (#542)
+  -->
+  <url>
+    <loc>https://example.org/news/case.html</loc>
+    <news:news>
+      <news:publication>
+        <news:name>The Example Times</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:genres>blog, pressrelease, Unknown</news:genres>
+      <news:publication_date>2025-10-07</news:publication_date>
+      <news:title>Lower-case access value</news:title>
+      <news:access>subscription</news:access>
+    </news:news>
+    <video:video>
+      <video:thumbnail_loc>https://example.org/thumb.jpg</video:thumbnail_loc>
+      <video:title>Video with upper-case price attributes</video:title>
+      <video:description>Dummy description</video:description>
+      <video:content_loc>https://example.org/video.mp4</video:content_loc>
+      <video:price currency="EUR" type="RENT" resolution="hd">1.99</video:price>
+      <video:tvshow>
+        <video:show_title>My TV Show!</video:show_title>
+        <video:video_type>Full</video:video_type>
+      </video:tvshow>
+    </video:video>
+  </url>
+  <url>
+    <!--
+        unknown values are skipped, the rest of the record is kept
+    -->
+    <loc>https://example.org/news/unknown.html</loc>
+    <news:news>
+      <news:publication>
+        <news:name>The Example Times</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-10-07</news:publication_date>
+      <news:title>Unknown access value</news:title>
+      <news:access>free</news:access>
+    </news:news>
+    <video:video>
+      <video:thumbnail_loc>https://example.org/thumb2.jpg</video:thumbnail_loc>
+      <video:title>Video with an unknown video type</video:title>
+      <video:description>Dummy description</video:description>
+      <video:content_loc>https://example.org/video2.mp4</video:content_loc>
+      <video:tvshow>
+        <video:show_title>My TV Show!</video:show_title>
+        <video:video_type>trailer</video:video_type>
+      </video:tvshow>
+    </video:video>
+  </url>
+</urlset>

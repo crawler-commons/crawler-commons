@@ -16,6 +16,7 @@
 
 package crawlercommons.sitemaps;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -282,6 +283,39 @@ public class SiteMapParserExtensionTest {
         assertFalse(attr.isValid());
         assertEquals(expectedNewsAttributes, attr);
         assertEquals(expectedNewsAttributes.toString(), attr.toString());
+    }
+
+    @Test
+    public void testExtensionValuesIgnoreCase() throws UnknownFormatException, IOException, URISyntaxException {
+        SiteMapParser parser = new SiteMapParser();
+        parser.enableExtension(Extension.NEWS);
+        parser.enableExtension(Extension.VIDEO);
+
+        URL url = new URI("https://example.org/sitemap.xml").toURL();
+        AbstractSiteMap asm = parse(parser, "src/test/resources/sitemaps/extension/sitemap-extension-values-case.xml", url);
+
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(2, sm.getSiteMapUrls().size());
+        Iterator<SiteMapURL> it = sm.getSiteMapUrls().iterator();
+
+        SiteMapURL su = it.next();
+        NewsAttributes news = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
+        assertEquals(NewsAttributes.AccessOption.Subscription, news.getAccess());
+        assertArrayEquals(new NewsAttributes.NewsGenre[] { NewsAttributes.NewsGenre.Blog, NewsAttributes.NewsGenre.PressRelease }, news.getGenres());
+        VideoAttributes video = (VideoAttributes) su.getAttributesForExtension(Extension.VIDEO)[0];
+        assertEquals(1, video.getPrices().length);
+        assertEquals(VideoAttributes.VideoPriceType.rent, video.getPrices()[0].getType());
+        assertEquals(VideoAttributes.VideoPriceResolution.HD, video.getPrices()[0].getResolution());
+        assertEquals(VideoAttributes.TVShow.VideoType.full, video.getTVShow().getVideoType());
+
+        su = it.next();
+        news = (NewsAttributes) su.getAttributesForExtension(Extension.NEWS)[0];
+        assertEquals("Unknown access value", news.getTitle());
+        assertNull(news.getAccess());
+        video = (VideoAttributes) su.getAttributesForExtension(Extension.VIDEO)[0];
+        assertEquals("Video with an unknown video type", video.getTitle());
+        assertEquals("My TV Show!", video.getTVShow().getShowTitle());
+        assertNull(video.getTVShow().getVideoType());
     }
 
     @Test

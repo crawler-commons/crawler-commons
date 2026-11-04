@@ -91,7 +91,7 @@ public class NewsHandler extends ExtensionHandler {
             List<NewsAttributes.NewsGenre> _genres = new ArrayList<>();
             for (String genre : genresList) {
                 try {
-                    _genres.add(NewsAttributes.NewsGenre.valueOf(genre.trim()));
+                    _genres.add(ExtensionMetadata.valueOfIgnoreCase(NewsAttributes.NewsGenre.class, genre));
                 } catch (IllegalArgumentException e) {
                     LOG.debug("Unsupported news sitemap genre: {}", genre);
                 }
@@ -106,7 +106,11 @@ public class NewsHandler extends ExtensionHandler {
             }
             currAttr.setStockTickers(stockTickers);
         } else if ("access".equals(localName)) {
-            currAttr.setAccess(value);
+            try {
+                currAttr.setAccess(value);
+            } catch (IllegalArgumentException e) {
+                LOG.debug("Unsupported news sitemap access value: {}", value);
+            }
         }
         // reset StringBuilder
         currVal = new StringBuilder();

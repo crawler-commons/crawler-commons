@@ -126,17 +126,17 @@ public class VideoHandler extends ExtensionHandler {
                 String t = priceAttr.get("type");
                 if (t != null && !t.trim().isEmpty()) {
                     try {
-                        type = VideoPriceType.valueOf(t.trim());
+                        type = ExtensionMetadata.valueOfIgnoreCase(VideoPriceType.class, t);
                     } catch (IllegalArgumentException e) {
-                        LOG.debug("Illegal value for price type: {}", type);
+                        LOG.debug("Illegal value for price type: {}", t);
                     }
                 }
                 String r = priceAttr.get("resolution");
                 if (r != null && !r.trim().isEmpty()) {
                     try {
-                        resolution = VideoPriceResolution.valueOf(r.trim());
+                        resolution = ExtensionMetadata.valueOfIgnoreCase(VideoPriceResolution.class, r);
                     } catch (IllegalArgumentException e) {
-                        LOG.debug("Illegal value for price resolution: {}", resolution);
+                        LOG.debug("Illegal value for price resolution: {}", r);
                     }
                 }
             }
@@ -213,7 +213,7 @@ public class VideoHandler extends ExtensionHandler {
             }
         } else if ("video_type".equals(localName)) {
             if (tvShow != null) {
-                tvShow.setVideoType(value);
+                setVideoType(tvShow, value);
             } else {
                 LOG.debug("Element <video_type> outside enclosing element <tvshow>!");
             }
@@ -225,7 +225,7 @@ public class VideoHandler extends ExtensionHandler {
             }
         } else if ("".equals(localName)) {
             if (tvShow != null) {
-                tvShow.setVideoType(value);
+                setVideoType(tvShow, value);
             } else {
                 LOG.debug("Element <> outside enclosing element <tvshow>!");
             }
@@ -250,6 +250,14 @@ public class VideoHandler extends ExtensionHandler {
         }
         // reset StringBuilder
         currVal = new StringBuilder();
+    }
+
+    private static void setVideoType(VideoAttributes.TVShow tvShow, String value) {
+        try {
+            tvShow.setVideoType(value);
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Illegal value for video type: {}", value);
+        }
     }
 
     @Override
