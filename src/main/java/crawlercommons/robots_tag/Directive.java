@@ -22,16 +22,31 @@ public final class Directive<T> {
         this.value = Optional.empty();
     }
 
-    public boolean hasValue() {
-        return value.isPresent();
-    }
-
     public String getName() {
         return name;
     }
 
     public Optional<T> getValue() {
         return value;
+    }
+
+    public boolean hasValue() {
+        return value.isPresent();
+    }
+
+    /**
+     * Returns {@code true} if the value of this directive is an instance of the given type.
+     * <p>
+     * If this {@link Directive} has no value, it is considered to be of type {@code Directive<Void>}.
+     */
+    public <V> boolean hasValueType(Class<V> valueType) {
+        if (value.isPresent()) {
+            //Check if the directive value is of type V:
+            return valueType.isInstance(value.get());
+        } else {
+            //Directives without a value are considered to be of type Directive<Void>.
+            return valueType.equals(Void.class);
+        }
     }
 
     @Override

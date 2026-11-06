@@ -3,6 +3,7 @@ package crawlercommons.robots_tag;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,6 +14,10 @@ public class DirectiveCollectionTest {
     static final Directive<Void> FOO = new Directive<>("foo");
     static final Directive<Void> BAR = new Directive<>("bar");
     static final Directive<Void> BAZ = new Directive<>("baz");
+    static final Directive<String> MAX_IMAGE_PREVIEW_1 = new Directive<>("max-image-preview", "none");
+    static final Directive<String> MAX_IMAGE_PREVIEW_2 = new Directive<>("max-image-preview", "large");
+    static final Directive<LocalDate> UNAVAILABLE_AFTER_1 = new Directive<>("unavailable_after", LocalDate.of(2025, 12, 31));
+    static final Directive<LocalDate> UNAVAILABLE_AFTER_2 = new Directive<>("unavailable_after", LocalDate.of(2026, 1, 1));
 
     @Test
     @DisplayName("should initialize and clear properly")
@@ -115,5 +120,95 @@ public class DirectiveCollectionTest {
         assertTrue(directiveCollection.isEmpty());
         assertTrue(directiveCollection.withoutProductToken().isEmpty());
         assertTrue(directiveCollection.withProductToken().isEmpty());
+    }
+
+    @Test
+    @DisplayName("findOne() should return only matching directives")
+    void findOne() {
+        var directiveCollection = new DirectiveCollection();
+        directiveCollection.addDirective("MyBot-1", FOO);
+        directiveCollection.addDirective("MyBot-1", MAX_IMAGE_PREVIEW_1);
+
+        //Everything matches:
+        assertEquals(FOO, directiveCollection.findOne("foo", Void.class).orElseThrow());
+        assertEquals(FOO, directiveCollection.findOne("MyBot-1", "foo", Void.class).orElseThrow());
+        assertEquals(MAX_IMAGE_PREVIEW_1, directiveCollection.findOne("max-image-preview", String.class).orElseThrow());
+        assertEquals(MAX_IMAGE_PREVIEW_1, directiveCollection.findOne("MyBot-1", "max-image-preview", String.class).orElseThrow());
+
+        //Wrong value type, everything else matches:
+        assertTrue(directiveCollection.findOne("foo", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findOne("max-image-preview", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-1", "foo", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-1", "max-image-preview", Integer.class).isEmpty());
+
+        //Wrong directive name, everything else matches:
+        assertTrue(directiveCollection.findOne("bar", Void.class).isEmpty());
+        assertTrue(directiveCollection.findOne("bar", String.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-1", "bar", Void.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-1", "bar", String.class).isEmpty());
+
+        //Wrong product token, everything else matches:
+        assertTrue(directiveCollection.findOne("MyBot-2", "foo", Void.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-2", "max-image-preview", String.class).isEmpty());
+
+        //Nothing matches:
+        assertTrue(directiveCollection.findOne("bar", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findOne("MyBot-2", "bar", Integer.class).isEmpty());
+    }
+
+    @Test
+    @DisplayName("findAll() should return only matching directives")
+    void findAll() {
+        var directiveCollection = new DirectiveCollection();
+
+        //MyBot-1 gets one "foo" and one "max-image-preview" directive:
+        directiveCollection.addDirective("MyBot-1", FOO);
+        directiveCollection.addDirective("MyBot-1", MAX_IMAGE_PREVIEW_1);
+
+        //MyBot-2 gets one "max-image-preview" and two "unavailable_after" directives:
+        directiveCollection.addDirective("MyBot-2", MAX_IMAGE_PREVIEW_2);
+        directiveCollection.addDirective("MyBot-2", UNAVAILABLE_AFTER_1);
+        directiveCollection.addDirective("MyBot-2", UNAVAILABLE_AFTER_2);
+
+        //Everything matches:
+        assertEquals(Set.of(FOO), directiveCollection.findAll("foo", Void.class));
+        assertEquals(Set.of(FOO), directiveCollection.findAll("MyBot-1", "foo", Void.class));
+
+        assertEquals(Set.of(MAX_IMAGE_PREVIEW_1, MAX_IMAGE_PREVIEW_2), directiveCollection.findAll("max-image-preview", String.class));
+        assertEquals(Set.of(MAX_IMAGE_PREVIEW_1), directiveCollection.findAll("MyBot-1", "max-image-preview", String.class));
+        assertEquals(Set.of(MAX_IMAGE_PREVIEW_2), directiveCollection.findAll("MyBot-2", "max-image-preview", String.class));
+
+        assertEquals(Set.of(UNAVAILABLE_AFTER_1, UNAVAILABLE_AFTER_2), directiveCollection.findAll("unavailable_after", LocalDate.class));
+        assertEquals(Set.of(UNAVAILABLE_AFTER_1, UNAVAILABLE_AFTER_2), directiveCollection.findAll("MyBot-2", "unavailable_after", LocalDate.class));
+
+        //Wrong value type, everything else matches:
+        assertTrue(directiveCollection.findAll("foo", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-1", "foo", Integer.class).isEmpty());
+
+        assertTrue(directiveCollection.findAll("max-image-preview", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-1", "max-image-preview", Integer.class).isEmpty());
+
+        assertTrue(directiveCollection.findAll("unavailable_after", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-2", "unavailable_after", Integer.class).isEmpty());
+
+        //Wrong directive name, everything else matches:
+        assertTrue(directiveCollection.findAll("bar", Void.class).isEmpty());
+        assertTrue(directiveCollection.findAll("bar", String.class).isEmpty());
+        assertTrue(directiveCollection.findAll("bar", LocalDate.class).isEmpty());
+
+        assertTrue(directiveCollection.findAll("MyBot-1", "bar", Void.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-1", "bar", String.class).isEmpty());
+
+        assertTrue(directiveCollection.findAll("MyBot-2", "bar", String.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-2", "bar", LocalDate.class).isEmpty());
+
+        //Wrong product token, everything else matches:
+        assertTrue(directiveCollection.findAll("MyBot-3", "foo", Void.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-3", "max-image-preview", String.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-3", "unavailable_after", LocalDate.class).isEmpty());
+
+        //Nothing matches:
+        assertTrue(directiveCollection.findAll("bar", Integer.class).isEmpty());
+        assertTrue(directiveCollection.findAll("MyBot-3", "bar", Integer.class).isEmpty());
     }
 }
