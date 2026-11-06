@@ -8,7 +8,7 @@ import crawlercommons.robots_tag.PreprocessedString;
 import java.util.Optional;
 
 /**
- * Parses simple directives that have no value (e.g. {@code follow} or
+ * Parses simple directives without a value (e.g. {@code follow} or
  * {@code index}).
  */
 public final class SimpleDirectiveParser implements DirectiveParser<Void> {

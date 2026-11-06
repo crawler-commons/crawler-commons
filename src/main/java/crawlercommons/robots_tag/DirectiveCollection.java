@@ -10,7 +10,7 @@ public final class DirectiveCollection {
     public static final String DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY = "*"; //Java's unmodifiable collections do not allow null values, so this string must not be null.
 
     /**
-     * <strong>Key:</strong> The trimmed and lowercased product token <i>p</i>.<br>
+     * <strong>Key:</strong> The product token <i>p</i>.<br>
      * <strong>Value:</strong> Directives that only apply to robots with the product token <i>p</i>, or directives that apply to all robots if <i>p</i> is equal to {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY}.
      */
     private final Map<String, Set<Directive<?>>> directivesByProductToken = new HashMap<>();
@@ -25,7 +25,9 @@ public final class DirectiveCollection {
     /**
      * Adds a directive that only applies to robots with a specific product token.
      * <p>
-     * The product token must be trimmed and lowercased.
+     * The product token is case-sensitive.
+     *
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
      */
     public void addDirective(String productToken, Directive<?> directive) {
         directivesByProductToken.compute(productToken, (key, directiveSet) -> {
@@ -51,9 +53,11 @@ public final class DirectiveCollection {
     /**
      * Returns a map of directives grouped by product token.
      * <p>
-     * The product tokens are trimmed and lowercased. The key for directives that apply to all robots is {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY}.
+     * The key for directives that apply to all robots is {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY}.
      * <p>
      * This method returns a reference to the internal data structure of this {@link DirectiveCollection}. Any changes to this {@link DirectiveCollection} will be reflected in the returned map, and any changes to the returned map will be reflected in this {@link DirectiveCollection}.
+     *
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
      */
     public Map<String, Set<Directive<?>>> getMap() {
         return directivesByProductToken;
@@ -62,9 +66,11 @@ public final class DirectiveCollection {
     /**
      * Returns a map of directives grouped by product token.
      * <p>
-     * The product tokens are trimmed and lowercased. The key for directives that apply to all robots is {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY}.
+     * The key for directives that apply to all robots is {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY}.
      * <p>
      * The collection returned by this method is immutable.
+     *
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
      */
     public Map<String, Set<Directive<?>>> toMap() {
         return directivesByProductToken.entrySet().stream()
@@ -115,7 +121,8 @@ public final class DirectiveCollection {
      * <p>
      * The collection returned by this method is immutable.
      *
-     * @param productToken the product token
+     * @param productToken the product token (case-sensitive)
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
      */
     public Set<Directive<?>> withProductToken(String productToken) {
         Set<Directive<?>> directives = directivesByProductToken.get(productToken);
@@ -145,6 +152,102 @@ public final class DirectiveCollection {
         } else {
             return Set.copyOf(directives);
         }
+    }
+
+    /**
+     * Finds a directive by product token, directive name, and directive value type.
+     * <p>
+     * If this {@link DirectiveCollection} contains multiple matching directives, any matching directive may be returned.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Optional<Directive<Void>> follow = directiveCollection.findOne("MyBot", "follow", Void.class);
+     * Optional<Directive<Integer>> maxSnippet = directiveCollection.findOne("MyBot", "max-snippet", Integer.class);
+     * }</pre>
+     *
+     * @param productToken  The product token (case-sensitive) to which the directive applies. Use {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY} to find a directive that applies to all robots.
+     * @param directiveName the directive name (case-sensitive)
+     * @param valueType     The type of the directive value. Use {@link Void} to find a directive without a value.
+     * @return an {@link Optional} containing a matching directive from this {@link DirectiveCollection}, or an empty {@link Optional} if there is no matching directive
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> Optional<Directive<T>> findOne(String productToken, String directiveName, Class<T> valueType) {
+        return (Optional<Directive<T>>) (Optional) directivesByProductToken.getOrDefault(productToken, Collections.emptySet()).stream()
+                .filter(directive -> directive.hasValueType(valueType) && directive.getName().equals(directiveName)) //The type check comes first because it is probably faster than the string comparison.
+                .findFirst();
+    }
+
+    /**
+     * Finds a directive by directive name and directive value type.
+     * <p>
+     * If this {@link DirectiveCollection} contains multiple matching directives, any matching directive may be returned.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Optional<Directive<Void>> follow = directiveCollection.findOne("follow", Void.class);
+     * Optional<Directive<Integer>> maxSnippet = directiveCollection.findOne("max-snippet", Integer.class);
+     * }</pre>
+     *
+     * @param directiveName the directive name (case-sensitive)
+     * @param valueType     The type of the directive value. Use {@link Void} to find a directive without a value.
+     * @return an {@link Optional} containing a matching directive from this {@link DirectiveCollection}, or an empty {@link Optional} if there is no matching directive
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> Optional<Directive<T>> findOne(String directiveName, Class<T> valueType) {
+        return (Optional<Directive<T>>) (Optional) directivesByProductToken.values().stream()
+                .flatMap(Set::stream)
+                .filter(directive -> directive.hasValueType(valueType) && directive.getName().equals(directiveName))
+                .findFirst();
+    }
+
+    /**
+     * Finds directives by product token, directive name, and directive value type.
+     * <p>
+     * The collection returned by this method is immutable.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Set<Directive<Void>> follow = directiveCollection.findAll("MyBot", "follow", Void.class);
+     * Set<Directive<Integer>> maxSnippet = directiveCollection.findAll("MyBot", "max-snippet", Integer.class);
+     * }</pre>
+     *
+     * @param productToken  The product token (case-sensitive) to which the directives apply. Use {@link #DIRECTIVES_WITHOUT_PRODUCT_TOKEN_KEY} to find directives that apply to all robots.
+     * @param directiveName the directive name (case-sensitive)
+     * @param valueType     The type of the directive value. Use {@link Void} to find directives without a value.
+     * @return a set of all matching directives from this {@link DirectiveCollection}
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> Set<Directive<T>> findAll(String productToken, String directiveName, Class<T> valueType) {
+        return (Set<Directive<T>>) (Set) directivesByProductToken.getOrDefault(productToken, Collections.emptySet()).stream()
+                .filter(directive -> directive.hasValueType(valueType) && directive.getName().equals(directiveName))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * Finds directives by directive name and directive value type.
+     * <p>
+     * The collection returned by this method is immutable.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * Set<Directive<Void>> follow = directiveCollection.findAll("follow", Void.class);
+     * Set<Directive<Integer>> maxSnippet = directiveCollection.findAll("max-snippet", Integer.class);
+     * }</pre>
+     *
+     * @param directiveName the directive name (case-sensitive)
+     * @param valueType     The type of the directive value. Use {@link Void} to find directives without a value.
+     * @return a set of all matching directives from this {@link DirectiveCollection}
+     * @apiNote The {@link RobotsMetaParser} and the {@link RobotsTagParser} always trim and lowercase product tokens and directive names.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> Set<Directive<T>> findAll(String directiveName, Class<T> valueType) {
+        return (Set<Directive<T>>) (Set) directivesByProductToken.values().stream()
+                .flatMap(Set::stream)
+                .filter(directive -> directive.hasValueType(valueType) && directive.getName().equals(directiveName))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
