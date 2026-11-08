@@ -38,6 +38,20 @@ class RobotsMetaParserTest {
     }
 
     @Test
+    @DisplayName("should work with null inputs")
+    void nullInputs() {
+        var parser = new RobotsMetaParser();
+
+        parser.parse(null);
+
+        parser.parse(null, null);
+        parser.parse(null, "index, follow");
+        parser.parse("robots", null);
+
+        assertTrue(parser.getCollectedDirectives().isEmpty());
+    }
+
+    @Test
     @DisplayName("should work with empty inputs")
     void emptyInputs() {
         var parser = new RobotsMetaParser();
