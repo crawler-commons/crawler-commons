@@ -116,7 +116,7 @@ public final class RobotsTagParser {
     /**
      * Parses an {@code X-Robots-Tag} HTTP response header.
      * <p>
-     * This method can handle empty strings.
+     * This method can handle null arguments and empty strings.
      * <p>
      * Nothing is done to ensure that the input is an {@code X-Robots-Tag}
      * header.
@@ -128,6 +128,10 @@ public final class RobotsTagParser {
      *            {@code X-Robots-Tag:})
      */
     public void parse(String robotsHeader) {
+        if (robotsHeader == null) {
+            return;
+        }
+
         if (robotsHeader.contains(":")) {
             parseAmbiguousString(robotsHeader);
         } else {

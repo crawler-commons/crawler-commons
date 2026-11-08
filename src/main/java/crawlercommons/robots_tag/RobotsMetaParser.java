@@ -157,9 +157,7 @@ public final class RobotsMetaParser {
      * the target product tokens, then the directives from the {@code content}
      * attribute are parsed and collected.
      * <p>
-     * This method can handle empty strings, empty {@code <meta>} elements,
-     * {@code <meta>} elements that lack the required attributes, and
-     * {@code <meta>} elements that have unrelated attributes.
+     * This method can handle null arguments, empty strings, empty {@code <meta>} elements, {@code <meta>} elements that lack the required attributes, and {@code <meta>} elements that have unrelated attributes.
      * <p>
      * Nothing is done to ensure that the input is a {@code <meta>} element.
      * <p>
@@ -177,6 +175,10 @@ public final class RobotsMetaParser {
          *
          * We could probably fix this by using a proper parser for HTML void elements instead of regular expressions.
          */
+        if (metaElement == null) {
+            return;
+        }
+
         Optional<String> nameOption = getNameAttribute(metaElement).map(ParserUtils::normalizeProductToken);
         boolean shouldCollect = nameOption.stream().anyMatch(name -> name.equals("robots") || normalizedTargetProductTokens.contains(name));
 
@@ -198,7 +200,7 @@ public final class RobotsMetaParser {
      * <p>
      * If the value of the {@code name} attribute is equal to "robots" or one of the target product tokens, then the directives from the {@code content} attribute are parsed and collected.
      * <p>
-     * This method can handle empty strings.
+     * This method can handle null arguments and empty strings.
      * <p>
      * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsMetaParser} throws an exception.
      *
@@ -206,6 +208,10 @@ public final class RobotsMetaParser {
      * @param content the value of the {@code content} attribute
      */
     public void parse(String name, String content) {
+        if (name == null || content == null) {
+            return;
+        }
+
         String normalizedName = ParserUtils.normalizeProductToken(name);
         boolean shouldCollect = normalizedName.equals("robots") || normalizedTargetProductTokens.contains(normalizedName);
 

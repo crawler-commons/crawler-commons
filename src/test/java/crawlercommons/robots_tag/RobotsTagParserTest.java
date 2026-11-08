@@ -42,6 +42,14 @@ class RobotsTagParserTest {
     }
 
     @Test
+    @DisplayName("should work with null input")
+    void nullInput() {
+        var parser = new RobotsTagParser();
+        parser.parse(null);
+        assertTrue(parser.getCollectedDirectives().isEmpty());
+    }
+
+    @Test
     @DisplayName("should work with empty input")
     void emptyInput() {
         var parser = new RobotsTagParser();
