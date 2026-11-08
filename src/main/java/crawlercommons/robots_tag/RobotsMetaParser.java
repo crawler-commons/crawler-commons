@@ -163,13 +163,20 @@ public final class RobotsMetaParser {
      * <p>
      * Nothing is done to ensure that the input is a {@code <meta>} element.
      * <p>
-     * This method throws a {@link RuntimeException} if the exception handler
-     * throws an exception.
+     * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsMetaParser} throws an exception.
      * 
      * @param metaElement
      *            a single {@code <meta>} element
      */
     public void parse(String metaElement) {
+        /*
+         * In terms of code quality and test coverage, it would be better if this method invoked parse(String, String) after extracting the attribute values.
+         * However, HTML attribute extraction is currently based on regular expressions, which probably makes it rather expensive (even if the regular expressions are compiled only once).
+         * To avoid unnecessarily extracting the value of the content attribute, this method must check if the directives should be collected before it extracts the value of the content attribute.
+         * To implement that check, this method must do most of the things that parse(String, String) does, so it makes little sense to invoke parse(String, String) after the check.
+         *
+         * We could probably fix this by using a proper parser for HTML void elements instead of regular expressions.
+         */
         Optional<String> nameOption = getNameAttribute(metaElement).map(ParserUtils::normalizeProductToken);
         boolean shouldCollect = nameOption.stream().anyMatch(name -> name.equals("robots") || normalizedTargetProductTokens.contains(name));
 
@@ -183,6 +190,31 @@ public final class RobotsMetaParser {
                     UnambiguousStringParser.parse(content).forEach(directive -> collectDirective(name, directive));
                 }
             });
+        }
+    }
+
+    /**
+     * Parses {@code name} and {@code content} attributes extracted from a {@code <meta name="robots" content="...">} HTML element.
+     * <p>
+     * If the value of the {@code name} attribute is equal to "robots" or one of the target product tokens, then the directives from the {@code content} attribute are parsed and collected.
+     * <p>
+     * This method can handle empty strings.
+     * <p>
+     * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsMetaParser} throws an exception.
+     *
+     * @param name    the value of the {@code name} attribute
+     * @param content the value of the {@code content} attribute
+     */
+    public void parse(String name, String content) {
+        String normalizedName = ParserUtils.normalizeProductToken(name);
+        boolean shouldCollect = normalizedName.equals("robots") || normalizedTargetProductTokens.contains(normalizedName);
+
+        if (shouldCollect) {
+            if (content.contains(":")) {
+                parseAmbiguousString(normalizedName, content);
+            } else {
+                UnambiguousStringParser.parse(content).forEach(directive -> collectDirective(normalizedName, directive));
+            }
         }
     }
 

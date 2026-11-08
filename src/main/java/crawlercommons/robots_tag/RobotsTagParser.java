@@ -121,8 +121,7 @@ public final class RobotsTagParser {
      * Nothing is done to ensure that the input is an {@code X-Robots-Tag}
      * header.
      * <p>
-     * This method throws a {@link RuntimeException} if the exception handler
-     * throws an exception.
+     * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsTagParser} throws an exception.
      * 
      * @param robotsHeader
      *            a single {@code X-Robots-Tag} header (not prefixed with
