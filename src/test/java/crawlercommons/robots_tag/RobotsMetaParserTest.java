@@ -37,17 +37,20 @@ class RobotsMetaParserTest {
         assertTrue(parser.getCollectedDirectives().isEmpty());
     }
 
-    @ParameterizedTest
+    @Test
     @DisplayName("should work with empty inputs")
-    @ValueSource(strings = {
-        "",
-        "<meta>",
-        "<meta name='' content='index, follow'>",
-        "<meta name='robots' content=''>"
-    })
-    void emptyInputs(String input) {
+    void emptyInputs() {
         var parser = new RobotsMetaParser();
-        parser.parse(input);
+
+        parser.parse("");
+        parser.parse("<meta>");
+        parser.parse("<meta name='' content='index, follow'>");
+        parser.parse("<meta name='robots' content=''>");
+
+        parser.parse("", "");
+        parser.parse("", "index, follow");
+        parser.parse("robots", "");
+
         assertTrue(parser.getCollectedDirectives().isEmpty());
     }
 
