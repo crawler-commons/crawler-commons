@@ -26,12 +26,15 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -229,6 +232,16 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
          * agent).
          */
         private boolean _crawlDelaySetRealName;
+        /**
+         * Flag indicating whether a user-agent line has been seen, i.e. lines
+         * before the first user-agent line are outside of any group.
+         */
+        private boolean _seenUserAgent;
+        /**
+         * Values of extension directives with a global fallback, found outside
+         * of any user-agent group.
+         */
+        private Map<RobotsExtension, List<String>> _globalFallbackValues;
 
         /*
          * Counter of warnings reporting invalid rules/lines in the robots.txt
@@ -385,6 +398,46 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         public void addSitemap(String sitemap) {
             _curRules.addSitemap(sitemap);
+        }
+
+        public boolean isSeenUserAgent() {
+            return _seenUserAgent;
+        }
+
+        public void setSeenUserAgent(boolean seenUserAgent) {
+            _seenUserAgent = seenUserAgent;
+        }
+
+        /**
+         * Keep a value of an extension directive with a global fallback (see
+         * {@link RobotsExtension#hasGlobalFallback()}) found outside of any
+         * user-agent group.
+         */
+        public void addGlobalFallbackValue(RobotsExtension extension, String value) {
+            if (_globalFallbackValues == null) {
+                _globalFallbackValues = new EnumMap<>(RobotsExtension.class);
+            }
+            _globalFallbackValues.computeIfAbsent(extension, e -> new ArrayList<>()).add(value);
+        }
+
+        /**
+         * Apply the values of extension directives with a global fallback
+         * found outside of any user-agent group, unless the user-agent
+         * group(s) selected for the crawler define values for the directive.
+         * To be called once the entire robots.txt file has been parsed.
+         */
+        public void applyGlobalFallbackValues() {
+            if (_globalFallbackValues == null) {
+                return;
+            }
+            for (Map.Entry<RobotsExtension, List<String>> entry : _globalFallbackValues.entrySet()) {
+                RobotsExtension ext = entry.getKey();
+                if (_curRules.getExtensionData(ext) == null) {
+                    for (String value : entry.getValue()) {
+                        _curRules.addExtensionValue(ext, value);
+                    }
+                }
+            }
         }
 
     }
@@ -941,6 +994,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             }
         }
 
+        parseState.applyGlobalFallbackValues();
+
         this._numWarningsDuringLastParse.set(parseState._numWarnings);
         SimpleRobotRules result = parseState.getRobotRules();
         if (result.getCrawlDelay() > _maxCrawlDelay) {
@@ -1017,6 +1072,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         // Clearly we've encountered a new user agent directive, hence we need to start
         // processing until we are finished.
         state.setFinishedAgentFields(false);
+        state.setSeenUserAgent(true);
 
         // Handle the case when multiple target names are passed.
         // We assume we should do case-insensitive comparison of every target name.
@@ -1219,24 +1275,40 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
 
         String sitemap = token.getData();
         try {
-            URL sitemapUrl;
-            URL base = null;
-            try {
-                base = new URI(state.getUrl()).toURL();
-            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
-                // must try without base URL
-            }
-            if (base != null) {
-                sitemapUrl = base.toURI().resolve(sitemap).toURL();
-            } else {
-                sitemapUrl = new URI(sitemap).toURL();
-            }
+            URL sitemapUrl = resolveUrl(state, sitemap);
             String hostname = sitemapUrl.getHost();
             if ((hostname != null) && (hostname.length() > 0)) {
                 state.addSitemap(sitemapUrl.toExternalForm());
             }
         } catch (Exception e) {
             reportWarning(state, "Invalid URL with sitemap directive:  {}", sitemap);
+        }
+    }
+
+    /**
+     * Resolve a URL found in a robots.txt directive against the URL of the
+     * robots.txt file. If the robots.txt URL is not valid, the URL is parsed
+     * without resolution.
+     *
+     * @param state
+     *            current parsing state
+     * @param url
+     *            (relative) URL found in a robots.txt directive
+     * @return the resolved URL
+     * @throws Exception
+     *             if the URL is not valid
+     */
+    private static URL resolveUrl(ParseState state, String url) throws Exception {
+        URL base = null;
+        try {
+            base = new URI(state.getUrl()).toURL();
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
+            // must try without base URL
+        }
+        if (base != null) {
+            return base.toURI().resolve(url).toURL();
+        } else {
+            return new URI(url).toURL();
         }
     }
 
@@ -1318,13 +1390,52 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
      *            the directive value (text after the colon, trimmed)
      */
     private void handleExtensionDirective(ParseState state, RobotsExtension extension, String value) {
+        if (extension == RobotsExtension.LICENSE) {
+            value = normalizeLicenseUrl(state, value);
+            if (value == null) {
+                return;
+            }
+        }
         if (extension.isPerGroup()) {
             if (state.isAddingRules()) {
                 state.getRobotRules().addExtensionValue(extension, value);
+            } else if (extension.hasGlobalFallback() && !state.isSeenUserAgent()) {
+                state.addGlobalFallbackValue(extension, value);
             }
         } else {
             state.getRobotRules().addExtensionValue(extension, value);
         }
+    }
+
+    /**
+     * Validate and normalize the value of a RSL {@link RobotsExtension#LICENSE
+     * License} directive. The RSL specification requires an absolute URL. For
+     * robustness, relative URLs are resolved against the URL of the robots.txt
+     * file, same as for the Sitemap directive.
+     *
+     * @param state
+     *            current parsing state
+     * @param value
+     *            the directive value
+     * @return the absolute license URL, or {@code null} if the value is not a
+     *         valid URL
+     */
+    private String normalizeLicenseUrl(ParseState state, String value) {
+        if (value.isEmpty()) {
+            reportWarning(state, "Empty License directive");
+            return null;
+        }
+        try {
+            URL licenseUrl = resolveUrl(state, value);
+            String hostname = licenseUrl.getHost();
+            if ((hostname != null) && (hostname.length() > 0)) {
+                return licenseUrl.toExternalForm();
+            }
+        } catch (Exception e) {
+            // invalid URL, reported below
+        }
+        reportWarning(state, "Invalid URL with License directive: {}", value);
+        return null;
     }
 
     /**
