@@ -66,7 +66,7 @@ public class SiteMapParserExtensionTest {
         assertEquals(false, asm.isIndex());
         assertEquals(true, asm instanceof SiteMap);
         SiteMap sm = (SiteMap) asm;
-        assertEquals(3, sm.getSiteMapUrls().size());
+        assertEquals(4, sm.getSiteMapUrls().size());
         Iterator<SiteMapURL> siter = sm.getSiteMapUrls().iterator();
 
         // first <loc> element: nearly all video attributes
@@ -111,6 +111,14 @@ public class SiteMapParserExtensionTest {
         expectedVideoAttributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123-3.jpg").toURL(), "Grilling steaks for summer, episode 3",
                         "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123-3.flv").toURL(), null);
         expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice(null, null, VideoAttributes.VideoPriceType.rent) });
+        attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
+        assertNotNull(attr);
+        assertEquals(expectedVideoAttributes, attr);
+
+        // "own" (outdated) vs. "purchase" #222, #543
+        expectedVideoAttributes = new VideoAttributes(new URI("http://www.example.com/thumbs/123-4.jpg").toURL(), "Grilling steaks for summer, episode 4",
+                        "Alkis shows you how to get perfectly done steaks every time", new URI("http://www.example.com/video123-4.flv").toURL(), null);
+        expectedVideoAttributes.setPrices(new VideoAttributes.VideoPrice[] { new VideoAttributes.VideoPrice("EUR", 1.99f, VideoAttributes.VideoPriceType.own) });
         attr = (VideoAttributes) siter.next().getAttributesForExtension(Extension.VIDEO)[0];
         assertNotNull(attr);
         assertEquals(expectedVideoAttributes, attr);

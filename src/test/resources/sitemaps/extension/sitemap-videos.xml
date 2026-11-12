@@ -50,8 +50,19 @@
       <video:description>Alkis shows you how to get perfectly done steaks every
         time</video:description>
       <video:content_loc>http://www.example.com/video123-3.flv</video:content_loc>
-      <!-- locale-specific number format, test #220 -->
       <video:price type="rent"></video:price>
+    </video:video>
+  </url>
+  <url>
+    <loc>http://www.example.com/videos/some_video_landing_page-4.html</loc>
+    <video:video>
+      <video:thumbnail_loc>http://www.example.com/thumbs/123-4.jpg</video:thumbnail_loc>
+      <video:title>Grilling steaks for summer, episode 4</video:title>
+      <video:description>Alkis shows you how to get perfectly done steaks every
+        time</video:description>
+      <video:content_loc>http://www.example.com/video123-4.flv</video:content_loc>
+      <!-- Value "own" vs. "purchase" #222, #543 -->
+      <video:price type="purchase" currency="EUR">1.99</video:price>
     </video:video>
   </url>
 </urlset>
