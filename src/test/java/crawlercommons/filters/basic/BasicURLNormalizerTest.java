@@ -176,6 +176,20 @@ public class BasicURLNormalizerTest {
                     "http://schöne.xn--bcher-kva.de/, http://xn--schne-lua.xn--bcher-kva.de/, http://schöne.bücher.de/, http://xn--schne-lua.xn--bcher-kva.de/, http://schöne.bücher.de/", //
                     "https://xn--90ax2c.xn--p1ai./, https://xn--90ax2c.xn--p1ai/, https://нэб.рф/, https://xn--90ax2c.xn--p1ai/, https://нэб.рф/", //
                     "https://xn--ls8h.la/, https://xn--ls8h.la/, https://💩.la/, https://xn--ls8h.la/, https://💩.la/", //
+                    // trailing dot on a host name with a masked label
+                    "https://xn--zz.de./, https://xn--zz.de/, https://xn--zz.de/, https://xn--zz.de/, https://xn--zz.de/", //
+                    // empty labels are kept unchanged, regardless of the
+                    // converter
+                    "https://xn--zz..de/, https://xn--zz..de/, https://xn--zz..de/, https://xn--zz..de/, https://xn--zz..de/", //
+                    "https://foo..xn--bcher-kva.de/, https://foo..xn--bcher-kva.de/, https://foo..bücher.de/, https://foo..xn--bcher-kva.de/, https://foo..bücher.de/", //
+                    "https://foo..bücher.de/, https://foo..xn--bcher-kva.de/, https://foo..bücher.de/, https://foo..xn--bcher-kva.de/, https://foo..bücher.de/", //
+                    // IDNA mapping produces a label separator (U+2488 -> "1."),
+                    // changing the number of labels: rejected
+                    "https://x\u2488y.xn--zz.de/, , , , ", //
+                    // ASCII host names with Punycode labels are validated
+                    // also in PUNYCODE mode: BiDi rule (UTS #46 only)
+                    "https://123abc.xn--mgbaam7a8h/, https://123abc.xn--mgbaam7a8h/, https://123abc.امارات/, , ", //
+                    "https://_dmarc.xn--4db.com/, https://_dmarc.xn--4db.com/, https://_dmarc.א.com/, , ", //
                     // pure ASCII host names without Punycode labels
                     "https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/", //
                     "https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/" })

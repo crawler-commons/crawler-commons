@@ -781,8 +781,9 @@ public class BasicURLNormalizer extends URLFilter {
      *
      * <p>
      * Punycode labels which cannot be decoded (see
-     * {@link #isDecodableAceLabel(String)}) are excluded from the conversion
-     * and kept unchanged in both modes, see {@link IdnNormalization}.
+     * {@link #isDecodableAceLabel(String)}) and empty labels are excluded from
+     * the conversion and kept unchanged in both modes, see
+     * {@link IdnNormalization}.
      * </p>
      *
      * @param host
@@ -803,22 +804,30 @@ public class BasicURLNormalizer extends URLFilter {
          * Mask Punycode labels which cannot be decoded by a placeholder, so
          * that the remaining labels are still converted and validated
          * together (e.g. the BiDi rule applies to the entire domain name).
+         * Empty labels (except the trailing one, i.e. a trailing dot) are
+         * masked as well: they are rejected by java.net.IDN (IDNA2003) but
+         * accepted by ICU4J (UTS #46), so that the result would otherwise
+         * depend on the converter.
          */
-        String[] maskedLabels = null; // undecodable labels by position
-        if (host.contains(ACE_PREFIX)) {
-            String[] labels = LABEL_SEPARATORS.split(host, -1);
-            for (int i = 0; i < labels.length; i++) {
-                if (labels[i].startsWith(ACE_PREFIX) && !isDecodableAceLabel(labels[i])) {
-                    if (maskedLabels == null) {
-                        maskedLabels = new String[labels.length];
-                    }
-                    maskedLabels[i] = labels[i];
-                    labels[i] = MASKED_LABEL;
+        String[] maskedLabels = null; // masked labels by position
+        String[] labels = LABEL_SEPARATORS.split(host, -1);
+        for (int i = 0; i < labels.length; i++) {
+            boolean mask;
+            if (labels[i].isEmpty()) {
+                mask = i < labels.length - 1;
+            } else {
+                mask = labels[i].startsWith(ACE_PREFIX) && !isDecodableAceLabel(labels[i]);
+            }
+            if (mask) {
+                if (maskedLabels == null) {
+                    maskedLabels = new String[labels.length];
                 }
+                maskedLabels[i] = labels[i];
+                labels[i] = MASKED_LABEL;
             }
-            if (maskedLabels != null) {
-                host = String.join(".", labels);
-            }
+        }
+        if (maskedLabels != null) {
+            host = String.join(".", labels);
         }
 
         /*
@@ -834,16 +843,16 @@ public class BasicURLNormalizer extends URLFilter {
         String result = this.idnNormalization == IdnNormalization.UNICODE ? unicode : ascii;
         if (maskedLabels != null) {
             // restore the masked labels
-            String[] labels = result.split("\\.", -1);
-            if (labels.length != maskedLabels.length) {
+            String[] resultLabels = result.split("\\.", -1);
+            if (resultLabels.length != maskedLabels.length) {
                 throw new IllegalArgumentException("IDN conversion changed the number of labels: " + host + " -> " + result);
             }
-            for (int i = 0; i < labels.length; i++) {
+            for (int i = 0; i < resultLabels.length; i++) {
                 if (maskedLabels[i] != null) {
-                    labels[i] = maskedLabels[i];
+                    resultLabels[i] = maskedLabels[i];
                 }
             }
-            result = String.join(".", labels);
+            result = String.join(".", resultLabels);
         }
         return result;
     }
@@ -921,13 +930,26 @@ public class BasicURLNormalizer extends URLFilter {
      * available) cannot decode labels valid only under IDNA2008, e.g.
      * <code>xn--strae-oqa.de</code> (<code>straße.de</code>), and it does not
      * distinguish them from invalid Punycode. Rejecting such labels would drop
-     * real, registered domain names. It also keeps pure ASCII host names
-     * accepted regardless of the converter, as do browsers following the <a
-     * href="https://url.spec.whatwg.org/">WHATWG URL standard</a> (cf. the
-     * web platform tests, e.g. <code>http://a.b.c.xn--pokxncvks/</code>).
-     * Consequently, a host name is never rejected only because one of its
-     * Punycode labels cannot be decoded, but it is rejected if the remaining
-     * labels cannot be converted.
+     * real, registered domain names. Browsers following the <a
+     * href="https://url.spec.whatwg.org/">WHATWG URL standard</a> also accept
+     * such labels (cf. the web platform tests, e.g.
+     * <code>http://a.b.c.xn--pokxncvks/</code>). Empty labels (e.g.
+     * <code>foo..xn--bcher-kva.de</code>) are kept unchanged as well. Thus, a
+     * host name is never rejected only because one of its Punycode labels
+     * cannot be decoded or because it contains an empty label, but it is
+     * rejected if the remaining labels cannot be converted.
+     * </p>
+     *
+     * <p>
+     * Note that ASCII host names containing Punycode labels are also validated
+     * by the converter, in both modes including the default
+     * {@link #PUNYCODE} mode (before version 1.7, such host names were not
+     * validated in {@link #PUNYCODE} mode). Acceptance may therefore depend on
+     * the converter: e.g. the IDNA2008 (UTS #46) converter applies the BiDi
+     * rule to the entire domain name, so that
+     * <code>https://123abc.xn--mgbaam7a8h/</code> (a label starting with a
+     * digit next to a right-to-left label) is rejected with ICU4J but
+     * accepted with the IDNA2003 converter.
      * </p>
      */
     public enum IdnNormalization {
