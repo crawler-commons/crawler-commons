@@ -1,0 +1,23 @@
+# Really Simple Licensing (RSL), robots.txt License Association, see
+# https://rslstandard.org/rsl#_4-4-robots-txt-license-association
+
+# outside of any user-agent group: applies to all crawlers, unless the
+# selected group contains License directives
+License: https://example.com/license.xml
+License: https://example.com/license-2.xml
+
+User-agent: ExampleBot
+Allow: /
+License: https://example.com/examplebot-license.xml
+
+User-agent: OtherBot
+User-agent: ExampleBot
+license: /otherbot-license.xml     # relative URL, per RFC 9309 (group merging): ExampleBot and OtherBot
+Disallow: /private/
+
+User-agent: NoLicenseBot
+Disallow: /private/
+
+User-agent: *
+Allow: /
+LICENSE: https://example.com/default-license.xml

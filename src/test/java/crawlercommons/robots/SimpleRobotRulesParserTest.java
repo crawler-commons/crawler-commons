@@ -1931,6 +1931,262 @@ public class SimpleRobotRulesParserTest {
         assertEquals(0, robotParser.getNumWarnings());
     }
 
+    private static List<String> getLicenses(SimpleRobotRulesParser robotParser, String robotsTxt, String agent) {
+        return getLicenses(robotParser, robotsTxt.getBytes(UTF_8), agent);
+    }
+
+    private static List<String> getLicenses(SimpleRobotRulesParser robotParser, byte[] robotsTxt, String agent) {
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt, "text/plain", Set.of(agent));
+        RobotsExtensionData data = rules.getExtensionData(RobotsExtension.LICENSE);
+        if (data == null) {
+            return null;
+        }
+        return data.getValues();
+    }
+
+    @Test
+    void testLicenseScope() {
+        assertEquals(RobotsExtension.Scope.GROUP_WITH_GLOBAL_FALLBACK, RobotsExtension.LICENSE.getScope());
+        assertTrue(RobotsExtension.LICENSE.isPerGroup());
+        assertFalse(RobotsExtension.LICENSE.isGlobal());
+        assertTrue(RobotsExtension.LICENSE.hasGlobalFallback());
+
+        // the scope of other extensions is not changed
+        assertEquals(RobotsExtension.Scope.GLOBAL, RobotsExtension.LLM_POLICY.getScope());
+        assertTrue(RobotsExtension.LLM_POLICY.isGlobal());
+        assertFalse(RobotsExtension.LLM_POLICY.isPerGroup());
+        assertFalse(RobotsExtension.LLM_POLICY.hasGlobalFallback());
+        assertEquals(RobotsExtension.Scope.GROUP, RobotsExtension.CONTENT_SIGNALS.getScope());
+        assertTrue(RobotsExtension.CONTENT_SIGNALS.isPerGroup());
+        assertFalse(RobotsExtension.CONTENT_SIGNALS.isGlobal());
+        assertFalse(RobotsExtension.CONTENT_SIGNALS.hasGlobalFallback());
+    }
+
+    @Test
+    void testLicenseNotEnabled() {
+        final String robotsTxt = "License: https://example.com/license.xml" + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "License: https://example.com/default-license.xml" + CRLF //
+                        + "Allow: /";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        assertNull(getLicenses(robotParser, robotsTxt, "mybot"));
+    }
+
+    /** RSL, section 4.4.4, example 1: a global License directive */
+    @Test
+    void testLicenseGlobalOnly() {
+        final String robotsTxt = "License: https://example.com/license.xml" + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "Disallow: /private/";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        // applies to all crawlers, whether selecting a specific group, the
+        // wildcard group or no group at all
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "mybot"));
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
+
+        // a robots.txt without any group
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, "License: https://example.com/license.xml", "somebot"));
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    /** RSL, section 4.4.4, example 2: License directives scoped to groups */
+    @Test
+    void testLicenseGroupOnly() {
+        final String robotsTxt = "User-agent: ExampleBot" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "License: https://example.com/examplebot-license.xml" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Allow: /" + CRLF //
+                        + "License: https://example.com/default-license.xml";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        assertEquals(List.of("https://example.com/examplebot-license.xml"), getLicenses(robotParser, robotsTxt, "examplebot"));
+        assertEquals(List.of("https://example.com/default-license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
+
+        // a License directive of a group not selected by the crawler (no
+        // wildcard group) does not apply
+        final String robotsTxt2 = "User-agent: ExampleBot" + CRLF //
+                        + "License: https://example.com/examplebot-license.xml" + CRLF //
+                        + "Allow: /";
+        assertNull(getLicenses(robotParser, robotsTxt2, "somebot"));
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    @Test
+    void testLicenseGroupOverridesGlobal() throws Exception {
+        byte[] robotsTxt = readFile("/robots/rsl-license-robots.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        // License directives of all groups selected by the crawler (RFC 9309
+        // group merging), the global ones are ignored
+        assertEquals(List.of("https://example.com/examplebot-license.xml", "http://domain.com/otherbot-license.xml"), //
+                        getLicenses(robotParser, robotsTxt, "examplebot"));
+        assertEquals(List.of("http://domain.com/otherbot-license.xml"), getLicenses(robotParser, robotsTxt, "otherbot"));
+
+        // the selected group does not contain a License directive: fall back
+        // to the global ones, not to those of the wildcard group
+        assertEquals(List.of("https://example.com/license.xml", "https://example.com/license-2.xml"), //
+                        getLicenses(robotParser, robotsTxt, "nolicensebot"));
+
+        // no group matching the crawler: the wildcard group is selected
+        assertEquals(List.of("https://example.com/default-license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
+
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    @Test
+    void testLicenseWildcardOrGlobalFallback() {
+        // the wildcard group does not contain a License directive: fall back
+        // to the global one
+        final String robotsTxt = "License: https://example.com/license.xml" + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "License: https://example.com/mybot-license.xml" + CRLF //
+                        + "Disallow:" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow: /private/";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        assertEquals(List.of("https://example.com/mybot-license.xml"), getLicenses(robotParser, robotsTxt, "mybot"));
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
+
+        // the License of the wildcard group must not leak into the rules of a
+        // crawler selecting a specific group, also if the wildcard group comes
+        // first
+        final String robotsTxt2 = "License: https://example.com/license.xml" + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "License: https://example.com/default-license.xml" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "Disallow:";
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt2, "mybot"));
+        assertEquals(List.of("https://example.com/default-license.xml"), getLicenses(robotParser, robotsTxt2, "somebot"));
+    }
+
+    /**
+     * Only License directives above the first User-agent line are outside of
+     * any group. A License directive following the rules of a group belongs to
+     * that group (RFC 9309 groups are terminated by the next User-agent line,
+     * not by an empty line).
+     */
+    @Test
+    void testLicenseAfterGroupIsNotGlobal() {
+        final String robotsTxt = "User-agent: otherbot" + CRLF //
+                        + "Disallow: /private/" + CRLF //
+                        + CRLF //
+                        + "License: https://example.com/otherbot-license.xml" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        assertEquals(List.of("https://example.com/otherbot-license.xml"), getLicenses(robotParser, robotsTxt, "otherbot"));
+        assertNull(getLicenses(robotParser, robotsTxt, "somebot"));
+    }
+
+    @Test
+    void testLicenseMultipleDirectives() {
+        final String robotsTxt = "License: https://example.com/license-1.xml" + CRLF //
+                        + "License: https://example.com/license-2.xml" + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "License: https://example.com/mybot-license-1.xml" + CRLF //
+                        + "Disallow:" + CRLF //
+                        + "License: https://example.com/mybot-license-2.xml" + CRLF //
+                        + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        assertEquals(List.of("https://example.com/mybot-license-1.xml", "https://example.com/mybot-license-2.xml"), //
+                        getLicenses(robotParser, robotsTxt, "mybot"));
+        assertEquals(List.of("https://example.com/license-1.xml", "https://example.com/license-2.xml"), //
+                        getLicenses(robotParser, robotsTxt, "somebot"));
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = { //
+    "License: https://example.com/license.xml", //
+                    "license: https://example.com/license.xml", //
+                    "LICENSE: https://example.com/license.xml", //
+                    "LiCeNsE:https://example.com/license.xml", //
+                    "License :  https://example.com/license.xml  ", //
+                    "License:\thttps://example.com/license.xml # comment" })
+    void testLicenseDirectiveCaseInsensitive(String licenseLine) {
+        final String robotsTxt = licenseLine + CRLF //
+                        + "User-agent: *" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "mybot"));
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    @Test
+    void testLicenseRelativeUrl() {
+        final String robotsTxt = "License: /license.xml" + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "License: mybot-license.xml" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        // relative URLs are resolved against the URL of the robots.txt file
+        SimpleRobotRules rules = robotParser.parseContent("https://www.example.com/robots.txt", robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+        assertEquals(List.of("https://www.example.com/mybot-license.xml"), rules.getExtensionData(RobotsExtension.LICENSE).getValues());
+        rules = robotParser.parseContent("https://www.example.com/robots.txt", robotsTxt.getBytes(UTF_8), "text/plain", Set.of("somebot"));
+        assertEquals(List.of("https://www.example.com/license.xml"), rules.getExtensionData(RobotsExtension.LICENSE).getValues());
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
+    @Test
+    void testLicenseInvalidValues() {
+        final String robotsTxt = "License: https://example.com/license.xml" + CRLF //
+                        + "License: http://[invalid/license.xml" + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "License:" + CRLF //
+                        + "License: http:///no-host.xml" + CRLF //
+                        + "License: https://exa mple.com/license.xml" + CRLF //
+                        + "Disallow:" + CRLF //
+                        + CRLF //
+                        + "User-agent: otherbot" + CRLF //
+                        + "License: mailto:info@example.com" + CRLF //
+                        + "License: https://example.com/otherbot-license.xml" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        // invalid values are skipped and do not count as License directives of
+        // the group, the global License applies
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "mybot"));
+        assertEquals(5, robotParser.getNumWarnings());
+
+        assertEquals(List.of("https://example.com/otherbot-license.xml"), getLicenses(robotParser, robotsTxt, "otherbot"));
+        assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);

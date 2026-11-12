@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+- [Robots.txt] Support the License directive of the Really Simple Licensing (RSL) standard, scoped per group with global fallback (Richard Zowalla) #617
 - [Sitemaps] Parse news and video extension values case-insensitively and skip unknown values instead of failing (rajda, Hasan Deniz) #542, #621
 - [Sitemaps] Enforce limits on the number of URLs and the size of sitemaps, also for XML and gzipped sitemaps (Richard Zowalla, sebastian-nagel) #611, #613
 - [IDN] Use ICU4J (optional) for IDNA2008 / UTS #46 if available on the classpath (Richard Zowalla, sebastian-nagel, jnioche) #608, #609⁠
