@@ -676,17 +676,22 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * {@inheritDoc}
      * 
-     * @see
-     * crawlercommons.robots.BaseRobotsParser#parseContent(java.lang.String,
-     * byte[], java.lang.String, java.lang.String)
+     * <p>
+     * The robot names are split at commas and whitespace (see
+     * {@link #splitRobotNames(String)}). How the resulting names are matched
+     * against the user-agent lines in the robots.txt file is configured by
+     * {@link #setExactUserAgentMatching(boolean)}: exact matching is the
+     * default, prefix matching on words is only applied if exact matching is
+     * disabled.
+     * </p>
      */
     @Deprecated
     @Override
     public SimpleRobotRules parseContent(String url, byte[] content, String contentType, String robotNames) {
-        return parseContent(url, content, contentType, new LinkedHashSet<>(Arrays.asList(splitRobotNames(robotNames))), false);
+        return parseRobotsTxt(url, content, contentType, new LinkedHashSet<>(Arrays.asList(splitRobotNames(robotNames))));
     }
 
     /**
@@ -793,10 +798,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 }
             }
         }
-        return parseContent(url, content, contentType, robotNames, isExactUserAgentMatching());
+        return parseRobotsTxt(url, content, contentType, robotNames);
     }
 
-    private SimpleRobotRules parseContent(String url, byte[] content, String contentType, Collection<String> robotNames, boolean exactUserAgentMatching) {
+    private SimpleRobotRules parseRobotsTxt(String url, byte[] content, String contentType, Collection<String> robotNames) {
 
         // If there's nothing there, treat it like we have no restrictions.
         if ((content == null) || (content.length == 0)) {
