@@ -158,6 +158,19 @@ public class BasicURLNormalizer extends URLFilter {
         return true;
     }
 
+    /** ACE prefix of Punycode labels, cf. RFC 3490 and RFC 5890 */
+    private static final String ACE_PREFIX = "xn--";
+
+    /**
+     * Label separators in IDNs, cf. <a
+     * href="https://www.unicode.org/reports/tr46/#Notation">UTS #46</a> and
+     * RFC 3490, section 3.1
+     */
+    private static final Pattern LABEL_SEPARATORS = Pattern.compile("[.\u3002\uFF0E\uFF61]");
+
+    /** Placeholder for Punycode labels which cannot be decoded */
+    private static final String MASKED_LABEL = "a";
+
     private final Set<String> queryParamsToRemove;
     private final IdnNormalization idnNormalization;
     private final IdnConverter idnConverter;
@@ -734,20 +747,11 @@ public class BasicURLNormalizer extends URLFilter {
 
         /*
          * 3. convert between Unicode and ASCII forms for Internationalized
-         * Domain Names (IDNs)
+         * Domain Names (IDNs). Pure ASCII host names without Punycode labels
+         * are not affected by IDN normalization and are left as is.
          */
-        if (this.idnNormalization == IdnNormalization.PUNYCODE && !isAscii(host)) {
-            /*
-             * IllegalArgumentException: thrown if the input string contains
-             * non-convertible Unicode codepoints
-             * 
-             * IndexOutOfBoundsException: thrown (undocumented) if one "label"
-             * (non-ASCII dot-separated segment) is longer than 256 characters,
-             * cf. https://bugs.openjdk.java.net/browse/JDK-6806873
-             */
-            host = idnConverter.toASCII(host);
-        } else if (this.idnNormalization == IdnNormalization.UNICODE && host.contains("xn--")) {
-            host = idnConverter.toUnicode(host);
+        if (this.idnNormalization != IdnNormalization.NONE && (!isAscii(host) || hasAceLabel(host))) {
+            host = normalizeIdn(host);
         }
 
         /* 4. trim a trailing dot */
@@ -759,6 +763,114 @@ public class BasicURLNormalizer extends URLFilter {
     }
 
     /**
+     * @return true if one of the labels of the (lowercased) host name starts
+     *         with the ACE prefix <code>xn--</code>
+     */
+    private static boolean hasAceLabel(String host) {
+        return host.startsWith(ACE_PREFIX) || host.contains("." + ACE_PREFIX);
+    }
+
+    /**
+     * Converts an internationalized domain name into the representation
+     * configured by {@link Builder#idnNormalization(IdnNormalization)}. Both
+     * representations are derived from the same round trip (Unicode to ASCII to
+     * Unicode to ASCII), so that a host name is accepted in
+     * {@link IdnNormalization#PUNYCODE} mode if and only if it is accepted in
+     * {@link IdnNormalization#UNICODE} mode, and the results of both modes are
+     * the ASCII resp. Unicode forms of each other.
+     *
+     * <p>
+     * Punycode labels which cannot be decoded (see
+     * {@link #isDecodableAceLabel(String)}) are excluded from the conversion
+     * and kept unchanged in both modes, see {@link IdnNormalization}.
+     * </p>
+     *
+     * @param host
+     *            lowercased host name containing non-ASCII characters or
+     *            Punycode labels
+     * @return the ASCII or Unicode form of the host name
+     * @throws IllegalArgumentException
+     *             if the host name cannot be converted or the round trip
+     *             fails
+     * @throws IndexOutOfBoundsException
+     *             thrown (undocumented) by {@link java.net.IDN} if one label
+     *             is longer than 256 characters, cf. <a
+     *             href="https://bugs.openjdk.java.net/browse/JDK-6806873"
+     *             >JDK-6806873</a>
+     */
+    private String normalizeIdn(String host) throws IllegalArgumentException, IndexOutOfBoundsException {
+        /*
+         * Mask Punycode labels which cannot be decoded by a placeholder, so
+         * that the remaining labels are still converted and validated
+         * together (e.g. the BiDi rule applies to the entire domain name).
+         */
+        String[] maskedLabels = null; // undecodable labels by position
+        if (host.contains(ACE_PREFIX)) {
+            String[] labels = LABEL_SEPARATORS.split(host, -1);
+            for (int i = 0; i < labels.length; i++) {
+                if (labels[i].startsWith(ACE_PREFIX) && !isDecodableAceLabel(labels[i])) {
+                    if (maskedLabels == null) {
+                        maskedLabels = new String[labels.length];
+                    }
+                    maskedLabels[i] = labels[i];
+                    labels[i] = MASKED_LABEL;
+                }
+            }
+            if (maskedLabels != null) {
+                host = String.join(".", labels);
+            }
+        }
+
+        /*
+         * IllegalArgumentException: thrown if the input string contains
+         * non-convertible Unicode codepoints or invalid Punycode labels
+         */
+        String ascii = idnConverter.toASCII(host);
+        String unicode = idnConverter.toUnicode(ascii);
+        if (!ascii.equals(idnConverter.toASCII(unicode))) {
+            throw new IllegalArgumentException("IDN round trip failed: " + host + " -> " + ascii + " -> " + unicode);
+        }
+
+        String result = this.idnNormalization == IdnNormalization.UNICODE ? unicode : ascii;
+        if (maskedLabels != null) {
+            // restore the masked labels
+            String[] labels = result.split("\\.", -1);
+            if (labels.length != maskedLabels.length) {
+                throw new IllegalArgumentException("IDN conversion changed the number of labels: " + host + " -> " + result);
+            }
+            for (int i = 0; i < labels.length; i++) {
+                if (maskedLabels[i] != null) {
+                    labels[i] = maskedLabels[i];
+                }
+            }
+            result = String.join(".", labels);
+        }
+        return result;
+    }
+
+    /**
+     * Whether a Punycode label can be decoded by the {@link IdnConverter}. This
+     * is not the case if the converter reports an error (e.g. invalid
+     * Punycode, or a label violating the IDNA rules), if it returns the label
+     * unchanged ({@link java.net.IDN#toUnicode(String)} does not report errors
+     * but silently returns the input, e.g. for <code>xn--strae-oqa</code>
+     * which is valid only under IDNA2008), or if the decoded label is not
+     * mapped back to the input.
+     *
+     * @param label
+     *            lowercased label starting with <code>xn--</code>
+     * @return true if the label can be decoded
+     */
+    private boolean isDecodableAceLabel(String label) {
+        try {
+            String unicode = idnConverter.toUnicode(label);
+            return !unicode.equals(label) && label.equals(idnConverter.toASCII(unicode));
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+
+    /**
      * Create a new builder object for creating a customized {@link BasicURLNormalizer} object.
      *
      * @return a {@link Builder} ready to use
@@ -767,9 +879,63 @@ public class BasicURLNormalizer extends URLFilter {
         return new Builder();
     }
 
+    /**
+     * Representation of <a href=
+     * "https://en.wikipedia.org/wiki/Internationalized_domain_name">internationalized
+     * domain names (IDNs)</a> in normalized URLs.
+     *
+     * <p>
+     * In {@link #PUNYCODE} and {@link #UNICODE} mode, a host name is converted
+     * if it contains non-ASCII characters or a label starting with the ACE
+     * prefix <code>xn--</code>. Pure ASCII host names without Punycode labels
+     * are left as is. The conversion verifies the round trip between both
+     * forms using the configured {@link IdnConverter}, see
+     * {@link Builder#idnConverter(IdnConverter)}, which guarantees that both
+     * modes are consistent:
+     * </p>
+     * <ul>
+     * <li>a URL is accepted in {@link #PUNYCODE} mode if and only if it is
+     * accepted in {@link #UNICODE} mode</li>
+     * <li>the host names returned in both modes are the ASCII resp. Unicode
+     * form of each other, and normalizing them again does not change
+     * them</li>
+     * </ul>
+     *
+     * <p>
+     * Consequently, characters mapped by the IDNA mapping step are mapped also
+     * in {@link #UNICODE} mode, e.g. <code>https://straße.de/</code> is
+     * normalized to <code>https://strasse.de/</code> under IDNA2003 (in both
+     * modes), but to <code>https://xn--strae-oqa.de/</code> resp.
+     * <code>https://straße.de/</code> under IDNA2008 (UTS #46). Host names
+     * violating the IDNA rules, e.g. the BiDi rule (<code>&#x5DC;ovh.ie</code>), are
+     * rejected in both modes.
+     * </p>
+     *
+     * <p>
+     * Punycode labels which the converter cannot decode to Unicode (because it
+     * reports an error, returns the label unchanged, or the decoded label
+     * does not map back to the input) are kept unchanged in their ASCII form
+     * in both modes, while the remaining labels are converted. This is the
+     * less destructive choice: the IDNA2003-based converter
+     * ({@link crawlercommons.utils.idn.JdkIdnConverter}, used if ICU4J is not
+     * available) cannot decode labels valid only under IDNA2008, e.g.
+     * <code>xn--strae-oqa.de</code> (<code>straße.de</code>), and it does not
+     * distinguish them from invalid Punycode. Rejecting such labels would drop
+     * real, registered domain names. It also keeps pure ASCII host names
+     * accepted regardless of the converter, as do browsers following the <a
+     * href="https://url.spec.whatwg.org/">WHATWG URL standard</a> (cf. the
+     * web platform tests, e.g. <code>http://a.b.c.xn--pokxncvks/</code>).
+     * Consequently, a host name is never rejected only because one of its
+     * Punycode labels cannot be decoded, but it is rejected if the remaining
+     * labels cannot be converted.
+     * </p>
+     */
     public enum IdnNormalization {
+        /** Host names are not converted, IDNs are not validated. */
         NONE,
+        /** Convert IDNs to their ASCII form (Punycode labels). */
         PUNYCODE,
+        /** Convert IDNs to their Unicode form. */
         UNICODE
     }
 
@@ -800,7 +966,10 @@ public class BasicURLNormalizer extends URLFilter {
          * Configures whether <a href=
          * "https://en.wikipedia.org/wiki/Internationalized_domain_name">internationalized
          * domain names (IDNs)</a> should be converted to ASCII/Punycode or
-         * Unicode.
+         * Unicode. Both conversions verify the round trip between the ASCII
+         * and Unicode forms, so that the same URLs are accepted in either
+         * mode, see {@link IdnNormalization} for details. Default:
+         * {@link IdnNormalization#PUNYCODE}.
          *
          * @param idnNormalization
          * @return this builder
