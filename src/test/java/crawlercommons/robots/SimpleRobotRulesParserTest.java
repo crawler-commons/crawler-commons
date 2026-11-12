@@ -2187,6 +2187,58 @@ public class SimpleRobotRulesParserTest {
         assertEquals(List.of("https://example.com/license.xml"), getLicenses(robotParser, robotsTxt, "somebot"));
     }
 
+    @Test
+    void testLicenseInvalidRobotsUrl() {
+        final String robotsTxt = "License: https://example.com/license.xml" + CRLF //
+                        + "License: /relative-license.xml" + CRLF //
+                        + "User-agent: mybot" + CRLF //
+                        + "License: https://example.com/mybot-license.xml" + CRLF //
+                        + "License: mybot-license.xml" + CRLF //
+                        + "Disallow:";
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+
+        // without a valid robots.txt URL, absolute License URLs are kept, while
+        // relative ones cannot be resolved and are dropped with a warning
+        for (String robotsUrl : new String[] { "", "not a valid url", "http://[invalid/robots.txt" }) {
+            SimpleRobotRules rules = robotParser.parseContent(robotsUrl, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("mybot"));
+            assertEquals(List.of("https://example.com/mybot-license.xml"), rules.getExtensionData(RobotsExtension.LICENSE).getValues(), robotsUrl);
+            assertEquals(2, robotParser.getNumWarnings(), robotsUrl);
+
+            rules = robotParser.parseContent(robotsUrl, robotsTxt.getBytes(UTF_8), "text/plain", Set.of("somebot"));
+            assertEquals(List.of("https://example.com/license.xml"), rules.getExtensionData(RobotsExtension.LICENSE).getValues(), robotsUrl);
+            assertEquals(2, robotParser.getNumWarnings(), robotsUrl);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    void testLicensePrefixUserAgentMatching() throws Exception {
+        byte[] robotsTxt = readFile("/robots/rsl-license-robots.txt");
+
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        robotParser.enableExtension(RobotsExtension.LICENSE);
+        robotParser.setExactUserAgentMatching(false);
+
+        // deprecated API: prefix matching of user-agent names
+        SimpleRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt, "text/plain", "Mozilla/5.0 (compatible; examplebot/1.0)");
+        assertEquals(List.of("https://example.com/examplebot-license.xml", "http://domain.com/otherbot-license.xml"), //
+                        rules.getExtensionData(RobotsExtension.LICENSE).getValues());
+
+        // the selected group does not contain a License directive: fall back
+        // to the global ones
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt, "text/plain", "Mozilla/5.0 (compatible; nolicensebot/1.0)");
+        assertEquals(List.of("https://example.com/license.xml", "https://example.com/license-2.xml"), //
+                        rules.getExtensionData(RobotsExtension.LICENSE).getValues());
+
+        // no group matching the crawler: the wildcard group is selected
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt, "text/plain", "Mozilla/5.0 (compatible; mybot/1.0)");
+        assertEquals(List.of("https://example.com/default-license.xml"), rules.getExtensionData(RobotsExtension.LICENSE).getValues());
+
+        assertEquals(0, robotParser.getNumWarnings());
+    }
+
     private byte[] readFile(String filename) throws Exception {
         byte[] bigBuffer = new byte[100000];
         InputStream is = SimpleRobotRulesParserTest.class.getResourceAsStream(filename);
