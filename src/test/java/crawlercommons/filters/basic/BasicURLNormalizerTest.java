@@ -19,12 +19,17 @@ package crawlercommons.filters.basic;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import crawlercommons.filters.basic.BasicURLNormalizer.IdnNormalization;
+import crawlercommons.utils.idn.IdnConverter;
+import crawlercommons.utils.idn.IdnConverters;
 
 /** Unit tests for BasicURLNormalizer. */
 public class BasicURLNormalizerTest {
@@ -130,6 +135,119 @@ public class BasicURLNormalizerTest {
         normalizer = BasicURLNormalizer.newBuilder().idnNormalization(BasicURLNormalizer.IdnNormalization.NONE).build();
         // leave the host name as is, even if it's mixed
         normalizeTest("http://schöne.xn--bcher-kva.de/", "http://schöne.xn--bcher-kva.de/");
+    }
+
+    /**
+     * Issue #616: IDN normalization verifies the round trip between ASCII and
+     * Unicode forms, so that the same URLs are accepted in PUNYCODE and UNICODE
+     * mode and the results of both modes map to each other. Columns: input URL,
+     * expected output with the IDNA2003 (jdk) converter in PUNYCODE and
+     * UNICODE mode, expected output with the IDNA2008 / UTS #46 (icu4j)
+     * converter in PUNYCODE and UNICODE mode. An empty value means that the URL
+     * is rejected (<code>null</code>).
+     */
+    @ParameterizedTest
+    @CsvSource({ //
+                    // table in issue #616
+                    "https://xn--strae-oqa.de/, https://xn--strae-oqa.de/, https://xn--strae-oqa.de/, https://xn--strae-oqa.de/, https://straße.de/", //
+                    "https://straße.de/, https://strasse.de/, https://strasse.de/, https://xn--strae-oqa.de/, https://straße.de/", //
+                    "https://strasse.de/, https://strasse.de/, https://strasse.de/, https://strasse.de/, https://strasse.de/", //
+                    // Punycode label not decodable (BiDi rule): kept unchanged
+                    "https://xn--ovh-2qe.ie/, https://xn--ovh-2qe.ie/, https://xn--ovh-2qe.ie/, https://xn--ovh-2qe.ie/, https://xn--ovh-2qe.ie/", //
+                    "https://\u05DCovh.ie/, , , , ", //
+                    // further IDNA2003 vs. IDNA2008 deviations
+                    "https://faß.de/, https://fass.de/, https://fass.de/, https://xn--fa-hia.de/, https://faß.de/", //
+                    "https://xn--fa-hia.de/, https://xn--fa-hia.de/, https://xn--fa-hia.de/, https://xn--fa-hia.de/, https://faß.de/", //
+                    "https://xn--bcher-kva.xn--strae-oqa.de/, https://xn--bcher-kva.xn--strae-oqa.de/, https://bücher.xn--strae-oqa.de/, https://xn--bcher-kva.xn--strae-oqa.de/, https://bücher.straße.de/", //
+                    // invalid Punycode labels are kept unchanged, cf. WHATWG
+                    // URL web platform tests
+                    "https://xn--zz.de/, https://xn--zz.de/, https://xn--zz.de/, https://xn--zz.de/, https://xn--zz.de/", //
+                    "http://a.b.c.xn--pokxncvks/, http://a.b.c.xn--pokxncvks/, http://a.b.c.xn--pokxncvks/, http://a.b.c.xn--pokxncvks/, http://a.b.c.xn--pokxncvks/", //
+                    "https://xn--/, https://xn--/, https://xn--/, https://xn--/, https://xn--/", //
+                    "https://bücher.xn--zz.de/, https://xn--bcher-kva.xn--zz.de/, https://bücher.xn--zz.de/, https://xn--bcher-kva.xn--zz.de/, https://bücher.xn--zz.de/", //
+                    "https://bücher\u3002xn--zz.de/, https://xn--bcher-kva.xn--zz.de/, https://bücher.xn--zz.de/, https://xn--bcher-kva.xn--zz.de/, https://bücher.xn--zz.de/", //
+                    // ... but the remaining labels must be valid
+                    "https://\u05DCovh.xn--zz.de/, , , , ", //
+                    // IDNs valid under both IDNA2003 and IDNA2008
+                    "https://bücher.de/, https://xn--bcher-kva.de/, https://bücher.de/, https://xn--bcher-kva.de/, https://bücher.de/", //
+                    "https://BÜCHER.de/, https://xn--bcher-kva.de/, https://bücher.de/, https://xn--bcher-kva.de/, https://bücher.de/", //
+                    "https://xn--bcher-kva.de/, https://xn--bcher-kva.de/, https://bücher.de/, https://xn--bcher-kva.de/, https://bücher.de/", //
+                    "https://XN--BCHER-KVA.de/, https://xn--bcher-kva.de/, https://bücher.de/, https://xn--bcher-kva.de/, https://bücher.de/", //
+                    "http://schöne.xn--bcher-kva.de/, http://xn--schne-lua.xn--bcher-kva.de/, http://schöne.bücher.de/, http://xn--schne-lua.xn--bcher-kva.de/, http://schöne.bücher.de/", //
+                    "https://xn--90ax2c.xn--p1ai./, https://xn--90ax2c.xn--p1ai/, https://нэб.рф/, https://xn--90ax2c.xn--p1ai/, https://нэб.рф/", //
+                    "https://xn--ls8h.la/, https://xn--ls8h.la/, https://💩.la/, https://xn--ls8h.la/, https://💩.la/", //
+                    // pure ASCII host names without Punycode labels
+                    "https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/", //
+                    "https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/" })
+    public void testIdnRoundTrip(String url, String jdkPunycode, String jdkUnicode, String icuPunycode, String icuUnicode) {
+        IdnConverter jdk = IdnConverters.jdk();
+        IdnConverter icu = IdnConverters.icu4j();
+        assertEquals(jdkPunycode, idnNormalizer(IdnNormalization.PUNYCODE, jdk).filter(url), "jdk, PUNYCODE: " + url);
+        assertEquals(jdkUnicode, idnNormalizer(IdnNormalization.UNICODE, jdk).filter(url), "jdk, UNICODE: " + url);
+        assertEquals(icuPunycode, idnNormalizer(IdnNormalization.PUNYCODE, icu).filter(url), "icu4j, PUNYCODE: " + url);
+        assertEquals(icuUnicode, idnNormalizer(IdnNormalization.UNICODE, icu).filter(url), "icu4j, UNICODE: " + url);
+        assertIdnNormalizationConsistent(jdk, url);
+        assertIdnNormalizationConsistent(icu, url);
+        // NONE: host name is only lowercased
+        assertEquals(idnNormalizer(IdnNormalization.NONE, jdk).filter(url), idnNormalizer(IdnNormalization.NONE, icu).filter(url));
+    }
+
+    /**
+     * Issue #616: pure ASCII host names without Punycode labels must not be
+     * passed to the {@link IdnConverter}.
+     */
+    @ParameterizedTest
+    @CsvSource({ "https://www.example.com/", "https://fooxn--bar.example.com/", "https://foo-xn--bar.example.com/", "http://[::1]/" })
+    public void testIdnFastPath(String url) {
+        IdnConverter failing = new IdnConverter() {
+            @Override
+            public String toASCII(String name) {
+                throw new UnsupportedOperationException("toASCII(" + name + ")");
+            }
+
+            @Override
+            public String toUnicode(String name) {
+                throw new UnsupportedOperationException("toUnicode(" + name + ")");
+            }
+
+            @Override
+            public String getName() {
+                return "failing";
+            }
+
+            @Override
+            public String getVersion() {
+                return "0";
+            }
+        };
+        for (IdnNormalization mode : IdnNormalization.values()) {
+            assertEquals(url, idnNormalizer(mode, failing).filter(url), mode + ": " + url);
+        }
+    }
+
+    /**
+     * Issue #616: a URL is accepted in PUNYCODE mode iff it is accepted in
+     * UNICODE mode, the outputs of both modes map to each other, and
+     * normalization is idempotent.
+     */
+    private static void assertIdnNormalizationConsistent(IdnConverter converter, String url) {
+        BasicURLNormalizer punycode = idnNormalizer(IdnNormalization.PUNYCODE, converter);
+        BasicURLNormalizer unicode = idnNormalizer(IdnNormalization.UNICODE, converter);
+        String msg = converter.getName() + ": " + url;
+        String p = punycode.filter(url);
+        String u = unicode.filter(url);
+        if (p == null || u == null) {
+            assertSame(p, u, "accepted in one mode only, " + msg + " -> " + p + " / " + u);
+            return;
+        }
+        assertEquals(p, punycode.filter(u), msg);
+        assertEquals(u, unicode.filter(p), msg);
+        assertEquals(p, punycode.filter(p), msg);
+        assertEquals(u, unicode.filter(u), msg);
+    }
+
+    private static BasicURLNormalizer idnNormalizer(IdnNormalization mode, IdnConverter converter) {
+        return BasicURLNormalizer.newBuilder().idnNormalization(mode).idnConverter(converter).build();
     }
 
     private void normalizeTest(String weird, String normal) {
