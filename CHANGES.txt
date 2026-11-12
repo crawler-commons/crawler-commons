@@ -12,6 +12,7 @@ Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - [Robots.txt] Avoid NullPointerException in getNumWarnings() before first parse (jnioche) #592
 - [Robots.txt] Fix per-group extension values leaking from the wildcard group (jnioche) #590
 - [Robots.txt] Support LLM-Policy entry in robots.txt (lewismc) #564, #569
+- Support for Cloudflare Content-Signals policy in robots.txt parser (Richard Zowalla) #541
 - [Robots] Add unit tests to verify that group merging and extension data (sebastian-nagel, jnioche) #594
 - Fix StringIndexOutOfBoundsException in BasicURLNormalizer for percent-encoded path with query (Richard Zowalla) #559, #585
 - Add lazy CrawlerURL and URI/CrawlerURL API variants (Richard Zowalla) #556, #584
