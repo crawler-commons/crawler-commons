@@ -2,15 +2,17 @@ Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - [Sitemaps] Parse news and video extension values case-insensitively and skip unknown values instead of failing (rajda, Hasan Deniz) #542, #621
-- [Sitemaps] Enforce limits on the number of URLs and the size of sitemaps, also for XML and gzipped sitemaps (Richard Zowalla, sebastian-nagel) #611
+- [Sitemaps] Enforce limits on the number of URLs and the size of sitemaps, also for XML and gzipped sitemaps (Richard Zowalla, sebastian-nagel) #611, #613
+- [IDN] Use ICU4J (optional) for IDNA2008 / UTS #46 if available on the classpath (Richard Zowalla, sebastian-nagel, jnioche) #608, #609⁠
 - [Robots.txt] Scope the Content-Signal extension to the user-agent group it is defined in (jnioche) #604
-- BasicURLNormalizer rejects URLs with IPv6 address as host name (Richard Zowalla, sebastian-nagel) #587
+- BasicURLNormalizer rejects URLs with IPv6 address as host name (Richard Zowalla, sebastian-nagel) #587, #597
 - [Robots.txt] Remove dead catch blocks around path normalization (jnioche) #596
 - [Robots.txt] Fix typo in "Content-Signal" extension directive (sebastian-nagel) #595
 - [Robots.txt] Replace per-line directive-prefix scan in tokenize() with a prefix trie (jnioche) #593
 - [Robots.txt] Avoid NullPointerException in getNumWarnings() before first parse (jnioche) #592
 - [Robots.txt] Fix per-group extension values leaking from the wildcard group (jnioche) #590
-- [Robots.txt] Support LLM-Policy entry in robots.txt (lewismc) #569
+- [Robots.txt] Support LLM-Policy entry in robots.txt (lewismc) #564, #569
+- [Robots] Add unit tests to verify that group merging and extension data (sebastian-nagel, jnioche) #594
 - Fix StringIndexOutOfBoundsException in BasicURLNormalizer for percent-encoded path with query (Richard Zowalla) #559, #585
 - Add lazy CrawlerURL and URI/CrawlerURL API variants (Richard Zowalla) #556, #584
 - Port WHATWG URL normalization tests from Web Platform Tests for URLUtils.resolve + BasicURLNormalizer (Richard Zowalla) #535, #586
@@ -18,8 +20,11 @@ Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - Fix SLF4J test dependency version mismatch (lewismc) #570
 - Let Dependabot upgrade GitHub workflow actions (sebastian-nagel) #578
 - [Sitemaps] Handle IOException declared by the BOMInputStream constructor since commons-io 2.22.0 (Richard Zowalla) #573
-- Upgrade dependencies (dependabot) #573, #574, #575, #588
-- Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589
+- Publish a daily SNAPSHOT to Maven Central (jnioche) #602
+- Publish nightly snapshoten (jnioche) #601
+- Use carbonrunner for gh workflows (jnioche) #557, #565
+- Upgrade dependencies (dependabot) #573, #574, #575, #588, #605, #607, #610, #612, #614, #615
+- Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589, #598, #599, #600, #606, #618, #619, #620
 - Upgrade GitHub workflow actions (dependabot) #579, #580
 
 Release 1.6 (2025-12-04)
