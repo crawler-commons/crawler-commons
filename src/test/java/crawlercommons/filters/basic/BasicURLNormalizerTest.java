@@ -186,10 +186,10 @@ public class BasicURLNormalizerTest {
                     // IDNA mapping produces a label separator (U+2488 -> "1."),
                     // changing the number of labels: rejected
                     "https://x\u2488y.xn--zz.de/, , , , ", //
-                    // ASCII host names with Punycode labels are validated
-                    // also in PUNYCODE mode: BiDi rule (UTS #46 only)
-                    "https://123abc.xn--mgbaam7a8h/, https://123abc.xn--mgbaam7a8h/, https://123abc.امارات/, , ", //
-                    "https://_dmarc.xn--4db.com/, https://_dmarc.xn--4db.com/, https://_dmarc.א.com/, , ", //
+                    // ASCII host names are never rejected: kept in ASCII form
+                    // if the round trip fails, here BiDi rule (UTS #46 only)
+                    "https://123abc.xn--mgbaam7a8h/, https://123abc.xn--mgbaam7a8h/, https://123abc.امارات/, https://123abc.xn--mgbaam7a8h/, https://123abc.xn--mgbaam7a8h/", //
+                    "https://_dmarc.xn--4db.com/, https://_dmarc.xn--4db.com/, https://_dmarc.א.com/, https://_dmarc.xn--4db.com/, https://_dmarc.xn--4db.com/", //
                     // pure ASCII host names without Punycode labels
                     "https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/, https://www.example.com/", //
                     "https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/, https://fooxn--bar.example.com/" })

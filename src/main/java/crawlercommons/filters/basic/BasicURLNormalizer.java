@@ -747,11 +747,20 @@ public class BasicURLNormalizer extends URLFilter {
 
         /*
          * 3. convert between Unicode and ASCII forms for Internationalized
-         * Domain Names (IDNs). Pure ASCII host names without Punycode labels
-         * are not affected by IDN normalization and are left as is.
+         * Domain Names (IDNs). Pure ASCII host names are never rejected: they
+         * are left as is in PUNYCODE mode, and in UNICODE mode Punycode
+         * labels are decoded only if the round trip succeeds.
          */
-        if (this.idnNormalization != IdnNormalization.NONE && (!isAscii(host) || hasAceLabel(host))) {
-            host = normalizeIdn(host);
+        if (!isAscii(host)) {
+            if (this.idnNormalization != IdnNormalization.NONE) {
+                host = normalizeIdn(host);
+            }
+        } else if (this.idnNormalization == IdnNormalization.UNICODE && hasAceLabel(host)) {
+            try {
+                host = normalizeIdn(host);
+            } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+                // keep the ASCII form
+            }
         }
 
         /* 4. trim a trailing dot */
@@ -894,10 +903,10 @@ public class BasicURLNormalizer extends URLFilter {
      * domain names (IDNs)</a> in normalized URLs.
      *
      * <p>
-     * In {@link #PUNYCODE} and {@link #UNICODE} mode, a host name is converted
-     * if it contains non-ASCII characters or a label starting with the ACE
-     * prefix <code>xn--</code>. Pure ASCII host names without Punycode labels
-     * are left as is. The conversion verifies the round trip between both
+     * In {@link #PUNYCODE} and {@link #UNICODE} mode, a host name containing
+     * non-ASCII characters is converted. In {@link #UNICODE} mode, also ASCII
+     * host names with a label starting with the ACE prefix <code>xn--</code>
+     * are converted. The conversion verifies the round trip between both
      * forms using the configured {@link IdnConverter}, see
      * {@link Builder#idnConverter(IdnConverter)}, which guarantees that both
      * modes are consistent:
@@ -941,15 +950,14 @@ public class BasicURLNormalizer extends URLFilter {
      * </p>
      *
      * <p>
-     * Note that ASCII host names containing Punycode labels are also validated
-     * by the converter, in both modes including the default
-     * {@link #PUNYCODE} mode (before version 1.7, such host names were not
-     * validated in {@link #PUNYCODE} mode). Acceptance may therefore depend on
-     * the converter: e.g. the IDNA2008 (UTS #46) converter applies the BiDi
-     * rule to the entire domain name, so that
+     * Pure ASCII host names are never rejected by the IDN normalization,
+     * regardless of the converter. In {@link #PUNYCODE} mode they are left as
+     * is. In {@link #UNICODE} mode, they are converted to Unicode only if the
+     * round trip succeeds, otherwise the ASCII form is kept, e.g.
      * <code>https://123abc.xn--mgbaam7a8h/</code> (a label starting with a
-     * digit next to a right-to-left label) is rejected with ICU4J but
-     * accepted with the IDNA2003 converter.
+     * digit next to a right-to-left label) is kept as is with the IDNA2008
+     * (UTS #46) converter, which applies the BiDi rule to the entire domain
+     * name.
      * </p>
      */
     public enum IdnNormalization {
