@@ -438,8 +438,35 @@ public class VideoAttributes extends ExtensionMetadata {
         isLive = live;
     }
 
+    /**
+     * Specifies the purchase option. Supported values are "rent" and "own"
+     * (later renamed to "purchase"). If not specified, the default value is
+     * "own".
+     */
     public enum VideoPriceType {
-        own, rent
+        own("purchase"), // default with variant name
+        rent;
+
+        private String variantName;
+
+        private VideoPriceType() {
+        }
+
+        private VideoPriceType(String variantName) {
+            this.variantName = variantName;
+        }
+
+        public static VideoPriceType parseValue(String value) throws IllegalArgumentException {
+            for (VideoPriceType type : VideoPriceType.class.getEnumConstants()) {
+                if (type.name().equalsIgnoreCase(value)) {
+                    return type;
+                }
+                if (type.variantName != null && value.equalsIgnoreCase(type.variantName)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("Unknown video:price type attribute value: " + value);
+        }
     }
 
     public enum VideoPriceResolution {
