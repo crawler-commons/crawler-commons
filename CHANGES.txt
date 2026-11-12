@@ -1,6 +1,7 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+- [URLs] BasicURLNormalizer: verify the round trip of IDN conversion, so that PUNYCODE and UNICODE mode accept the same URLs. Note: ASCII host names with Punycode labels are now validated also in the default PUNYCODE mode, and IDNA mapping is applied also in UNICODE mode (Richard Zowalla) #616
 - [Robots.txt] Match the last piece before $ at the end of the path (bardrop, sebastian-nagel) #632, #633
 - [Robots.txt] Deprecated parseContent(..., String robotNames): remove unused parameter, fix Javadoc (Richard Zowalla) #625, #628
 - [Robots.txt] Support the License directive of the Really Simple Licensing (RSL) standard, scoped per group with global fallback (Richard Zowalla) #617
