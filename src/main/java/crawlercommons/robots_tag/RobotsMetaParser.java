@@ -173,11 +173,14 @@ public final class RobotsMetaParser {
      * the target product tokens, then the directives from the {@code content}
      * attribute are parsed and collected.
      * <p>
-     * This method can handle null arguments, empty strings, empty {@code <meta>} elements, {@code <meta>} elements that lack the required attributes, and {@code <meta>} elements that have unrelated attributes.
+     * This method can handle null arguments, empty strings, empty
+     * {@code <meta>} elements, {@code <meta>} elements that lack the required
+     * attributes, and {@code <meta>} elements that have unrelated attributes.
      * <p>
      * Nothing is done to ensure that the input is a {@code <meta>} element.
      * <p>
-     * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsMetaParser} throws an exception.
+     * This method throws a {@link RuntimeException} if the exception handler of
+     * this {@link RobotsMetaParser} throws an exception.
      * 
      * @param metaElement
      *            a single {@code <meta>} element
@@ -212,16 +215,22 @@ public final class RobotsMetaParser {
     }
 
     /**
-     * Parses {@code name} and {@code content} attributes extracted from a {@code <meta name="robots" content="...">} HTML element.
+     * Parses {@code name} and {@code content} attributes extracted from a
+     * {@code <meta name="robots" content="...">} HTML element.
      * <p>
-     * If the value of the {@code name} attribute is equal to "robots" or one of the target product tokens, then the directives from the {@code content} attribute are parsed and collected.
+     * If the value of the {@code name} attribute is equal to "robots" or one of
+     * the target product tokens, then the directives from the {@code content}
+     * attribute are parsed and collected.
      * <p>
      * This method can handle null arguments and empty strings.
      * <p>
-     * This method throws a {@link RuntimeException} if the exception handler of this {@link RobotsMetaParser} throws an exception.
-     *
-     * @param name    the value of the {@code name} attribute
-     * @param content the value of the {@code content} attribute
+     * This method throws a {@link RuntimeException} if the exception handler of
+     * this {@link RobotsMetaParser} throws an exception.
+     * 
+     * @param name
+     *            the value of the {@code name} attribute
+     * @param content
+     *            the value of the {@code content} attribute
      */
     public void parse(String name, String content) {
         if (name == null || content == null) {
