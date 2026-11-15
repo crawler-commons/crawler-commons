@@ -21,6 +21,7 @@ Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - Fix SLF4J test dependency version mismatch (lewismc) #570
 - Let Dependabot upgrade GitHub workflow actions (sebastian-nagel) #578
 - [Sitemaps] Handle IOException declared by the BOMInputStream constructor since commons-io 2.22.0 (Richard Zowalla) #573
+- Add parsers for <meta name="robots"> HTML elements and X-Robots-Tag HTTP headers (Amin Aoulkadi) #566
 - Publish a daily SNAPSHOT to Maven Central (jnioche) #602
 - Publish nightly snapshoten (jnioche) #601
 - Use carbonrunner for gh workflows (jnioche) #557, #565
