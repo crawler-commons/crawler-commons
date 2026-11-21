@@ -445,6 +445,11 @@ public class SimpleRobotRules extends BaseRobotRules {
 
                 boolean matched = false;
                 int patternPieceLen = patternPieceEnd - patternPos;
+                if (containsEndChar && patternPieceEnd == patternEnd) {
+                    // The last piece before '$' must match at the end of the
+                    // text, not at its first occurrence
+                    textPos = Math.max(textPos, textEnd - patternPieceLen);
+                }
                 while ((textPos + patternPieceLen <= textEnd) && !matched) {
                     // See if patternPieceLen chars from text at textPos match
                     // chars from pattern at patternPos
