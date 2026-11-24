@@ -1,6 +1,8 @@
 Crawler-Commons Change Log
 
 Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
+- [Robots.txt] Match the last piece before $ at the end of the path (bardrop, sebastian-nagel) #632, #633
+- [Robots.txt] Deprecated parseContent(..., String robotNames): remove unused parameter, fix Javadoc (Richard Zowalla) #625, #628
 - [Robots.txt] Support the License directive of the Really Simple Licensing (RSL) standard, scoped per group with global fallback (Richard Zowalla) #617
 - [Sitemaps] Parse news and video extension values case-insensitively and skip unknown values instead of failing (rajda, Hasan Deniz) #542, #621
 - [Sitemaps] Enforce limits on the number of URLs and the size of sitemaps, also for XML and gzipped sitemaps (Richard Zowalla, sebastian-nagel) #611, #613
@@ -25,8 +27,8 @@ Current Development 1.7-SNAPSHOT (yyyy-mm-dd)
 - Publish a daily SNAPSHOT to Maven Central (jnioche) #602
 - Publish nightly snapshoten (jnioche) #601
 - Use carbonrunner for gh workflows (jnioche) #557, #565
-- Upgrade dependencies (dependabot) #573, #574, #575, #588, #605, #607, #610, #612, #614, #615
-- Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589, #598, #599, #600, #606, #618, #619, #620
+- Upgrade dependencies (dependabot) #573, #574, #575, #588, #605, #607, #610, #612, #614, #615, #630
+- Upgrade Maven plugins (dependabot) #558, #560, #563, #567, #571, #577, #582, #583, #589, #598, #599, #600, #606, #618, #619, #620, #629
 - Upgrade GitHub workflow actions (dependabot) #579, #580
 
 Release 1.6 (2025-12-04)
