@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.robots.SimpleRobotRules.RobotRulesMode;
+import crawlercommons.utils.URLUtils;
 
 /**
  * Robots.txt parser following RFC 9309, supporting the Sitemap and Crawl-delay
@@ -1305,11 +1306,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             // must try without base URL
         }
-        if (base != null) {
-            return base.toURI().resolve(url).toURL();
-        } else {
-            return new URI(url).toURL();
-        }
+        return URLUtils.resolve(base, url);
     }
 
     /**
