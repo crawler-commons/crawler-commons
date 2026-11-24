@@ -423,7 +423,7 @@
 
 		<commons-io.version>2.22.0</commons-io.version>
 		<slf4j-api.version>2.0.20</slf4j-api.version>
-		<icu4j.version>78.3</icu4j.version>
+		<icu4j.version>79.1</icu4j.version>
 		<junit.version>5.14.4</junit.version>
 		<slf4j-simple.version>2.0.20</slf4j-simple.version>
 
