@@ -30,6 +30,14 @@ import java.net.IDN;
  * <code>xn--strae-oqa.de</code>. Code points not assigned in Unicode 3.2 are
  * accepted ({@link IDN#ALLOW_UNASSIGNED}) but not validated.
  * </p>
+ *
+ * <p>
+ * Note that {@link #toUnicode(String)} never throws an exception: labels which
+ * cannot be decoded, e.g. invalid Punycode or labels valid only under IDNA2008
+ * such as <code>xn--strae-oqa</code>, are returned unchanged. Likewise,
+ * {@link #toASCII(String)} does not validate labels which are already in ASCII
+ * form.
+ * </p>
  */
 public class JdkIdnConverter implements IdnConverter {
 
