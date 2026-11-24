@@ -333,6 +333,29 @@ public class SimpleRobotRulesParserTest {
         assertEquals(isAllowed, rules.isAllowed(urlStr), msg);
     }
 
+    @ParameterizedTest
+    @CsvSource({ // A wildcard before the end anchor `$` must let the last
+                 // piece match at the end of the path, not only at its first
+                 // occurrence
+                    "False, */$, https://www.example.com/a/", //
+                    "False, */$, https://www.example.com/a/b/", //
+                    "False, /*/$, https://www.example.com/a/b/", //
+                    "False, /a*/$, https://www.example.com/a/b/", //
+                    "False, /*.html$, https://www.example.com/a.html/b.html", //
+                    "False, /*a*b$, https://www.example.com/ab/ab", //
+                    "True, */$, https://www.example.com/a/b", //
+                    "True, /*.html$, https://www.example.com/a.html/b.htm", //
+                    "True, /a*/$, https://www.example.com/b/a/", //
+    })
+    void testWildcardBeforeEndAnchor(boolean isAllowed, String disallowPath, String urlStr) {
+        final String simpleRobotsTxt = "User-agent: *" + CRLF //
+                        + "Disallow: " + disallowPath + CRLF //
+                        + "Allow: /";
+        BaseRobotRules rules = createRobotRules("mybot", simpleRobotsTxt);
+        String msg = urlStr + " should " + (isAllowed ? "not" : "") + " be disallowed by rule Disallow: " + disallowPath;
+        assertEquals(isAllowed, rules.isAllowed(urlStr), msg);
+    }
+
     @Test
     void testSimplestAllowAll() {
         final String simpleRobotsTxt = "User-agent: *" + CRLF //
