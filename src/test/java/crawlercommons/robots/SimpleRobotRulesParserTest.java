@@ -1219,6 +1219,29 @@ public class SimpleRobotRulesParserTest {
         }
     }
 
+    /**
+     * The deprecated parseContent(..., String robotNames) follows
+     * {@link SimpleRobotRulesParser#setExactUserAgentMatching(boolean)}, see
+     * #625
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    void testDeprecatedParseContentFollowsUserAgentMatchingMode() {
+        String robotsTxt = "User-agent: crawlerbot\n" //
+                        + "Disallow: /\n";
+        String robotName = "Mozilla Crawlerbot-super 1.0";
+
+        // default: exact matching, "crawlerbot" does not match
+        SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
+        BaseRobotRules rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", robotName);
+        assertTrue(rules.isAllowed("http://www.fict.com/"));
+
+        // prefix matching: "crawlerbot" is a prefix of "crawlerbot-super"
+        robotParser.setExactUserAgentMatching(false);
+        rules = robotParser.parseContent(FAKE_ROBOTS_URL, robotsTxt.getBytes(UTF_8), "text/plain", robotName);
+        assertFalse(rules.isAllowed("http://www.fict.com/"));
+    }
+
     @Test
     void testMatchingUserAgentNamesHttpHeader() {
         /*

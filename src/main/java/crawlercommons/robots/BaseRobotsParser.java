@@ -33,11 +33,15 @@ public abstract class BaseRobotsParser implements Serializable {
      * Also note that names are lower-cased before comparison, and that any
      * robot name you pass shouldn't contain commas or spaces; if the name has
      * spaces, it will be split into multiple names, each of which will be
-     * compared against agent names in the robots.txt file. An agent name is
-     * considered a match if it's a prefix match on the provided robot name. For
-     * example, if you pass in "Mozilla Crawlerbot-super 1.0", this would match
+     * compared against agent names in the robots.txt file. If the
+     * implementation performs prefix matching, an agent name is considered a
+     * match if it's a prefix match on the provided robot name. For example, if
+     * you pass in "Mozilla Crawlerbot-super 1.0", this would match
      * "crawlerbot" as the agent name, because of splitting on spaces,
-     * lower-casing, and the prefix match rule.
+     * lower-casing, and the prefix match rule. Note that
+     * {@link SimpleRobotRulesParser} performs prefix matching only if exact
+     * user-agent matching is disabled, see
+     * {@link SimpleRobotRulesParser#setExactUserAgentMatching(boolean)}.
      * 
      * @deprecated since 1.4 - replaced by {@link parseContent(String, byte[],
      *             String, Collection)}. Passing a collection of robot names
