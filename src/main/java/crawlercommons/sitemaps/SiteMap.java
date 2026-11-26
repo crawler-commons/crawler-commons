@@ -133,8 +133,10 @@ public class SiteMap extends AbstractSiteMap {
             path = path.substring(0, lastPathDelimPos + 1);
         }
         try {
+            // The path is already percent-encoded: append it as is because
+            // the multi-argument URI constructors always encode '%' again
             baseUrl = new URI(sitemapUrl.getProtocol(), null, sitemapUrl.getHost(),
-                    sitemapUrl.getPort(), path, null, null).toURL().toString();
+                    sitemapUrl.getPort(), null, null, null).toURL().toString() + path;
         } catch (MalformedURLException | URISyntaxException e) {
             baseUrl = sitemapUrl.toString();
         }
