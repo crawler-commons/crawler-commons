@@ -789,6 +789,37 @@ public class SiteMapParserTest {
     }
 
     @Test
+    public void testFileLocationValidationPercentEncodedPath() throws UnknownFormatException, IOException, URISyntaxException {
+        // the path of the sitemap URL is already percent-encoded and must not
+        // be encoded a second time
+        SiteMap sitemap = new SiteMap("http://example.com/caf%C3%A9/sitemap.xml");
+        assertEquals("http://example.com/caf%C3%A9/", sitemap.getBaseUrl());
+        assertTrue(SiteMapParser.urlIsValid(sitemap.getBaseUrl(), "http://example.com/caf%C3%A9/menu.html"));
+
+        sitemap = new SiteMap("http://example.com/a%20b/sitemap.xml");
+        assertEquals("http://example.com/a%20b/", sitemap.getBaseUrl());
+
+        SiteMapParser parser = new SiteMapParser();
+        String scontent = "http://example.com/caf%C3%A9/menu.html\nhttp://example.com/caf%C3%A9/drinks.html";
+        URL url = new URI("http://example.com/caf%C3%A9/sitemap.txt").toURL();
+        AbstractSiteMap asm = parser.parseSiteMap("text/plain", scontent.getBytes(UTF_8), url);
+        SiteMap sm = (SiteMap) asm;
+        assertEquals(2, sm.getSiteMapUrls().size());
+        for (SiteMapURL u : sm.getSiteMapUrls()) {
+            assertTrue(u.isValid(), u.toString());
+        }
+
+        scontent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" //
+                        + "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">" //
+                        + "<url><loc>http://example.com/caf%C3%A9/menu.html</loc></url>" //
+                        + "</urlset>";
+        url = new URI("http://example.com/caf%C3%A9/sitemap.xml").toURL();
+        asm = parser.parseSiteMap("text/xml", scontent.getBytes(UTF_8), url);
+        sm = (SiteMap) asm;
+        assertEquals(1, sm.getSiteMapUrls().size());
+    }
+
+    @Test
     public void testUrlLocUrl() throws UnknownFormatException, IOException, URISyntaxException {
         SiteMapParser parser = new SiteMapParser(false);
         String contentType = "text/xml";
