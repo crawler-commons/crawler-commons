@@ -117,6 +117,7 @@ public class VideoHandler extends ExtensionHandler {
         if ("price".equals(localName)) {
             Float fvalue = getFloatValue(value);
             String currency = null;
+            /* Price type "own" (or "purchase") is the default. */
             VideoPriceType type = VideoPriceType.own;
             VideoPriceResolution resolution = null;
             if (priceAttr != null) {
@@ -124,9 +125,10 @@ public class VideoHandler extends ExtensionHandler {
                     currency = priceAttr.get("currency").trim();
                 }
                 String t = priceAttr.get("type");
-                if (t != null && !t.trim().isEmpty()) {
+                if (t != null && !t.isBlank()) {
+                    t = t.trim();
                     try {
-                        type = ExtensionMetadata.valueOfIgnoreCase(VideoPriceType.class, t);
+                        type = VideoPriceType.parseValue(t);
                     } catch (IllegalArgumentException e) {
                         LOG.debug("Illegal value for price type: {}", t);
                     }
